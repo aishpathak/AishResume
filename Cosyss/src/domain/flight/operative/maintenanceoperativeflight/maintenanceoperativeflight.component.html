@@ -1,0 +1,1442 @@
+<form [formGroup]="mntform">
+    <!-- Card (Begin) -->
+    <ngc-titlebar title="flight.maintainOperativeFlight.title" (save)="onSave($event)" (clear)="onClear()"
+        (cancel)="onCancel($event)"></ngc-titlebar>
+    <!-- Card Heading (End) -->
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column column="10">
+                <ngc-container>
+                    <ngc-row>
+                        <ngc-column column="2">
+                            <ngc-label label="g.carrierCode" shortcutFor="carrierCode"></ngc-label>
+                            <div>
+                                <ngc-lov [disabled]="onSearchFlag" required formControlName="carrierCode" [width]="50"
+                                    upperCase="true" noCache="true" sourceId='CARRIER_OPT' title='flight.carrierType'
+                                    dataField="code" displayMember="code" (select)="onSelect($event)"
+                                    accessEnableOn="r">
+                                    <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                                    <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="flight.flightNumber"></ngc-label>
+                            <div>
+                                <ngc-flightkeyinput [disabled]="onSearchFlag" [width]="100" [noCarrier]="true"
+                                    upperCase="true" formControlName="flightNo" required accessEnableOn="r">
+                                </ngc-flightkeyinput>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="g.date"></ngc-label>
+                            <div>
+                                <ngc-dateinput [disabled]="onSearchFlag" required [width]="100"
+                                    formControlName="flightDate" accessEnableOn="r">
+                                </ngc-dateinput>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <br>
+                            <div>
+                                <ngc-button [disabled]="onSearchFlag" (click)="onSearch()" value="g.search"
+                                    iconType=search accessEnableOn="r">
+                                </ngc-button>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2" *ngIf="editableBoolean">
+                            <br>
+                            <div *ngIf="this.mntform.controls.flightStatus.value ==='CANCELLED'">
+                                <strong style="color:red;">
+                                    <ngc-label label="flight.Flight.caps"></ngc-label>
+                                    <ngc-display formControlName="flightStatus"></ngc-display>
+                                </strong>
+                            </div>
+                        </ngc-column>
+                        <ngc-column *ngIf="bookingStatusFlag">
+                            <div align="right">
+                                <strong style="color:red;">
+                                    <ngc-label label="flight.closed.booking"></ngc-label>
+                                </strong>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-container formGroupName="schDetails">
+                                <ngc-row>
+                                    <ngc-column column="2">
+                                        <div *ngIf="schPresent">
+                                            <ngc-label label="import.from.to"></ngc-label><br>
+                                            <strong style="color:red;">
+                                                <ngc-display formControlName="scheduleFrom"></ngc-display>
+                                                <ngc-label label="/"></ngc-label>
+                                                <ngc-display formControlName="scheduleTo"></ngc-display>
+                                            </strong>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column column="2">
+                                        <div *ngIf="schPresent">
+                                            <ngc-label label="flight.sch.start.date"></ngc-label><br>
+                                            <strong style="color:red;">
+                                                <ngc-display formControlName="scheduleStartDate" [onlyDate]="true">
+                                                </ngc-display>
+                                            </strong>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column column="2">
+                                        <div *ngIf="schPresent">
+                                            <ngc-label label="flight.sch.end.date"></ngc-label><br>
+                                            <strong style="color:red;">
+                                                <ngc-display formControlName="scheduleEndDate" [onlyDate]="true">
+                                                </ngc-display>
+                                            </strong>
+                                        </div>
+                                    </ngc-column>
+                                </ngc-row>
+                            </ngc-container>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="onSearchFlag">
+            <ngc-column column="7">
+                <ngc-container>
+                    <ngc-row>
+                        <ngc-column column="2">
+                            <ngc-label label="g.flight"></ngc-label>
+                            <br />
+                            <ngc-display formControlName="carrierCode" *ngIf="displayFlightInfo"></ngc-display>
+                            <ngc-display formControlName="flightNo" *ngIf="displayFlightInfo"></ngc-display>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="g.date"></ngc-label>
+                            <br />
+                            <ngc-display formControlName="displayfltDate" *ngIf="displayFlightInfo" [onlyDate]="true">
+                            </ngc-display>
+                        </ngc-column>
+                        <ngc-column column="6">
+                            <ngc-label label="g.name"></ngc-label>
+                            <br />
+                            <ngc-display formControlName="carrierName" *ngIf="displayFlightInfo"></ngc-display>
+                            <br />
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column>
+                <ngc-container>
+                    <ngc-row>
+                        <ngc-column column="4">
+                            <ngc-label label="flight.autoFlightComplete"></ngc-label>
+                            <br />
+                            <ngc-dropdownlist *ngIf='autoFlightEnable' placeholder="flight.select" [width]="100"
+                                [dropDownWidth]="100" [dropDownHeight]="60" sourceId='Autocomplete$dropdown'
+                                [dropDownHeight]="100" [multiSelect]="false" [dropDownWidth]="50"
+                                formControlName="flightAutoCompleteFlag" (select)="onAutoFlightChange(event)">
+                            </ngc-dropdownlist>
+                        </ngc-column>
+                        <ngc-column column="8" align="right">
+                            <br>
+                            <ngc-button (click)="onHistory($event)" value="flight.history" iconType=history
+                                accessEnableOn="r">
+                            </ngc-button>
+
+                            <ngc-button (click)="ondeleteFlight($event)" entityAttribute="Flight.DeleteButton"
+                                value="flight.delete.flight" iconType=delete *ngIf=restoreBoolean></ngc-button>
+
+                            <ngc-button (click)="onCancelFlight($event)" value="flight.cancel.flight" iconType=cancel
+                                *ngIf="!restoreBoolean && editableBoolean"></ngc-button>
+
+                            <ngc-button (click)="onRestore($event)" value="flight.restore.flight" iconType=cancel
+                                *ngIf=restoreBoolean></ngc-button>
+
+                            <ngc-button (click)="openForBooking($event)" value="flight.open.for.booking"
+                                *ngIf="bookingStatus" [disabled]="disableclosebutton" iconType="openforbooking">
+                            </ngc-button>
+                            <ngc-button (click)="closeForBooking($event)" value="flight.closed.for.booking"
+                                *ngIf="!bookingStatus" [disabled]="disableclosebutton" iconType="closeforbooking">
+                            </ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="section" *ngIf="onSearchFlag">
+        <ngc-row>
+            <ngc-column [column]="flightInfoColumn">
+                <ngc-container title="flight.information.caps">
+                    <ngc-row>
+                        <ngc-column column="2">
+                            <ngc-label label="flight.serviceType"></ngc-label>
+                            <div>
+                                <ngc-lov [noCache]="true" #focusLov [autoFocus]="true" [disabled]="disableServiceType"
+                                    required formControlName="serviceType" sourceId='SVC' displayMember="code"
+                                    dataField="code" [width]="50" title='flight.serviceType' maxlength='1'
+                                    (select)="onSelectService($event)">
+                                    <ngc-data-column text="flight.serviceType" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="flight.paxCao" dataField="param1" [width]="200">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="3">
+                            <ngc-label label="g.description"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="description"></ngc-display>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="flight.paxCao"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="caoPax"></ngc-display>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="flight.jointFlight"></ngc-label>
+                            <div>
+                                <ngc-checkbox formControlName="jointFlight"></ngc-checkbox>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="1">
+                            <ngc-label label="flight.apron"></ngc-label>
+                            <div>
+                                <ngc-checkbox formControlName="flgApn" [checked]="flgApn"></ngc-checkbox>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="flight.handler"></ngc-label>
+                            <div>
+                                <ngc-display *ngIf="hideHandlerDropdown" formControlName="groundHandlerCode">
+                                </ngc-display>
+                                <ngc-dropdownlist *ngIf="!hideHandlerDropdown" [dropDownWidth]="80" displayMember='code'
+                                    [dropDownHeight]="120" [width]="80" formControlName="groundHandlerCode"
+                                    sourceId='Flight$Handler' required></ngc-dropdownlist>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column [column]="flightPriorityColumn" feature="Flight.Priority">
+                <ngc-container title="&nbsp;">
+                    <ngc-row>
+                        <ngc-column verticalAlign="middle">
+                            <ngc-label label="g.priority"></ngc-label>
+                            <div>
+                                <ngc-dropdownlist formControlName="flightPriority" sourceId='Flight$FlightPriority'
+                                     [width]="80"  [dropDownWidth]="80">
+                                </ngc-dropdownlist>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-container title="flight.inbound">
+                    <ngc-row>
+                        <ngc-column column="4">
+                            <ngc-label label="flight.bay"></ngc-label>
+                            <div>
+                                <ngc-input formControlName="codPrkBayArr" [width]="80"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="8">
+                            <ngc-label label="flight.acreg"></ngc-label>
+                            <div>
+                                <ngc-input formControlName="regisArrival" [width]="120"></ngc-input>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-container title="flight.outbound">
+                    <ngc-row>
+                        <ngc-column column="4">
+                            <ngc-label label="flight.bay"></ngc-label>
+                            <div>
+                                <ngc-input formControlName="codPrkBayDep" [width]="80"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="8">
+                            <ngc-label label="flight.acreg"></ngc-label>
+                            <div>
+                                <ngc-input formControlName="regisDeparture" [width]="120"></ngc-input>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-container title="&nbsp;">
+                    <ngc-row>
+                        <ngc-column verticalAlign="middle" *ngIf="isSSMActive">
+                            <ngc-label label="ssm"></ngc-label>
+                            <div>
+                                <ngc-checkbox formControlName="flgSsmAsm" [checked]="flgSsmAsm"></ngc-checkbox>
+                            </div>
+                        </ngc-column>
+                        <ngc-column verticalAlign="middle" *ngIf="!isSSMActive">
+                            <ngc-label label="flight.ssm"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="flgSsmAsm"></ngc-display>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column [column]="customsColumn">
+                <ngc-container title="flight.customs" *ngIf="isOnlyIgmEgmEnabled"
+                    entityAttribute="Flight.CustomsImportFlightNumber">
+                    <ngc-row>
+                        <ngc-column column="3" formGroupName="inboundFlightAttributes">
+                            <ngc-label label="flight.customs.imp.flt.num"
+                                entityAttribute="Flight.CustomsImportFlightNumber">
+                            </ngc-label>
+                            <div>
+                                <ngc-input formControlName="customsFlightNumber" [width]="100"
+                                    entityAttribute="Flight.CustomsImportFlightNumber"
+                                    [disabled]="igmNumberFlagDisabled"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="3" formGroupName="outboundFlightAttributes">
+                            <ngc-label label="flight.customs.exp.flt.num"
+                                entityAttribute="Flight.CustomsExportFlightNumber">
+                            </ngc-label>
+                            <div>
+                                <ngc-input formControlName="customsFlightNumber" [width]="100"
+                                    entityAttribute="Flight.CustomsExportFlightNumber"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="6">
+                            <ngc-label label="flight.truck.or.sea.company" entityAttribute="Gen.ServiceProvider">
+                            </ngc-label>
+                            <div>
+                                <ngc-lov sourceType='query' formControlName="customerShortName" [width]="150"
+                                    upperCase="true" noCache="true" sourceId='SERVICE_PROVIDER_TYPE_LOV'
+                                    (select)="setCustomerShortName($event)"
+                                    [sourceParameters]="{ 'parameter1': mntform.get('carrierCode').value + mntform.get('flightNo').value, 'parameter2': mntform.get('carrierCode').value, 'parameter3':'TRUCKING','parameter4':'SEA FERRY'}"
+                                    title='flight.truck.sea.company.type' dataField="param1" displayField="desc"
+                                    accessEnableOn="r" entityAttribute="Gen.ServiceProvider">
+                                    <ngc-data-column text="g.customerCode" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.customerName" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container title="flight.flightLeg" *ngIf="onSearchFlag" type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <ngc-label label="flight.aircraft"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="flight.boardPoint"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="flight.offPoint"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="flight.domestic"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="flight.std"></ngc-label>
+                            </th>
+
+                            <th>
+                                <ngc-label label="flight.sta"></ngc-label>
+                            </th>
+
+                            <th>
+                                <ngc-label label="flight.etd"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="flight.eta"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="flight.atd"></ngc-label>
+                            </th>
+
+                            <th>
+                                <ngc-label label="flight.ata"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label=""></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody ngc-form-array formArrayName="flightLegs">
+                        <tr ngc-form-group *ngFor="let item of mntform.controls.flightLegs.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+
+                                <ngc-lov [noCache]="true" formControlName="aircraftModel" required [width]="55"
+                                    sourceId='AIR' title='flight.aircraft' dataField='code' displayMember="code"
+                                    maxlength='3' (select)="onChangeOfJointFLight($event, index)">
+                                    <ngc-data-column text="flight.aircraftType" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </td>
+                            <td>
+                                <ngc-lov [noCache]="true" [disabled]="index < disabledControles "
+                                    formControlName="boardPointCode" maxlength='3' required [width]="55"
+                                    sourceId='FLIGHT_AIRPORT' title='flight.airport' dataField='code'
+                                    displayMember="code" (select)="onChangeOfJointFLight($event, index)">
+                                    <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </td>
+                            <td>
+                                <ngc-lov [noCache]="true" [disabled]="index < disabledControles"
+                                    formControlName="offPointCode" maxlength='3' required sourceId='FLIGHT_AIRPORT'
+                                    [width]="55" title='flight.airport' dataField='code' displayMember="code"
+                                    (select)="onChangeOfJointFLight($event, index)">
+                                    <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </td>
+                            <td>
+                                <div>
+                                    <ngc-checkbox formControlName="domesticStatus" [disabled]="true"></ngc-checkbox>
+                                </div>
+                            </td>
+                            <td *ngIf="index===0">
+                                <ngc-datetimeinput required formControlName="departureDate" [separated]="true"
+                                    (ngModelChange)="onChangeOfJointFLight($event, index)" [disableDate]="true">
+                                </ngc-datetimeinput>
+                            </td>
+                            <td *ngIf="index!==0">
+                                <ngc-datetimeinput required formControlName="departureDate" [separated]="true"
+                                    (ngModelChange)="onChangeOfJointFLight($event, index)"
+                                    [disableDate]="(item.get('boardPointCode').value===airportCode || item.get('boardPointCode').value===cityCode)&& boardPointFlag">
+                                </ngc-datetimeinput>
+                            </td>
+                            <td>
+                                <ngc-datetimeinput
+                                    [disableDate]="(item.get('boardPointCode').value===airportCode || item.get('boardPointCode').value===cityCode) && offPointFlag"
+                                    required formControlName="arrivalDate"
+                                    (ngModelChange)="onChangeOfJointFLight($event, index)" [separated]="true">
+                                </ngc-datetimeinput>
+                            </td>
+
+                            <td>
+                                <ngc-datetimeinput formControlName="datEtd" [separated]="true" [disableDate]="false">
+                                </ngc-datetimeinput>
+                            </td>
+
+                            <td>
+                                <ngc-datetimeinput formControlName="datEta" [separated]="true" [disableDate]="false">
+                                </ngc-datetimeinput>
+                            </td>
+
+                            <td>
+                                <ngc-datetimeinput formControlName="datAtd" [separated]="true" [disableDate]="false">
+                                </ngc-datetimeinput>
+                            </td>
+
+                            <td>
+                                <ngc-datetimeinput formControlName="datAta" [separated]="true" [disableDate]="false">
+                                </ngc-datetimeinput>
+                            </td>
+                            <td class="text-center">
+                                <ngc-link (linkClick)="deleteFlightLegs(index)" iconType="delete"
+                                    [disabled]="mntform.controls.flightLegs.length - 1 !== index">
+                                    <ngc-i18n value="g.delete"></ngc-i18n>
+                                </ngc-link>
+                            </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+
+
+
+        <ngc-row>
+            <ngc-column *ngIf="terminalFlag">
+                <br />
+                <ngc-label label="flight.terminals.nbsp"></ngc-label>
+                <ngc-dropdownlist formControlName="handlingArea" sourceId="WAREHOUSE_TERMINAL" multiSelect="true"
+                     [width]='500' sourceType="query" required>
+                </ngc-dropdownlist>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align="right">
+                <ngc-button (click)="addLegsRow(mntform.controls.flightLegs.length)"
+                    [disabled]="mntform.controls.flightLegs.length == 8" value="flight.addRow">
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab" *ngIf="onSearchFlag">
+        <ngc-row>
+            <ngc-column>
+                <ngc-tabs>
+                    <div ngc-tab-card title="flight.segment">
+                        <ngc-container type="heading">
+                            <ngc-row>
+                                <ngc-column column="6">
+                                    <ngc-table class="table table-bordered table-hover table-responsive table-ngc"
+                                        id="addcargodetails">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <ngc-label label="flight.boardPoint"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="flight.offPoint"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="flight.freightNA"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="flight.technicalStop"></ngc-label>
+                                                </th>
+
+                                                <th>
+                                                    <ngc-label label="flight.noMail"></ngc-label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody ngc-form-array formArrayName="flightSegments">
+                                            <tr ngc-form-group
+                                                *ngFor="let item of mntform.controls.flightSegments.controls; let index=index"
+                                                [formGroupName]="index">
+                                                <td>
+                                                    <ngc-display formControlName="codAptBrd"></ngc-display>
+                                                </td>
+                                                <td>
+                                                    <ngc-display formControlName="codAptOff"></ngc-display>
+                                                </td>
+                                                <td>
+                                                    <ngc-checkbox formControlName="flgNfl"></ngc-checkbox>
+                                                </td>
+                                                <td>
+                                                    <ngc-checkbox formControlName="flgTecStp"></ngc-checkbox>
+                                                </td>
+
+                                                <td>
+                                                    <ngc-checkbox formControlName="noMail"></ngc-checkbox>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </ngc-table>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title="flight.delay">
+                        <ngc-container type="heading">
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-container type="heading" title="flight.inbound">
+                                        <ngc-row>
+                                            <ngc-column column="3">
+                                                <ngc-checkbox formControlName="flgDlyIn">
+                                                    <ngc-i18n value="flight.delay"></ngc-i18n>
+                                                </ngc-checkbox>
+                                            </ngc-column>
+                                            <ngc-column column="2" formGroupName="inboundFlightAttributes">
+                                                <ngc-i18n value="flight.delay.code" entityAttribute="Flight.DelayCode">
+                                                </ngc-i18n>
+                                                <ngc-dropdownlist formControlName="delayCode"
+                                                    sourceId='Flight$DelayCode' [width]="120" [dropDownWidth]="120"
+                                                    entityAttribute="Flight.DelayCode">
+                                                </ngc-dropdownlist>
+                                            </ngc-column>
+                                            <ngc-column>
+                                                <strong>
+                                                    <ngc-i18n value="flight.note"></ngc-i18n> :
+                                                    <ngc-i18n value="flight.atamessage"></ngc-i18n>
+                                                </strong>
+                                            </ngc-column>
+                                        </ngc-row>
+                                        <ngc-row>
+                                            <ngc-column>
+                                                <br>
+                                                <ngc-label label="g.remarks" [disabled]="!flagDelayIn"></ngc-label>
+                                                <ngc-input upperCase="true" [disabled]="!flagDelayIn"
+                                                    formControlName="dlyInReason" [width]="900" maxlength='65'>
+                                                </ngc-input>
+                                            </ngc-column>
+                                        </ngc-row>
+                                    </ngc-container>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-container type="heading" title="flight.outbound">
+                                        <ngc-row>
+                                            <ngc-column column="3">
+                                                <ngc-checkbox formControlName="flgDlyOut" [checked]="flgDlyOut">
+                                                    <ngc-i18n value="flight.delay"></ngc-i18n>
+                                                </ngc-checkbox>
+                                            </ngc-column>
+                                            <ngc-column column="2" formGroupName="outboundFlightAttributes">
+                                                <ngc-i18n value="flight.delay.code" entityAttribute="Flight.DelayCode">
+                                                </ngc-i18n>
+                                                <ngc-dropdownlist formControlName="delayCode"
+                                                    sourceId='Flight$DelayCode' [width]="120" [dropDownWidth]="120"
+                                                    entityAttribute="Flight.DelayCode">
+                                                </ngc-dropdownlist>
+                                            </ngc-column>
+                                        </ngc-row>
+                                        <ngc-row>
+                                            <ngc-column>
+                                                <br>
+                                                <ngc-label label="g.remarks" [disabled]="!flagDelayOut"></ngc-label>
+                                                <ngc-input [disabled]="!flagDelayOut" formControlName="dlyOutReason"
+                                                    upperCase="true" [width]="900" maxlength='65'></ngc-input>
+                                            </ngc-column>
+                                        </ngc-row>
+                                    </ngc-container>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title="flight.exception">
+                        <ngc-container>
+                            <ngc-row>
+                                <ngc-column column="8">
+                                    <ngc-container type="heading">
+                                        <ngc-row>
+                                            <ngc-column column="12">
+                                                <ngc-checkbox formControlName="flgExpUld">
+                                                    <ngc-label label="flight.byPassULDType"></ngc-label>
+                                                </ngc-checkbox>
+                                                <ngc-table id="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                <ngc-label value="uld.uldtype"></ngc-label>
+                                                            </th>
+                                                            <th>
+                                                                <ngc-label value="flight.tareweight"></ngc-label>
+                                                            </th>
+                                                            <th>
+                                                                <ngc-label value="flight.reason"></ngc-label>
+                                                            </th>
+                                                            <th>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody ngc-form-array formArrayName="flightExpULDTyps">
+                                                        <tr ngc-form-group
+                                                            *ngFor="let item of mntform.controls.flightExpULDTyps.controls; let index=index"
+                                                            [disabled]="!flagExpUld" [formGroupName]="index">
+                                                            <td>
+                                                                <ngc-input upperCase="true" formControlName="uldExpType"
+                                                                    maxlength='3' [disabled]="!flagExpUld"
+                                                                    [required]="flagExpUld"></ngc-input>
+                                                            </td>
+                                                            <td>
+                                                                <ngc-weightinput formControlName="tareWeight"
+                                                                    [disabled]="!flagExpUld"></ngc-weightinput>
+                                                            </td>
+
+                                                            <td>
+                                                                <ngc-input upperCase="true"
+                                                                    formControlName="uldWtReason" maxlength='65'
+                                                                    [width]=500 [disabled]="!flagExpUld"
+                                                                    [required]="flagExpUld"></ngc-input>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <ngc-link [disabled]="!flagExpUld"
+                                                                    (linkClick)="deleteuldType(index)"
+                                                                    iconType="delete">
+                                                                    <ngc-i18n value="g.delete"></ngc-i18n>
+                                                                </ngc-link>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                </ngc-table>
+                                            </ngc-column>
+                                            <ngc-column column="12">
+                                                <ngc-button (click)="addExceptionULDRow()" [disabled]="!flagExpUld"
+                                                    value="g.addRow" iconType=addrow></ngc-button>
+                                            </ngc-column>
+                                            <ngc-column column="12">
+                                                <hr>
+                                                <ngc-checkbox formControlName="flgExpWt"
+                                                    accessSectionId="BYPASS_ULDMAXWT">
+                                                    <ngc-label label="flight.byPassULDMessage"></ngc-label>
+                                                </ngc-checkbox>
+                                                <ngc-table
+                                                    class="table table-bordered table-hover table-responsive table-ngc"
+                                                    id="table">
+                                                    <thead>
+                                                        <tr>
+                                                            <th>
+                                                                <ngc-label value="uld.uldnumber"></ngc-label>
+                                                            </th>
+                                                            <th>
+                                                                <ngc-label value="flight.reason"></ngc-label>
+                                                            </th>
+                                                            <th>
+                                                                <ngc-label value=""></ngc-label>
+                                                            </th>
+                                                        </tr>
+                                                    </thead>
+                                                    <tbody ngc-form-array formArrayName="flightExps">
+                                                        <tr ngc-form-group
+                                                            *ngFor="let item of mntform.controls.flightExps.controls; let index=index"
+                                                            [formGroupName]="index">
+                                                            <td>
+                                                                <ngc-uldinput upperCase="true" formControlName="uldNo"
+                                                                    [disabled]="!flagExpWt" maxlength='11'
+                                                                    [required]="flagExpWt"></ngc-uldinput>
+                                                            </td>
+                                                            <td>
+                                                                <ngc-input upperCase="true"
+                                                                    formControlName="uldWtReason" maxlength='65'
+                                                                    [width]=670 [disabled]="!flagExpWt"
+                                                                    [required]="flagExpWt"></ngc-input>
+                                                            </td>
+                                                            <td class="text-center">
+                                                                <ngc-link [disabled]="!flagExpWt"
+                                                                    (linkClick)="deleteuldNo(index)" iconType="delete">
+                                                                    <ngc-i18n value="g.delete"></ngc-i18n>
+                                                                </ngc-link>
+                                                            </td>
+                                                        </tr>
+                                                    </tbody>
+                                                    <td>
+                                                    </td>
+                                                </ngc-table>
+                                            </ngc-column>
+                                            <ngc-column column="12">
+                                                <ngc-button (click)="addExceptionReasonRow()" [disabled]="!flagExpWt"
+                                                    value="g.addRow" iconType=addrow></ngc-button>
+                                            </ngc-column>
+                                        </ngc-row>
+                                    </ngc-container>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title="flight.jointFlight" [disabled]="this.mntform.jointFlight">
+                        <br>
+                        <ngc-container [disabled]="this.mntform.jointFlight">
+                            <ngc-row>
+                                <ngc-column column="8">
+                                    <ngc-table id="table">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <ngc-label value="g.flight"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="g.name"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value=""></ngc-label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody ngc-form-array formArrayName="flightJoints">
+                                            <tr ngc-form-group
+                                                *ngFor="let item of mntform.controls.flightJoints.controls; let index=index"
+                                                [formGroupName]="index">
+                                                <td style="min-width: 100px;max-width:300px;">
+                                                    <ngc-lov [noCache]="true" [required]="flagJoint"
+                                                        [disabled]="!flagJoint" formControlName="jFlightName"
+                                                        sourceId='JOINT_FLIGHT_SCHEDULE_OPT' [width]="120"
+                                                        title='flight.jointFlightTitle' dataField='code'
+                                                        sourceType="query" displayMember="code"
+                                                        [sourceParameters]="jointGroupCodeParam">
+                                                        <ngc-data-column text="g.flight" dataField="code" [width]="100">
+                                                        </ngc-data-column>
+                                                        <ngc-data-column text="g.name" dataField="desc" [width]="150">
+                                                        </ngc-data-column>
+                                                    </ngc-lov>
+                                                </td>
+                                                <td style="min-width: 300px;">
+                                                    <div style="padding:5px;">
+                                                        <ngc-display formControlName="carDesc" [disabled]="!flagJoint">
+                                                        </ngc-display>
+                                                    </div>
+                                                </td>
+                                                <td>
+                                                    <div class="text-center">
+                                                        <ngc-link [disabled]="!flagJoint"
+                                                            (linkClick)="deleteJointFlight(index)" [hideValue]="true"
+                                                            iconType="delete">
+                                                            <ngc-i18n value="g.delete"></ngc-i18n>
+                                                        </ngc-link>
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </ngc-table>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column column="7">
+                                    <ngc-button (click)="addJointFlightRow()" value="g.addRow"
+                                        [disabled]="mntform.controls.flightJoints.length == 3" iconType=addrow>
+                                    </ngc-button>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title="flight.facts">
+                        <br>
+                        <ngc-container>
+                            <ngc-row>
+                                <ngc-column>
+                                    <div formArrayName="flightFcts">
+                                        <div ngc-form-group
+                                            *ngFor="let item of mntform.controls.flightFcts.controls; let index=index"
+                                            [formGroupName]="index">
+                                            <ngc-container>
+                                                <ngc-row>
+                                                    <ngc-column>
+                                                        <ngc-input formControlName="remarks" [width]="900"
+                                                            maxlength='65'></ngc-input>
+                                                    </ngc-column>
+
+                                                    <ngc-column align="left">
+                                                        <ngc-link (linkClick)="deleteFactRow(index)" [hideValue]="true"
+                                                            iconType="delete">
+                                                            <ngc-i18n value="g.delete"></ngc-i18n>
+                                                        </ngc-link>
+                                                    </ngc-column>
+                                                </ngc-row>
+                                            </ngc-container>
+                                        </div>
+                                    </div>
+                                    <br>
+                                    <ngc-button (click)="addFactRow()" value="flight.addfact" iconType=addfact>
+                                    </ngc-button>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card #remarksTab title="g.remarks" *ngIf="showTabs" entityAttribute="Flight.Remarks"
+                        [indicatorIconType]="remarksIcon" indicatorIconColor="red">
+                        <ngc-row>
+                            <ngc-column>
+                                <ngc-container type="heading" title="flight.inbound">
+                                    <ngc-row>
+                                        <ngc-column column="2">
+                                            <ngc-label label="flightremarks"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column column="5">
+                                            <ngc-input formControlName="inboundGeneralRemark" [width]="500"
+                                                maxlength='65'></ngc-input>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column column="3">
+                                            <div>
+                                                <ngc-container type="squarethin">
+                                                    <ngc-row>
+                                                        <ngc-column>
+                                                            <ngc-label label=""></ngc-label>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.cancel.reason"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-dropdownlist #inboundCancelReason
+                                                                formControlName="inboundCancelReason"
+                                                                sourceId='Flight$FlightCancelReason' [width]="120"
+                                                                [dropDownWidth]="120">
+                                                            </ngc-dropdownlist>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.cancel.remark"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-input #inboundCancelRemark
+                                                                formControlName="inboundCancelRemark" [width]="200"
+                                                                maxlength='65'>
+                                                            </ngc-input>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                </ngc-container>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="1">
+                                        </ngc-column>
+                                        <ngc-column column="3">
+                                            <div>
+                                                <ngc-container type="squarethin">
+                                                    <ngc-row>
+                                                        <ngc-column>
+                                                            <ngc-label label=""></ngc-label>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.offload.reason"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-dropdownlist formControlName="inboundOffloadReason"
+                                                                sourceId='Flight$FlightOffloadReason' [width]="120"
+                                                                [dropDownWidth]="120">
+                                                            </ngc-dropdownlist>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.offload.remarks"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-input formControlName="inboundOffloadRemark"
+                                                                [width]="200" maxlength='65'>
+                                                            </ngc-input>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                </ngc-container>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="1">
+                                        </ngc-column>
+                                        <ngc-column column="3">
+                                            <div>
+                                                <ngc-container type="squarethin">
+                                                    <ngc-row>
+                                                        <ngc-column>
+                                                            <ngc-label label=""></ngc-label>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.added.reason"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-dropdownlist formControlName="inboundAddedReason"
+                                                                sourceId='Flight$FlightAddedReason' [width]="120"
+                                                                [dropDownWidth]="120">
+                                                            </ngc-dropdownlist>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.added.remarks"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-input formControlName="inboundAddedRemark"
+                                                                [width]="200" maxlength='65'>
+                                                            </ngc-input>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                </ngc-container>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="1">
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                        </ngc-row>
+                        <ngc-row>
+                            <ngc-column>
+                                <ngc-container type="heading" title="flight.outbound">
+                                    <ngc-row>
+                                        <ngc-column column="2">
+                                            <ngc-label label="flightremarks"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column column="5">
+                                            <ngc-input formControlName="outboundGeneralRemark" [width]="500"
+                                                maxlength='65'></ngc-input>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column column="3">
+                                            <div>
+                                                <ngc-container type="squarethin">
+                                                    <ngc-row>
+                                                        <ngc-column>
+                                                            <ngc-label label=""></ngc-label>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.cancel.reason"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-dropdownlist #outboundCancelReason
+                                                                formControlName="outboundCancelReason"
+                                                                sourceId='Flight$FlightCancelReason' [width]="120"
+                                                                [dropDownWidth]="120">
+                                                            </ngc-dropdownlist>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.cancel.remark"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-input #outboundCancelRemark
+                                                                formControlName="outboundCancelRemark" [width]="200"
+                                                                maxlength='65'>
+                                                            </ngc-input>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                </ngc-container>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="1">
+                                        </ngc-column>
+                                        <ngc-column column="3">
+                                            <div>
+                                                <ngc-container type="squarethin">
+                                                    <ngc-row>
+                                                        <ngc-column>
+                                                            <ngc-label label=""></ngc-label>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.offload.reason"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-dropdownlist formControlName="outboundOffloadReason"
+                                                                sourceId='Flight$FlightOffloadReason' [width]="120"
+                                                                [dropDownWidth]="120">
+                                                            </ngc-dropdownlist>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.offload.remarks"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-input formControlName="outboundOffloadRemark"
+                                                                [width]="200" maxlength='65'>
+                                                            </ngc-input>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                </ngc-container>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="1">
+                                        </ngc-column>
+                                        <ngc-column column="3">
+                                            <div>
+                                                <ngc-container type="squarethin">
+                                                    <ngc-row>
+                                                        <ngc-column>
+                                                            <ngc-label label=""></ngc-label>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.added.reason"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-dropdownlist formControlName="outboundAddedReason"
+                                                                sourceId='Flight$FlightAddedReason' [width]="120"
+                                                                [dropDownWidth]="120">
+                                                            </ngc-dropdownlist>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                    <ngc-row>
+                                                        <ngc-column column="4">
+                                                            <ngc-label label="flight.added.remarks"></ngc-label>
+                                                        </ngc-column>
+                                                        <ngc-column>
+                                                            <ngc-input formControlName="outboundAddedRemark"
+                                                                [width]="200" maxlength='65'>
+                                                            </ngc-input>
+                                                        </ngc-column>
+                                                    </ngc-row>
+                                                </ngc-container>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="1">
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                        </ngc-row>
+                    </div>
+                    <div ngc-tab-card #miscDetailTab title="flight.misc.details" *ngIf="showTabs"
+                        entityAttribute="Flight.ArrDepStatus" [indicatorIconType]="miscDetailIcon"
+                        indicatorIconColor="red">
+                        <ngc-row>
+                            <ngc-column column="6">
+                                <ngc-container type="squarethin" title="flight.inbound"
+                                    formGroupName="inboundFlightAttributes">
+                                    <ngc-row>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="flight.warehouse.level"
+                                                entityAttribute="Flight.WarehouseLevel">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="warehouseLevel"
+                                                    sourceId='Flight$WarehouseLevel'  [width]="80"  [dropDownWidth]="80"
+                                                    entityAttribute="Flight.WarehouseLevel">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="flight.rho" entityAttribute="Flight.RHO">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-lov sourceType='query' [width]="150" upperCase="true"
+                                                    noCache="true" sourceId='SERVICE_PROVIDER_TYPE_LOV'
+                                                    [sourceParameters]="inboundRhoLovParam" title='RHO'
+                                                    formControlName="rho" dataField="param1" displayField="desc"
+                                                    accessEnableOn="r" entityAttribute="Flight.RHO"
+                                                    [skipEntityAttribute]="['required']">
+                                                    <ngc-data-column text="g.customerCode" dataField="code"
+                                                        [width]="100">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.customerName" dataField="desc"
+                                                        [width]="150">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="flight.arr.dep.status"
+                                                entityAttribute="Flight.ArrDepStatus">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="arrDepStatus"
+                                                    sourceId='Flight$FlightStatus'  [width]="150"  [dropDownWidth]="150"
+                                                    entityAttribute="Flight.ArrDepStatus">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="g.weather" entityAttribute="Flight.Weather"></ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="weather"
+                                                    sourceId='Flight$WeatherCondition'  [width]="120"
+                                                     [dropDownWidth]="120" entityAttribute="Flight.Weather">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.trucking.sea.company"
+                                                entityAttribute="Gen.ServiceProvider"></ngc-label>
+                                            <div>
+                                                <ngc-lov formControlName="truckSeaCompany" [width]="200"
+                                                    sourceType='query' upperCase="true" noCache="true"
+                                                    sourceId='SERVICE_PROVIDER_TYPE_LOV'
+                                                    (select)="checkProviderType($event, 'INBOUND')"
+                                                    [sourceParameters]="{ 'parameter1': mntform.get('carrierCode').value + mntform.get('flightNo').value, 'parameter2': mntform.get('carrierCode').value, 'parameter3':'TRUCKING','parameter4':'SEA FERRY'}"
+                                                    title='flight.trucking.sea.company' dataField="param1"
+                                                    displayField="desc" accessEnableOn="r"
+                                                    entityAttribute="Gen.ServiceProvider">
+                                                    <ngc-data-column text="g.customerCode" dataField="code"
+                                                        [width]="100">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.customerName" dataField="desc"
+                                                        [width]="150">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="flight.serviceType" dataField="param2"
+                                                        [width]="150">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.custom.flight"
+                                                entityAttribute="Flight.CustomsImportFlightNumber"></ngc-label>
+                                            <div>
+                                                <ngc-input [width]="100" formControlName="customsFlightNumber"
+                                                    entityAttribute="Flight.CustomsImportFlightNumber">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.gate" entityAttribute="Flight.Gate"></ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="gate" [width]="100"
+                                                    entityAttribute="Flight.Gate">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.buildup.breakdown"
+                                                entityAttribute="Flight.BuBdOffice">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="bubdOffice"
+                                                    sourceId='Flight$BuBdOffice'  [width]="120"  [dropDownWidth]="120"
+                                                    entityAttribute="Flight.BuBdOffice"
+                                                    [skipEntityAttribute]="['required']">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.default.printer" entityAttribute="Flight.Printer">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="printer" sourceId='Flight$Printer'
+                                                     [width]="120"  [dropDownWidth]="120"
+                                                    entityAttribute="Flight.Printer"
+                                                    [skipEntityAttribute]="['required']">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                            <ngc-column column="6">
+                                <ngc-container type="squarethin" title="flight.outbound"
+                                    formGroupName="outboundFlightAttributes">
+                                    <ngc-row>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="flight.warehouse.level"
+                                                entityAttribute="Flight.WarehouseLevel">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="warehouseLevel"
+                                                    sourceId='Flight$WarehouseLevel'  [width]="80"  [dropDownWidth]="80"
+                                                    entityAttribute="Flight.WarehouseLevel">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="flight.rho" entityAttribute="Flight.RHO"></ngc-label>
+                                            <div>
+                                                <ngc-lov formControlName="rho" sourceType='query' [width]="150"
+                                                    upperCase="true" noCache="true" sourceId='SERVICE_PROVIDER_TYPE_LOV'
+                                                    [sourceParameters]="inboundRhoLovParam" title='flight.rho'
+                                                    dataField="param1" displayField="desc" accessEnableOn="r"
+                                                    entityAttribute="Flight.RHO" [skipEntityAttribute]="['required']">
+                                                    <ngc-data-column text="g.customerCode" dataField="code"
+                                                        [width]="100">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.customerName" dataField="desc"
+                                                        [width]="150">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="flight.arr.dep.status"
+                                                entityAttribute="Flight.ArrDepStatus">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="arrDepStatus"
+                                                    sourceId='Flight$FlightStatus'  [width]="150"  [dropDownWidth]="150"
+                                                    entityAttribute="Flight.ArrDepStatus">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            <ngc-label label="g.weather" entityAttribute="Flight.Weather"></ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="weather"
+                                                    sourceId='Flight$WeatherCondition'  [width]="120"
+                                                     [dropDownWidth]="120" entityAttribute="Flight.Weather">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.trucking.sea.company"
+                                                entityAttribute="Gen.ServiceProvider"></ngc-label>
+                                            <div>
+                                                <ngc-lov formControlName="truckSeaCompany" [width]="200"
+                                                    sourceType='query' upperCase="true" noCache="true"
+                                                    sourceId='SERVICE_PROVIDER_TYPE_LOV'
+                                                    (select)="checkProviderType($event, 'OUTBOUND')"
+                                                    [sourceParameters]="{ 'parameter1': mntform.get('carrierCode').value + mntform.get('flightNo').value, 'parameter2': mntform.get('carrierCode').value, 'parameter3':'TRUCKING','parameter4':'SEA FERRY'}"
+                                                    title='flight.trucking.sea.company' dataField="param1"
+                                                    displayField="desc" accessEnableOn="r"
+                                                    entityAttribute="Gen.ServiceProvider">
+                                                    <ngc-data-column text="g.customerCode" dataField="code"
+                                                        [width]="100">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.customerName" dataField="desc"
+                                                        [width]="150">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="flight.serviceType" dataField="param2"
+                                                        [width]="150">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.custom.flight"
+                                                entityAttribute="Flight.CustomsExportFlightNumber"></ngc-label>
+                                            <div>
+                                                <ngc-input [width]="100" formControlName="customsFlightNumber"
+                                                    entityAttribute="Flight.CustomsExportFlightNumber">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.gate" entityAttribute="Flight.Gate"></ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="gate" [width]="100"
+                                                    entityAttribute="Flight.Gate">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.buildup.breakdown"
+                                                entityAttribute="Flight.BuBdOffice">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="bubdOffice"
+                                                    sourceId='Flight$BuBdOffice'  [width]="120"  [dropDownWidth]="120"
+                                                    entityAttribute="Flight.BuBdOffice"
+                                                    [skipEntityAttribute]="['required']">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="3"><br>
+                                            <ngc-label label="flight.default.printer" entityAttribute="Flight.Printer">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="printer" sourceId='Flight$Printer'
+                                                     [width]="120"  [dropDownWidth]="120"
+                                                    entityAttribute="Flight.Printer"
+                                                    [skipEntityAttribute]="['required']">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                        </ngc-row>
+                    </div>
+                    <div ngc-tab-card #stfsTab title="flight.stfs" *ngIf="showTabs" entityAttribute="Flight.VesselID"
+                        [indicatorIconType]="stfsIcon" indicatorIconColor="red">
+                        <ngc-row>
+                            <ngc-column column="6" formGroupName="inboundFlightAttributes">
+                                <ngc-container type="squarethin" title="flight.inbound">
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label=""></ngc-label>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column column="4">
+                                            <ngc-label label="flight.vessel.id" entityAttribute="Flight.VesselID">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="vesselId" [width]="200"
+                                                    entityAttribute="Flight.VesselID">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="4">
+                                            <ngc-label label="flight.vessel.name" entityAttribute="Flight.VesselName">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="vesselName" [width]="200"
+                                                    entityAttribute="Flight.VesselName">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="4">
+                                            <ngc-label label="flight.voyage.number"
+                                                entityAttribute="Flight.VoyageNumber"></ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="voyageNumber" [width]="200"
+                                                    entityAttribute="Flight.VoyageNumber">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                            <ngc-column column="6" formGroupName="outboundFlightAttributes">
+                                <ngc-container type="squarethin" title="flight.outbound">
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label=""></ngc-label>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column column="4">
+                                            <ngc-label label="flight.vessel.id" entityAttribute="Flight.VesselID">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="vesselId" [width]="200"
+                                                    entityAttribute="Flight.VesselID">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="4">
+                                            <ngc-label label="flight.vessel.name" entityAttribute="Flight.VesselName">
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="vesselName" [width]="200"
+                                                    entityAttribute="Flight.VesselName">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column column="4">
+                                            <ngc-label label="flight.voyage.number"
+                                                entityAttribute="Flight.VoyageNumber"></ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="voyageNumber" [width]="200"
+                                                    entityAttribute="Flight.VoyageNumber">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                        </ngc-row>
+                    </div>
+                </ngc-tabs>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-window #flightCompletePopup title=" " [showCloseButton]="true">
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column align="center">
+                    <ngc-display value="flight.already.departed" [i18n]="true"></ngc-display>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+
+        <ngc-window-footer>
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button value="g.ok" (click)='clickOnOK()'></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-window-footer>
+
+    </ngc-window>
+</form>

@@ -1,0 +1,186 @@
+<ngc-titlebar title="temp.temperaturelogentry" (print)="print()" (save)="onSave($event)" (cancel)="onCancel()"
+  [disablePrint]="printFlag==false">
+</ngc-titlebar>
+<form [formGroup]="ShipmentTemperatureSearch" [allowSubmission]="true">
+    <ngc-container type='section'>
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label value="g.awbNumber"></ngc-label>
+                <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" required [disabled]=showAsPopup
+            (ngModelChange)="onTabOutCheckHandledBy($event)"></ngc-awbinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5" *ngIf=handledbyHouse>
+                <ngc-label label="g.hawb.number" feature="Imp.Bd.HAWBHandling"></ngc-label>
+                <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="100" sourceId='HWBNUMBER'
+            [validOnly]="true" dataField='code' valueMember='code' [noCache]="true" title="g.hawb.number"
+            feature="Imp.Bd.HAWBHandling"
+            [sourceParameters]="{'parameter1': this.ShipmentTemperatureSearch.get('shipmentNumber').value}">
+                        <ngc-data-column text='g.hawb.number' [width]='80' dataField='code' required></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <br>
+                <ngc-button accessEnableOn="r" [width]="120" label="search" iconType="search" (click)="onSearch()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type='section' [formGroup]="ShipmentTemperatureSearchResponse" *ngIf="ShipmentTemperatureSearchFlag">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label='temperature.svc'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="svc"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='temperature.awb'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column feature="Imp.Bd.HAWBHandling">
+                <ngc-label label='temperature.hawbNumber'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="hawbNumber"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="3">
+                <ngc-label label='temperature.temprange'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="temperatureRange" sourceCategory="dropdown" sourceId="AWBTEMPLOGENTRY">
+                    </ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='temperature.origin'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="origin"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='temperature.destination'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="destination"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='temperature.pieces'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='temperature.weight'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='temperature.chargecode'></ngc-label>
+                <div *ngIf="helpViewVisible">
+                    <ngc-display formControlName="chargeCode"></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th rowspan="2">
+                                <ngc-checkbox formControlName="selectAll"></ngc-checkbox>
+                            </th>
+                            <th rowspan="2">
+                                <ngc-label label='temperature.sno'></ngc-label>
+                            </th>
+                            <th rowspan="2">
+                                <ngc-label label='temperature.svc'></ngc-label>
+                            </th>
+                            <th colspan="3">
+                                <ngc-label label='temperature.capture' align="center"></ngc-label>
+                            </th>
+                            <th rowspan="2">
+                                <ngc-label label='temperature.activity'></ngc-label>
+                            </th>
+                            <th rowspan="2">
+                                <ngc-label label='temperature.coolport'></ngc-label>
+                            </th>
+                        </tr>
+                        <tr>
+                            <th [width]="150">
+                                <ngc-label label='temperature.temp'></ngc-label>
+                            </th>
+                            <th [width]="70">
+                                <ngc-label label='temperature.date'></ngc-label>
+                            </th>
+                            <th [width]="70">
+                                <ngc-label label='temperature.timestamp'></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName="temperatureLogEntryData" *ngIf="helpViewVisible">
+            <tr
+              *ngFor="let item of ShipmentTemperatureSearchResponse.controls.temperatureLogEntryData.controls; let index=index"
+              [formGroupName]="index">
+                            <td align="center">
+                                <ngc-checkbox formControlName="flagSave"></ngc-checkbox>
+                            </td>
+                            <td>
+                                <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td [formGroup]="ShipmentTemperatureSearchResponse">
+                                <ngc-display formControlName="svc"></ngc-display>
+                            </td>
+                            <td>
+                <ngc-display *ngIf="item.get('shipmentId').value != ''" sourceCategory="dropdown"
+                  formControlName="temperature" [sourceId]="sourceIdValue" [width]="150"></ngc-display>
+                <ngc-numberinput *ngIf="item.get('shipmentId').value == ''" formControlName="temperature" required
+                  [width]="150" decimalDigits="1"></ngc-numberinput>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="capturedOn" [width]="70" [onlyDate]="true" [width]="200"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="capturedOn" [onlyTime]="true" [width]="70"></ngc-display>
+                            </td>
+                            <td [width]="50" [width]="100">
+                                <!--<ngc-display *ngIf="item.get('shipmentId').value != ''" sourceCategory="dropdown"
+                  formControlName="activity" sourceId="AWB_Temp_Type$AWB_Temperature_Event" required></ngc-display>
+                <ngc-input *ngIf="item.get('shipmentId').value == ''" formControlName="activity" [width]="400" [maxLength]="65" required>
+                </ngc-input>-->
+                <ngc-dropdownlist formControlName="activity" sourceId="AWBTEMPLOGENTRY" sourceType="query" [width]="400"
+                  (ngModelChange)='onDropdownclick()' [maxlength]='90'
+                  [sourceParameters]="{ 'parameter1': response.processType,'parameter2': 'AWB'}" [noCache]="true"
+                                    required>
+                                </ngc-dropdownlist>
+                            </td>
+                            <td>
+                                <ngc-display *ngIf="item.get('shipmentId').value != ''" formControlName="locationCode" required>
+                                </ngc-display>
+                <ngc-input *ngIf="item.get('shipmentId').value == ''" formControlName="locationCode" [width]="550"
+                  [maxLength]="60">
+                                </ngc-input>
+                            </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+                <ngc-column>
+                    <ngc-row align="right">
+                        <ngc-column>
+                            <ngc-button [width]="120" label="1.delete" iconType="delete" (click)="onDelete()"></ngc-button>
+                            <ngc-button (click)="onAddRow($event)" value="addRow"></ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-column>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+<ngc-report #reportWindow title="g.report"  reportId='AWBTemperatureLogEntry'  [reportParameters]='reportParameters'>
+    </ngc-report>

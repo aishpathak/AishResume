@@ -1,0 +1,449 @@
+<ngc-titlebar title="tcs.maintainVehicleInformation"></ngc-titlebar>
+<!-- Search form -->
+<form [formGroup]="vehicleInfoSearchForm">
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label="tcs.companyName"></ngc-label>
+                <div>
+                    <ngc-lov formControlName="companyId" dataField="param1" displayField="desc" sourceId="COMPANY_NAME"
+                        accessEnableOn="r" [width]="300">
+                        <ngc-data-column text="tcs.companyCode" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="tcs.vehicleNo"></ngc-label>
+                <div>
+                    <ngc-input formControlName="vehicleNo" sourceId="TCS_VEHICLES" patternName="alphanum"
+                        sourceCategory="dropdown" sourceType="query" [maxlength]="10" accessEnableOn="r">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="tcs.vehicleType"></ngc-label>
+                <div>
+                    <ngc-dropdownlist formControlName="vehicleType" sourceId="TCS$VEHICLE_LENGTH" [width]="150"
+                        accessEnableOn="r">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="tcs.active"></ngc-label>
+                <div>
+                    <ngc-checkbox accessEnableOn="r" type="checkbox" formControlName="active"></ngc-checkbox>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label="tcs.natureOfBusiness"></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="natureOfBusiness"
+                        sourceId="TCS$NATURE_OF_BUSINESS" [width]="150">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="tcs.id"></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" formControlName="associatedId" patternName="alphanum"
+                        [maxlength]="32"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="tcs.qrCode"></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" formControlName="qrCode" upperCase="false" [width]="250">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column align="right">
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" label="awb.search" (click)="onSearch()"></ngc-button>
+                    <ngc-button label="arrival.create" (click)="onCreate(createWindow)"></ngc-button>
+                    <ngc-button label="g.unKnownVehicle" (click)="onUnknownVehicleList(unknownList)"></ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<!-- Display form -->
+<form [formGroup]="vehicleInfo" *ngIf="showData">
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable formArrayName="records" (linkClick)="onDataTableClick($event, createWindow)"
+                    [columnsHeight]="50">
+                    <ngc-data-column text="tcs.companyName" dataField="companyName" [width]="100" cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.vehicleNo" dataField="vehicleNo" [width]="35" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.vehicleType" dataField="vehicleType" [width]="80" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.natureOfBusiness" dataField="natureOfBusiness" [width]="55"
+                        cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.contactNo" dataField="phoneNo" [width]="40" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.notificationPhoneNo" dataField="notificationPhoneNo" [width]="40"
+                        cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.active" dataField="active" type="icon" iconType="yesno"
+                        cellsAlign="center" [width]="20">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.deActiveReason" dataField="deActiveReason" [width]="45"
+                        cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.remarks" dataField="remarks" [width]="50" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.update" dataField="updateFlag" type="link" iconType="edit"
+                        cellsAlign="center" [width]="20">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.delete" dataField="deleteFlag" type="link" iconType="delete"
+                        cellsAlign="center" [width]="20">
+                    </ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<!--*************** Create Popup****************** -->
+<form [formGroup]="vehicleInfoCreateUpdateForm" formName="save">
+    <ngc-window #createWindow title="tcs.vehicleinformation" [width]="800" [height]="600">
+        <ngc-container>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-container>
+                        <ngc-row>
+                            <ngc-column>
+                                <ngc-container type="tab">
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.vehicleNo"></ngc-label>
+                                            <div>
+                                                <ngc-input
+                                                    *ngIf="!this.vehicleInfoCreateUpdateForm.get('vehicleId').value"
+                                                    formControlName="vehicleNo" patternName="alphanum" [maxlength]="10"
+                                                    required>
+                                                </ngc-input>
+                                                <ngc-display
+                                                    *ngIf="this.vehicleInfoCreateUpdateForm.get('vehicleId').value"
+                                                    formControlName="vehicleNo">
+                                                </ngc-display>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.vehicleType"></ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist formControlName="vehicleType"
+                                                    sourceId="TCS$VEHICLE_LENGTH" [width]="150" required>
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.singleUse"></ngc-label>
+                                            <div>
+                                                <ngc-checkbox formControlName="singleUse">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.companyName"></ngc-label>
+                                            <div>
+                                                <ngc-lov formControlName="companyId" dataField="param1"
+                                                    displayField="desc" sourceId="COMPANY_NAME" accessEnableOn="r"
+                                                    [width]="300" required>
+                                                    <ngc-data-column text="tcs.companyCode" dataField="code"
+                                                        [width]="50">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="tcs.companyName" [width]="150"
+                                                        dataField="desc">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.driverName"></ngc-label>
+                                            <div>
+                                                <ngc-alphanuminput formControlName="driverName">
+                                                </ngc-alphanuminput>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.id"></ngc-label>
+                                            <div>
+                                                <ngc-alphanuminput formControlName="associatedId" [maxlength]="32">
+                                                </ngc-alphanuminput>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.natureOfBusiness"></ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist required formControlName="natureOfBusiness"
+                                                    sourceId="TCS$NATURE_OF_BUSINESS" [width]="150">
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.contactMobileNo."></ngc-label>
+                                            <div>
+                                                <ngc-phoneinput formControlName="phoneNo" [noCountryCode]="true">
+                                                </ngc-phoneinput>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.notificationMobileNo"></ngc-label>
+                                            <div>
+                                                <ngc-phoneinput formControlName="notificationPhoneNo"
+                                                    [noCountryCode]="true">
+                                                </ngc-phoneinput>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.active"></ngc-label>
+                                            <div>
+                                                <ngc-checkbox formControlName="active" (modelChange)="onActive()">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.deActiveReason"></ngc-label>
+                                            <div>
+                                                <ngc-alphanuminput formControlName="deActiveReason" [width]="200"
+                                                    [disabled]="vehicleInfoCreateUpdateForm.get('active').value"
+                                                    [maxlength]="65">
+                                                </ngc-alphanuminput>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.remarks"></ngc-label>
+                                            <div>
+                                                <ngc-alphanuminput formControlName="remarks" patternName="alphanum"
+                                                    [maxlength]="65" [width]="350">
+                                                </ngc-alphanuminput>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                        </ngc-row>
+                        <ngc-row>
+                            <ngc-column>
+                                <ngc-container type="sectiontop">
+                                    <ngc-row>
+                                        <ngc-column [column]="4">
+                                            <ngc-label label="tcs.gatePass"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="bypassGate">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="4">
+                                            <ngc-label label="tcs.gatePassGE56"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="bypassGate5And6">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column [column]="4">
+                                            <ngc-label label="tcs.noOverstayCharge"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="allowFreeParking">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="4">
+                                            <ngc-label label="tcs.defaultNonCargoHandling"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="nonCargoVehicle">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.setFee"> </ngc-label>
+                                            <div>
+                                                <ngc-currencydisplay formControlName="setFee"></ngc-currencydisplay>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.setWaive"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="waiveSet"
+                                                    (modelChange)="onWaiveSET()"></ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.setWaiveReason"> </ngc-label>
+                                            <div>
+                                                <ngc-alphanuminput formControlName="waiveSETReason" [width]="200"
+                                                    [maxlength]="65"
+                                                    [disabled]="!vehicleInfoCreateUpdateForm.get('waiveSet').value">
+                                                </ngc-alphanuminput>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.tenantGateChargeFee"> </ngc-label>
+                                            <div>
+                                                <ngc-currencydisplay formControlName="tenantGateChargeFee">
+                                                </ngc-currencydisplay>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.waiveTenantGateCharge"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="waiveTenantGateCharge"
+                                                    (modelChange)="onWaiveGateFee()">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="tcs.tenantFeeWaiveReason"> </ngc-label>
+                                            <div>
+                                                <ngc-alphanuminput formControlName="waiveTenantGateChargeReason"
+                                                    [width]="200" [maxlength]="65"
+                                                    [disabled]="!vehicleInfoCreateUpdateForm.get('waiveTenantGateCharge').value">
+                                                </ngc-alphanuminput>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row>
+                                        <ngc-column [column]="4">
+                                            <ngc-label label="tcs.adminFee"> </ngc-label>
+                                            <div>
+                                                <ngc-currencydisplay formControlName="adminFee"></ngc-currencydisplay>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="4">
+                                            <ngc-label label="tcs.applyAdminFee"> </ngc-label>
+                                            <div>
+                                                <ngc-checkbox type="checkbox" formControlName="acceptAdminFee">
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-container>
+                            </ngc-column>
+                        </ngc-row>
+                    </ngc-container>
+                </ngc-column>
+                <ngc-column *ngIf="vehicleInfoCreateUpdateForm.get('vehicleImage').value" [column]="4">
+                    <ngc-container>
+                        <ngc-row>
+                            <ngc-column>
+                                <ngc-image formControlName="vehicleImage"></ngc-image>
+                            </ngc-column>
+                        </ngc-row>
+                    </ngc-container>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+            <ngc-container type="sectiontop">
+                <ngc-row>
+                    <ngc-column align="right">
+                        <ngc-button label="g.save.e" (click)="onSave(createWindow)"></ngc-button>
+                        <ngc-button label="cancel" (click)="onCancel(createWindow)"></ngc-button>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+</form>
+
+<!--******************* Unknown Vehicle List ********-->
+<form [formGroup]="unknownVehicleForm">
+    <ngc-window #unknownList title="tcs.unknownVehicleLists" [width]="1000" [height]="450">
+        <ngc-container type="section">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-edittable formArrayName="unknownVehicleList">
+                        <ngc-data-column text="tcs.vehicleNo" dataField="vehicleNo" [width]="40">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-input formControlName="newVehicleNo" [width]="100" [maxlength]="10"
+                                        patternName="alphanum" required>
+                                    </ngc-input>&nbsp;
+                                    <ngc-link (linkClick)="onMap(unknownVehicleForm.get(['unknownVehicleList', group]))"
+                                        value="Map" iconType="edit">
+                                    </ngc-link>
+                                    <ngc-display
+                                        *ngIf="unknownVehicleForm.get(['unknownVehicleList', group, 'vehicleNo']).value"
+                                        formControlName="vehicleNo"></ngc-display>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="tcs.declaredPurpose" dataField="declaredPurposeCode" [width]="30">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-display formControlName="declaredPurposeCode" sourceId="INCOMING_PURPOSE"
+                                        sourceCategory="dropdown" sourceType="query"></ngc-display>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="tcs.entryTime" dataField="terminalEntryDateTime" [width]="25">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-display formControlName="terminalEntryDateTime"></ngc-display>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="tcs.image" dataField="vehicleImage" cellsAlign="center" [width]="20">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-link
+                                        *ngIf="unknownVehicleForm.get(['unknownVehicleList', group, 'vehicleImage']).value"
+                                        (linkClick)="onViewImage(unknownListImage, unknownVehicleForm.get(['unknownVehicleList', group, 'vehicleImage']).value)"
+                                        value="View Image" iconType="image">
+                                    </ngc-link>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="tcs.register" dataField="vehicleId" cellsAlign="center" [width]="20">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-link
+                                        *ngIf="!unknownVehicleForm.get(['unknownVehicleList', group, 'vehicleId']).value && unknownVehicleForm.get(['unknownVehicleList', group, 'vehicleNo']).value"
+                                        (linkClick)="onRegister(createWindow, unknownList, unknownVehicleForm.get(['unknownVehicleList', group]))"
+                                        value="Register">
+                                    </ngc-link>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                    </ngc-edittable>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+    <ngc-window #unknownListImage title="tcs.unKnownVehicleImage" [width]="600" [height]="300">
+        <ngc-container type="section">
+            <ngc-row>
+                <ngc-column align="center">
+                    <ngc-image [value]="vehicleImage"></ngc-image>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>

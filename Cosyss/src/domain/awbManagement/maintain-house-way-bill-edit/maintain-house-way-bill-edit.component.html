@@ -1,0 +1,744 @@
+<ngc-titlebar title='title.maintain.house.waybill.edit' (save)="onSave()" (cancel)="onCancel($event)"
+  [disableSave]="hasReadPermission">
+</ngc-titlebar>
+<form [formGroup]="formAddNew">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-shipmentdisplay formControlName="awbNumber" shipmentType='AWB' required></ngc-shipmentdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.hawb.number'></ngc-label>
+        <div>
+          <ngc-display [width]="100" formControlName="hawbNumber" required>
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.origin'></ngc-label>
+        <div>
+          <ngc-lov formControlName="origin" [width]="45" title='g.origin' upperCase="true" dataField="code"
+            displayMember="code" sourceId="APT" required (ngModelChange)="onTabOutOriginHandle($event)">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.destination'></ngc-label>
+        <div>
+          <ngc-lov formControlName="destination" [width]="45" title='g.destination' upperCase="true" dataField="code"
+            displayMember="code" sourceId="APT" required (ngModelChange)="onTabOutDestinationHandle($event)">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.pieces'></ngc-label>
+        <div>
+          <ngc-piecesinput [width]="80" formControlName="pieces" required>
+          </ngc-piecesinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.weight'></ngc-label>
+        <div>
+          <ngc-weightinput formControlName="weight" required>
+          </ngc-weightinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.weightCode'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="weightUnitCode"  sourceId='MaintainHouse$WeightUnitCode' [noBlank]="true"
+            [width]="100"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='hwb.slac'></ngc-label>
+        <div>
+          <ngc-input [width]="70" formControlName="slac" [maxlength]="5"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='g.natureOfGoods'></ngc-label>
+        <div>
+          <ngc-input [width]="170" formControlName="natureOfGoods" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.shc'></ngc-label>
+        <div>
+          <ngc-shcinput formArrayName="shc" dataField="code"></ngc-shcinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title="awb.shipper" formGroupName="shipper" type="rectangle">
+    <ngc-row>
+      <ngc-column column="5">
+        <ngc-label label='g.name'></ngc-label>
+        <div>
+          <ngc-lov [noValidation]="true" formControlName="name" [width]="400" upperCase="true" [dropDownWidth]="700"
+            sourceId="SHIPPER_DATA" title="g.name" displayMember="code" dataField="desc" [maxlength]="70"
+            (select)="onSelectShipperName($event,item)" [required]="originShipperMandatoryflag">
+            <ngc-data-column text="g.code" dataField="code" [width]="150">
+            </ngc-data-column>
+            <ngc-data-column text="g.name" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ng-container formGroupName="address">
+        <ngc-column column="5">
+          <ngc-label label="g.address"></ngc-label>
+          <div>
+            <ngc-input [width]="500" formControlName="streetAddress" [maxlength]="70"
+              [required]="originShipperMandatoryflag"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label label="g.place"></ngc-label>
+          <div>
+            <ngc-input [width]="170" formControlName="place" [maxlength]="17" [required]="originShipperMandatoryflag">
+            </ngc-input>
+          </div>
+        </ngc-column>
+      </ng-container>
+    </ngc-row>
+    <ngc-row formGroupName="address">
+      <ngc-column column="2">
+        <ngc-label label="g.postalCode"></ngc-label>
+        <div>
+          <ngc-input formControlName="postal" [maxlength]="9"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.state"></ngc-label>
+        <div>
+          <ngc-lov sourceId="STATE" title="g.state" formControlName="state"  dataField="code" width="70%"
+            [noValidation]="true" [maxlength]="9">
+            <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.country"></ngc-label>
+        <div>
+          <ngc-lov [required]="originShipperMandatoryflag" formControlName="country" sourceId="COUNTRY"
+             title="g.country"  dataField="code" width="50%" [noValidation]="true" [maxlength]="2">
+            <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="6">
+        <div>
+          <ngc-label label="hwb.shipper.contact.details"></ngc-label>
+        </div>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width="20">
+                <ngc-label label="g.type"></ngc-label>
+              </th>
+              <th width="20">
+                <ngc-label label="agent.details"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label=""></ngc-label>
+              </th>
+              <th>
+                <ngc-label label=""></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="contacts">
+            <tr
+              *ngFor="let item of formAddNew.controls.shipper.controls.address.controls.contacts.controls; let index=index"
+              [formGroupName]="index">
+              <td width="20">
+                <ngc-dropdownlist formControlName="type" sourceId='CONTACTYPE' sourceType='query' displayMember="code"
+                  [width]="100"></ngc-dropdownlist>
+              </td>
+              <td width="20">
+                <ngc-input formControlName="detail" [width]="250" [maxlength]="25"></ngc-input>
+              </td>
+              <td align="center" *ngIf="displayAdd">
+                <ngc-button [disabled]="hasReadPermission"  align="center" iconType="add" (click)="onAddShipperContact(index)"
+                  *ngIf="formAddNew.get('shipper.address.contacts').controls.length == (index + 1)"></ngc-button>
+              </td>
+              <td align="center">
+                <ngc-link [disabled]="hasReadPermission" align="center" (linkClick)="onDeleteShipperContact(index)" iconType="delete">
+                  <ngc-i18n value="g.delete"></ngc-i18n>
+                </ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title="awb.consignee" formGroupName="consignee" type="rectangle">
+    <ngc-row>
+      <ngc-column column="5">
+        <ngc-label label='g.name'></ngc-label>
+        <div>
+          <ngc-lov [noValidation]="true" formControlName="name" [width]="400" upperCase="true" [dropDownWidth]="700"
+            sourceId="CONSIGNEE_DATA" title="g.name" displayMember="code" dataField="desc" [maxlength]="70"
+            (select)="onSelectConsigneeName($event,item)" [required]="destinationConsigneeMandatoryFlag">
+            <ngc-data-column text="g.code" dataField="code" [width]="150">
+            </ngc-data-column>
+            <ngc-data-column text="g.name" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ng-container formGroupName="address">
+        <ngc-column column="5">
+          <ngc-label label="g.address"></ngc-label>
+          <div>
+            <ngc-input [width]="500" formControlName="streetAddress" [maxlength]="70"
+              [required]="destinationConsigneeMandatoryFlag"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label label="g.place"></ngc-label>
+          <div>
+            <ngc-input [width]="170" formControlName="place" [maxlength]="17"
+              [required]="destinationConsigneeMandatoryFlag"></ngc-input>
+          </div>
+        </ngc-column>
+      </ng-container>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container formGroupName="address">
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-label label="g.postalCode"></ngc-label>
+              <div>
+                <ngc-input formControlName="postal" [maxlength]="9"></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="g.state"></ngc-label>
+              <div>
+                <ngc-lov sourceId="STATE" title="g.state" formControlName="state"  dataField="code" width="70%"
+                  [noValidation]="true" [maxlength]="9">
+                  <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="g.country"></ngc-label>
+              <div>
+                <ngc-lov [required]="destinationConsigneeMandatoryFlag" formControlName="country" sourceId="COUNTRY"
+                   title="g.country"  dataField="code" width="50%" [noValidation]="true" [maxlength]="2">
+                  <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="6">
+              <div>
+                <ngc-label label="hwb.consignee.contact.details"></ngc-label>
+              </div>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th width="20">
+                      <ngc-label label="g.type"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="agent.details"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="contacts">
+                  <tr
+                    *ngFor="let item of formAddNew.controls.consignee.controls.address.controls.contacts.controls; let index=index"
+                    [formGroupName]="index">
+                    <td width="20">
+                      <ngc-dropdownlist formControlName="type" sourceId='CONTACTYPE' sourceType='query'
+                        displayMember="code" [width]="100"></ngc-dropdownlist>
+                    </td>
+                    <td width="20">
+                      <ngc-input formControlName="detail" [width]="250" [maxlength]="25"></ngc-input>
+                    </td>
+                    <td align="center">
+                      <ngc-button [disabled]="hasReadPermission"  align="center" iconType="add" (click)="onAddConsigneeContact(index)"
+                        *ngIf="formAddNew.get('consignee.address.contacts').controls.length == (index + 1)">
+                      </ngc-button>
+                    </td>
+                    <td align="center">
+                      <ngc-link [disabled]="hasReadPermission" align="center" (linkClick)="onDeleteConsigneeContact(index)" iconType="delete">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title="agent.notify" formGroupName="notify" type="rectangle" feature="Edi.FHL.NotifyParty">
+    <ngc-row>
+      <ngc-column column="5">
+        <ngc-label label='g.name'></ngc-label>
+        <div>
+          <ngc-lov formControlName="name" [width]="400" upperCase="true" [dropDownWidth]="700"
+            sourceId="KEY_NOTIFY_CUSTOMER_DATA" title="g.name" displayMember="code" dataField="desc"
+            (select)="onSelectNotifyName($event,item)" [maxlength]="70" [required]="this.formAddNew.get(['notify','name']).value != null">
+            <ngc-data-column text="g.code" dataField="code" [width]="150">
+            </ngc-data-column>
+            <ngc-data-column text="g.name" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ng-container formGroupName="address">
+        <ngc-column column="5">
+          <ngc-label label="g.address"></ngc-label>
+          <div>
+            <ngc-input [width]="500" formControlName="streetAddress" [maxlength]="70" [required]="this.formAddNew.get(['notify','name']).value != null">
+            </ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label label="g.place"></ngc-label>
+          <div>
+            <ngc-input [width]="170" formControlName="place" [maxlength]="17" [required]="this.formAddNew.get(['notify','name']).value != null"></ngc-input>
+          </div>
+        </ngc-column>
+      </ng-container>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container formGroupName="address">
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-label label="g.postalCode"></ngc-label>
+              <div>
+                <ngc-input formControlName="postal" [maxlength]="9"></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="g.state"></ngc-label>
+              <div>
+                <ngc-lov sourceId="STATE" title="g.state" formControlName="state"  dataField="code" width="70%"
+                  [maxlength]="9">
+                  <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="g.country"></ngc-label>
+              <div>
+                <ngc-lov formControlName="country" sourceId="COUNTRY"  title="g.country"  dataField="code" width="50%"
+                  [maxlength]="2" [required]="this.formAddNew.get(['notify','name']).value != null">
+                  <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="6">
+              <div>
+                <ngc-label label="hwb.notify.contact.details"></ngc-label>
+              </div>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th width="20">
+                      <ngc-label label="g.type"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="agent.details"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="contacts">
+                  <tr
+                    *ngFor="let item of formAddNew.controls.notify.controls.address.controls.contacts.controls; let index=index"
+                    [formGroupName]="index">
+                    <td width="20">
+                      <ngc-dropdownlist formControlName="type" sourceId='CONTACTYPE' sourceType='query'
+                        displayMember="code" [width]="100"></ngc-dropdownlist>
+                    </td>
+                    <td width="20">
+                      <ngc-input formControlName="detail" [width]="250" [maxlength]="25"></ngc-input>
+                    </td>
+                    <td align="center">
+                      <ngc-button align="center" iconType="add" (click)="onAddNotifyContact(index)"
+                        *ngIf="formAddNew.get('notify.address.contacts').controls.length == (index + 1)">
+                      </ngc-button>
+                    </td>
+                    <td align="center">
+                      <ngc-link iconType="delete" (linkClick)="onDeleteNotifyContact(index)">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container feature="Edi.FHL.License">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="rectangle">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="hwb.license.details"></ngc-label>
+            </ngc-column>
+            <ngc-column column="7" align="left">
+              <ngc-button iconType="add" value="add.row.uld" (click)="addRowLicenseNo()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="hwb.license.no"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="license">
+                  <tr *ngFor="let item of formAddNew.controls.license.controls;let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-input [width]="600" formControlName="number" [maxlength]="65"></ngc-input>
+                    </td>
+                    <td align="center">
+                      <ngc-link iconType="delete" (linkClick)="onDeleteLicenseNo(index)">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container type="rectangle">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="hwb.permit.details"></ngc-label>
+            </ngc-column>
+            <ngc-column column="7" align="left">
+              <ngc-button iconType="add" value="g.add.e" (click)="addRowPermitNo()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="agent.issue.do.permit.number"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="permit">
+                  <tr *ngFor="let item of formAddNew.controls.permit.controls;let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-input [width]="600" formControlName="number" [maxlength]="65"></ngc-input>
+                    </td>
+                    <td align="center">
+                      <ngc-link iconType="delete" (linkClick)="onDeletePermitNo(index)">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="hwb.description.of.goods"></ngc-label>
+            </ngc-column>
+            <ngc-column column="7" align="right">
+              <ngc-button [disabled]="hasReadPermission" iconType="add" value="g.add" (click)="addRowFreeText()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="g.select"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.free.text"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="descriptionOfGoods">
+                  <tr *ngFor="let item of formAddNew.controls.descriptionOfGoods.controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox type="checkbox" formControlName="check"></ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-input [width]="600" formControlName="content" [maxlength]="65"></ngc-input>
+                    </td>
+                    <td align="center">
+                      <ngc-link [disabled]="hasReadPermission" align="center" (linkClick)="onDeleteFreeText(index)" iconType="delete">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column column="2">
+      </ngc-column>
+      <ngc-column>
+        <ngc-container type="rectangle">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="hwb.harmonised.tariff.schedule.info"></ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+              <ngc-button [disabled]="hasReadPermission" iconType="add" value="g.add" (click)="addRowCommodity()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="g.select"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="hwb.harmonised.commodity.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=""></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="tariffs">
+                  <tr *ngFor="let item of formAddNew.controls.tariffs.controls let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox type="checkbox" formContorlName="check"></ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-input [width]="200" formControlName="code" maxlength='18' minlength="6"></ngc-input>
+                    </td>
+                    <td align="center">
+                      <ngc-link [disabled]="hasReadPermission" align="center" (linkClick)="onDeleteCommodityCode(index)" iconType="delete">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="hwb.oci.security.regulatory.info"></ngc-label>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button [disabled]="hasReadPermission" [width]="100" iconType="add" value="g.add" (click)="addRowOci()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12">
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="50">
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th align="center" [width]="100">
+                <ngc-label value="g.iso.country.code"></ngc-label>
+              </th>
+              <th align="center" [width]="100">
+                <ngc-label value="awb.information.identifier"></ngc-label>
+              </th>
+              <th align="center" [width]="100">
+                <ngc-label value="hwb.customs.security.control.info.identifier"></ngc-label>
+              </th>
+              <th align="center" [width]="100">
+                <ngc-label value="hwb.customs.security.control.info.information"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label label=""></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="oci">
+            <tr *ngFor="let item of formAddNew.controls.oci.controls let index=index" [formGroupName]="index">
+              <td align="center">
+                <ngc-checkbox type="checkbox" formContorlName="check"></ngc-checkbox>
+              </td>
+              <td align="center">
+
+                <ngc-lov formControlName="country" sourceId="COUNTRY"  title="g.country"  dataField="code" width="50%"
+                  maxlength="2">
+                  <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-input [width]="170" formControlName="identifier" [maxlength]="3"></ngc-input>
+              </td>
+              <td>
+                <ngc-input [width]="170" formControlName="csrcIdentifier" [maxlength]="2"></ngc-input>
+              </td>
+              <td>
+                <ngc-input [width]="300" formControlName="scsrcInformation" [maxlength]="35"></ngc-input>
+              </td>
+              <td align="center">
+                <ngc-link [disabled]="hasReadPermission" align="center" (linkClick)="onDeleteOCI(index)" iconType="delete">
+                  <ngc-i18n value="g.delete"></ngc-i18n>
+                </ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title="billing.charge.declaration" formGroupName="otherChargeDeclarations" type="rectangle">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.currency.code"></ngc-label>
+        <div>
+          <ngc-lov formControlName="currencyCode" [width]="60" upperCase="true" [dropDownWidth]="60" sourceId="CURRENCY"
+            title="g.currency" displayMember="code" dataField="code" (select)="onSelectCarrier($event,item)">
+            <ngc-data-column text="g.code" dataField="code" [width]="100">
+            </ngc-data-column>
+            <ngc-data-column text="g.name" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="billing.p.c.indicator"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="pcIndicator"  sourceId='OtherCharges$OtherCharges' [width]="100">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="billing.other.charge"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="otherCharge"  sourceId='OtherCharges$OtherCharges' [width]="100">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="billing.value.for.carriage"></ngc-label>
+        <div>
+          <ngc-digitinput [width]="170" formControlName="carriageValue" placeHolder="NVD" maxlength='12'
+            [allowDecimals]="true"></ngc-digitinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="billing.value.for.customs"></ngc-label>
+        <div>
+          <ngc-digitinput [width]="170" formControlName="customValue" placeHolder="NCV" maxlength='12'
+            [allowDecimals]="true">
+          </ngc-digitinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="billing.amount.for.insurance"></ngc-label>
+        <div>
+          <ngc-digitinput [width]="170" formControlName="insuranceValue" placeHolder="XXX" maxlength='11'
+            [allowDecimals]="true"></ngc-digitinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row feature="Edi.FHL.ChargeDeclarationRemarks">
+      <ngc-column column="2">
+        <ngc-label label="g.remarks" feature="Edi.FHL.ChargeDeclarationRemarks"></ngc-label>
+        <div>
+          <ngc-input formControlName="remarks" [width]="400" [maxLength]="35" feature="Edi.FHL.ChargeDeclarationRemarks"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container  title="export.other.info.caps" type="rectangle" feature="Edi.FHL.DistinguishRemarks">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="hwb.distinguishing.marks" ></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="distinguishRemarks" sourceId="MaintainHouse$DistinguishRemarks" [noCache]="true" [width]="400"
+          (select)="onDistinguishRemarksSelect($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

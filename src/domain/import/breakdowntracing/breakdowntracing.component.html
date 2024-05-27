@@ -1,0 +1,335 @@
+<form [formGroup]="tracingBreakdownData">
+  <ngc-titlebar title='import.breakdown.tracing.list' (cancel)="onBack($event)" (print)="onPrint()"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row formGroupName="searchTracingData">
+      <ngc-column [column]="2">
+        <ngc-label label='import.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightId" required="true"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='agent.createRoutingDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="date" required="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label='export.offload.uld.number.awb.number'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="Import$numberType" accessEnableOn="r" formControlName="typeOfNumber"
+            (select)="ontypeOfNumberChange($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label [label]='typeOfNumberLabelValue'></ngc-label>
+        <div>
+          <ngc-uldinput *ngIf='!awbInputFlag' accessEnableOn="r" [width]="120" formControlName="numberValue">
+          </ngc-uldinput>
+          <ngc-awbinput *ngIf='awbInputFlag' accessEnableOn="r" [width]="120" formControlName="numberValue">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+
+      <!-- <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='Print' (click)="onPrint()" *ngIf="isBreakDownInformation"></ngc-button>
+        </div>
+      </ngc-column> -->
+    </ngc-row>
+    <ngc-row formGroupName="searchData" *ngIf="isBreakDownInformation">
+      <ngc-column [column]="1">
+        <ngc-label label='import.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='agent.createRoutingDate'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='wrkLst.selctSeg'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="segmentDropDown" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query"
+            [sourceParameters]="sourceIdSegmentDropdown" [width]="120" [dropDownWidth]='110'
+            (ngModelChange)="onSegmentChange($event)" accessEnableOn="r">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.segment'></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2.5">
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label [label]='numberTypeValue'></ngc-label>
+        <div>
+          <ngc-display formControlName="numberValue"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+
+
+  </ngc-container>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column *ngIf="isBreakDownInformation">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="g.awbNumber"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400" feature="Imp.Bd.HAWBHandling">
+                <ngc-label label="g.hawb.number" featureAttribute="Imp.Bd.HAWBHandling"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="40">
+                <ngc-label label="import.origin"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50">
+                <ngc-label label="import.destination"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50">
+                <ngc-label label="import.natureOfGoods"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50" entityAttribute="Import.AwbPiceWeight">
+                <ngc-label entityAttribute="Import.AwbPiceWeight"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="30">
+                <ngc-label label="import.breakdown.mainfested.pieces"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="30">
+                <ngc-label label="import.breakdown.mainfested.weight"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50" entityAttribute="Import.LocationPieceWeight">
+                <ngc-label entityAttribute="Import.LocationPieceWeight"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50" entityAttribute="Import.SRFPieceWeight">
+                <ngc-label entityAttribute="Import.SRFPieceWeight"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50" entityAttribute="Import.Clearenceinfo">
+                <ngc-label entityAttribute="Import.Clearenceinfo"></ngc-label>
+              </th>
+
+
+
+
+
+              <th rowspan="2" [width]="100">
+                <ngc-label label="import.breakdown.hand.carry"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="70">
+                <ngc-label label="imp.transferType"></ngc-label>
+              </th>
+              <th colspan="5">
+                <ngc-label label="wrkLst.lctnInfo" align="center"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="70">
+                <ngc-label label="Damage Pieces"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50">
+                <ngc-label label="import.breakdown.irregularity"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="50">
+                <ngc-label label="import.breakdown.handling.terminal"></ngc-label>
+              </th>
+
+
+
+            </tr>
+            <tr>
+              <th [width]="80">
+                <ngc-label label="import.breakdown.shipment.location"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label entityAttribute="Gen.WareHouseDestination"></ngc-label>
+              </th>
+              <th [width]="50" feature="Gen.Shipment.ActualLocation">
+                <ngc-label value="Gen.ActualLocation"></ngc-label>
+              </th>
+
+              <th [width]="50">
+                <ngc-label label="g.pieces"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="tracingList">
+            <ng-container *ngFor="let item of tracingBreakdownData.controls.tracingList.controls; let index=index"
+              [formGroupName]="index">
+              <tr *ngIf="item.get('segmentChange').value">
+                <td colspan="5">
+                  <ngc-display formControlName='origin'></ngc-display>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ngc-display formControlName='shipmentNumber'></ngc-display>
+                </td>
+                <td feature="Imp.Bd.HAWBHandling">
+                  <ngc-display formControlName='hawbNumber' feature="Imp.Bd.HAWBHandling"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='origin'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='destination'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='natureOfGoods'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='awbPcWt' entityAttribute="Import.AwbPiceWeight"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='manifestPieces'></ngc-display>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName='manifestWeight'></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName='bdPcWt' entityAttribute="Import.LocationPieceWeight"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='srfTranipmentPcWt' entityAttribute="Import.SRFPieceWeight">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='cc' entityAttribute="Import.Clearenceinfo"></ngc-display>
+                </td>
+                <td>
+                  <ngc-icon formControlName='handCarry' type="yesno"></ngc-icon>
+                </td>
+                <td>
+                  <ngc-display formControlName='transferType'></ngc-display>
+                </td>
+                <!-- -->
+                <ng-container formArrayName="locationInfo">
+                  <ng-container *ngIf="item.get('locationInfo').controls.length > 0">
+                    <ng-container *ngFor="let sitem of item.get('locationInfo').controls | first; let sindex=index"
+                      [formGroupName]="sindex">
+                      <td>
+                        <ngc-display formControlName="shipmentLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="warehouseLocation"></ngc-display>
+                      </td>
+                      <td feature="Gen.Shipment.ActualLocation">
+                        <ngc-display formControlName="actualLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName='shc'></ngc-display>
+                      </td>
+                    </ng-container>
+                  </ng-container>
+                  <ng-container *ngIf="item.get('locationInfo').controls.length == 0">
+                    <td colspan="4"></td>
+                  </ng-container>
+                </ng-container>
+                <td>
+                  <ngc-display formControlName='damagePieces'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='irregularityPiece'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='handlingTerminal'></ngc-display>
+                </td>
+
+
+              </tr>
+              <ng-container formArrayName="locationInfo">
+                <ng-container *ngIf="item.get('locationInfo').controls.length > 1">
+                  <tr *ngFor="let sitem of item.get('locationInfo').controls | onward :1; let sindex=index"
+                    [formGroupName]="sindex + 1">
+                    <td *ngIf="sindex == 0" [attr.colspan]="customColspan"
+                      [attr.rowspan]="item.get('locationInfo').length - 1"></td>
+                    <td>
+                      <ngc-display formControlName="shipmentLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="warehouseLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="warehouseDestination"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='shc'></ngc-display>
+                    </td>
+                    <td *ngIf="sindex == 0" colspan="3" [attr.rowspan]="item.get('locationInfo').length - 1"></td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="box" title="import.detailed.uld.breakdown.location" *ngIf="isULDInformation">
+    <ngc-row>
+
+      <ngc-column [column]="3">
+        <ngc-table formArrayName="uldDetails">
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label='uld.uld.number'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.breakdown.location.pieces'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let contact of tracingBreakdownData.get('uldDetails').controls; let index = index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="uldNumber" [width]="10"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="LocationDetails"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #report title="g.report"  reportId='ImportTracingList'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

@@ -1,0 +1,183 @@
+<ngc-titlebar title="tcs.truckParkActivity"></ngc-titlebar>
+<!-- Search Form -->
+<form [formGroup]="truckSearchForm">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="1">
+        <ngc-label value="tcs.vehicleNo"></ngc-label>
+        <div>
+          <ngc-input formControlName="vehicleNumber" patternName="alphanum" accessEnableOn="r" sourceId="TCS_VEHICLES"
+            sourceCategory="dropdown" sourceType="query" [maxlength]="10" [width]="100"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label value="tcs.incomingPurpose"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="incomingPurpose" sourceId='INCOMING_PURPOSE'
+            sourceType='query' [width]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="search" (click)="onSearch($event)"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showFlag" verticalAlign="bottom" [column]="1" align="right">
+        <ngc-label label="tcs.autoRefresh"></ngc-label>
+        <div>
+          <ngc-switchbutton accessEnableOn="r" formControlName="auto" (change)="onSwitchChange($event)"
+            onLabel="val.auto.refresh">
+          </ngc-switchbutton>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Display Form  -->
+<form [formGroup]="truckParkActivityForm" *ngIf="showFlag">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label='tcs.incomingPurpose'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.numberoftrucks'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.truckNumber'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.arrivaltime'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.declarePurposeTime'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.waitingtime'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.overstay'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.lastCheckPoint'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.truckStatus'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='tcs.truckDockAllocated'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="truckParkActivityList">
+            <ng-container
+              *ngFor="let item of truckParkActivityForm.controls.truckParkActivityList.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display formControlName="incomingPurpose"></ngc-display>
+                </td>
+                <td align="right">
+                  {{item.controls.truckDetails.controls.length}}
+                </td>
+                <ng-container *ngIf="item.controls.truckDetails.controls &&
+                  item.controls.truckDetails.controls.length > 0; else emptyRow">
+                  <ng-container formArrayName="truckDetails">
+                    <ng-container *ngFor="let sitem of item.controls.truckDetails.controls let sindex=index"
+                      [formGroupName]="sindex">
+                      <ng-container *ngIf="sindex == 0">
+                        <td>
+                          <ngc-link (linkClick)="onHyperLinkClick(sitem.controls.vehicleNo)"
+                            formControlName="vehicleNo">
+                          </ngc-link>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="terminalEntryDateTime"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="declarePurposeDateTime"></ngc-display>
+                        </td>
+                        <td align="right">
+                          <ngc-display formControlName="waitingTime"></ngc-display>
+                        </td>
+                        <td align="center">
+                          <ngc-icon type="yesno" formControlName="overStay"></ngc-icon>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="currentLocation"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="status"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="resourceCode"></ngc-display>
+                        </td>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+                <ng-template #emptyRow>
+                  <td colspan="8"></td>
+                </ng-template>
+              </tr>
+              <ng-container formArrayName="truckDetails">
+                <tr *ngFor="let sitem of item.controls.truckDetails.controls let sindex=index" [formGroupName]="sindex">
+                  <ng-container *ngIf="sindex > 0">
+                    <td colspan=2>
+                    </td>
+                    <td>
+                      <ngc-link (linkClick)="onHyperLinkClick(sitem.controls.vehicleNo)" formControlName="vehicleNo">
+                      </ngc-link>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="terminalEntryDateTime"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="declarePurposeDateTime"></ngc-display>
+                    </td>
+                    <td align="right">
+                      <ngc-display formControlName="waitingTime"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="overStay"></ngc-icon>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="currentLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="status"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="resourceCode"></ngc-display>
+                    </td>
+                  </ng-container>
+                </tr>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- 
+  <ngc-window #maintainTruckDockWindow title="tcs.maintainDockAllocationWindowTitle" [width]="1300" [height]="563"
+    (close)="cancel(maintainTruckDockWindow)">
+    <app-maintain-truck-dock #maintainDockScreen [incomingVehicleNo]="vehicleNo" [callerScreen]="callerScreen">
+    </app-maintain-truck-dock>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="tcs.tenantPopupCancel" (click)="cancel(maintainTruckDockWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window> -->

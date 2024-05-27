@@ -1,0 +1,274 @@
+<form [formGroup]="scheduleCollectionListForm">
+  <ngc-titlebar title='import.sch.coll.list.title' (save)="onSave($event)"
+    [disableSave]="showTable==false || checkDisableFlag==true" (print)='onPrint($event)'
+    [disablePrint]="showTable==false || checkDisableFlag==false" (clear)="onClear()" (cancel)="onCancel()">
+  </ngc-titlebar>
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column='3'>
+        <ngc-label label='agent.agent.name'>
+        </ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='300' formControlName="requestAgentCode" upperCase="true"
+            sourceId="AGENT_NAME_DISPLAY_PO" title="g.name" dataField="code">
+            <ngc-data-column text="g.name" dataField="desc" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="80">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <div>
+          <ngc-label label="agent.iataAgentcode"></ngc-label>
+        </div>
+        <ngc-lov dataField='code' valueMember='code' formControlName='requestIataAgentCode' [width]='160'
+          upperCase='true' sourceId='IATACODE' title='g.iatacode' accessEnableOn="r" [dropDownWidth]='50'>
+          <ngc-data-column text='g.iatacode' dataField='code' [width]='70'></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='g.shipmentNumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <div>
+          <ngc-label label="import.sch.coll.no"></ngc-label>
+        </div>
+        <ngc-input [width]="180" textAlign='left' formControlName="requestSchCollectionNo">
+        </ngc-input>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)='searchScheduleCollectionList()'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.agentName'></ngc-label>
+        <div>
+          <ngc-display formControlName="agentName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='agent.iataAgentcode'></ngc-label>
+        <div>
+          <ngc-display formControlName="iataAgentCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.sch.time.slot'></ngc-label>
+        <div>
+          <ngc-display formControlName="schTimeSlot"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.po.truck.dock'></ngc-label>
+        <div>
+          <ngc-display formControlName="truckDockNo"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.sch.coll.no'></ngc-label>
+        <div>
+          <ngc-display formControlName="schCollectionNo"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="TCSK.VEHICLE"></ngc-label>
+        <div>
+          <ngc-taginput formControlName="vehicleNo" [maxItems]="5" required></ngc-taginput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable (linkClick)="onHyperLinkClick($event)" formArrayName="scheduleCollectionShipmentList"
+          *ngIf="showTable" [showToolbar]="false" [pageSize]=13 [pageable]='true'>
+          <ngc-data-column text="g.sNo" dataField="sno" [width]="20" [pinned]='true' align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.select" dataField="checkFlag" [width]="30" [pinned]='true' align="center"
+            cellsAlign="center" type='check'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="checkFlag" [width]="30"
+                  [disabled]="(this.scheduleCollectionListForm.get(['scheduleCollectionShipmentList', group,'validateBreakdownPieces']).value != 'Custom Clearance is pending' && this.scheduleCollectionListForm.get(['scheduleCollectionShipmentList', group,'validateBreakdownPieces']).value !=null)">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.awb" dataField="shipmentNumber" [width]="80" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="documentview.flt.no.date" dataField="flightData" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.man.pcs.wts" dataField="manifestInfo" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="inv.pcs.wgt" dataField="inventoryInfo" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.status" dataField="paymentStatus" cellsAlign="left">
+            <!--<ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link
+                  (click)="getPaymentStatus(this.scheduleCollectionListForm.get(['scheduleCollectionShipmentList', group]).value,group)"
+                  iconType="search">
+                </ngc-link>
+                <ngc-display formControlName="paymentStatus"></ngc-display>
+              </ng-container>
+            </ng-template>-->
+          </ngc-data-column>
+          <ngc-data-column text="Free Storage Expiry" dataField="freeStorageExpiry" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.natureOfGoods" dataField="nog" [width]="120" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.cc" dataField="customsConstraintCode" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shc" [width]="120" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="validateBreakdownPieces" [width]="200" align="left"
+            cellsAlign="left">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column *ngIf="showTable==true">
+        <ngc-column [column]='1'>
+          <ngc-label label='&nbsp;'></ngc-label>
+          <div>
+            <ngc-button accessEnableOn="r" value='issue.srf' (click)='onIssueSrf()'></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- <ngc-window #issueSRF title="issue.srf" width="1000" height="200" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="agent.appointed.agent"></ngc-label>
+          <div>
+            <ngc-input formControlName="agentName" required></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="billing.collected.by"></ngc-label>
+          <div>
+            <ngc-input formControlName="collectedBy" required></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="hkid"></ngc-label>
+          <div>
+            <ngc-input formControlName="hkid" required></ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <div>
+            <ngc-button label="g.save" (click)="saveIssueSRF()">
+            </ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window> -->
+  <ngc-report #reportWindow title="g.report" reportId='schCollectionReport' [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<form [formGroup]="collectionPerson">
+  <ngc-window #issueSRF [width]="600" [height]="200" title='Collection Person'>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value='agent.appointed.agent'></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-lov accessEnableOn="r" formControlName="appointedAgent" sourceId="APPOINTED_AGENT_DATA_FOR_AWB_RELEASE"
+            title="g.customer.list" dataField="code" displayMember='code' [width]="120" required>
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value='billing.collected.by'></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-input formControlName="collectedBy" [width]='130' accessEnableOn="r" required></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value='hkid'></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-input formControlName="hkId" [width]='150' accessEnableOn="r" required></ngc-input>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right" [width]="50" [height]="50">
+          <ngc-button label='g.save' (click)="saveIssueSRF()"></ngc-button>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

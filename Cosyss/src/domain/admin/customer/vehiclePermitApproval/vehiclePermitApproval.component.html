@@ -1,0 +1,246 @@
+<ngc-titlebar title="admin.title.vehicle.permit.approval.request.list" (clear)="onClear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type='tab'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" showTimeButton="true"
+            formControlName="fromDateTime" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" showTimeButton="true"
+            formControlName="toDateTime" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="admin.vehicle.permit.type.vehicle"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='AgentPortal$VEHICLE_TYPE'  [width]="130"  [dropDownWidth]="130"
+            formControlName="type"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.referenceNumber"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="requestNo" [width]="140"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" [width]="130"></ngc-awbinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName='status' sourceId='AgentPortal$STATUS' [width]="130">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="admin.vehicle.permit.requested.date"></ngc-label>
+        <!--<ngc-datetimeinput formControlName="fromDate" [width]="100" required></ngc-datetimeinput>-->
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" formControlName="requestDate"
+            [onlyDate]="true" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.terminal"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="120" [dropDownWidth]="120" sourceType='query'
+            sourceId="HANDLINGAREA" formControlName="handlingTerminal"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" label="g.search" (click)="searchVehicleRequests()"></ngc-button>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isTableFlg" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable (linkClick)="onApproveOrReject($event)" [pageable]="true" [pagerMode]="'advanced'"
+          formArrayName="VehiclePermitList" [enablePageSizeHeight]="false">
+          <ngc-data-column text='g.terminal' dataField="handlingTerminal" [width]="80" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text='agent.agentName' dataField="agentName" [width]="300" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text='g.referenceNumber' type="link" dataField="requestNo" [width]="150" cellsAlign="left"
+            align="left"></ngc-data-column>
+          <ngc-data-column text='awb.awbnumber' dataField="shipmentNumber" [width]="130" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text='admin.vehicle.permit.requested.date' dataField="requestDate" type="displayDate" [width]="130">
+          </ngc-data-column>
+          <ngc-data-column text='admin.vehicle.permit.type.vehicle' dataField="type" [width]="130" align="left" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text='g.status' dataField="status" [width]="100" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text='g.remarks' dataField="reasonForRejection" [width]="520" cellsAlign="left" align="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #vehiclePermitApprovalPopup width="800" height="350" title="admin.vehicle.permit.approval">
+    <ngc-container formGroupName="windowGroup" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.agentName"></ngc-label>
+                <div>
+                  <ngc-display formControlName="agentName"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="admin.vehicle.permit.type.vehicle"></ngc-label>
+                <div>
+                  <ngc-display formControlName="type"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="admin.vehicle.permit.registration.number"></ngc-label>
+                <div>
+                  <ngc-display formControlName="registrationNumbersList"></ngc-display>
+                </div>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="awb.awbnumber"></ngc-label>
+                <div>
+                  <ngc-display formControlName="shipmentNumber"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="g.pieces"></ngc-label>
+                <div>
+                  <ngc-display formControlName="pieces"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="g.weight"></ngc-label>
+                <div>
+                  <ngc-display formControlName="weight"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="g.purpose"></ngc-label>
+                <div>
+                  <ngc-display formControlName="purpose"></ngc-display>
+                </div>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.email"></ngc-label>
+                <div>
+                  <ngc-display formControlName="email"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="g.terminal"></ngc-label>
+                <div>
+                  <ngc-display formControlName="handlingTerminal"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="admin.vehicle.permit.requested.date"></ngc-label>
+                <div>
+                  <ngc-display formControlName="requestDate"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="g.timeFrom"></ngc-label>
+                <div>
+                  <ngc-display formControlName="fromDate"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label="g.timeTo"></ngc-label>
+                <div>
+                  <ngc-display formControlName="toDate"></ngc-display>
+                </div>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="admin.vehicle.permit.rejected.reason"></ngc-label>
+                <div>
+                  <ngc-combobox [width]="525" *ngIf="this.form.get('windowGroup').get('status').value==='PENDING'"
+                    formControlName="reasonForRejection" sourceId='REASON_FOR_EMBARGO'  sourceType='query'
+                    valueMember="desc" [maxlength]="65"></ngc-combobox>
+                  <ngc-display *ngIf="this.form.get('windowGroup').get('status').value!=='PENDING'"
+                    formControlName="reasonForRejection"></ngc-display>
+                </div>
+              </ngc-column>
+
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label *ngIf="this.form.get('windowGroup').get('status').value==='PENDING'" label="admin.vehicle.permit.approved.by">
+          </ngc-label>
+          <ngc-input *ngIf="this.form.get('windowGroup').get('status').value==='PENDING'" [maxlength]='35'
+            formControlName="approvedBy"></ngc-input>
+
+        </ngc-column>
+        <ngc-column>
+          <ngc-label *ngIf="this.form.get('windowGroup').get('status').value==='PENDING'" label="admin.vehicle.permit.contact.number">
+          </ngc-label>
+          <ngc-phoneinput *ngIf="this.form.get('windowGroup').get('status').value==='PENDING'" [noCountryCode]="true"
+            [width]="210" formControlName="contactnumber"></ngc-phoneinput>
+
+        </ngc-column>
+
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container>
+        <ngc-row>
+          <ngc-column column='10' align="right">
+            <ngc-button *ngIf="showSearchButton" [width]="90" (click)="onRejection()" value="Reject"></ngc-button>
+          </ngc-column>
+          <ngc-column column='2' align="right">
+            <ngc-button *ngIf="showSearchButton" (click)="onApproval()" value="g.approve"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

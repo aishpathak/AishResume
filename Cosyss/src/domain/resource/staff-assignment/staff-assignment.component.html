@@ -1,0 +1,248 @@
+<ngc-titlebar title="Staff Assignment" (cancel)="onCancel($event)" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="resourceForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]='7'>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label='From'></ngc-label>
+              <div>
+                <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true" formControlName='fromDate' [width]="150" required='true'></ngc-datetimeinput>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='To'></ngc-label>
+              <div>
+                <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true" formControlName='toDate' [width]="150" required='true'></ngc-datetimeinput>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='Handling Area'></ngc-label>
+              <div>
+                <ngc-dropdownlist accessEnableOn="r" sourceId="WAREHOUSE_TERMINAL" [width]='100' formControlName="handlingArea" sourceType="query"></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='Role'></ngc-label>
+              <div>
+                <ngc-lov accessEnableOn="r" [width]="100" formControlName="role" upperCase='true' sourceId='ROLECODE' title="admin.roleCode" dataField='code'
+                  [noCache]="true" (ngModelChange)="onRoleSelect($event)" required>
+                  <ngc-data-column text="Role Code" [width]="80" dataField="code"></ngc-data-column>
+                  <ngc-data-column text="Description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </div>
+              <!--<ngc-dropdownlist formControlName="role" sourceId='ROLES' sourceType='query' [width]="80" [noCache]="true" [required]='true'></ngc-dropdownlist>-->
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label='Staff'></ngc-label>
+              <div>
+                <ngc-input accessEnableOn="r" formControlName="staff" upperCase='true' [width]="100"></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='Flight'></ngc-label>
+              <div>
+                <ngc-input accessEnableOn="r" formControlName="flightKey" upperCase='true' [width]="100"></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column [column]='3'>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label>&nbsp</ngc-label>
+              <div>
+                <ngc-button #searchButton  accessEnableOn="r" (click)="search()" value="expbu.search"></ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column [column]='5'>
+        <ngc-container title='Upload Roster' type="rectangle">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=' '></ngc-label>
+              <div>
+                <ngc-fileupload #fileUpload viewMode="none"  (choose)="onChooseDocuments($event)"  label="Upload"></ngc-fileupload>
+              </div>
+            </ngc-column>
+            <ngc-column [column]='2'>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="staffAssign">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button #addNewButton (click)="addNew()" value="Add Allocated Flight"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="staffList" (itemSelect)="onClick($event)" [pageable]="false">
+          <ngc-data-column text="Staff ID" dataField="staffId" [width]="50"></ngc-data-column>
+          <ngc-data-column text="Name" dataField="name" [width]="50"></ngc-data-column>
+          <ngc-data-column text="Date" dataField="shiftDate" [width]="50" type="displayDate"></ngc-data-column>
+          <ngc-data-column text="Shift From" dataField="shiftStart" [width]="40" cellsAlign="right" type="displayTime"></ngc-data-column>
+          <ngc-data-column text="Shift To" dataField="shiftEnd" [width]="40" cellsAlign="right" type="displayTime"></ngc-data-column>
+          <ngc-data-column text="Roles" dataField="roleName" [width]="40"></ngc-data-column>
+          <ngc-data-column text="Allocated Flight" [width]="200">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container formArrayName='flights'>
+                  <ng-container *ngFor="let itemFlight of resourceForm.getList(['staffList', group, 'flights']); let subindexAllPack=index"
+                    [formGroupName]="subindexAllPack">
+                    <div class="resource-flight-info">
+                      <ngc-display formControlName='flightKey'></ngc-display>
+                      <div class="resource-flight-info-time">
+                        <ngc-display formControlName='std' [onlyTime]="true"></ngc-display>
+                      </div>
+                    </div>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="edit">
+            <ng-template let-name="name"  let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link type="link" iconType="edit" (linkClick)="add($event,group)"></ngc-link>
+                </ng-container>
+                </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Allocated Map" dataField="roleCode">
+            <ng-template let-name="name"  let-group="group">
+              <ng-container [formGroupName]="group">
+                <!---->
+                <app-allocationmapforflight [width]="400" [height]="50" [shiftDate]="resourceForm.get(['staffList', group, 'shiftDate']).value"
+                  [shiftStartTime]="resourceForm.get(['staffList', group, 'shiftStart']).value" [shiftEndTime]="resourceForm.get(['staffList', group, 'shiftEnd']).value"
+                  [shiftFlights]="resourceForm.get(['staffList', group, 'flights']).getRawValue()">
+                </app-allocationmapforflight>
+                </ng-container>
+                </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="windowForm">
+  <ngc-window #staffWindow title="Add/Modify Staff Allocation" [showCloseButton]="true" [width]="600" [height]="650" (close)="onCloseWindow($event)">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='Staff ID'></ngc-label>
+          <div>
+            <ngc-lov [width]="100" *ngIf="show_staff_lov" (select)="getStaff($event, index)" upperCase='true'
+              sourceId='STAFF' title="admin.roleCode" dataField='param3' [noCache]="true" required
+              valueMember="code" [sourceParameters]="roleSourceParameter">
+             <ngc-data-column text="Staff No" [width]="80" dataField="param3"></ngc-data-column>
+              <ngc-data-column text="Name" [width]="150" dataField="desc"></ngc-data-column>
+              <ngc-data-column text="Login ID" [width]="150" dataField="param1"></ngc-data-column>
+              <ngc-data-column text="Role" [width]="150" dataField="param2"></ngc-data-column>
+            </ngc-lov>
+            <!--<ngc-input *ngIf="windowForm.get('staffId').value == null" formControlName="staffId"></ngc-input>-->
+            <ngc-display *ngIf="windowForm.get('staffNumberId').value != null" formControlName="staffNumberId"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="Name"></ngc-label>
+          </div>
+          <!--<ngc-input *ngIf="windowForm.get('name').value == null" formControlName='name'></ngc-input>-->
+          <ngc-display *ngIf="windowForm.get('name').value != null" formControlName='name'></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="Role"></ngc-label>
+          </div>
+          <!--<ngc-input *ngIf="windowForm.get('role').value == null" formControlName='role'></ngc-input>-->
+          <ngc-display *ngIf="windowForm.get('role').value != null" formControlName='role'></ngc-display>
+        </ngc-column>
+        <ngc-column [column]='3'>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button #saveStaffButton (click)="saveStaff()" *ngIf="!staffAssign" value="Save"></ngc-button>
+          <ngc-button #saveStaffButton (click)="saveOnlyStaff()" *ngIf="staffAssign" value="Save"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='Date'></ngc-label>
+          <div>
+            <ngc-datetimeinput formControlName='date' [showCalendarButton]="true" [showTimeButton]="false"></ngc-datetimeinput>
+            <!--*ngIf="windowForm.get('date').value == null"
+              <ngc-display formControlName='date' *ngIf="windowForm.get('date').value != null" [onlyDate]="true"></ngc-display>-->
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='Shift Start'></ngc-label>
+          <div>
+            <ngc-datetimeinput formControlName='shtTimeFrom' [showCalendarButton]="true" [showTimeButton]="true" [showTimeButton]="true"></ngc-datetimeinput>
+            <!--*ngIf="windowForm.get('shtTimeFrom').value == null"
+
+              <ngc-display formControlName='shtTimeFrom' *ngIf="windowForm.get('shtTimeFrom').value != null" [onlyTime]="true"></ngc-display>-->
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='Shift End'></ngc-label>
+          <div>
+            <ngc-datetimeinput formControlName='shtTimeTo' [showCalendarButton]="true" [showTimeButton]="true"></ngc-datetimeinput>
+            <!--*ngIf="windowForm.get('shtTimeTo').value == null"
+
+              <ngc-display formControlName='shtTimeTo' *ngIf="windowForm.get('shtTimeTo').value != null" [onlyTime]="true"></ngc-display>-->
+          </div>
+        </ngc-column>
+        <ngc-column [column]='3'>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="Flight"></ngc-label>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-button #addFlightButton (click)="addFlight(index)" value="Add"></ngc-button>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='8'>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+        <ngc-column>
+          <ngc-table>
+            <tbody formArrayName='flightList'>
+              <tr *ngFor="let itemflightList of windowForm.getList('flightList'); let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-label label={{index+1}} align="center" cellsAlign="center"></ngc-label>
+                </td>
+                <td>
+                  <ngc-flightkeyinput *ngIf="itemflightList.get('flightKey').value == null || itemflightList.get('std').value == null" (ngModelChange)="onFlightkeyinput($event, index)"
+                    formControlName="flightKey" flightType="ALL"></ngc-flightkeyinput>
+                  <ngc-display *ngIf="itemflightList.get('flightKey').value  != null && itemflightList.get('std').value != null" formControlName="flightKey"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='std' [onlyTime]="true"></ngc-display>
+                </td>
+                <td>
+                  <ngc-button (click)="onConfirm(index)" iconType="delete" #deletebutton></ngc-button>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+        <ngc-column></ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

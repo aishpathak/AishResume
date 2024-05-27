@@ -1,0 +1,891 @@
+import { Component, OnInit, NgZone, ElementRef, ViewContainerRef, ViewChild, Output, EventEmitter } from '@angular/core';
+import { NgcPage, NgcFormGroup, NgcFormArray, NgcWindowComponent, NgcFormControl, PageConfiguration, NgcReportComponent, NgcUtility, NgcCheckBoxComponent } from 'ngc-framework';
+import { ImportService } from "../import.service";
+import { Validators } from '@angular/forms';
+import { ShipmentDeliveryEquipmentReleaseModel } from "../import.sharedmodel";
+import { Router, ActivatedRoute } from '@angular/router';
+import { ApplicationFeatures } from '../../common/applicationfeatures';
+import { invalid } from 'moment';
+import { DuplicatenamepopupComponent } from '../../common/duplicatenamepopup/duplicatenamepopup.component';
+import { ApplicationEntities } from '../../common/applicationentities';
+import { analyzeAndValidateNgModules } from '@angular/compiler';
+
+@Component({
+  selector: 'app-issuedo',
+  templateUrl: './issuedo.component.html',
+  styleUrls: ['./issuedo.component.scss']
+})
+@PageConfiguration({
+  trackInit: true,
+  callNgOnInitOnClear: true,
+  autoBackNavigation: true
+})
+export class IssuedoComponent extends NgcPage implements OnInit {
+  @ViewChild('reportWindow') reportWindow: NgcReportComponent;
+  @ViewChild('houses') houses: NgcWindowComponent;
+  @ViewChild('inventoryField') firstField: NgcCheckBoxComponent;
+  @ViewChild('duplicateNamePopup') duplicateNamePopup: DuplicatenamepopupComponent;
+  subMessageParameter: {
+  };
+  clearingAgentParam: any;
+  issueDoSaveRequest: any;
+  dataToPreviousScreen: any;
+  showTable = false;
+  showRemarks = false;
+
+  excemptionCodeFlag: boolean;
+  permitNumberFlag: boolean;
+  permitToFollowFlag: boolean;
+  showBankEndorsement = true
+  appointedAgent = false;
+  expireAppointedAgent = true;
+  appointedAgentValue: any
+  segmentId: any;
+  isReadOnly = false
+  isSignature = false;
+  isIA = true;
+  isAwbDetailsPresent = false;
+  hawbSourceParameters: {};
+  handledByMasterHouse: boolean;
+  hwabHandling: boolean;
+  DOClientPrint: boolean;
+  anyPersonBlacklisted: boolean = false;
+  validNamesUponValidate: any = [];
+
+  OTA = [
+    'LANDSIDE',
+    'AIRSIDE'
+  ]
+  TD = [
+    '603A',
+    '603B'
+  ]
+  customerId: any;
+  reportParameters: any;
+  resp: any;
+  request: { receivingPartyIdentificationNumber: any; customerId: any; shipmentNumber: any; shipmentDate: any; };
+  appointedAgentDetail: any;
+  issueDodata: any;
+  type: any;
+  issuedorequest: any;
+  sourceIdPODropdown: any
+  clearingAgent: any;
+  shipmentType1: any = "AWB";
+
+
+  constructor(appZone: NgZone, appElement: ElementRef, appContainerElement: ViewContainerRef, private importService: ImportService, private router: Router, private activatedRoute: ActivatedRoute) {
+    super(appZone, appElement, appContainerElement);
+  }
+
+  private issueDoForm: NgcFormGroup = new NgcFormGroup(
+    {
+      entityType: new NgcFormControl(),
+      entityKey: new NgcFormControl(),
+      awbNumber: new NgcFormControl('', Validators.required),
+      entityKey2: new NgcFormControl(),
+      shipmentNumber: new NgcFormControl(),
+      shipmentDate: new NgcFormControl(),
+      shipmentType: new NgcFormControl(),
+      deliveryRequestOrderNo: new NgcFormControl(),
+      deliveryRequestOrderId: new NgcFormControl(),
+      chargeCode: new NgcFormControl('', Validators.required),
+      origin: new NgcFormControl(),
+      destination: new NgcFormControl(),
+      deliveryPieces: new NgcFormControl(),
+      deliveryWeight: new NgcFormControl(),
+      natureOfGoodsDescription: new NgcFormControl(),
+      shc: new NgcFormControl(),
+      paid: new NgcFormControl(),
+      paymentStatus: new NgcFormControl(),
+      bankEndorsementCollected: new NgcFormControl(false),
+      bankEndorsement: new NgcFormControl(false),
+      consigneeName: new NgcFormControl(),
+      notifyParty: new NgcFormControl(),
+      customerId: new NgcFormControl(),
+      appointedAgent: new NgcFormControl(),
+      authorizedRemarks: new NgcFormControl(),
+      allocatedQuota: new NgcFormControl(),
+      availableQuota: new NgcFormControl(),
+      receivingPartyIdentificationNumber: new NgcFormControl(),
+      receivingPartyCompanyName: new NgcFormControl(null, [Validators.maxLength(15)]),
+      receivingPartyName: new NgcFormControl(),
+      authorizedSignature: new NgcFormControl(),
+      authroizedPerson: new NgcFormControl(false),
+      deliveryRequestExpiry: new NgcFormControl(),
+      lastUpdatedDateTime: new NgcFormControl(),
+      onShipmentHold: new NgcFormControl(),
+      airportPassValidation: new NgcFormControl(),
+      invChargeableWeight: new NgcFormControl(),
+      awbChargeableWeight: new NgcFormControl(),
+      hawbnumber: new NgcFormControl(),
+      remark: new NgcFormControl(),
+      totalDeliveryPieces: new NgcFormControl(),
+      blackListed: new NgcFormControl(),
+      hawbInfo: new NgcFormGroup({
+        hawbnumber: new NgcFormControl(),
+        hawbChargeableWeight: new NgcFormControl(),
+        hawbPieces: new NgcFormControl(),
+        hawbWeight: new NgcFormControl(),
+        hawbNOG: new NgcFormControl(),
+        hawbShc: new NgcFormControl(),
+        hawbOrigin: new NgcFormControl(),
+        hawbDestination: new NgcFormControl(),
+        hawbConsigneeName: new NgcFormControl(),
+        hawbAppointedAgent: new NgcFormControl(),
+        hawbNotifyParty: new NgcFormControl(),
+        paymentStatus: new NgcFormControl(),
+        hawbCustomerId: new NgcFormControl()
+      }),
+      customsInfo: new NgcFormArray([
+        new NgcFormGroup({
+          customsFreightIn: new NgcFormControl(),
+          customsFreightDate: new NgcFormControl(),
+          customsImportFlightNumber: new NgcFormControl(),
+          CustomsImportDocumentNumber: new NgcFormControl(),
+          CustomsClearanceNumber: new NgcFormControl()
+        })
+      ]),
+      inventory: new NgcFormArray([
+        new NgcFormGroup(
+          {
+            house: new NgcFormArray([])
+          }
+        )
+      ]),
+      localAuthority: new NgcFormGroup({
+        type: new NgcFormControl(),
+        localAuthorityDetail: new NgcFormArray([
+          new NgcFormGroup({
+            referenceNumber: new NgcFormControl(),
+            appointedAgent: new NgcFormControl(),
+            license: new NgcFormControl(null, [Validators.maxLength(65)]),
+            remarks: new NgcFormControl(null, [Validators.maxLength(65)]),
+          })
+        ])
+      }),
+      equipment: new NgcFormArray(
+        [
+
+        ]
+      )
+    }
+  )
+
+  ngOnInit() {
+    super.ngOnInit();
+    let forwardedData = this.getNavigateData(this.activatedRoute);
+    this.dataToPreviousScreen = forwardedData;
+    //get true or false
+    this.hwabHandling = NgcUtility.hasFeatureAccess(ApplicationFeatures.Imp_Bd_HAWBHandling);
+    if (forwardedData != null) {
+
+      this.issueDoForm.get('shipmentNumber').setValue(forwardedData.shipmentNumber);
+      this.onShipmentSelect(null);
+      this.issueDoForm.get('hawbnumber').setValue(forwardedData.hawbnumber);
+      this.sourceIdPODropdown = this.createSourceParameter(forwardedData.shipmentNumber, forwardedData.hawbNumber);
+      this.retrieveDropDownListRecords("DROPDOWN_PO_NUMBER", "query", this.sourceIdPODropdown).subscribe(data => {
+
+      });
+      this.issueDoForm.get('deliveryRequestOrderNo').setValue(forwardedData.deliveryRequestOrderNo);
+      this.issueDoForm.get('chargeCode').setValue(forwardedData.chargeCode);
+      this.onSearch();
+    } else {
+      this.shipmentType1 = "AWB"
+    }
+    this.issueDoForm.get(['localAuthority', 'type']).setValue('IA');
+    this.permitToFollowFlag = true;
+    this.trackInventoryChanges();
+    this.onChange(null);
+    //this.issueDoForm.get('receivingPartyName').disable();
+
+  }
+
+  ngAfterViewInit() {
+    super.ngAfterViewInit();
+  }
+
+  onLocalAuthorityType(newValue) {
+    if (newValue) {
+      if (newValue === 'EC') {
+        this.issueDoForm.get(['localAuthority', 'localAuthorityDetail']).patchValue([{
+          referenceNumber: null,
+          appointedAgent: this.clearingAgent,
+          license: null,
+          remarks: null,
+        }]);
+        // this.showLicenseRemarksFlag = true;
+        this.permitNumberFlag = false;
+        this.excemptionCodeFlag = true;
+        this.permitToFollowFlag = false;
+      }
+      if (newValue === 'PN') {
+        this.issueDoForm.get(['localAuthority', 'localAuthorityDetail']).patchValue([{
+          referenceNumber: null,
+          appointedAgent: this.clearingAgent,
+          license: null,
+          remarks: null,
+        }]);
+        // this.showLicenseRemarksFlag = false;
+        this.permitNumberFlag = true;
+        this.excemptionCodeFlag = false;
+        this.permitToFollowFlag = false;
+      }
+      if (newValue === 'IA') {
+        this.issueDoForm.get(['localAuthority', 'localAuthorityDetail']).patchValue([{
+          referenceNumber: null,
+          appointedAgent: null,
+          license: null,
+          remarks: null,
+        }]);
+        // this.showLicenseRemarksFlag = false;
+        this.permitNumberFlag = false;
+        this.permitToFollowFlag = true;
+        this.excemptionCodeFlag = false;
+      }
+    }
+  }
+
+  private trackInventoryChanges() {
+    const inventoryArray: NgcFormArray = this.issueDoForm.get('inventory') as NgcFormArray;
+    //
+    if (inventoryArray) {
+      inventoryArray.valueChanges.subscribe(() => {
+        let totalDeliveryPieces: number = 0;
+
+        inventoryArray.controls.forEach((inventoryGroup: NgcFormGroup) => {
+          const selectFlag: boolean = inventoryGroup.get('deliver').value;
+          const pieces: number = inventoryGroup.get('pieces').value;
+
+          if (selectFlag) {
+            totalDeliveryPieces += (pieces ? pieces : 0);
+          }
+        });
+        this.issueDoForm.get('totalDeliveryPieces').setValue(totalDeliveryPieces);
+      });
+    }
+  }
+
+  onAddRow() {
+    (<NgcFormArray>this.issueDoForm.get(["equipment"])).addValue([
+      {
+        requestDate: "",
+        uldNumber: "",
+        typeOfCollection: ""
+      }
+    ]);
+  }
+  onAddPermitNumber(index) {
+    (<NgcFormArray>this.issueDoForm.get('localAuthority.localAuthorityDetail')).addValue([
+      {
+        referenceNumber: '',
+        appointedAgent: null,
+      }
+    ]);
+  }
+
+  onDeletePermitNumberRows(index) {
+    (<NgcFormArray>this.issueDoForm.get('localAuthority.localAuthorityDetail')).deleteValueAt(index);
+  }
+
+
+
+  onSearch() {
+    if (this.hwabHandling && this.handledByMasterHouse && (this.issueDoForm.get('hawbnumber').value == null || this.issueDoForm.get('hawbnumber').value == '')) {
+      this.showErrorMessage("import.delivery.nohouse");
+      return;
+    }
+    if (this.issueDoForm.get('hawbnumber').invalid) {
+      this.showErrorMessage("import.delivery.nohouse");
+      return;
+    }
+    this.showRemarks = false;
+
+    this.DOClientPrint = NgcUtility.hasFeatureAccess(ApplicationFeatures.Imp_Dlv_DOClientPrint);
+    const requestData = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      deliveryRequestOrderNo: this.issueDoForm.get('deliveryRequestOrderNo').value,
+      chargeCode: this.issueDoForm.get('chargeCode').value,
+      shipmentType: this.issueDoForm.get('shipmentType').value,
+      hawbnumber: this.issueDoForm.get('hawbnumber').value
+    }
+    this.importService.getDeliveryInfo(requestData).subscribe(response => {
+      const resp = response.data;
+      this.refreshFormMessages(response);
+      if (!this.showResponseErrorMessages(response)) {
+
+        if (resp.deliveryRequestExpiry) {
+
+          this.showConfirmMessage('continue.issuing.delivery'
+          ).then(fulfilled => {
+
+          }
+
+          ).catch(reason => {
+            this.showTable = false
+          });
+        }
+
+
+
+        if (resp) {
+          this.issueDoForm.patchValue(resp);
+          this.isIA = resp.isCourier
+          if (resp.bankEndorsementCollected === false) {
+
+            this.showBankEndorsement = false
+
+          }
+          this.issueDoForm.get('deliveryRequestOrderNo').setValue(resp.deliveryRequestOrderNo);
+          const inventoryFormArray: NgcFormArray = this.issueDoForm.get('inventory') as NgcFormArray;
+          const localAuthorityInfo: NgcFormGroup = this.issueDoForm.get('localAuthority') as NgcFormGroup;
+          const localAuthorityDetails: NgcFormArray = this.issueDoForm.get('localAuthority.localAuthorityDetail') as NgcFormArray;
+
+          if (inventoryFormArray) {
+            inventoryFormArray.controls.forEach((inventoryGroup: NgcFormGroup) => {
+              if (inventoryGroup.get('onHold').value == true) {
+                inventoryGroup.get('deliver').setValue(false);
+                inventoryGroup.get('deliver').disable();
+                inventoryGroup.get('reason').setValue(inventoryGroup.get('reasonForHold').value)
+              }
+              else if (inventoryGroup.get('ready').value == true) {
+                inventoryGroup.get('deliver').setValue(false);
+                inventoryGroup.get('deliver').disable();
+                inventoryGroup.get('reason').setValue(inventoryGroup.get('reason').value)
+              }
+              else {
+                inventoryGroup.get('deliver').setValue(true);
+                inventoryGroup.get('deliver').disable();
+              }
+
+            });
+          }
+
+          if (requestData.deliveryRequestOrderNo) {
+
+
+            this.issueDoForm.get('paid').disable();
+            this.issueDoForm.get('paid').setValue(true)
+            this.isReadOnly = true
+            // this.issueDoForm.get('bankEndorsement').disable();
+            // this.issueDoForm.get('bankEndorsement').setValue(true)
+
+            if (inventoryFormArray) {
+              inventoryFormArray.controls.forEach((inventoryGroup: NgcFormGroup) => {
+
+                inventoryGroup.get('deliver').disable();
+              });
+              if (localAuthorityDetails) {
+                localAuthorityDetails.controls.forEach((localAuthorityDetailsGroup: NgcFormGroup) => {
+
+                  localAuthorityDetailsGroup.get('referenceNumber').disable()
+                  localAuthorityDetailsGroup.get('appointedAgent').disable()
+
+                })
+
+              }
+
+            }
+
+            if (resp.authorizedSignature != null) {
+              this.isSignature = true
+            }
+
+
+          }
+          else {
+            this.clearingAgent = resp.customerId;
+          }
+          this.showTable = true;
+
+        }
+        let i = 0;
+        for (const eachRow of resp.inventory) {
+          if (eachRow.onHold) {
+            // eachRow.checkBoxValue = 
+            this.issueDoForm.get(['inventory', i, 'deliver']).disable();
+          }
+          ++i;
+        }
+
+
+      }
+      else {
+        this.showTable = false;
+      }
+
+    }, error => {
+      this.showErrorStatus(error);
+    });
+
+
+  }
+  public afterFocus() {
+    setTimeout(() => {
+      try {
+        this.firstField.focus();
+      } catch (e) { }
+    }, 1000);
+  }
+  private onShipmentSelect(event) {
+    if (event != null && event.shipmentType) {
+      this.issueDoForm.get('shipmentType').patchValue(event.shipmentType);
+      this.onChange(event.shipmentNumber);
+    }
+    this.handledByMasterHouse = false;
+    this.issueDoForm.get('hawbnumber').patchValue("");
+    this.issueDoForm.get('hawbnumber').clearValidators();
+    if (NgcUtility.hasFeatureAccess(ApplicationFeatures.Imp_Bd_HAWBHandling)) {
+      this.hawbSourceParameters = this.createSourceParameter(this.issueDoForm.get('shipmentNumber').value);
+      this.retrieveDropDownListRecords("AWB_HOUSE_OR_MASTER", "query", this.hawbSourceParameters).subscribe(data => {
+        if (data != null && data.length > 0) {
+
+          this.handledByMasterHouse = true;
+          this.issueDoForm.get('hawbnumber').setValidators([Validators.required, Validators.maxLength(16)]);
+          this.retrieveLOVRecords("HWBNUMBER", this.hawbSourceParameters).subscribe(data => {
+            if (data != null && data.length == 1) {
+              this.issueDoForm.get('hawbnumber').setValue(data[0].code);
+            }
+          })
+        } else {
+          this.handledByMasterHouse = false;
+          this.issueDoForm.get('hawbnumber').clearValidators();
+        }
+      },
+      );
+    }
+  }
+  private onHawbSelect(event) {
+
+    this.showTable = false;
+    this.issueDoForm.get('deliveryRequestOrderNo').patchValue(null);
+    this.onChange(event.shipmentNumber);
+
+  }
+
+  onSave() {
+    this.issueDoSaveRequest = this.issueDoForm.getRawValue();
+    if (this.issueDoSaveRequest.deliveryRequestOrderNo == null || this.issueDoSaveRequest.deliveryRequestOrderNo == '') {
+      if (this.issueDoSaveRequest.localAuthority.type === 'IA') {
+        this.issueDoSaveRequest.localAuthority.localAuthorityDetail[0].appointedAgent = this.appointedAgentValue;
+      }
+      if (!NgcUtility.hasFeatureAccess(ApplicationFeatures.Imp_Dlv_LocalAuthorityInfoRequiredAtDelivery)) {
+        if (this.issueDoSaveRequest.hawbInfo != null && this.issueDoSaveRequest.hawbInfo.hawbAppointedAgent == null && this.handledByMasterHouse) {
+          this.showErrorMessage("import.no.appointed.agent");
+          return;
+        }
+      }
+    }
+
+    if ((null == this.issueDoSaveRequest.receivingPartyIdentificationNumber)
+      || !this.issueDoForm.get('receivingPartyIdentificationNumber').valid) {
+      return;
+    }
+    if ((null == this.issueDoSaveRequest.receivingPartyName)
+      || this.issueDoForm.get('receivingPartyName').value.length < 4) {
+      this.showErrorMessage("ERROR_IC_NAME_CHR");
+      return;
+    }
+    if (this.showRemarks === true) {
+      if (this.issueDoForm.get('authorizedRemarks').value == null || this.issueDoForm.get('authorizedRemarks').value.length == 0) {
+        this.showErrorMessage("please.enter.remarks");
+        return;
+      }
+    }
+
+    this.issueDoSaveRequest.customerId = this.issueDoForm.get('customerId').value
+
+    if (this.issueDoSaveRequest.blackListed == 'Y') {
+      this.showErrorStatus('AGTBLOCKLISTED')
+      return;
+    }
+    if (this.issueDoSaveRequest.receivingPartyIdentificationNumber != null && this.issueDoSaveRequest.receivingPartyName != null) {
+      this.importService.checkForBlackListCustomer(this.issueDoSaveRequest).subscribe(response => {
+        if (response.success === false) {
+          if (response.messageList.length > 0) {
+            var icName: string[] = [];
+            icName.push(this.issueDoSaveRequest.receivingPartyName);
+            icName.push(this.issueDoSaveRequest.receivingPartyIdentificationNumber);
+            var error = NgcUtility.translateMessage(response.messageList[0].code, icName);
+            this.showErrorStatus(error + " " + response.messageList[0].message);
+            return;
+          }
+        }
+
+        if (!this.showResponseErrorMessages(response)) {
+          this.importService.onSaveIssueDo(this.issueDoSaveRequest).subscribe(response => {
+            const resp = response.data;
+            console.log(resp);
+            if (!this.showResponseErrorMessages(response)) {
+              this.showSuccessStatus('g.completed.successfully');
+
+              if (NgcUtility.hasFeatureAccess(ApplicationFeatures.Imp_Dlv_DOClientPrint)) {
+                this.reportParameters = new Object();
+                this.reportParameters.deliveryId = resp.id;
+                this.reportParameters.loggedInUser = this.getUserProfile().userLoginCode;
+                if (NgcUtility.isEntityAttributeEnabled(ApplicationEntities.Gen_House_Enable)) {
+                  this.reportParameters.isHawbEnable = true;
+                }
+                this.reportParameters.Hawbflg = false;
+                if (this.handledByMasterHouse) {
+                  this.reportParameters.Hawbflg = true;
+                }
+                this.reportWindow.open();
+              }
+
+              this.issueDoForm.reset();
+
+              this.showTable = false;
+
+              this.appointedAgentValue = null
+              this.clearingAgent = null
+              this.isReadOnly = false;
+              this.issueDoForm.enable();
+            }
+          }, error => {
+            this.showErrorStatus(error);
+          });
+        }
+      });
+
+    }
+
+  }
+  fetchEquipmentNumberDetails(event) {
+    let request1 = new ShipmentDeliveryEquipmentReleaseModel();
+    request1.equipmentNumber = event
+    this.importService.fetchEquipment(request1).subscribe(response => {
+      const resp = response.data
+      if (resp.length) {
+        this.issueDoForm.get(['equipment']).patchValue(resp);
+      }
+    })
+
+  }
+  onSelectClearingAgent(event, index) {
+    this.clearingAgentParam = event.param1;
+  }
+
+  public onCancel(event) {
+    this.navigateBack(this.dataToPreviousScreen);
+  }
+  onChange(event) {
+    this.subMessageParameter = this.createSourceParameter(this.issueDoForm.get('shipmentNumber').value, this.issueDoForm.get('hawbnumber').value);
+  }
+  validateAirportPass($event) {
+    this.validNamesUponValidate.length = 0;
+    this.anyPersonBlacklisted = false;
+    this.showRemarks = false;
+    if (!this.issueDoForm.get('receivingPartyIdentificationNumber').value) {
+      this.showFormControlErrorMessage(<NgcFormControl>this.issueDoForm.get('receivingPartyIdentificationNumber'), 'g.mandatory');
+      return;
+    }
+    if (!this.issueDoForm.get('receivingPartyIdentificationNumber').valid) {
+      return;
+    }
+
+    this.issueDodata = this.issueDoForm.getRawValue();
+    this.appointedAgentDetail = this.issueDodata.localAuthority.localAuthorityDetail[0].appointedAgent
+
+    if (this.issueDodata.deliveryRequestOrderNo == null) {
+      if (this.appointedAgentValue == null) {
+        this.request = {
+          receivingPartyIdentificationNumber: this.issueDoForm.get('receivingPartyIdentificationNumber').value,
+          customerId: this.issueDoForm.get('customerId').value,
+          shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+          shipmentDate: this.issueDoForm.get('shipmentDate').value
+        }
+      }
+      else {
+        this.request = {
+          receivingPartyIdentificationNumber: this.issueDoForm.get('receivingPartyIdentificationNumber').value,
+          customerId: this.appointedAgentValue,
+          shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+          shipmentDate: this.issueDoForm.get('shipmentDate').value
+        }
+      }
+    }
+    else {
+      if (this.appointedAgentDetail == null) {
+        this.request = {
+          receivingPartyIdentificationNumber: this.issueDoForm.get('receivingPartyIdentificationNumber').value,
+          customerId: this.issueDoForm.get('customerId').value,
+          shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+          shipmentDate: this.issueDoForm.get('shipmentDate').value
+        }
+      }
+      else {
+        this.request = {
+          receivingPartyIdentificationNumber: this.issueDoForm.get('receivingPartyIdentificationNumber').value,
+          customerId: this.appointedAgentDetail,
+          shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+          shipmentDate: this.issueDoForm.get('shipmentDate').value
+        }
+      }
+    }
+
+    this.importService.validateAirportPass(this.request).subscribe(response => {
+      const resp = response.data
+      if (resp === null) {
+        this.showConfirmMessage('contractor.is.not.recognized'
+        ).then(fulfilled => {
+          this.showRemarks = true;
+          (this.issueDoForm.get('receivingPartyName') as NgcFormControl).focus();
+          this.issueDoForm.get('airportPassValidation').setValue('Fail (N)');
+          this.resetAuthorizedPersonDetail();
+        }
+        ).catch(reason => {
+          this.showRemarks = false;
+          (this.issueDoForm.get('receivingPartyIdentificationNumber') as NgcFormControl).focus();
+          this.issueDoForm.get('airportPassValidation').setValue('Fail (N)');
+          this.resetAuthorizedPersonDetail();
+        });
+      }
+      else {
+        if (resp.authorizedPersonDetailList == null || resp.authorizedPersonDetailList.length == 0) {
+          this.showConfirmMessage('contractor.is.not.recognized'
+          ).then(fulfilled => {
+            this.showRemarks = true;
+            this.issueDoForm.get('airportPassValidation').setValue('Fail (N)');
+            (this.issueDoForm.get('receivingPartyName') as NgcFormControl).focus();
+            this.resetAuthorizedPersonDetail();
+          }
+          ).catch(reason => {
+            this.showRemarks = false;
+            this.issueDoForm.get('airportPassValidation').setValue('Fail (N)');
+            (this.issueDoForm.get('receivingPartyIdentificationNumber') as NgcFormControl).focus();
+            this.resetAuthorizedPersonDetail();
+          });
+        }
+        else if (resp.authorizedPersonDetailList.length == 1) {
+          this.issueDoForm.get('receivingPartyName').setValue(resp.authorizedPersonDetailList[0].authorizedPersonnelName);
+          this.issueDoForm.get('receivingPartyCompanyName').setValue(resp.authorizedPersonDetailList[0].customerShortName);
+          this.issueDoForm.get('airportPassValidation').setValue('Pass (Y)');
+          this.validNamesUponValidate.push(resp.authorizedPersonDetailList[0].authorizedPersonnelName);
+          if (resp.authorizedPersonDetailList[0].authorizedSignature != null) {
+            this.isSignature = true
+            this.issueDoForm.get('authorizedSignature').setValue(resp.authorizedPersonDetailList[0].authorizedSignature);
+          }
+          this.customerId = resp.authorizedPersonDetailList[0].customerId;
+          (this.issueDoForm.get('receivingPartyIdentificationNumber') as NgcFormControl).focus();
+        }
+        else {
+          resp.authorizedPersonDetailList.forEach(authorizedPerson => {
+            this.validNamesUponValidate.push(authorizedPerson.authorizedPersonnelName);
+          });
+          this.duplicateNamePopup.open(resp.authorizedPersonDetailList);
+        }
+      }
+    }, error => {
+      this.showErrorStatus(error);
+    });
+
+  }
+
+  onRemarks() {
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      hawbNumber: this.issueDoForm.get('hawbnumber').value
+    }
+
+    //const shipno = this.issueDoForm.get('shipmentNumber').value;
+    this.navigateTo(this.router, '/awbmgmt/maintainremarks', dataToSend);
+  }
+  onPayment() {
+    var dataToSend = {
+      shipment: this.issueDoForm.get('shipmentNumber').value,
+
+    }
+    //const shipno = this.issueDoForm.get('shipmentNumber').value;
+    this.navigateTo(this.router, '/billing/collectPayment/enquireCharges', dataToSend);
+  }
+  onShipmentInfo() {
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      hawbNumber: this.issueDoForm.get('hawbnumber').value
+
+    }
+    //const shipno = this.issueDoForm.get('shipmentNumber').value;
+    this.navigateTo(this.router, 'awbmgmt/shipmentinfoCR', dataToSend);
+
+  }
+
+  onSelectShipmentInfoForHAWBHandling() {
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      hawbNumber: this.issueDoForm.get('hawbnumber').value
+
+    }
+    //const shipno = this.issueDoForm.get('shipmentNumber').value;
+    // if handled by master
+    if (this.handledByMasterHouse == false) {
+      this.navigateTo(this.router, 'awbmgmt/shipmentinfoCR', dataToSend);
+    }
+    else {
+      // if handled by hosue
+      this.navigateTo(this.router, 'awbmgmt/maintainhousemaster', dataToSend)
+    }
+
+  }
+  onShipmentLocation() {
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      hawbNumber: this.issueDoForm.get('hawbnumber').value
+
+    }
+    //  const shipno = this.issueDoForm.get('shipmentNumber').value;
+    this.navigateTo(this.router, 'awbmgmt/shipmentLocation', dataToSend);
+  }
+  onAwbDocument() {
+
+
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      shipmentType: this.issueDoForm.get('shipmentType').value
+
+    }
+    this.navigateTo(this.router, 'awbmgmt/awbdocument', dataToSend);
+
+
+
+  }
+
+  onAddService() {
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+
+    }
+    // const shipno = this.issueDoForm.get('shipmentNumber').value;
+    this.navigateTo(this.router, '/billing/createServiceRequest', dataToSend);
+  }
+  house(event) {
+    this.houses.open()
+    const dataToPatch = this.issueDoForm.getRawValue()
+
+  }
+  onIssueDO() {
+    this.reportParameters = new Object();
+    this.reportParameters.ShipmentNumber = this.issueDoForm.get('shipmentNumber').value;
+    let date = this.splittingDate(this.issueDoForm.get('shipmentDate').value)
+    this.reportParameters.ShipmentDate = date;
+    this.reportParameters.DeliveryRequestOrderNo = this.issueDoForm.get('deliveryRequestOrderNo').value;
+    this.reportParameters.CreatedForReferenceNumber = this.issueDoForm.get('deliveryRequestOrderNo').value;
+    console.log(this.reportParameters);
+    this.reportWindow.open();
+  }
+
+  splittingDate(date) {
+    let dd = date.getDate();
+    let mm = date.getMonth() + 1;
+    let yyyy = date.getFullYear();
+    if (dd < 10) { dd = '0' + dd }
+    if (mm < 10) { mm = '0' + mm };
+    date = `${yyyy}-${mm}-${dd}`;
+    return date;
+  }
+  onChangeIA(event) {
+    this.issuedorequest = this.issueDoForm.getRawValue()
+    this.type = this.issuedorequest.localAuthority.type
+    const requestData = {
+      referenceNumber: event.controls.referenceNumber.value,
+      type: this.type
+      //appointedAgent: event.controls.appointedAgent.value
+
+    }
+    if (event.controls.referenceNumber.value != null) {
+      this.importService.validateDOIANumber(requestData).subscribe(response => {
+
+        if (!this.showResponseErrorMessages(response)) {
+
+          const resp = response.data
+
+          if (resp) {
+            this.appointedAgent = true;
+            this.expireAppointedAgent = false;
+          }
+          if (resp == null) {
+            this.showConfirmMessage('ia.number.not.matched'
+            ).then(fulfilled => {
+
+
+            }
+
+            ).catch(reason => {
+
+            });
+            this.appointedAgent = true;
+            this.expireAppointedAgent = false;
+            this.issueDoForm.controls.localAuthority.get(['localAuthorityDetail', 0, 'appointedAgent']).patchValue('');
+          }
+
+          this.issueDoForm.controls.localAuthority.get(['localAuthorityDetail', 0, 'appointedAgent']).patchValue(resp.appointedAgentCode);
+          this.appointedAgentValue = resp.id;
+
+        }
+
+      })
+    }
+  }
+  onCancelDO() {
+    var dataToSend = {
+      shipmentNumber: this.issueDoForm.get('shipmentNumber').value,
+      hawbNumber: this.issueDoForm.get('hawbnumber').value
+    }
+    this.navigateTo(this.router, '/import/displaydo', dataToSend)
+  }
+
+  public navigateToUploadPhoto(): void {
+    let url = "/common/capturephoto";
+    let shipmentData: any = null;
+    shipmentData = {
+      entityType: this.issueDoForm.get('shipmentType').value,
+      entityKey: this.issueDoForm.get('shipmentNumber').value,
+      entityKey2: this.issueDoForm.get('hawbnumber').value,
+      associatedTo: "Shipment",
+      stage: "Delivery"
+    };
+    console.log(shipmentData);
+    this.navigateTo(this.router, url, shipmentData);
+
+  }
+
+  onConfirmNewEntry(boolean) {
+    this.issueDoForm.get('airportPassValidation').setValue('Pass (N)');
+    this.showRemarks = true;
+    (this.issueDoForm.get('receivingPartyName') as NgcFormControl).focus();
+    this.resetAuthorizedPersonDetail();
+  }
+
+  onNameSelect(selectedName) {
+    this.issueDoForm.get('receivingPartyName').setValue(selectedName.authorizedPersonnelName);
+    this.issueDoForm.get('receivingPartyCompanyName').setValue(selectedName.customerShortName);
+    this.issueDoForm.get('airportPassValidation').setValue('Pass (Y)');
+    (this.issueDoForm.get('receivingPartyIdentificationNumber') as NgcFormControl).focus();
+
+    if (selectedName.authorizedSignature != null) {
+      this.isSignature = true
+      this.issueDoForm.get('authorizedSignature').setValue(selectedName.authorizedSignature);
+    }
+    this.customerId = selectedName.customerId;
+  }
+  resetAuthorizedPersonDetail() {
+    this.issueDoForm.get('receivingPartyName').reset();
+    this.issueDoForm.get('authorizedSignature').reset();
+    this.issueDoForm.get('receivingPartyCompanyName').setValue("");
+    this.issueDoForm.get('authroizedPerson').reset();
+    this.issueDoForm.get('authorizedRemarks').reset();
+  }
+  onChangeIC(event) {
+    this.issueDoForm.get('airportPassValidation').setValue('Pass (N)');
+    this.resetAuthorizedPersonDetail();
+  }
+  onChangeName(event) {
+    if (event.target.value != "" && !this.validNamesUponValidate.includes(event.target.value.toUpperCase())) {
+      this.showRemarks = true;
+    }
+    else {
+      this.showRemarks = false;
+    }
+  }
+
+}
+

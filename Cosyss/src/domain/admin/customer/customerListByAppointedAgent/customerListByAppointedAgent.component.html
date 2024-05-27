@@ -1,0 +1,214 @@
+<!--form control to get the  input Data-->
+<form [formGroup]="customerlistform">
+  <!-- Title Bar -->
+  <ngc-titlebar title='customerlist.title' (clear)="onClear($event)"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row></ngc-row>
+    <ngc-row></ngc-row>
+    <ngc-row></ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label value="By"></ngc-label>
+        <div>
+          <ngc-dropdownlist required (select)="displayAppointee($event)" formControlName="appointee" [width]="195"
+            sourceId="Customer$APPOINTEE_TYPE" accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="appointedAgentFlag">
+        <ngc-label value="agent.appointed.agent.code"></ngc-label>
+        <div>
+          <ngc-lov required formControlName="appointeeCode" sourceId="CUSTOMER_LIST_AGT_DEREG"
+            title="agent.appointed.agent.code" dataField="code" [width]="150" valueMember="code"
+            (select)='onCompanyLOVSelect($event)' accessEnableOn="r">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="appointedAgentFlag">
+        <ngc-label value="agent.appointed.agent.name"></ngc-label>
+        <div>
+          <ngc-lov formControlName="appointeeName" sourceId="CUSTOMER_LIST_AGT_DEREG" title="agent.appointed.agent.name"
+            dataField="desc" [width]="150" valueMember="desc" (select)='onCompanyNameLOVSelect($event)'
+            accessEnableOn="r">
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="contractorCodeFlag">
+        <ngc-label value="admin.contractor.code"></ngc-label>
+        <div>
+          <ngc-lov required formControlName="appointeeCode" sourceId="CONTRACTOR_LIST"
+            (select)='onContractCodeLOVSelect($event)' title="admin.contractor.list" dataField="code" [width]="150"
+            accessEnableOn="r">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="contractorCodeFlag">
+        <ngc-label value="admin.contractor.name"></ngc-label>
+        <div>
+          <ngc-lov formControlName="appointeeName" sourceId="CONTRACTOR_LIST" (select)='onContractNameLOVSelect($event)'
+            title="admin.contractor.list" dataField="desc" valueMember="desc" [width]="150" accessEnableOn="r">
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="searchButtonFlag">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button (click)="getCustomerList($event)" value="g.search" iconType="search" accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row *ngIf="show">
+      <ngc-column>
+        <ngc-datatable formArrayName="customerDetails" (linkClick)="onEditClick($event)" [pageable]="true"
+          [pagerMode]="'advanced'">
+          <ngc-data-column text="g.customerName" dataField="customerName" type="link" align="center" cellsAlign="center"
+            [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.customerCode" dataField="customerCode" align="center" cellsAlign="center"
+            [width]="70"></ngc-data-column>
+          <ngc-data-column entityAttribute="Customer.CustomerUniqueEntityNumber" dataField="uenNumber" align="center"
+            cellsAlign="center" [width]="50">
+          </ngc-data-column>
+          <ngc-data-column text="admin.customer.list.agreement.type" dataField="delegationAgreementType" align="center"
+            cellsAlign="center" [width]="50">
+          </ngc-data-column>
+          <ngc-data-column type="displayDate" text="agent.effectiveDate" dataField="effectiveDate" align="center"
+            cellsAlign="center" [width]="80"></ngc-data-column>
+          <ngc-data-column type="displayDate" text="g.expiryDate" dataField="expiryDate" align="center"
+            cellsAlign="center" [width]="80"></ngc-data-column>
+          <ngc-data-column type="displayDate" text="awb.last.shipment.assignment.date"
+            dataField="lastShipmentAssignment" align="center" cellsAlign="center" [width]="120"></ngc-data-column>
+          <ngc-data-column type="displayDate" text="custauth.lastupdated" dataField="modifiedOn" align="center"
+            cellsAlign="center" [width]="80"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row *ngIf="showButtons">
+      <ngc-column align="right">
+        <ngc-button [width]="215" *ngIf="appointedAgentFlag" (click)="onTransferWindow($event)"
+          accessSectionId="TRANSFER" value="admin.customer.transfer" [width]="200"></ngc-button>
+        <ngc-button [width]="125" value="g.exportToPDF" (click)="oncreatereport($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #transferWindow [width]="720" [height]="500" title="admin.transfer.of.customer.to"
+    [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row></ngc-row>
+      <ngc-row>
+        <ngc-column colum="1">
+          <ngc-label value="agent.agent.code"></ngc-label>
+          <div>
+            <ngc-lov required (select)="onCodeChange()" formControlName="appointedAgentCode"
+              sourceId="CUSTOMER_LIST_AGT" title="g.customer.list" dataField="code" [width]="100"
+              (select)="onSelect($event)" accessEnableOn="r">
+              <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+              <ngc-data-column text="g.customer.full.name" dataField="desc" [width]="80"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column colum="1">
+          <ngc-label value="agent.agent.name"></ngc-label>
+          <div>
+            <ngc-input required formControlName="appointedAgentName" [width]="190"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column colum="1">
+          <ngc-label value=""></ngc-label>
+          <div>
+            <ngc-button (click)="getTransferCustomerList($event)" value="g.search" iconType="search" accessEnableOn="r">
+            </ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row></ngc-row>
+      <ngc-row *ngIf="showTransferTable">
+        <ngc-column>
+          <br />
+          <ngc-datatable formArrayName="customerTransferDetails" [pageable]="true" [pagerMode]="'advanced'">
+            <ngc-data-column type="check" text="customerlist.select" dataField="By" align="center" [checkAll]="true"
+              cellsAlign="center" [width]="60"></ngc-data-column>
+            <ngc-data-column text="customerlist.cstname" dataField="customerName" align="center" cellsAlign="center"
+              [width]="100"></ngc-data-column>
+            <ngc-data-column text="customerlist.cstcode" dataField="customerCode" align="center" cellsAlign="center"
+              [width]="70"></ngc-data-column>
+            <ngc-data-column text="admin.customer.list.agreement.type" dataField="appointee" align="center"
+              cellsAlign="center" [width]="140">
+            </ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+      </ngc-row>
+      <ngc-row *ngIf="showTransferTable">
+        <ngc-column>
+          <br />
+          <ngc-combobox [width]="370" formControlName="reason" [maxlength]="65" placeHolder="Reason"
+            sourceId='TRANSFER_REASON'  sourceType='query' valueMember="desc" required></ngc-combobox>
+        </ngc-column>
+        <ngc-column>
+          <br />
+          <ngc-button (click)="onTransfer($event)" value="admin.customer.list.transfer"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #selectWindow [width]="50" title="admin.select.list.of.customers" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-radiobutton groupName="sel" formControlName="withaddress"></ngc-radiobutton>
+          <ngc-label label="customer.with.address"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-radiobutton groupName="sel" formControlName="withoutaddress"></ngc-radiobutton>
+          <ngc-label label="customer.without.address"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="9">
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-button value="g.ok" (click)="onServiceReport($event)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-report format='pdf' #reportWindow1 title="g.report"  reportId='Maintainlistofcustomerbyagent(a)'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf' #reportWindow2 title="g.report"  reportId='Maintainlistofcustomerbyappointedagen(noa)'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf' #reportWindow3 title="g.report"  reportId='Maintainlistofcustomerbycontractor(a)'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf'  #reportWindow4 title="g.report"  reportId='Maintainlistofcontractor(woa)'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf'  #reportWindow5 title="g.report"  reportId='CustomerListByAgentWithAddress'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf'  #reportWindow6 title="g.report"  reportId='CustomerListByAgentWithoutAddress'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf'  #reportWindow7 title="g.report"  reportId='CustomerListByContractorWithAddress'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf'  #reportWindow8 c  reportId='CustomerListByContractorWithoutAddress'
+     [reportParameters]='reportParameters'></ngc-report>
+
+</form>

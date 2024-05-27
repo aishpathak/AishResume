@@ -1,0 +1,263 @@
+<ngc-titlebar title='eq.title.create.muld.assignment' [disablePrint]='true' (save)="onSave($event)" (clear)="onClear($event)"
+  (cancel)="onCancel($event)">
+</ngc-titlebar>
+<!-- Form that contain the data that has to be saved -->
+<form [formGroup]="mUldAssignmentForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="11" align="right">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button value="eq.add.more.muld" iconType="add" (click)="addMoremULD(index)"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <ngc-label label='g.printer'></ngc-label>&nbsp;
+        <div>
+          <ngc-printer [width]='100' #printerName formControlName="requestPrinterId" [printerTypeList]="['EQUIPMENT']">
+          </ngc-printer>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- The list that contains all the fields -->
+  <ngc-container formArrayName="uldListRecord">
+    <ngc-row *ngFor="let item of mUldAssignmentForm.controls.uldListRecord.controls; let index=index;"
+      [formGroupName]="index">
+      <ngc-column>
+        <ngc-container type="rectangle">
+          <ngc-row>
+            <ngc-column>
+              <ngc-container type="section">
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label label="g.carrier"></ngc-label>
+                    <div>
+                      <ngc-lov required formControlName="carrierCode" [width]="60" upperCase="true" noCache="true"
+                        sourceId='CARRIER_OPT' title='flight.carrierType' dataField="code" displayMember="code"
+                        accessEnableOn="r" (select)="getCarrierName($event, index)"
+                        (ngModelChange)='carrierCodechange($event,index)'>
+                        <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                        </ngc-data-column>
+                        <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                        </ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label label="reqd.by.carr"></ngc-label>
+                    <div>
+                      <ngc-checkbox formControlName="requiredByCarrier" (modelChange)="disableAgentName($event, index)">
+                      </ngc-checkbox>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label label="flight.flight.no"></ngc-label>
+                    <div>
+                      <ngc-flightkeyinput [width]="90" formControlName="flightKey" upperCase="true">
+                      </ngc-flightkeyinput>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label label="g.FlightDate"></ngc-label>
+                    <div>
+                      <ngc-dateinput [width]="100" formControlName="flightDate" accessEnableOn="r">
+                      </ngc-dateinput>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="3">
+                    <ngc-label label="g.agentName"></ngc-label>
+                    <div>
+                      <ngc-lov accessEnableOn="r" formControlName="customerCode" [width]="350"
+                        sourceId="EQUIPMENT_AGENT" title="equipment.agent" dataField='code' displayField='desc'
+                        valueMember="desc" (select)="getCustomerIdName($event, index)">
+                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-data-column formControlName="customerName" dataField="customerName" [hidden]="true">
+                  </ngc-data-column>
+                  <ngc-column align="right" *ngIf="index != 0">
+                    <ngc-button value="g.delete" iconType="delete" (click)="deleteSection(index)">
+                    </ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column column="3">
+                    <ngc-container>
+                      <!-- Add row button for ULD Type/Group table -->
+                      <ngc-row>
+                        <ngc-column align="right">
+                          <ngc-button value="add.row.uld" iconType="add" (click)="onAddUldTypeGroup(index)">
+                          </ngc-button>
+                        </ngc-column>
+                      </ngc-row>
+                      <!-- ULD Type/Group Table -->
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-edittable formArrayName="reqContainers" [pageable]="false">
+                            <ngc-data-column text="eq.uld.typ.grp" dataField="uldType">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-lov accessEnableOn="r" formControlName="uldType" sourceId='GETULDTYPEGROUPINFO'
+                                    title='uld.uld.type' dataField='code' width='150px' upperCase='true'
+                                    displayMember="code"  [dropDownWidth]='60'>
+                                    <ngc-data-column text="uld.uld.type" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                  </ngc-lov>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.quantity" dataField="qty">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-input patternName="digit" formControlName="qty">
+                                  </ngc-input>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.delete" [width]="50" [useNotOnDemand]="true" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-link (click)="onDeleteUldTypeGroup($event,group,index)" iconType="delete">
+                                  </ngc-link>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                          </ngc-edittable>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+                  <ngc-column column="3">
+                    <ngc-container>
+                      <!-- Add row button for Accessory Type table -->
+                      <ngc-row>
+                        <ngc-column align="right">
+                          <ngc-button value="add" iconType="add" (click)="onAddAccessoryType(index)"></ngc-button>
+                        </ngc-column>
+                      </ngc-row>
+                      <!-- ACCESSORY Type Table -->
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-edittable formArrayName="reqAccessory" [pageable]="false">
+                            <ngc-data-column text="accessory.type" dataField="accessoryType">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-lov accessEnableOn="r" formControlName="accessoryType"
+                                    sourceId="KEY_ACCESSORY_TYPE" title="Accessory Type" dataField="parameter1"
+                                    width="150px" upperCase="true" displayMember="desc" [dropDownWidth]="60">
+                                    <ngc-data-column text='Accessory Code' dataField='parameter1' [width]='150'>
+                                    </ngc-data-column>
+                                    <ngc-data-column text='Accessory Description' dataField='desc' [width]='150'>
+                                    </ngc-data-column>
+                                  </ngc-lov>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.quantity" dataField="qty">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-input patternName="digit" formControlName="qty">
+                                  </ngc-input>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.delete" [width]="50" [useNotOnDemand]="true" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-link (click)="onDeleteAccessoryType($event,group,index)" iconType="delete">
+                                  </ngc-link>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                          </ngc-edittable>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+                  <ngc-column column="6">
+                    <ngc-container>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label value=""></ngc-label>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                    <!-- Stop Email/Fax and Remarks fields -->
+                    <ngc-container>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label label="eq.email.fax"></ngc-label>&nbsp;
+                          <ngc-checkbox formControlName="emailNotificationFlag"></ngc-checkbox>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label label="g.remarks"></ngc-label>
+                          <div>
+                            <ngc-input formControlName="specialinstruction" width="650"></ngc-input>
+                          </div>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Form that contain the EIR Number generated after saving the data -->
+<form [formGroup]="windowForm">
+  <ngc-window #transactionNumberPopUpWindow title='eq.eir.nos.title' [showCloseButton]="true" (close)="onCloseWindow()">
+    <ngc-container *ngIf=" windowFlag">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead align="center">
+              <tr>
+                <th>
+                  <ngc-label value="eir.number"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="flight.carrier"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="arrayOfTransactionNumber">
+              <tr *ngFor="let item of windowForm.controls.arrayOfTransactionNumber.controls; let index=index;"
+                [formGroupName]="index">
+                <td>
+                  <ngc-label formControlName="transactionNumber"></ngc-label>
+                </td>
+                <td>
+                  <ngc-label formControlName="carrierCode"></ngc-label>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button value="equipment.ok" (click)="okButton()"></ngc-button>
+        </ngc-column>
+        <ngc-column align="center">
+          <ngc-button value="equipment.close" (click)="okButton()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

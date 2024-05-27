@@ -1,0 +1,2474 @@
+<ngc-titlebar title="hawb.info" (clear)="onClear()" (cancel)="onCancel()"></ngc-titlebar>
+<form [formGroup]="shipmentInfoForm">
+  <ngc-container type="header">
+    <ngc-row formGroupName="searchFormGroup">
+      <ngc-column [column]="3">
+        <ngc-label value="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType="{{shipmentType1}}" [width]="200" [noDN]="true" [noCBN]="true" required
+            formControlName="shipmentNumber" (select)="onShipmentSelect($event)" accessEnableOn="r"
+            (ngModelChange)="onAWBChange($event)">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-lov formControlName="hwbNumber"  upperCase='true'  accessEnableOn="r" sourceType='query'  [width]="100"
+             sourceId='HWBNUMBER'  [noCache]="true"  datafield='code' title="g.hawb.number"
+            [sourceParameters]="{'parameter1': shipmentInfoForm.get('searchFormGroup').get('shipmentNumber').value}"
+             accessEnableOn="r"  valueMember="code" (select)="setAWBNumber($event)" required>
+            <ngc-data-column text='g.hawb.number'  dataField='code'  [width]='150' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="shipmentDateLen">
+        <ngc-label label='date'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="shipmentDate" [width]="140" sourceId='SHIPMENTDATE'
+            [sourceParameters]="shipmentNumberparam" [autoSelect]="true" [noBlank]="true" sourceType='query'
+            accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <br>
+        <ngc-button value="expbu.search" (click)="onSearch()" accessEnableOn="r"></ngc-button>
+      </ngc-column>
+      <ngc-column [column]="4" *ngIf="stausForCancel == 'Yes'" verticalAlign="center">
+        <br>
+        <ngc-label label=""></ngc-label>
+        <ngc-label label="stockManagement.cancelled" color="blue" emphasis='md'></ngc-label>
+        <ngc-label label="/" color="blue" emphasis='md'></ngc-label>
+        <ngc-display formControlName="cancelShipmentRmrk" color="blue" emphasis='md'></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="(processType == 'IMPORT') && showFlag && !showCancelButton " align="right">
+        <br>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="(processType != 'EXPORT')">
+        <br>
+        <ngc-button value="fltpouch.print" (click)="onPrint()" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="showFlag">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column>
+        <ngc-label label="g.svc"></ngc-label>
+        <div>
+          <ngc-shape formControlName="svc" type="circle" textColor="white" bgColor="gray" [width]="22" [height]="22">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awbnumber"></ngc-label>
+        <div>
+          <ngc-icon formControlName="awbOnHold" type="lock" trueColor="inherit"></ngc-icon>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="center">
+        <ngc-label label="poIssue.org/des"></ngc-label>
+        <div>
+          <ngc-display formControlName="origin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="center">
+        <ngc-label label="display.awbPieces/Weight"></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="awbPiece"></ngc-piecesdisplay>/
+          <ngc-weightdisplay formControlName="awbWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column align="center" *ngIf="(processType == 'EXPORT')">
+        <ngc-label label="si.actualpw"></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="actualPieces"></ngc-piecesdisplay>/
+          <ngc-weightdisplay formControlName="actualWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column entityAttribute="Gen.ChargeableWeight" align="center">
+        <ngc-label label="g.chargeableWeight"></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="chargebleWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column align="center">
+        <ngc-label label="shc"></ngc-label>
+        <div>
+          <ngc-display formControlName="shcs"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-accordion [height]="350">
+          <ngc-accordion-card [selected]="expandaccordian">
+            <ngc-accordion-titlebar>
+              <ngc-label label="exp.acceptance.awb.info"> </ngc-label>
+            </ngc-accordion-titlebar>
+            <ngc-container type="section" *ngIf="showFlag">
+              <ngc-row formGroupName="shipmentInfoFormGroup">
+                <ngc-column [column]="6">
+                  <ngc-container type="squarethin">
+                    <ngc-row>
+                      <ngc-column entityAttribute="Awb.DomesticInternationalHandling">
+                        <ngc-label label="import.domesticInternational"
+                          entityAttribute="Awb.DomesticInternationalHandling"></ngc-label>
+                        <div>
+                          <ngc-shape formControlName="indicatorDomIntl" type="rectangle" textColor="white"
+                            [bgColor]="getShapeColor(shipmentInfoForm.get(['shipmentInfoFormGroup', 'indicatorDomIntl']).value,'bgColor')"
+                            [width]="36" [height]="22" entityAttribute="Awb.DomesticInternationalHandling">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center" feature="Imp.Bd.HAWBHandling">
+                        <ngc-label label="g.HandledBy" feature="Imp.Bd.HAWBHandling"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape formControlName="handledByHouse" type="circle" textColor="white" bgColor="gray"
+                            [width]="22" [height]="22" feature="Imp.Bd.HAWBHandling"> </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center" feature="Exp.PartSuffix">
+                        <ngc-label label="partShipment"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!partShipmentFlag" formControlName="partShipment" type="circle"
+                            textColor="white" bgColor="gray" [width]="22" [height]="22"> </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center" *ngIf="(processType == 'IMPORT')">
+                        <ngc-label label="si.releasedby"></ngc-label>
+                        <div>
+                          <ngc-display formControlName="releasedBy"></ngc-display>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center" *ngIf="(processType == 'IMPORT')">
+                        <ngc-label label="si.releasedon"></ngc-label>
+                        <div>
+                          <ngc-display formControlName="releasedOn" [onlyDate]="true" [onlyTime]="true"></ngc-display>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="right">
+                        <ngc-container type="square">
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-label *ngIf="(processType == 'IMPORT' || processType == 'TRANSHIPMENT')"
+                                value="si.acceptancedate">
+                              </ngc-label>
+                              <ngc-label *ngIf="(processType == 'EXPORT')" value="si.acceptancedate"></ngc-label>
+                              <div>
+                                <ngc-display formControlName="receivedOn" [onlyDate]="true"></ngc-display>
+                              </div>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container type="squarethin">
+                    <ngc-row>
+                      <ngc-column *ngIf="courierFlag" align="center">
+                        <ngc-label value="si.couriertag"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape formControlName="courierTag" type="rectangle" textColor="white" bgColor="gray"
+                            [width]="35" [height]="20" (click)="openCorierTagPopUp()" style="cursor: pointer;"
+                            accessEnableOn="r">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column *ngIf="xpsFlag" align="center">
+                        <ngc-label value="si.rfidtag"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape formControlName="rfidTag" type="rectangle" textColor="white" bgColor="gray"
+                            [width]="35" [height]="20" (click)="openRfidTagPopUp()" style="cursor: pointer;"
+                            accessEnableOn="r">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label value="si.canreuse"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!canReUseFlag" formControlName="canReUse" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label value="si.abandonedcargo"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!abondanedCargoFlag" formControlName="abondanedCargo" type="circle"
+                            textColor="white" bgColor="gray" [width]="22" [height]="22"> </ngc-shape>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container *ngIf="showFlag">
+              <ngc-row formGroupName="shipmentInfoFormGroup">
+                <ngc-column [column]="6">
+                  <ngc-container type="squarethin">
+                    <ngc-row>
+                      <ngc-column [column]=1>
+                        <ngc-label label="si.eawb"></ngc-label>
+                        <div>
+                          <ngc-shape *ngIf="!eawbFlag" formControlName="eawb" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="exp.NatureOfGoods"></ngc-label>
+                        <div>
+                          <ngc-display formControlName="natureOfGoods"></ngc-display>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label label="si.slacpieces"></ngc-label>
+                        <div>
+                          <ngc-display formControlName="slacPieces"></ngc-display>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label value="si.consol"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!consolFlag" formControlName="consol" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label label="si.pouchreceived"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!pouchReceivedFlag" formControlName="pouchReceived" type="circle"
+                            textColor="white" bgColor="gray" [width]="22" [height]="22"> </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label label="import.fwb"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!fwbeFlag" formControlName="fwb" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22" (click)="openFWBMsgPopUp()"
+                            style="cursor: pointer;" accessEnableOn="r">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label label="import.fhl"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!fhleFlag" formControlName="fhl" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22" (click)="openFHLMsgPopUp()"
+                            style="cursor: pointer;" accessEnableOn="r">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label label="si.fsu"></ngc-label>
+                        <div class='text-center'>
+                          <ngc-shape *ngIf="!fsuFlag" formControlName="fsu" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22" (click)="openFSUMsgPopUp()"
+                            style="cursor: pointer;" accessEnableOn="r">
+                          </ngc-shape>
+                        </div>
+                      </ngc-column>
+                      <ngc-column align="center">
+                        <ngc-label label="Agent"></ngc-label>
+                        <div>
+                          <ngc-display formControlName="agent"></ngc-display>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container type="squarethin">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-label label="si.awbremarks"></ngc-label>
+                        <div *ngFor="let listItem of awbRemarkList; index as i;">
+                          {{listItem.shipmentRemarks}}
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container class="m-t" *ngIf="showFlag">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column [column]="6">
+        <ngc-container type="squarethin">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="g.hawb.number"></ngc-label>
+              <div>
+                <ngc-display formControlName="hwbNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="hawb.piecesweight"></ngc-label>
+              <div>
+                <ngc-piecesdisplay formControlName="housePieces"></ngc-piecesdisplay>/
+                <ngc-weightdisplay formControlName="houseWeight"></ngc-weightdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column entityAttribute="Gen.ChargeableWeight" align="center">
+              <ngc-label label="g.chargeableWeight"></ngc-label>
+              <div>
+                <ngc-chargeableweightdisplay formControlName="houseChargeableWeight"></ngc-chargeableweightdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="poIssue.org/des"></ngc-label>
+              <div>
+                <ngc-display formControlName="houseOrigin"></ngc-display>
+              </div>
+            </ngc-column>
+
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column [column]="6">
+        <ngc-container type="squarethin">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="shc"></ngc-label>
+              <div>
+                <ngc-display formControlName="houseShcs"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="agent.natureOfGoods"></ngc-label>
+              <div>
+                <ngc-display formControlName="houseNOG"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='agent.appointed.agent'></ngc-label>
+              <div>
+                <!-- <ngc-input [hidden]="true" formControlName="hwbCustomerId"></ngc-input> -->
+                <ngc-display formControlName="houseCustomerCode" [width]="30"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showFlag">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column [column]="6">
+        <ngc-container type="squarethin">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="hawb.remarks"></ngc-label>
+              <div *ngFor="let listItem of hwbRemarkList; index as i;">
+                {{listItem.shipmentRemarks}}
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="si.uploadeddocument"></ngc-label>
+              <div>
+                <ngc-shape formControlName="uploadedDocument" type="rectangle" textColor="white" bgColor="gray"
+                  [width]="35" [height]="20">
+                </ngc-shape>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="showFlag && (processType == 'EXPORT')">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+          </thead>
+          <tbody formArrayName="ewarehouseRemarks">
+            <ng-container
+              *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.eWarehouseRemarks.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display formControlName="noaemail"></ngc-display>&nbsp;&nbsp;
+                  <ngc-display formControlName="noadate"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="showFlag">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column [column]="3" *ngIf="(processType == 'IMPORT')">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="bankCreationDocument" disabled="true">
+            <ngc-label label="awb.bank.clearance.document"></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="(processType == 'IMPORT')">
+        <div>
+          <ngc-checkbox formControlName="checkListReceived" disabled="true">
+            <ngc-label label="awb.checklist.recieved"></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="(processType == 'IMPORT' || processType == 'TRANSHIPMENT') && showFlag"
+    title="import.flightInfo">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.flight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flight.ata"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flight.boarding"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.man.pcs.wgt.report"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.frt.in.pcs.wgt.rep"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.documents"></ngc-label>
+              </th>
+              <th entityAttribute="Import.InspectionRequestedOnDt">
+                <ngc-label label="import.customs.requestforexamination"></ngc-label>
+              </th>
+              <th entityAttribute="Import.MovedToInspectionDt">
+                <ngc-label label="import.customs.forwardedforexamination">
+                </ngc-label>
+              </th>
+              <th entityAttribute="Import.CustomsDocumentRequiredForDelivery">
+                <ngc-label label="import.customs.import.document.number"></ngc-label>
+              </th>
+              <th entityAttribute="Import.CustomsClearanceRequiredForDelivery">
+                <ngc-label label="import.customs.clearance.number"></ngc-label>
+              </th>
+              <th entityAttribute="Import.CustomsAssessedValue">
+                <ngc-label label="import.customs.cav"></ngc-label>
+              </th>
+              <th entityAttribute="Import.CustomsAssessedValue">
+                <ngc-label label="export.total"></ngc-label>
+                <ngc-label label="billing.duty"></ngc-label>
+              </th>
+              <th entityAttribute="Import.AirlineDeliveryAuthorizationNo">
+                <ngc-label label="import.customs.edo">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shp.shpLocation"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="openLocationPage()" iconType="open-link"
+                  color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="shp.warehouseLocation"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="weight"></ngc-label>
+              </th>
+              <th entityAttribute="Gen.ChargeableWeight">
+                <ngc-label label="g.chargeableWeight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shp.hold"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="openHoldShipmentPage()"
+                  iconType="open-link" color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th *ngIf="(processType == 'IMPORT')">
+                <ngc-label label="si.delreqno"></ngc-label>
+              </th>
+              <th *ngIf="(processType == 'IMPORT')">
+                <ngc-label label="si.readydel"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.viewdamage"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="captureDamagePage()"
+                  iconType="open-link" color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="g.irregularity"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="openIrregularityPage()"
+                  iconType="open-link" color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="remarks"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="openRemarksPage()" iconType="open-link"
+                  color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="si.fsustatus"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="incomingFlightDetails">
+            <ng-container
+              *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.incomingFlightDetails.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="flightDetailsKey"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="flightDetailsSta" [onlyTime]="true"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="flightDetailsBoardPoint"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-piecesdisplay formControlName="manifestPieces"></ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="manifestWeight"></ngc-weightdisplay>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-piecesdisplay formControlName="breakdownPieces"></ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="breakdownWeight"></ngc-weightdisplay>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-shape *ngIf="documentReceivedFlag1" formControlName="documentReceivedFlag" type="circle"
+                    textColor="white" bgColor="gray" [width]="22" [height]="22">
+                  </ngc-shape>
+                  <ngc-display formControlName="photoCopyAwbFlag"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.InspectionRequestedOnDt">
+                  <ngc-display formControlName="rfe"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.MovedToInspectionDt">
+                  <ngc-display formControlName="ffe"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.CustomsDocumentRequiredForDelivery">
+                  <ngc-display formControlName="boe"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.CustomsClearanceRequiredForDelivery">
+                  <ngc-display formControlName="oc"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.CustomsAssessedValue">
+                  <ngc-display formControlName="cav"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.CustomsAssessedValue">
+                  <ngc-display formControlName="totalDuty"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" formGroupName="shipmentFlightCustomsInfo"
+                  entityAttribute="Import.AirlineDeliveryAuthorizationNo">
+                  <ngc-display formControlName="edoNumber"></ngc-display>
+                  <ngc-display align="center" cellsAlign="center" [width]="100" value="/"
+                    *ngIf="item.get('shipmentFlightCustomsInfo').get('edoNumber').value != '' && item.get('shipmentFlightCustomsInfo').get('edoNumber').value != null">
+                  </ngc-display>
+                  <ngc-display formControlName="edoDate"></ngc-display>
+                </td>
+                <td *ngIf="(processType == 'IMPORT') && chargeableWeightFeature" 
+                  colspan="8"
+                  [ngClass]="{ 'shipment-info-blank': item.controls.inventoryDetails.length > 0 ? true : false }"></td>
+                <td *ngIf="(processType != 'IMPORT') && chargeableWeightFeature" 
+                  colspan="7"
+                  [ngClass]="{ 'shipment-info-blank': item.controls.inventoryDetails.length > 0 ? true : false }"></td>
+                <td *ngIf="(processType == 'IMPORT') && !chargeableWeightFeature" colspan="7"
+                  [ngClass]="{ 'shipment-info-blank': item.controls.inventoryDetails.length > 0 ? true : false }"></td>
+                <td *ngIf="(processType != 'IMPORT') && !chargeableWeightFeature" colspan="6"
+                  [ngClass]="{ 'shipment-info-blank': item.controls.inventoryDetails.length > 0 ? true : false }"></td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" *ngIf="(processType == 'IMPORT')"
+                  align="center">
+                  <ngc-icon type="yesno" formControlName="readyForDelivery"></ngc-icon>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-display formControlName="damagedPieces"></ngc-display>
+                  <ngc-display></ngc-display>
+
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-display formControlName="irregularityInfo"></ngc-display>
+
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ng-container formArrayName="remarks">
+              <tr *ngFor="let aitem of item.controls.remarks.controls; let aindex=index" [formGroupName]="aindex">
+                <td>
+                  <ngc-display formControlName="shipmentRemarks"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            </td>
+            <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+              <ngc-display formControlName="flightFsuStatus"></ngc-display>
+            </td>
+            </tr>
+            <ng-container formArrayName="inventoryDetails">
+              <tr *ngFor="let sitem of item.controls.inventoryDetails.controls; let sindex=index"
+                [formGroupName]="sindex">
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-display formControlName="shipmentLocation"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-display formControlName="warehouseLocation"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }" align="center">
+                  <ngc-display formControlName="inventoryPieces"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }" align="center">
+                  <ngc-weightdisplay formControlName="inventoryWeight"></ngc-weightdisplay>
+                </td>
+                <td entityAttribute="Gen.ChargeableWeight" [ngClass]="{ 'shipment-info-child-top': sindex == 0 }"
+                  align="center">
+                  <ngc-chargeableweightdisplay formControlName="inventoryChgWeight"></ngc-chargeableweightdisplay>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }" align="center">
+                  <ngc-display formControlName="shcs"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-icon formControlName="locked" type="lock" trueColor="inherit"></ngc-icon>
+                  <ng-container *ngIf="sitem.get('locked').value === '0'">
+                    <ngc-icon value="yes" type="unlock" trueColor="inherit"></ngc-icon>
+                  </ng-container>
+                  <ng-container *ngIf="sitem.get('locked').value === '1'">
+                    <ngc-icon value="yes" type="lock" trueColor="red"></ngc-icon>
+                  </ng-container>
+                  <ngc-display formControlName="lockedBy"></ngc-display>
+                  <ngc-display formControlName="lockReason"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }" *ngIf="(processType == 'IMPORT')">
+                  <ngc-display formControlName="deliveryRequestInfo"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            </ng-container>
+            <tr></tr>
+            <tr class='greyBack' *ngIf="totalFlightPieces != 0">
+              <td style="border-right: 0; ">
+              </td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; " align="center">
+                <ngc-label value='Total Pieces/Weight'></ngc-label>
+              </td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; ">
+              </td>
+              <td align="center" style=" border-left: 0; border-right: 0; ">
+                <ngc-piecesdisplay [value]='totalFlightPieces'></ngc-piecesdisplay>
+              </td>
+              <td align="center" style=" border-left: 0; border-right: 0; ">
+                <ngc-weightdisplay [value]="totalFlightWeight"></ngc-weightdisplay>
+              </td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td entityAttribute="Gen.ChargeableWeight" align="center" style=" border-left: 0; border-right: 0; ">
+                <ngc-label value='g.total.chargeable.weight'></ngc-label>
+              </td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td entityAttribute="Gen.ChargeableWeight" align="center" style=" border-left: 0; border-right: 0; ">
+                <ngc-chargeableweightdisplay [value]="totalChgWeight"></ngc-chargeableweightdisplay>
+              </td>
+              <td style=" border-left: 0; border-right: 0; " *ngIf="(processType == 'IMPORT')"></td>
+              <td style=" border-left: 0; border-right: 0; " *ngIf="(processType == 'IMPORT')"></td>
+              <td style=" border-left: 0;"></td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="(processType == 'EXPORT') && showFlag" title="ACCEPTANCE INFO">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="si.acceptance"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.declared.pcs.wgt.br"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="exp.acceptance.type"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.acceptance.completed"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.checklist"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.temp"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="exp.acceptance.trucktype"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.readyforload"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shp.shpLocation"></ngc-label>
+                <ngc-link accessKey="l" (linkClick)="openLocationPage()" iconType="open-link" color="white"
+                  linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="shp.warehouseLocation"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shp.hold"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="openHoldShipmentPage()"
+                  iconType="open-link" color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="si.viewdamage"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="captureDamagePage()"
+                  iconType="open-link" color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+              <th>
+                <ngc-label label="si.viewereceipt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.viewweighing"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="remarks"></ngc-label>
+                <ngc-link accessKey="l" (close)="closePopScreen()" (linkClick)="openRemarksPage()" iconType="open-link"
+                  color="white" linkClass="link-shipment-info">
+                </ngc-link>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="acceptanceDetails">
+            <ng-container
+              *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.acceptanceDetails.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="eacceptance"></ngc-display> /
+                  <ngc-display formControlName="serviceCreationDateTime"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="declaredPieceWeight" color="blue" emphasis='md'></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="acceptanceType"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="acceptanceStatus"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-display formControlName="shc"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="checkList"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-display formControlName="requestedTemperatureRange"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ngc-display formControlName="truckType"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-icon type="yesno" formControlName="readyForLoad"></ngc-icon>
+                </td>
+                <td colspan="5"
+                  [ngClass]="{ 'shipment-info-blank': item.controls.inventoryDetails.length > 0 ? true : false }"></td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-link iconType="open-link" (click)="onereceipt($event,index)" accessEnableOn="r">
+                  </ngc-link>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1" align="center">
+                  <ngc-link iconType="open-link" (click)="onweighingslipServiceReport($event,index)" accessEnableOn="r">
+                  </ngc-link>
+                </td>
+                <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                  <ng-container formArrayName="remarks">
+              <tr *ngFor="let aitem of item.controls.remarks.controls; let aindex=index" [formGroupName]="aindex">
+                <td>
+                  <ngc-display formControlName="shipmentRemarks"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            </td>
+            </tr>
+            <ng-container formArrayName="inventoryDetails">
+              <tr *ngFor="let sitem of item.controls.inventoryDetails.controls; let sindex=index"
+                [formGroupName]="sindex">
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-display formControlName="shipmentLocation"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-display formControlName="warehouseLocation"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-display formControlName="inventoryPieces"></ngc-display>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-weightdisplay formControlName="inventoryWeight"></ngc-weightdisplay>
+                </td>
+                <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                  <ngc-icon formControlName="locked" type="lock" trueColor="inherit"></ngc-icon>
+                  <ngc-display formControlName="lockedBy"></ngc-display>
+                  <ngc-display formControlName="lockReason"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="(processType == 'TRANSHIPMENT') && showFlag">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="si.trmnumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.transfereecarrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.receivingcarrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="uld.finalized"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="tmDetails">
+            <ng-container
+              *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.tmDetails.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display formControlName="trmNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="transfereeCarrier"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="receivingCarrier"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="finalized"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="tab" *ngIf="(processType == 'EXPORT' || processType == 'TRANSHIPMENT') && showFlag"
+    title="BOOKING INFO">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="si.bookinginfo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.Bookingpiecesweight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.offloadedpiecesweight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="siassigneduldtrolley"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.loadedpiecesweight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.buildupcomplete"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Screening Completed"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.shipmentstatus"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="si.fsustatus"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="outbooundFlightDetails">
+            <ng-container
+              *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.outbooundFlightDetails.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td [attr.rowspan]="item.controls.loadingInfoModel.length + 1">
+                  <ngc-display formControlName="bookingFlightKey"></ngc-display>-
+                  <ngc-display formControlName="bookingSta" [onlyDate]="true"></ngc-display>-
+                  <ngc-display formControlName="bookingSta" [onlyTime]="true"></ngc-display>&nbsp;
+                  <ngc-display formControlName="bookingFlightBoardingPoint"></ngc-display>/
+                  <ngc-display formControlName="bookingFlightOffPoint"></ngc-display>&nbsp;
+                  <ngc-shape formControlName="bookingStatusCode" type="rectangle" textColor="white" bgColor="gray"
+                    [width]="30" [height]="20">
+                  </ngc-shape>&nbsp;
+                  <ngc-shape *ngIf="item.get('transferType').value" formControlName="transferType" type="rectangle"
+                    textColor="white" bgColor="gray" [width]="30" [height]="20">
+                  </ngc-shape>
+                </td>
+                <td [attr.rowspan]="item.controls.loadingInfoModel.length + 1">
+                  <ngc-piecesdisplay formControlName="bookingPieces"></ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="bookingWeight"></ngc-weightdisplay>
+                </td>
+                <td [attr.rowspan]="item.controls.loadingInfoModel.length + 1">
+                  <ngc-piecesdisplay formControlName="offLoadedPieces"></ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="offLoadedWeight"></ngc-weightdisplay>
+                </td>
+                <td colspan="4"
+                  [ngClass]="{ 'shipment-info-blank': item.controls.loadingInfoModel.length > 0 ? true : false }"></td>
+
+                <td [attr.rowspan]="item.controls.loadingInfoModel.length + 1">
+                  <ngc-display formControlName="flightScreeningCompleted"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.loadingInfoModel.length + 1">
+                  <ngc-display formControlName="shipmentstatus"></ngc-display>
+                </td>
+                <td [attr.rowspan]="item.controls.loadingInfoModel.length + 1">
+                  <ngc-display formControlName="flightFsuStatus"></ngc-display>
+                </td>
+              </tr>
+              <ng-container formArrayName="loadingInfoModel">
+                <tr *ngFor="let sitem of item.controls.loadingInfoModel.controls; let sindex=index"
+                  [formGroupName]="sindex">
+                  <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                    <ngc-display formControlName="shc"></ngc-display>
+                  </td>
+                  <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                    <ngc-display formControlName="assignedUldOrTrolley"></ngc-display>
+                  </td>
+                  <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }">
+                    <ngc-piecesdisplay formControlName="loadedPieces"></ngc-piecesdisplay>/
+                    <ngc-weightdisplay formControlName="loadedWeight"></ngc-weightdisplay>
+                  </td>
+                  <td [ngClass]="{ 'shipment-info-child-top': sindex == 0 }" align="center">
+                    <ngc-icon type="yesno" formControlName="buildupComplete" falseColor="transparent"></ngc-icon>
+                  </td>
+                </tr>
+              </ng-container>
+            </ng-container>
+            <tr class='greyBack' *ngIf="totalBookingPieces != 0">
+              <td style="border-right: 0; ">
+                <ngc-label value='Total Pieces/Weight'></ngc-label>
+              </td>
+              <td style="border-left: 0; border-right: 0; ">
+                <ngc-piecesdisplay [value]='totalBookingPieces'></ngc-piecesdisplay>/
+                <ngc-weightdisplay [value]="totalBookingWeight"></ngc-weightdisplay>
+              </td>
+              <td align="center" style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0; border-right: 0; "></td>
+              <td style=" border-left: 0;"></td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="tab" *ngIf="showFlag">
+    <ngc-row formGroupName="shipmentInfoFormGroup">
+
+      <ngc-column [column]="4" *ngIf="processType == 'IMPORT'">
+        <ngc-container title="title.delivery.info">
+          <ngc-row>
+            <ngc-column column="1" align="right" verticalAlign="middle">
+              <ngc-icon type="truck" value="Y" iconSize="2x" trueColor="inherit"></ngc-icon>
+            </ngc-column>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="si.doNumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.datetime"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="Remarks"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="Status"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentDeliveryDetails">
+                  <ng-container
+                    *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.shipmentDeliveryDetails.controls; let index=index"
+                    [formGroupName]="index">
+                    <tr>
+                      <td>
+                        <ngc-display formControlName="doNumber"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="deliveryDate"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="deliveryPieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="deliveryWeight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="remarks"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="status"></ngc-display>
+                      </td>
+                    </tr>
+                  </ng-container>
+                  <tr class='greyBack' *ngIf="totalDeliveryPieces != 0">
+                    <td style="border-right: 0; ">
+                      <ngc-label value='Total Pieces/Weight'></ngc-label>
+                    </td>
+                    <td style="border-left: 0; border-right: 0; ">
+                    </td>
+                    <td style=" border-left: 0; border-right: 0; ">
+                      <ngc-piecesdisplay [value]='totalDeliveryPieces'></ngc-piecesdisplay>
+                    </td>
+                    <td style=" border-left: 0;">
+                      <ngc-weightdisplay [value]="totalDeliveryWeight"></ngc-weightdisplay>
+                    </td>
+                    <td style="border-left: 0; border-right: 0; ">
+                    </td>
+                    <td style="border-left: 0; border-right: 0; ">
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+      <ngc-column [column]="4" *ngIf="processType == 'EXPORT' || processType == 'TRANSHIPMENT'">
+        <ngc-container title="FREIGHT OUT">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="Remarks"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="freightOutDetails">
+                  <ng-container
+                    *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.freightOutDetails.controls; let index=index"
+                    [formGroupName]="index">
+                    <tr>
+                      <td>
+                        <ngc-display formControlName="flightKey"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="freightOutflightDate"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="freightOutPieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="freightOutWeight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="remarks"></ngc-display>
+                      </td>
+                    </tr>
+                  </ng-container>
+                  <tr class='greyBack' *ngIf="totalFrtPieces != 0">
+                    <td style="border-right: 0; ">
+                      <ngc-label value='Total Pieces/Weight'></ngc-label>
+                    </td>
+                    <td style="border-left: 0; border-right: 0; ">
+                    </td>
+                    <td style=" border-left: 0; border-right: 0; ">
+                      <ngc-piecesdisplay [value]='totalFrtPieces'></ngc-piecesdisplay>
+                    </td>
+                    <td style=" border-left: 0;">
+                      <ngc-weightdisplay [value]="totalFrtWeight"></ngc-weightdisplay>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+      <ngc-column [column]="8">
+        <ngc-container title="title.service.charge">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="flight.serviceType"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="expdgd.quantity"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="si.duration"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billingverification.amount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="si.paid"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.receipt.number"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="si.waivedamount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bil.paidAmount"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName='chargeAdvice'>
+                  <ng-container>
+                    <tr
+                      *ngFor="let item1 of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.chargeAdvice.controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-display formControlName="serviceType"></ngc-display>
+                      </td>
+                      <td align="right">
+                        <ngc-display formControlName="quantity"></ngc-display>
+                        <ngc-display formControlName="quantityDesc"></ngc-display>
+                      </td>
+                      <td align="right">
+                        <ngc-display formControlName="duration"></ngc-display>
+                      </td>
+                      <td align="right">
+                        <ngc-currencydisplay formControlName="amount"></ngc-currencydisplay>
+                      </td>
+                      <td align="center" *ngIf="item1.get('paymentType').value!='Bill/Collect'">
+                        <ngc-icon type="yesno" formControlName="paid"></ngc-icon>
+                      </td>
+                      <td align="center" *ngIf="item1.get('paymentType').value=='Bill/Collect'">
+                        <ngc-display value='customerbilling.bill' [i18n]="true"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="receiptNumber"></ngc-display>
+                      </td>
+                      <td align="right">
+                        <ngc-currencydisplay formControlName="waivedAmount"></ngc-currencydisplay>
+                      </td>
+                      <td align="right">
+                        <ngc-currencydisplay formControlName="paidAmount"></ngc-currencydisplay>
+                      </td>
+                    </tr>
+                    <tr class='greyBack'>
+                      <td align="right" *ngIf="totalSumFlag">
+                        <ngc-label value='g.total'></ngc-label>
+                      </td>
+                      <td align="right" *ngIf="!totalSumFlag">
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-right">
+                        <ngc-currencydisplay *ngIf="totalSumFlag" [value]='allTotalsCharge'></ngc-currencydisplay>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-right">
+                        <ngc-currencydisplay *ngIf="totalSumFlag" [value]='paidTotalCharge'></ngc-currencydisplay>
+                      </td>
+                    </tr>
+                    <tr class='greyBack'>
+                      <td align="right" *ngIf="totalSumFlag">
+                        <ngc-label value='bil.groupPayment.collectedAmount'></ngc-label>
+                      </td>
+                      <td align="right" *ngIf="!totalSumFlag">
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td class="text-right">
+                        <ngc-currencydisplay *ngIf="totalSumFlag" [value]='collectTotal'></ngc-currencydisplay>
+                      </td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                      <td></td>
+                    </tr>
+                  </ng-container>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showFlag" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showFlag" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #courierTagPopUp title="Tag Info" [width]="400" [height]="420" style="top:170px !important;"
+    [showCloseButton]="true" align="center">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="si.tagid"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="si.tagpieces"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let info1 of courierInfo">
+                <td>
+                  {{info1.houseInfoTagNumber}}
+                </td>
+                <td>
+                  {{info1.houseInfoRfidTagPieces}}
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #rfidTagPopUp title="Tag Info" [width]="400" [height]="420" style="top:170px !important;"
+    [showCloseButton]="true" align="center">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="si.tagid"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="si.tagpieces"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let info of rfidInfo">
+                <td>
+                  {{info.houseInfoTagNumber}}
+                </td>
+                <td>
+                  {{info.houseInfoRfidTagPieces}}
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #infoPopUp title="Information" [width]="300" [height]="100" style="top:100px !important;"
+    [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="center" style="top:70px !important;">
+          <ngc-label label="Under Construction"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #cancelShpPopUp [showCloseButton]="true" [width]="650" [height]="300" title="Cancel Shipment">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="Do you really want to cancel the shipment?"></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label=""></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row formGroupName="cancelShipmentInfoForm">
+        <ngc-column>
+          <ngc-label label='Remarks'></ngc-label>
+          <div>
+            <ngc-textarea [width]="300" formControlName="cancelRemark" [height]="50" [maxlength]="65" required>
+            </ngc-textarea>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='Password'></ngc-label>
+          <div>
+            <ngc-passwordinput formControlName="encryptPasswordChange" required [width]="300"></ngc-passwordinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button label="Yes" [width]="80" (click)="cancelShipment()">
+          </ngc-button>
+          <ngc-button label="No" [width]="80" (click)="closePopUp()">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #fwbMsgPopUp title="Message Info" [width]="800" [height]="500" style="top:170px !important;"
+    [showCloseButton]="true" align="center">
+    <ngc-container type="tab">
+      <ngc-row formGroupName="shipmentInfoFormGroup">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th style="width: 1px;">
+                  <ngc-label label="S/N"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="message"></ngc-label>
+                </th>
+                <th style="width: 1px;">
+                  <ngc-label label="Recevied/Sent On"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="fwbOutgoingMessageSummary">
+              <tr
+                *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.fwbOutgoingMessageSummary.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-codeeditor formControlName="message" [disabled]="true"></ngc-codeeditor>
+                </td>
+                <td>
+                  <ngc-display formControlName="messageSentOn" [onlyDate]="true"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #fsuMsgPopUp title="Message Info" [width]="800" [height]="500" style="top:170px !important;"
+    [showCloseButton]="true" align="center">
+    <ngc-container type="tab">
+      <ngc-row formGroupName="shipmentInfoFormGroup">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th style="width: 1px;">
+                  <ngc-label label="S/N"></ngc-label>
+                </th>
+                <th style="width: 1px;">
+                  <ngc-label label="messageType"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="message"></ngc-label>
+                </th>
+                <th style="width: 1px;">
+                  <ngc-label label="Received/Sent On"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="fsuOutgoingMessageSummary">
+              <tr
+                *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.fsuOutgoingMessageSummary.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-display formControlName="messageType"></ngc-display>
+                </td>
+                <td>
+                  <ngc-codeeditor formControlName="message" [disabled]="true"></ngc-codeeditor>
+                </td>
+                <td>
+                  <ngc-display formControlName="messageSentOn"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+
+  <ngc-window #partShpPopUp title="Part Shipment Information" [width]="800" [height]="400" style="top:170px !important;"
+    [showCloseButton]="true" align="center" feature="Exp.PartSuffix">
+    <ngc-container type="tab">
+
+      <ngc-row formGroupName="shipmentInfoFormGroup" *ngIf="partShpFlag">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th style="width: 1px;">
+                  <ngc-label label="S/N"></ngc-label>
+                </th>
+                <th style="width: 1px;">
+                  <ngc-label label="Part Suffix"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Flight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Flight Date"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Part Pieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Part Weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Board Point"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Off Point"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="partShipmentDetails">
+              <tr
+                *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.partShipmentDetails.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-display formControlName="partSuffix"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightDetailsKey"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightDetailsSta"></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="bookingPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="bookingWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightDetailsBoardPoint"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightOffPoint"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #fhlMsgPopUp title="Message Info" [width]="800" [height]="500" style="top:170px !important;"
+    [showCloseButton]="true" align="center">
+    <ngc-container type="tab">
+      <ngc-row formGroupName="shipmentInfoFormGroup">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th style="width: 1px;">
+                  <ngc-label label="S/N"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="message"></ngc-label>
+                </th>
+                <th style="width: 1px;">
+                  <ngc-label label="Received/Sent On"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="fhlOutgoingMessageSummary">
+              <tr
+                *ngFor="let item of shipmentInfoForm.controls.shipmentInfoFormGroup.controls.fhlOutgoingMessageSummary.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-codeeditor formControlName="message" [disabled]="true"></ngc-codeeditor>
+                </td>
+                <td>
+                  <ngc-display formControlName="messageSentOn" [onlyDate]="true"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-footer [height]="80">
+    <ngc-container *ngIf="showFlag" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-button value="1awb" (click)="openAwbDocumentPage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="2fwb" (click)="openMaintainsFwb()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="3hwb" (click)="openMaintainHousePage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="4release" (click)="openAWBReleasePage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="5billservice" (click)="openBillingServicePage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="6billcollect" (click)="openBillingPage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="si.checklistbutton" (click)="openCheckListPage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="12survey" (click)="openSurveyPage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="13tracing" (click)="openTracingPage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="si.history" (click)="openHistoryPage()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="16Freightout" (click)="freightOutCargo()"></ngc-button>
+          <ngc-button value="si.dgentry" (click)="openDgEntry()" accessEnableOn="r"></ngc-button>
+          <ngc-button value="button.uploaded.doc" (click)="openCapturePhotograph()" accessEnableOn="r"></ngc-button>
+          <ngc-button feature="Exp.PartSuffix" value="si.part.shipment.information" (click)="openPartShipmentpage()"
+            accessEnableOn="r">
+          </ngc-button>
+          <ngc-button *ngIf="(processType == 'IMPORT' || processType == 'EXPORT') " value="hawb.deletehouse"
+            (click)="onDeleteHouse()">
+          </ngc-button>
+          <ngc-button *ngIf="(processType == 'IMPORT') && handlingFlag" value="g.changeHandling"
+            (click)="changeAwbHwbHandling()" feature="Imp.Bd.LocalShipment.HAWBHandling">
+          </ngc-button>
+          <ngc-button value="hawb.boeocothers" (click)="openMaintainUpdateBOEOC()" accessSectionId="Manual_BOE_OC">
+          </ngc-button>
+          <ngc-button *ngIf="(processType == 'IMPORT')" value="hawb.hawbrecord" (click)="openHAWBRecordScreen()">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-footer>
+
+  <!-- ManualFreightOut Starts Form Here -->
+  <form formGroupName="freightOutremarks">
+    <!--Missing code start-->
+    <ngc-window #manualFreightOut [title]="'ManualFreightOut'" [width]="1000" [height]="650">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="3">
+            <ngc-label label='Type'></ngc-label>
+            <div>
+              <ngc-dropdownlist sourceId="DocVerication$DocverRemark" [width]="100" [dropDownWidth]="100"
+                [noBlank]="true" formControlName="remarkType" (ngModelChange)="onChangeRemarkType($event)" required>
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="5">
+            <ngc-label label='Remarks'></ngc-label>
+            <div>
+              <ngc-textarea [width]="300" [height]="50" formControlName="remarks" [maxlength]="65" required>
+              </ngc-textarea>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3" *ngIf="deliveryDetials">
+            <ngc-label label="DeliveryOrder Number"></ngc-label>
+            <div>
+              <ngc-input [width]="150" formControlName="doNumber" upperCase="true" [maxlength]="8" [disabled]="valCheck"
+                required>
+              </ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ng-container type="tab">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                        </th>
+                        <th>
+                          <ngc-label label="g.status"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.shipment.location"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.warehouse.location"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.inventory.pieces"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.inventory.weight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.shc"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.reason"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="inventoryDetails">
+                      <tr
+                        *ngFor="let item of shipmentInfoForm.get(['freightOutremarks','inventoryDetails']).controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-checkbox formControlName="select" [width]="20" align="center"
+                            (ngModelChange)="onSelectInventory($event,index,item)"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="deliveryRequestInfo" [width]="20"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="shipmentLocation" [width]="20"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="warehouseLocation" [width]="100"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="inventoryPieces" [width]="50"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="inventoryWeight" [width]="70"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="shcs" [width]="100"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-icon formControlName="locked" type="lock" trueColor="inherit" [width]="20"></ngc-icon>
+                          <ngc-display formControlName="lockedBy" [width]="50"></ngc-display>
+                          <ngc-display formControlName="lockReason" [width]="50"></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ng-container>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="tramDetails">
+          <ngc-column [column]="3">
+            <ngc-label label="TRM Number"></ngc-label>
+            <div>
+              <ngc-input [width]="150" formControlName="trmNumber" upperCase="true" [maxlength]="15" required>
+              </ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="5">
+            <ngc-label label="date"></ngc-label>
+            <div>
+              <ngc-datetimeinput [width]="100" formControlName="trmDate" required></ngc-datetimeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <!-- start  local authority information-->
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <!-- <ngc-row *ngIf="larInfoForImport">
+          <ngc-column>
+            <ngc-container type="rectangle">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="LAR Info"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="2">
+                  <ngc-dropdownlist formControlName="type" sourceId="Issue_Po$Issue_Po" width="170" [required]="isIA"
+                    [disabled]="isReadOnly"></ngc-dropdownlist>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-container *ngIf="permitToFollowFlag">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="ACES"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="Appointed Agent"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get(['freightOutremarks','localAuthorityDetail']).controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input formControlName="referenceNumber" (ngModelChange)="onChangeIA(item)"
+                                  required>
+                                </ngc-input>
+                              </td>
+                              <td *ngIf="expireAppointedAgent">
+                                <div>
+                                  <ngc-lov [width]="80" formControlName="customerAppAgentId"
+                                    sourceId="APPOINTED_AGENT_DATA" title="Customer List" dataField="param1"
+                                    displayField="code" (select)="onSelectClearingAgent($event,index)"
+                                    [disabled]="true">
+                                    <ngc-data-column text="Customer Code" dataField="code" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="Customer Full Name" dataField="desc" [width]="80">
+                                    </ngc-data-column>
+                                  </ngc-lov>
+
+                                </div>
+                              </td>
+                              <td *ngIf="appointedAgent">
+                                <div>
+                                  <ngc-display formControlName="customerAppAgentId"></ngc-display>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container *ngIf="permitNumberFlag">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="Permit Number"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label=" "></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label=" "></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input formControlName="referenceNumber" required></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-button iconType="add" priority="quaternary" (click)="onAddPermitNumber(index)"
+                                  *ngIf="shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls.length == (index + 1)">
+                                </ngc-button>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeletePermitNumberRows(index)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container *ngIf="excemptionCodeFlag">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="Exemption Code"></ngc-label>
+                              </th>
+
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-dropdownlist formControlName="referenceNumber" sourceId="Admin$ExemptionCode"
+                                  displayBoth="true" required></ngc-dropdownlist>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="license"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="Reason"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input formControlName="license" [width]="150"></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-input formControlName="remarks" [width]="250"></ngc-input>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+        </ngc-row> -->
+        <!-- end -->
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=''></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf='flightLable'>
+          <ngc-column>
+            <ngc-label label='Outbound Flight'></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="flightDetails">
+          <ngc-column [column]="3">
+            <ngc-label label="flight"></ngc-label>
+            <div>
+              <ngc-input [width]="100" formControlName="flightNumber" upperCase="true"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="5">
+            <ngc-label label="date"></ngc-label>
+            <div>
+              <ngc-datetimeinput [width]="100" formControlName="flightDate"></ngc-datetimeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="manualFreigtOut()" value="Save"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+
+    <ngc-window #remarksPopup [width]="750" [height]="600" [title]="'Remarks'">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='Type'></ngc-label>
+            <div>
+              <ngc-dropdownlist sourceId="DocVerication$DocverRemark" [width]="100" [dropDownWidth]="100"
+                [noBlank]="true" formControlName="remarkType" (ngModelChange)="onChangeRemarkType($event)" required>
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label='Remarks'></ngc-label>
+            <div>
+              <ngc-textarea [width]="300" [height]="50" formControlName="remarks" [maxlength]="65" required>
+              </ngc-textarea>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3" *ngIf="deliveryDetials">
+            <ngc-label label="DeliveryOrder Number"></ngc-label>
+            <div>
+              <ngc-input [width]="150" formControlName="doNumber" upperCase="true" [maxlength]="8" [disabled]="valCheck"
+                required>
+              </ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ng-container type="tab">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                        </th>
+                        <th>
+                          <ngc-label label="Status"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="ShipmentLocation"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="WarehouseLocation"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="InventoryPieces"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="InventoryWeight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="Shcs"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="Reason"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="inventoryDetails">
+                      <tr
+                        *ngFor="let item of shipmentInfoForm.get(['freightOutremarks','inventoryDetails']).controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <!-- <ngc-link formControlName="select" (linkClick)="onSelectInventory($event,index,item)"> -->
+                          <ngc-checkbox formControlName="select" [width]="20" align="center"
+                            (ngModelChange)="onSelectInventory($event,index,item)"></ngc-checkbox>
+                          <!-- </ngc-link> -->
+                        </td>
+                        <td>
+                          <ngc-display formControlName="deliveryRequestInfo" [width]="20"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="shipmentLocation" [width]="20"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="warehouseLocation" [width]="100"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="inventoryPieces" [width]="50"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="inventoryWeight" [width]="70"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="shcs" [width]="100"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-icon formControlName="locked" type="lock" trueColor="inherit" [width]="20"></ngc-icon>
+                          <ngc-display formControlName="lockedBy" [width]="50"></ngc-display>
+                          <ngc-textarea formControlName="lockReason" [width]="50">
+                          </ngc-textarea>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ng-container>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="deliveryDetials">
+          <ngc-column [column]="3">
+            <ngc-label label="DeliveryOrder Number"></ngc-label>
+            <div>
+              <ngc-input [width]="150" formControlName="doNumber" upperCase="true" [maxlength]="8" required></ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="tramDetails">
+          <ngc-column [column]="3">
+            <ngc-label label="TRM Number"></ngc-label>
+            <div>
+              <ngc-input [width]="150" formControlName="trmNumber" upperCase="true" [maxlength]="8" required>
+              </ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="5">
+            <ngc-label label="date"></ngc-label>
+            <div>
+              <ngc-datetimeinput [width]="100" formControlName="trmDate" required></ngc-datetimeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <!-- start  local authority information-->
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <!-- <ngc-row *ngIf="larInfoForImport">
+          <ngc-column>
+            <ngc-container type="rectangle">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="LAR Info"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="2">
+                  <ngc-dropdownlist formControlName="type" sourceId="Issue_Po$Issue_Po" width="170" [required]="isIA"
+                    [disabled]="isReadOnly"></ngc-dropdownlist>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-container *ngIf="permitToFollowFlag">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="ACES"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="Appointed Agent"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get(['freightOutremarks','localAuthorityDetail']).controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input formControlName="referenceNumber" (ngModelChange)="onChangeIA(item)"
+                                  required></ngc-input>
+                              </td>
+                              <td *ngIf="expireAppointedAgent">
+                                <div>
+                                  <ngc-lov [width]="80" formControlName="customerAppAgentId"
+                                    sourceId="APPOINTED_AGENT_DATA" title="Customer List" dataField="param1"
+                                    displayField="code" (select)="onSelectClearingAgent($event,index)"
+                                    [disabled]="true">
+                                    <ngc-data-column text="Customer Code" dataField="code" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="Customer Full Name" dataField="desc" [width]="80">
+                                    </ngc-data-column>
+                                  </ngc-lov>
+
+                                </div>
+                              </td>
+                              <td *ngIf="appointedAgent">
+                                <div>
+                                  <ngc-display formControlName="customerAppAgentId"></ngc-display>
+                                </div>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container *ngIf="permitNumberFlag">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="Permit Number"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label=" "></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label=" "></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input formControlName="referenceNumber" required></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-button iconType="add" priority="quaternary" (click)="onAddPermitNumber(index)"
+                                  *ngIf="shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls.length == (index + 1)">
+                                </ngc-button>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeletePermitNumberRows(index)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container *ngIf="excemptionCodeFlag">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="Exemption Code"></ngc-label>
+                              </th>
+
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-dropdownlist formControlName="referenceNumber" sourceId="Admin$ExemptionCode"
+                                  displayBoth="true" required></ngc-dropdownlist>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="license"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="Reason"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="localAuthorityDetail">
+                            <tr
+                              *ngFor="let item of shipmentInfoForm.get('freightOutremarks.localAuthorityDetail').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input formControlName="license" [width]="150"></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-input formControlName="remarks" [width]="250"></ngc-input>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+        </ngc-row> -->
+        <!-- end -->
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=''></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf='flightLable'>
+          <ngc-column>
+            <ngc-label label='Outbound Flight'></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="flightDetails">
+          <ngc-column [column]="3">
+            <ngc-label label="flight"></ngc-label>
+            <div>
+              <ngc-input [width]="100" formControlName="flightNumber" upperCase="true"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="5">
+            <ngc-label label="date"></ngc-label>
+            <div>
+              <ngc-datetimeinput [width]="100" formControlName="flightDate"></ngc-datetimeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="remarkSave()" value="Save"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </form>
+  <ngc-report #reportWindow1 title="Report"  reportId='AcceptanceWeighingNewHwbWeightSlipNewDesign'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindow2 title="Report"  reportId='e-receiptShpInfo'  [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindow3 title="Report"  reportId='shipmentinfoexport'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow4 title="Report"  reportId='shipmentinfoimportHouse'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow5 title="Report"  reportId='houseinfotranshipment'  [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindowHwbWeightSlip title="Report"  reportId='AcceptanceWeighingNewHwbWeightSlip'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindowHwbTotalWeightSlip title="Report"  reportId='AcceptanceWeighingNewHwbTotalWeightSlip'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindow title="Report"  reportId='AcceptanceWeighingNewMasterWeighingSlip'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+
+
+<!-- Parent Window -->
+<ngc-window #parentWindow [title]="title" [width]="popUpWidth" [height]="popUpHeight" (close)="closePopScreen()">
+  <ng-container *ngTemplateOutlet="templateRef;"></ng-container>
+</ngc-window>
+<ng-template #shipmentLocation *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <app-shipmentLocation
+          [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          (autoSearchShipmentInfo)=" autoSearchShipmentInfo()" [showAsPopup]="true">
+        </app-shipmentLocation>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+<ng-template #maintainHouseMaster *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <!-- <app-maintain-house-master
+          [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          (autoSearchShipmentInfo)=" autoSearchShipmentInfo()" [showAsPopup]="true">
+        </app-maintain-house-master> -->
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+
+<ng-template #maintainRemark *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <app-maintain-remark
+          [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          (autoSearchShipmentInfo)=" autoSearchShipmentInfo()" [showAsPopup]="true">
+        </app-maintain-remark>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+
+
+
+
+
+<ng-template #shipmentOnHold *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <app-shipmentOnHold
+          [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          (autoSearchShipmentInfo)=" autoSearchShipmentInfo()" [showAsPopup]="true">
+        </app-shipmentOnHold>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+
+<ng-template #CaptureDamage *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <common-capturedamage
+          [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          (autoSearchShipmentInfo)=" autoSearchShipmentInfo()" [showAsPopup]="true">
+        </common-capturedamage>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+<ng-template #maintainShipmentIrregularity *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <app-maintain-shipment-irregularity
+          [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          (autoSearchShipmentInfo)=" autoSearchShipmentInfo()" [showAsPopup]="true">
+        </app-maintain-shipment-irregularity>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+
+<ng-template #CapturePhoto *ngIf="showMe">
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <capturephoto [shipmentNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentNumber']).value"
+          [shipmentTypeData]="this.shipmentInfoForm.get(['searchFormGroup', 'shipmentType']).value ==='' ? 'AWB' : this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value"
+          [hwbNumberData]="this.shipmentInfoForm.get(['searchFormGroup', 'hwbNumber']).value" [showAsPopup]="true">
+        </capturephoto>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>

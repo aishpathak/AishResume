@@ -1,0 +1,148 @@
+<form [formGroup]="searchForm">
+  <ngc-titlebar title='import.breakdown.delay.status' (clear)="onClear($event)"></ngc-titlebar>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.terminal"> </ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminals"  sourceId="WAREHOUSE_TERMINAL" [width]="110"
+            sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="4" [grid36]="true">
+        <ngc-label label="g.fromDate"> </ngc-label>
+        <div>
+          <ngc-datetimeinput (ngModelChange)="onFromDateChange()" accessEnableOn="r" formControlName="fromDate"
+            [showCalendarButton]="true"  [showTimeButton]="true" [midnight]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="4" [grid36]="true">
+        <ngc-label label="g.toDate"> </ngc-label>
+        <div>
+          <ngc-datetimeinput [endOfDay]="true" accessEnableOn="r" formControlName="toDate" [showCalendarButton]="true"
+             [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.carrier.group"> </ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100" [noCache]="true" valueMember="desc"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.flight"> </ngc-label>
+        <div>
+          <ngc-flightkeyinput (ngModelChange)="onFlightChange()" accessEnableOn="r" formControlName="flight"
+            [width]="100"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.date"> </ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="date" [width]="110"></ngc-dateinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <ngc-label label="import.flight.closed"> </ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="flightClosed" sourceId="Lying_ListAD$DnCompleteFlag"
+            [width]="100" [autoSelect]="true" (select)="onCarierGroup($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)='onSearch()' iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+</form>
+<form [formGroup]="DelayData">
+  <ngc-container type="header" *ngIf="isFlightInformation">
+    <ngc-row>
+      <ngc-column align="right">
+
+
+        <ngc-button label='import.ld.waive.w' (click)='loadCreate()'></ngc-button>
+        <ngc-button label='import.ld.applicable.a' (click)='loadCreate()'></ngc-button>
+        <ngc-button *ngIf="isflightClosed" label='flight.close.flight.f' (click)='closeFlight()'></ngc-button>
+        <ngc-button *ngIf="reOpenflight" label='flight.reopen.flight.f' (click)='reopenFlight()'></ngc-button>
+
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="delayStatusArray" [pageable]="false" [columnsHeight]="40">
+          <ngc-data-column text="" dataField="flagInsert" align="center" cellsAlign="center" [checkAll]="true"
+            type="check" [width]="30"></ngc-data-column>
+          <ngc-data-column text="g.flight.id" dataField="flightId" hidden="true"></ngc-data-column>
+          <ngc-data-column text="g.flight" dataField="flightNumber" align="center" cellsAlign="center" [width]="50">
+          </ngc-data-column>
+          <ngc-data-column text="g.date" dataField="flightDate" type="displayDate" align="center" cellsAlign="center"
+            [width]="40"></ngc-data-column>
+          <ngc-data-column text="import.sta" dataField="sta" align="center" type="displayTime" cellsAlign="center"
+            [width]="35"></ngc-data-column>
+          <ngc-data-column text="ATA" dataField="ata" align="center" type="displayTime" cellsAlign="center"
+            [width]="35"></ngc-data-column>
+          <ngc-data-column text="import.first.uld.tow.in.time.br" tooltip="FirstULD Tow IN Time" dataField="firstUldTowInTime"
+            type="displayTime" align="center" cellsAlign="center" [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.first.uld.tow.in.time.br" tooltip="LastULD Tow IN Time" dataField="lastUldTowInTime"
+            type="displayTime" align="center" cellsAlign="center" [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.breakdown.completion.date.br" tooltip="Breakdown Completion Date & Time"
+            dataField="breakdownCompletionDataTime" type="displayDateTime" align="center" cellsAlign="center"
+            [width]="120"></ngc-data-column>
+          <ngc-data-column text="import.flight.completion.date.br" tooltip="Flight Completion Date & Time"
+            dataField="flightCompletionDataTime" type="displayDateTime" align="center" cellsAlign="center"
+            [width]="110"></ngc-data-column>
+          <ngc-data-column text="import.breakdown.delay.min" dataField="delayInMinutes" cellsAlign="center" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="import.breakdown.ld.applicable" dataField="ldApplicable" align="center" cellsAlign="center" [width]="75"
+            iconType="yesno" type="icon"></ngc-data-column>
+          <ngc-data-column text="LD Waive" dataField="ldWaive" align="center" cellsAlign="center" [width]="50"
+            iconType="yesno" type="icon" [width]="60"></ngc-data-column>
+          <ngc-data-column text="import.approved.by.co.br" tooltip="Approved by CO" dataField="approvedCO"
+            type="displayDateTime" align="center" cellsAlign="center" [width]="80"></ngc-data-column>
+          <ngc-data-column text="import.approved.by.dm.br" tooltip="Approved by DM" dataField="approvedDM"
+            type="displayDateTime" align="center" cellsAlign="center" [width]="80"></ngc-data-column>
+
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-container type="box" title='import.breakdown.delay.legend' *ngIf="isFlightInformation">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='import.approved.by.co.dm'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='import.not.required.approval.by.co.dm'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='import.pending.approval.from.co.dm'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+</form>
+<ngc-footer>
+  <ngc-row *ngIf="isFlightInformation">
+    <ngc-column>
+      <ngc-button label='brk.1' (click)='loadCreate()'></ngc-button>
+      <!-- <ngc-button label='brk.2' (click)='onSearch()'></ngc-button> -->
+      <ngc-button label='brk.3' (click)='loadFlightMonitoring()'></ngc-button>
+      <ngc-button label='brk.4' (click)='loadPaymentSummary()'></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

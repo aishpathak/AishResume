@@ -1,0 +1,364 @@
+<ngc-titlebar title="Submit Breakdown Discrepancy" (cancel)="onCancel()" (onClear)="OnClear($event)">
+</ngc-titlebar>
+<form [formGroup]="brkdwnDiscrepancyForm">
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="110" formControlName="flightKey" upperCase="true">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" required="true" [autoFocus]="true" formControlName="fltArrivalDate"
+            [width]="100">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button align="right" value="g.search" iconType="search" (click)="onSearch()" accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <br />
+  <ngc-container type="box" *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column [column]="6">
+        <table>
+          <tr>
+            <th>
+              <ngc-label label="export.booking.flight.details"></ngc-label>
+            </th>
+          </tr>
+        </table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="fltDtlList" [dynamic]="true" [pageable]="true" [pageSize]="20">
+          <ngc-data-column text="g.sNo" align="center" [width]="20" cellsAlign="center" dataField=""
+            [cellsRenderer]="cellsRendererSno">
+          </ngc-data-column>
+
+          <ngc-data-column text="documentview.flt.no.date" [width]="120" align="center" cellsAlign="center"
+            dataField="flightNo">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="openFltOperativeScrn(group)">
+                  <ngc-display formControlName="flightNo" align="center"></ngc-display>/
+                  <ngc-display formControlName="flightDate" [onlyDate]="true" align="center"></ngc-display>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="itfs.flight.no.date" [width]="120" align="center" cellsAlign="center"
+            dataField="flightNo">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="brkdwnDiscrepancyForm.get(['fltDtlList',group,'itfsFlightNo']).value !=null">
+                  <ngc-display formControlName="itfsFlightNo" align="center"></ngc-display>/
+                  <ngc-display formControlName="itfsFlightDate" [onlyDate]="true" align="center"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.ata" [width]="120" align="center" cellsAlign="center" dataField="ata"
+            type="displayTime">
+          </ngc-data-column>
+          <ngc-data-column text="customs.disc.flight.clear" [width]="120" align="center" cellsAlign="center"
+            dataField="flightClrIndicator">
+          </ngc-data-column>
+          <ngc-data-column text="customs.disc.priority" [width]="120" align="center" cellsAlign="center"
+            dataField="discPrty">
+          </ngc-data-column>
+          <ngc-data-column text="customs.disc.normal" [width]="120" align="center" cellsAlign="center"
+            dataField="discNrml">
+          </ngc-data-column>
+          <ngc-data-column text="import.breakdown.compl.date" [width]="120" align="center" cellsAlign="center"
+            dataField="flightNo">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="bdsComplDate" [onlyDate]="true" align="center"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.status" [width]="120" align="center" cellsAlign="center" dataField="status">
+          </ngc-data-column>
+          <ngc-data-column text="g.action" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" type="link" (linkClick)="openShipment(group)" iconType="open-link"
+                  align="center" cellsAlign="center">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column hidden="true" text="" [width]="120" align="left" dataField="customsFlightId">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #shipmentDtl title="Shipment Details" [width]="1400" [height]="800" (close)="closeShpDtlScreen()">
+    <ngc-container *ngIf="!isCloseShpScreen">
+      <ngc-row>
+        <ngc-column [column]="4">
+          <ngc-label label='documentview.flt.no.date'></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-display formControlName="flightNo" align="left"> </ngc-display>/<ngc-display formControlName="flightDate"
+            align="left" [onlyDate]="true">
+          </ngc-display>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label='flight.ata'></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-display formControlName="ata" [onlyTime]="true" align="left"> </ngc-display>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label='customs.disc.version.no'></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-display formControlName="brkdwnDiscVerNo" align="left"> </ngc-display>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <br />
+    <ngc-container *ngIf="!isCloseShpScreen">
+      <ngc-row>
+        <ngc-column [column]="7.5">
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button align="right" [disabled]="!disableCommitFlag" value="customs.disc.submit" (click)="onSubmit()"
+            accessEnableOn="r">
+          </ngc-button>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button align="right" [disabled]="disableCommitFlag" value="customs.disc.complete" (click)="onComplete()"
+            accessEnableOn="r">
+          </ngc-button>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button align="right" value="customs.disc.supposed.pcs" (click)="openSupposedPcs()" accessEnableOn="r">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <br />
+    <ngc-container *ngIf="!isCloseShpScreen" type="box">
+      <ngc-row>
+        <ngc-column>
+
+          <ngc-edittable formArrayName="shpmntList" [pageable]="false">
+            <ngc-data-column text="g.sNo" [width]="20" align="center" cellsAlign="center" dataField=""
+              [cellsRenderer]="cellsRendererSno">
+            </ngc-data-column>
+            <ngc-data-column [disabled]="!disableCommitFlag" text="g.select" [width]="5" dataField="select" type="check"
+              align="center" cellsAlign="center" checkAll="true">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ng-container>
+                    <ngc-checkbox formControlName="select"
+                      [disabled]="brkdwnDiscrepancyForm.get(['shpmntList',group,'disableSubmit']).value"></ngc-checkbox>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.supposed.piece" dataField="rselect" type="radio" [width]="5"
+              align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="documentview.awb.no" dataField="shipmentNumber" [width]="30" align="center"
+              cellsAlign="center">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-awbdisplay formControlName='shipmentNumber' align="center">
+                  </ngc-awbdisplay>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Gen.HawbNo" dataField="hawbNumber" [width]="30" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.shipment.priority" dataField="priority" [width]="30" align="center"
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="g.type" dataField="bdsIrrTypeCode" [width]="30" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.pieces.weight" dataField="irrPcs" [width]="30" align="center"
+              cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-piecesdisplay formControlName="cirPieces" align="center"></ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="cirWeight" align="center"></ngc-weightdisplay>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="exp.constraint.code" dataField="constraintCode" [width]="30" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="customs.breakdown.submission.date" [width]="30" align="center"
+              dataField="bdsSubmDate" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display formControlName="bdsSubmDate" [onlyDate]="true" align="center"></ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="customs.shipment.handler" dataField="handler" [width]="30" align="center"
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column hidden="true" text="agent.status" dataField="status" [width]="30" align="center"
+              cellsAlign="center">
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #supposedPcs title="Supposed Pieces" [width]="1400" [height]="800" (close)="closeSuppPcsScreen()">
+    <ngc-container *ngIf="!isCloseSupPcsScrn">
+      <ngc-row>
+        <ngc-column [column]="4">
+          <ngc-label label='documentview.flt.no.date'></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-display formControlName="flightNo" align="left"> </ngc-display>/<ngc-display formControlName="flightDate"
+            align="left" [onlyDate]="true">
+          </ngc-display>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label='flight.ata'></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-display formControlName="ata" [onlyTime]="true" align="left"> </ngc-display>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='documentview.awb.no'></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-awbdisplay formControlName='shipmentNo' align="left">
+          </ngc-awbdisplay>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="Gen.HawbNo"></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-display formControlName="hawbNo" align="left"> </ngc-display>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <br />
+    <ngc-container *ngIf="!isCloseSupPcsScrn">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                </th>
+                <th>
+                  <ngc-label label='export.awb.by.hwb'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='customs.disc.manifest'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='inward.physical'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='customs.disc.supposed'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="discrepancyList">
+              <tr *ngFor="let item of brkdwnDiscrepancyForm.controls.discrepancyList.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-label label='export.pcs.lowercase' align="center"></ngc-label>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="awbPieces" align="center"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="manifestPieces" align="center"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="cirPieces" align="center"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="suppPieces" align="center"></ngc-piecesdisplay>
+                </td>
+              </tr>
+              <tr *ngFor="let item of brkdwnDiscrepancyForm.controls.discrepancyList.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-label label='warehouse.wgt' align="center"></ngc-label>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="awbWeight" align="center"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="manifestWeight" align="center"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="cirWeight" align="center"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="suppWeight" align="center"></ngc-weightdisplay>
+                </td>
+              </tr>
+
+            </tbody>
+          </ngc-table>
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <br />
+    <ngc-container *ngIf="!isCloseSupPcsScrn" type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="discrepancyList" [pageable]="false" [columnsHeight]="40" [showToolbar]="true"
+            [enablePageSizeHeight]="false">
+            <ngc-data-column text="g.sNo" [width]="20" align="center" cellsAlign="center" dataField=""
+              [cellsRenderer]="cellsRendererSno">
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.version.no" dataField="brkdwnDiscVerNo" [width]="40" align="center"
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.code" dataField="bdsIrrTypeCode" align="center" cellsAlign="center"
+              [width]="40">
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.pieces" dataField="cirPieces" align="center" cellsAlign="center"
+              [width]="40">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-piecesdisplay formControlName="cirPieces" align="center"></ngc-piecesdisplay>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.weight" dataField="cirWeight" align="center" cellsAlign="center"
+              [width]="40">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-weightdisplay formControlName="cirWeight" align="center"></ngc-weightdisplay>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.supposed.pieces" dataField="suppPieces" align="center"
+              cellsAlign="center" [width]="40">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-piecesdisplay formControlName="suppPieces" align="center"></ngc-piecesdisplay>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="customs.disc.supposed.weight" dataField="suppWeight" align="center"
+              cellsAlign="center" [width]="40">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-weightdisplay formControlName="suppWeight" align="center"></ngc-weightdisplay>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+</form>

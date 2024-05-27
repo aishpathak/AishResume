@@ -1,0 +1,337 @@
+<form [formGroup]="scheduleCollection">
+  <ngc-titlebar title="tcs.maintainscheduleCollectionEnquiry"></ngc-titlebar>
+  <ng-container formGroupName="search">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.truckDock"></ngc-label>
+          <div>
+            <ngc-lov formControlName="truckDockNo" dataField="desc" sourceId="Truck_Dock_No" accessEnableOn="r">
+              <ngc-data-column text="tcs.truckDock" [width]="150" dataField="desc"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.companyName"></ngc-label>
+          <div>
+            <ngc-lov formControlName="companyName" dataField="desc" sourceId="COMPANY_NAME" accessEnableOn="r">
+              <ngc-data-column text="tcs.companyId" dataField="param1" [width]="50"></ngc-data-column>
+              <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.vehicleNo"></ngc-label>
+          <div>
+            <ngc-input formControlName="vehicleNo" accessEnableOn="r"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.from"></ngc-label>
+          <div>
+            <ngc-dateinput formControlName="startPeriodDate" accessEnableOn="r"></ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.to"></ngc-label>
+          <div>
+            <ngc-dateinput formControlName="endPeriodDate" accessEnableOn="r"></ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column verticalAlign="bottom" align="right">
+          <ngc-button label="g.search" (click)="onSearch()"></ngc-button>
+          <ngc-button label="g.create" (click)="onCreate(createWindow)"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+  <!-- DataTable Implementation -->
+
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="searchResults" (linkClick)="onDataTableClick($event, updateWindow)">
+          <ngc-data-column text="tcs.companyName" dataField="companyName" [width]="150" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="tcs.truckDock" dataField="truckDockNo" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.vehicleNo" dataField="vehicleNo" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.startTime" dataField="scheduledFromTime" type="displayTime" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="tcs.endTime" dataField="scheduledTillTime" type="displayTime" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="tcs.weekofDays" dataField="WeekofDays" [width]="150" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="tcs.repeatPeriod" type="displayDate" dataField="RepeatPeriod" [width]="150"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.update" dataField="Update" type="link" iconType="edit" cellsAlign="center"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.delete" dataField="delete" type="link" iconType="delete" cellsAlign="center"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- form to create schedule collection -->
+  <ng-container formGroupName="createschedule">
+    <ngc-window #createWindow title="tcs.createScheduleCollection" [width]="800" [height]="400">
+      <ngc-container>
+        <ngc-row type="section">
+          <ngc-column>
+            <ngc-label label="tcs.truckDock"></ngc-label>
+            <div>
+              <ngc-lov formControlName="resourceId" displayField="desc" dataField="code" sourceId="Truck_Dock_No">
+                <ngc-data-column text="tcs.truckDock" [width]="150" dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.companyName"></ngc-label>
+            <div>
+              <ngc-lov formControlName="companyId" displayField="desc" dataField="param1" sourceId="COMPANY_NAME">
+                <ngc-data-column text="tcs.companyId" dataField="param1" [width]="50"></ngc-data-column>
+                <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label [width]="100" label="tcs.vehicleNo"></ngc-label>
+            <div>
+              <ngc-input formControlName="vehicleNo"></ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column [column]="2">
+            <div>
+              <ngc-label label="tcs.repeatPeriod"></ngc-label>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3">
+            <ngc-label label="tcs.from"></ngc-label>
+            <div>
+              <ngc-dateinput [min]="toMin" formControlName="startPeriodDate">
+              </ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3">
+            <ngc-label label="tcs.to"></ngc-label>
+            <div>
+              <ngc-dateinput [min]="this.scheduleCollection.get('createschedule')['controls']['startPeriodDate'].value"
+                formControlName="endPeriodDate"></ngc-dateinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column [column]="2">
+            <div>
+              <ngc-label label="tcs.scheduleTime"></ngc-label>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label label="tcs.timeFrom"></ngc-label>
+            <div>
+              <ngc-timeinput formControlName="scheduledFromTime" dataType="string"></ngc-timeinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label label="tcs.timeTo"></ngc-label>
+            <div>
+              <ngc-timeinput formControlName="scheduledTillTime" dataType="string"></ngc-timeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column [column]="2">
+            <ngc-label [width]="200" label="tcs.weekofDays"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.mon"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnMonday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.tue"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnTuesday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.wed"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnWednesday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.thu"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnThursday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.fri"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnFriday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.sat"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnSaturday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.sun"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnSunday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.save" (click)="CreatSave()"></ngc-button>
+              <ngc-button label="g.close" (click)="onClose(createWindow)"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </ng-container>
+
+  <!-- PopUp To update Schedule collection -->
+  <ng-container formGroupName="update">
+    <ngc-window #updateWindow title="tcs.updateScheduleCollection" [width]="800" [height]="400">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.truckDock"></ngc-label>
+            <div>
+              <ngc-display formControlName="truckDockNo"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.companyName"></ngc-label>
+            <div>
+              <ngc-lov formControlName="companyName" dataField="desc" sourceId="COMPANY_NAME">
+                <ngc-data-column text="tcs.companyId" dataField="param1" [width]="50"></ngc-data-column>
+                <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label [width]="100" label="tcs.vehicleNo"></ngc-label>
+            <div>
+              <ngc-input formControlName="vehicleNo"></ngc-input>
+              <!-- <ngc-dropdownlist sourceId=""></ngc-dropdownlist> -->
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column [column]="2">
+            <div>
+              <ngc-label label="tcs.repeatPeriod"></ngc-label>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3">
+            <ngc-label label="tcs.from"></ngc-label>
+            <div>
+              <ngc-dateinput formControlName="startPeriodDate"></ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3">
+            <ngc-label label="tcs.to"></ngc-label>
+            <div>
+              <ngc-dateinput [min]="this.scheduleCollection.get('update')['controls']['startPeriodDate'].value"
+                formControlName="endPeriodDate"></ngc-dateinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column [column]="2">
+            <div>
+              <ngc-label label="tcs.scheduleTime"></ngc-label>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label label="tcs.timeFrom"></ngc-label>
+            <div>
+              <ngc-timeinput formControlName="scheduledFromTime" dataType="string"></ngc-timeinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label label="tcs.timeTo"></ngc-label>
+            <div>
+              <ngc-timeinput formControlName="scheduledTillTime" dataType="string"></ngc-timeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column [column]="2">
+            <ngc-label [width]="200" label="tcs.weekofDays"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.mon"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnMonday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.tue"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnTuesday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.wed"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnWednesday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.thu"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnThursday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.fri"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnFriday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.sat"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnSaturday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.sun"></ngc-label>
+            <div>
+              <ngc-checkbox type="checkbox" formControlName="applicableOnSunday"></ngc-checkbox>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.save" (click)="onUpdateSave()"></ngc-button>
+              <ngc-button label="g.close" (click)="onClose(updateWindow)"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </ng-container>
+</form>

@@ -1,0 +1,1988 @@
+<ngc-titlebar title="export.NAWB.title" (save)="onSave($event)" (print)="printNAWBReport($event)"></ngc-titlebar>
+<form [formGroup]='nawbForm'>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label="g.svc"></ngc-label>
+        </div>
+        <ngc-checkbox accessEnableOn="r" formControlName="svc" [width]='40'></ngc-checkbox>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-input accessEnableOn="r" formControlName='awbNumber' maxLength="11"></ngc-input>
+      </ngc-column>
+      <ngc-column [column]='1'>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value=" "></ngc-label>
+        <div>
+          <ngc-button #search accessEnableOn="r" label='g.search' (click)="onAwbSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value=" "></ngc-label>
+        <div>
+          <ngc-button label='export.NAWB.stock' (click)="onStock()" #stockButton [disabled]="stockButtonFlag"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='8'>
+      </ngc-column>
+    </ngc-row>
+    <!-- code added for nawb master details-->
+    <ngc-row *ngIf="showDataFlg">
+      <ngc-column>
+        <ngc-label label='awb.origin'></ngc-label>
+        <div>
+          <ngc-lov [maxlength]="3" formControlName="origin" [width]="45" title='ORIGIN' upperCase="true"
+            dataField="code" displayMember="code" sourceId="APT" required>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='awb.destination'></ngc-label>
+        <div>
+          <ngc-lov [maxlength]="3" formControlName="destination" [width]="45" title='awb.destination' upperCase="true"
+            dataField="code" displayMember="code" sourceId="APT" required>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='awb.pieces'></ngc-label>
+        <div>
+          <ngc-piecesinput formControlName="pieces" required>
+          </ngc-piecesinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.weight'></ngc-label>
+        <div>
+          <ngc-weightinput formControlName="weight" required></ngc-weightinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='awb.weightcode'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='EXPORT$Weight_Code' [width]="70" formControlName="weightUnitCode" default="K"
+            required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='awb.volume.code'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="70" formControlName="volumeUnitCode" sourceId="EXPORT$Volume_Code">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='awb.volume.amount'></ngc-label>
+        <div>
+          <ngc-numberinput [width]="80" formControlName="volumeAmount"></ngc-numberinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-label label='g.or'></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.NAWB.density.indicator'></ngc-label>
+        <div>
+          <ngc-display [width]='70' formControlName="densityIndicator"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.NAWB.density.group'></ngc-label>
+        <div>
+          <ngc-numberinput [width]="60" digits="2" textAlign='right' max="99" formControlName="densityGroupCode"
+            decimalDigits="0"></ngc-numberinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showDataFlg">
+      <ngc-column [column]="3">
+        <ngc-label label="export.NAWB.shippers.certification"></ngc-label>
+        <div>
+          <ngc-input [width]="240" formControlName="shippersCertificateSignature" upperCase='true' [maxlength]='20'>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="awb.natureofgoods"></ngc-label>
+        <div>
+          <ngc-input [width]="240" formControlName="natureOfGoodsDescription" (ngModelChange)='headerNog($event)'
+            upperCase='true' [maxlength]='20' required></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showDataFlg">
+      <ngc-column [column]="3">
+        <ngc-label label="export.NAWB.carrier.execution.date"></ngc-label>
+        <div>
+          <ngc-dateinput required [width]="90" formControlName="carriersExecutionDate"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="export.NAWB.carrier.execution.place"></ngc-label>
+        <div>
+          <ngc-input required maxLength="17" [width]="220" formControlName="carriersExecutionPlace" upperCase='true'>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4">
+        <ngc-label label="export.NAWB.carrier.execution.sign"></ngc-label>
+        <div>
+          <ngc-input required maxLength="35" [width]="470" formControlName="carriersExecutionAuthorisationSignature"
+            upperCase='true'></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label=" "></ngc-label>
+        <div>
+          <ngc-button value="export.NAWB.print.copy" (click)="printNAWBCopy($event)"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type='section' *ngIf="showDataFlg">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <ngc-tab-card title='export.NAWB.shipper.consignee.issuing' [indicatorIconType]="shipperInfoIndicatorIcon"
+            indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [column]='4'>
+                  <ngc-container formGroupName='shipperInfo' title='awb.shipper.details'>
+                    <ngc-row>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.code"></ngc-label>
+                        </div>
+
+                        <ngc-lov formControlName="customerCode" sourceId="SHIPPER_DATA" title="g.customer.list"
+                          dataField="code" [width]="100" (select)="onShipperCodeSelection($event)">
+                          <ngc-data-column text="customer.code" dataField="code" [width]="50"></ngc-data-column>
+                          <ngc-data-column text="g.customer.full.name" dataField="desc" [width]="80"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.accountNumber"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='customerAccountNumber' [width]='180' maxLength="14"></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column [column]='4'>
+                        <div>
+                          <ngc-label label="g.name"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='customerName' [width]='400' maxLength="70" required></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row formGroupName='customerAddressInfo'>
+                      <ngc-column [column]='4'>
+                        <div>
+                          <ngc-label label="g.address"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='streetAddress1' [width]='400' required maxLength="70"></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row formGroupName="customerAddressInfo">
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.place"></ngc-label>
+                        </div>
+                        <!-- <ngc-input formControlName='customerPlace' [width]='100' required></ngc-input> -->
+                        <ngc-input required formControlName='customerPlace'></ngc-input>
+                      </ngc-column>
+                      <ngc-column column="10" [grid48]="true">
+                        <div>
+                          <ngc-label label="export.nawb.post.code"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='postalCode' [width]='80' maxLength="9"></ngc-input>
+                      </ngc-column>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.country"></ngc-label>
+                        </div>
+                        <ngc-lov required formControlName="countryCode" sourceId="COUNTRY"  title="g.country"
+                           dataField="code" [width]="50">
+                          <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                          <ngc-data-column text="g.description" [width]="200" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column column="10" [grid48]="true">
+                        <div>
+                          <ngc-label label="g.state"></ngc-label>
+                        </div>
+                        <ngc-lov sourceId="STATE" title="g.state" formControlName="stateCode"  dataField="code"
+                            width="110" [noValidation]="true" [sourceParameters]="{'parameter1': nawbForm.get('shipperInfo').get('customerAddressInfo').get('countryCode').value}"
+                          maxLength="9">
+                          <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                          <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-label label="val.appointedAgent"></ngc-label>
+                        <div>
+                          <ngc-lov required accessEnabledOn="r" formControlName="appointedAgent" [width]="200"
+                            upperCase="true" [dropDownWidth]="300" sourceId="AGENT_NAME_DISPLAY" sourceType="query"
+                            title="agent.appointed.agent" displayField="code" dataField="code"
+                            (select)="setAppointedAgent($event)">
+                            <ngc-data-column text="g.code" dataField="code" [width]="100">
+                            </ngc-data-column>
+                            <ngc-data-column text="g.name" dataField="desc" [width]="150">
+                            </ngc-data-column>
+                          </ngc-lov>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label='rcar.rcarStatus'></ngc-label>
+                        <div *ngIf="!tenantSpecific">
+                          <ngc-dropdownlist required accessEnabledOn="r" width="80" displayMember="code"
+                            formControlName="rcarType" sourceId='RCAR_CODE_WITH_FILTER' sourceType='query'
+                            [dropDownWidth]="80"
+                            [sourceParameters]="{'parameter1': nawbForm.get('shipperInfo').get('appointedAgent').value}"
+                            selectedIndex='1'>
+                          </ngc-dropdownlist>
+                        </div>
+                        <div feature="Exp.Nawb.RcarStatus">
+                          <ngc-dropdownlist required accessEnabledOn="r" width="80" displayMember="code"
+                            formControlName="rcarType" sourceId='Nawb$RcarStatus' [dropDownWidth]="80">
+                          </ngc-dropdownlist>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button (click)="onAddContact($event)" value="export.NAWB.add.contact"></ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column formGroupName="customerAddressInfo">
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.contact.type"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.details"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="customerContactInfo">
+                            <tr
+                              *ngFor="let item of nawbForm.getList('shipperInfo.customerAddressInfo.customerContactInfo'); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-dropdownlist [width]="60" formControlName="contactIdentifier" displayMember="code"
+                                  sourceId='CONTACT_TYPE' sourceType="query"></ngc-dropdownlist>
+                              </td>
+                              <td>
+                                <ngc-input formControlName="contactDetail" [width]="250" maxLength="25"></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteShipperContact($event,index)" hideValue="true"
+                                  iconType="delete">
+                                  <ngc-i18n value="g.delete"></ngc-i18n>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]='4'>
+                  <ngc-container formGroupName='consigneeInfo' title='export.nawb.consignee.details'>
+                    <ngc-row>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.accountNumber"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='customerAccountNumber' [width]='180'></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column [column]='4'>
+                        <div>
+                          <ngc-label label="g.name"></ngc-label>
+                        </div>
+                        <ngc-lov [noValidation]=true required formControlName="customerName"
+                          [sourceParameters]='destination' sourceType='query' sourceId="OVERSEAS_CONSIGNEE"
+                           title="consignee.name"  dataField="code" [width]="380" (select)='consigneeSelect($event)'>
+                          <ngc-data-column text="g.name" dataField="code" [width]="50" maxLength="70"></ngc-data-column>
+                        </ngc-lov>
+                        <!-- <ngc-input formControlName='customerName' [width]='400' required></ngc-input> -->
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row formGroupName='customerAddressInfo'>
+                      <ngc-column [column]='4'>
+                        <div>
+                          <ngc-label label="g.address"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='streetAddress1' [width]='400' maxLength="70" required></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row formGroupName="customerAddressInfo">
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.place"></ngc-label>
+                        </div>
+                        <!-- <ngc-input formControlName='customerPlace' [width]='100' required></ngc-input> -->
+                        <ngc-input required formControlName='customerPlace'></ngc-input>
+                      </ngc-column>
+                      <ngc-column column="10" [grid48]="true">
+                        <div>
+                          <ngc-label label="export.nawb.post.code"></ngc-label>
+                        </div>
+                        <ngc-input formControlName='postalCode' [width]='80' maxLength="9"></ngc-input>
+                      </ngc-column>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.country"></ngc-label>
+                        </div>
+                        <ngc-lov required formControlName="countryCode" sourceId="COUNTRY"  title="g.country"
+                           dataField="code" [width]="50">
+                          <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                          <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column column="10" [grid48]="true">
+                        <div>
+                          <ngc-label label="g.state"></ngc-label>
+                        </div>
+                        <ngc-lov sourceId="STATE" title="g.state" formControlName="stateCode"  dataField="code"
+                            width="120" [noValidation]="true" [sourceParameters]="{'parameter1': nawbForm.get('consigneeInfo').get('customerAddressInfo').get('countryCode').value}"
+                            maxLength="9">
+                          <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                          <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-label label=" "></ngc-label>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button (click)="onAddconsigneeContact($event)" value="export.NAWB.add.contact"></ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column formGroupName="customerAddressInfo">
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.contact.type"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.details"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="customerContactInfo">
+                            <tr
+                              *ngFor="let item of nawbForm.get('consigneeInfo.customerAddressInfo.customerContactInfo').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-dropdownlist [width]="60" formControlName="contactIdentifier"
+                                  sourceId='CONTACT_TYPE' displayMember="code" sourceType="query"></ngc-dropdownlist>
+                              </td>
+                              <td>
+                                <ngc-input formControlName="contactDetail" [width]="250" maxLength="25"></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteConsigneeContact($event,index)" hideValue="true"
+                                  iconType="delete">
+                                  <ngc-i18n value="g.delete"></ngc-i18n>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]='4'>
+                  <ngc-container title='export.NAWB.issuing.agent' formGroupName="agentInfo">
+                    <ngc-row>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.code"></ngc-label>
+                        </div>
+                        <ngc-display formControlName='agentCode' [width]='180'></ngc-display>
+                      </ngc-column>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.accountNumber"></ngc-label>
+                        </div>
+                        <ngc-display formControlName='accountNumber' [width]='180'></ngc-display>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column [column]='4'>
+                        <div>
+                          <ngc-label label="g.name"></ngc-label>
+                        </div>
+                        <!-- <ngc-input formControlName='agentName' [width]='400' required></ngc-input> -->
+                        <ngc-display formControlName='agentName' [width]='180'></ngc-display>
+
+                      </ngc-column>
+                    </ngc-row>
+
+                    <ngc-row>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="export.nawb.iata.code"></ngc-label>
+                        </div>
+                        <ngc-display formControlName='cargAgentNumericCode' [width]='100' decimalDigits="0" digits="7">
+                        </ngc-display>
+                      </ngc-column>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="g.city"></ngc-label>
+                        </div>
+
+                        <ngc-display formControlName='agentPlace' [width]='180'></ngc-display>
+                      </ngc-column>
+                      <ngc-column>
+                        <div>
+                          <ngc-label label="export.NAWB.cass.code"></ngc-label>
+                        </div>
+                        <ngc-display formControlName='iatacargoAgentCASSAddress' [width]='100'></ngc-display>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="export.NAWB.flight.booking.routing" [indicatorIconType]="flightBookingIndicatorIcon"
+            indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-container title="export.NAWB.flight.booking">
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button priority="secondary" (click)="onAddFlightBooking($event)" value="export.NAWB.add.flight">
+                        </ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label value='flight.carrier'></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label value='flight.Flight'></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label value='flight.date'></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label value='g.delete'></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName='flightBookingList'>
+                            <tr *ngFor="let item of nawbForm.get('flightBookingList').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-lov formControlName="carrierCode" sourceId='CARRIER' title='AIRLINE'
+                                  displayMember="code" dataField='code' [width]="40" uppercase='true'
+                                  [validOnly]="true">
+                                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                                  <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                                </ngc-lov>
+                              </td>
+                              <td>
+                                <ngc-flightkeyinput formControlName="flightNumber" [noCarrier]="true">
+                                </ngc-flightkeyinput>
+                              </td>
+                              <td>
+                                <ngc-dateinput [width]="110" formControlName="flightDate"></ngc-dateinput>
+                              </td>
+                              <!-- <td *ngIf="index ==0">
+                                <ngc-label value=' '></ngc-label>
+                              </td> -->
+                              <td class="text-center">
+                                <ngc-link (linkClick)="onDeleteFlight($event,index)" hideValue="true" iconType="delete">
+                                  <ngc-i18n value="g.delete"></ngc-i18n>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+
+                <ngc-column>
+                  <ngc-container title="export.routing">
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button priority="secondary" (click)="addNewRouting($event)" value="export.NAWB.add.routing">
+                        </ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label value='g.destination'></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label value='g.carrier'></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label value='g.delete'></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="routingList">
+                            <tr *ngFor="let item of nawbForm.get('routingList').controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-lov required formControlName="to" upperCase="true" [dropDownWidth]="60"
+                                  sourceId="APT" title="flight.airport" displayMember="code" dataField="code"
+                                  [validOnly]="true">
+                                  <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                                  </ngc-data-column>
+                                  <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                                  </ngc-data-column>
+                                </ngc-lov>
+                              </td>
+                              <td>
+                                <ngc-lov required formControlName="carrierCode" sourceId='CARRIER' title='AIRLINE'
+                                  displayMember="code" dataField='code' [width]="40" uppercase='true'
+                                  [validOnly]="true">
+                                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                                  <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                                </ngc-lov>
+                              </td>
+                              <!-- <td *ngIf="index ==0">
+                                <ngc-label value=' '></ngc-label>
+                              </td> -->
+                              <td class="text-center">
+                                <ngc-link (linkClick)="onDeleteRouting($event,index)" hideValue="true"
+                                  iconType="delete">
+                                  <ngc-i18n value="g.delete"></ngc-i18n>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+
+          <ngc-tab-card title="export.NAWB.ssr.osi" [indicatorIconType]="ssrOsiInfoIcon" indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label value="export.NAWB.handling.information"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="6" align="right">
+                  <ngc-button (click)="onAddSSROSI($event)" value="g._add"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="6">
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="export.NAWB.osi.ssr"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.NAWB.service.request"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.delete"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="ssrOsiInfo">
+                      <tr *ngFor="let info of nawbForm.get('ssrOsiInfo').controls; let index = index; "
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-dropdownlist [width]="100" [source]="serviceRequestTypes"
+                            formControlName="serviceRequestType"></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input [width]="500" maxlength="65" formControlName="serviceRequestcontent"></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-link (linkClick)="onDeleteSSROSI($event,index)" hideValue="true" iconType="delete">
+                            <ngc-i18n value="g.delete"></ngc-i18n>
+                          </ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+
+          <div ngc-tab-card title='export.NAWB.special.handling' [indicatorIconType]="shcIndicatorIcon" indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <div>
+                    <ngc-label label="export.NAWB.customs.origin"></ngc-label>
+                  </div>
+
+                  <ngc-lov [maxlength]="2" formControlName="customOrigin" sourceId="CUSTOMS_ORIGIN_DATA"
+                    title="export.NAWB.customs.origin" dataField="code" width="50%">
+                    <ngc-data-column text="export.NAWB.customs.origin" dataField="code" [width]="100"></ngc-data-column>
+                    <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                  </ngc-lov>
+                </ngc-column>
+                <ngc-column column="10">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column column="2">
+                        <ngc-label label="g.special.handling.code"></ngc-label>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-shcinput formArrayName="shcCode" dataField="specialHandlingCode">
+                        </ngc-shcinput>
+
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+              </ngc-row>
+            </ngc-container>
+
+
+          </div>
+
+
+          <ngc-tab-card title="export.NAWB.also.notify" [indicatorIconType]="alsoNotifyIndicatorIcon" indicatorIconColor="red">
+            <ngc-container formGroupName="alsoNotify">
+              <ngc-row>
+                <ngc-column column="6">
+                  <div>
+                    <ngc-label label='g.name'></ngc-label>
+                  </div>
+                  <ngc-input formControlName="customerName" [width]="600" maxLength="70"></ngc-input>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row formGroupName="customerAddressInfo">
+                <ngc-column [column]="6">
+                  <div>
+                    <ngc-label label='g.address'></ngc-label>
+                  </div>
+                  <ngc-input formControlName="streetAddress1" [width]="600" maxLength="70"></ngc-input>
+                </ngc-column>
+                <ngc-column>
+                  <div>
+                    <ngc-label label='g.postalCode'></ngc-label>
+                  </div>
+                  <ngc-input formControlName="postalCode" [width]="140"></ngc-input>
+                </ngc-column>
+                <ngc-column>
+                  <div>
+                    <ngc-label label='g.place'></ngc-label>
+                  </div>
+                  <ngc-input formControlName='customerPlace' [maxlength]='19'></ngc-input>
+
+                </ngc-column>
+
+                <ngc-column>
+                  <ngc-label label='g.country'></ngc-label>
+                  <div>
+
+                    <ngc-lov  formControlName="countryCode" sourceId="COUNTRY"  title="g.country"  dataField="code"
+                      width="50%">
+                      <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <div>
+                    <ngc-label label="g.state"></ngc-label>
+                  </div>
+                  <ngc-lov sourceId="STATE" title="g.state" formControlName="stateCode"  dataField="code"
+                      width="120" [noValidation]="true" [sourceParameters]="{'parameter1': nawbForm.get('alsoNotify').get('customerAddressInfo').get('countryCode').value}"
+                    maxLength="9">
+                    <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                    <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                  </ngc-lov>
+                </ngc-column>
+              </ngc-row>
+
+              <ngc-row>
+                <ngc-column [column]='2'>
+                  <ngc-label label='export.NAWB.contact.information'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="6" align="right">
+                  <ngc-button (click)="onAddOnNotifyContact($event)" value="export.NAWB.add.contact"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="6" formGroupName="customerAddressInfo">
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="g.contact.type"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.details"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.delete"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="customerContactInfo">
+                      <tr
+                        *ngFor="let item of nawbForm.get('alsoNotify.customerAddressInfo.customerContactInfo').controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-dropdownlist [width]="60" formControlName="contactIdentifier" sourceId='CONTACT_TYPE'
+                            displayMember="code" sourceType="query"></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input maxLength="25" formControlName="contactDetail" [width]="250"></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-link (linkClick)="onDeleteAlsoNotifyContact($event,index)" hideValue="true"
+                            iconType="delete">
+                            <ngc-i18n value="g.delete"></ngc-i18n>
+                          </ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="export.NAWB.commodity" [indicatorIconType]="commodityIndicatorIcon" indicatorIconColor="red">
+            <ngc-container formArrayName="rateDescriptionForNawb">
+              <ngc-row>
+                <ngc-column column="9" align="right">
+                  <ngc-button priority="secondary" (click)="addNewRowForRateDescriptionForNawb($event)"
+                    value="export.NAWB.add.row" (ngModelChange)="onChange($event)">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row *ngFor="let item of nawbForm.getList('rateDescriptionForNawb'); let index=index"
+                [formGroupName]="index">
+                <ngc-column>
+                  <ngc-table [width]='1400'>
+                    <th>
+                      <ngc-label value='export.NAWB.rate.line.br.number'></ngc-label>
+                    </th>
+                    <tbody>
+                      <ng-container>
+                        <td>
+                          <ngc-label value='export.NAWB.rate.line.br.number'></ngc-label>
+                          <ngc-display formControlName="rateLineNumber" uppercase='true'></ngc-display>
+                        </td>
+                      </ng-container>
+                      <ngc-container>
+                        <ngc-row>
+                          <ngc-column>
+                            <ngc-table>
+                              <thead>
+                                <th>
+                                  <ngc-label value='export.NAWB.pc.rcp'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label label='g.weightCode'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="g.gross.weight"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="export.NAWB.rate.class"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="export.NAWB.commodity.item.no"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="export.NAWB.chargeable.weight"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="export.NAWB.rate.charge"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="export.NAWB.total.charge.amount"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="g.delete"></ngc-label>
+                                </th>
+                              </thead>
+                    <tbody>
+                      <ng-container>
+                        <td>
+                          <ngc-numberinput digits="4" textAlign='right' max="9999" formControlName="numberOfPieces"
+                            decimalDigits="0" required></ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist sourceId='EXPORT$Weight_Code' [width]="70" default="K"
+                            formControlName="weightUnitCode" [autoSelect]="true"></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-weightinput textAlign='right' formControlName="grossWeight" required></ngc-weightinput>
+                        </td>
+                        <td>
+                          <ngc-lov [maxlength]="1" (modelChange)='onCommodityRateChange(index)'
+                            formControlName="rateClassCode" sourceId="RATE_DATA" title="export.NAWB.rate.class" dataField="code"
+                            width="50%" required>
+                            <ngc-data-column text="g.code" dataField="code" [width]="50"></ngc-data-column>
+                            <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                          </ngc-lov>
+                        </td>
+                        <td>
+                          <ngc-numberinput [width]="70" digits="7" max="9999999" formControlName="commodityItemNo"
+                            decimalDigits="0"></ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-weightinput (modelChange)='onCommodityRateChange(index)' textAlign='right'
+                            formControlName="chargeableWeight"></ngc-weightinput>
+                        </td>
+                        <td>
+                          <ngc-currencyinput (modelChange)='onCommodityRateChange(index)' max="999999.9"
+                            formControlName="rateChargeAmount"></ngc-currencyinput>
+                        </td>
+                        <td>
+                          <ngc-currencyinput (modelChange)='onTotalChargeAmount(index)'
+                            formControlName="totalChargeAmount" [localCurrency]="false" [min]='0'
+                            [currencyDecimalDigits]='3'>
+                          </ngc-currencyinput>
+                        </td>
+                        <td>
+                          <ngc-link (linkClick)="onDeleteRateDesc($event, index)" iconType="delete">
+                            <ngc-i18n value="g.delete"></ngc-i18n>
+                          </ngc-link>
+                        </td>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container formArrayName="rateDescriptionOtherInfoForNawb">
+              <ngc-row *ngFor="let sitem of item.getList('rateDescriptionOtherInfoForNawb'); let sindex=index"
+                [formGroupName]="sindex">
+                <ngc-column [column]="3">
+                  <ngc-label label="g.type"></ngc-label>
+                  <div>
+                    <ngc-dropdownlist *ngIf="sindex==0&&index==0" required sourceId="RTD_TYPE" sourceType="query"
+                      formControlName="type" (keyup)="onChange($event,sitem)" [width]="100"></ngc-dropdownlist>
+                  </div>
+                  <div>
+                    <ngc-dropdownlist *ngIf="index!=0||sindex!=0" sourceId="RTD_TYPE" sourceType="query"
+                      formControlName="type" (keyup)="onChange($event.target.value)" [width]="100">
+                    </ngc-dropdownlist>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label label="g.delete"></ngc-label>
+                  <div>
+                    <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)" iconType="delete">
+                      <ngc-i18n value="g.delete"></ngc-i18n>
+                    </ngc-link>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="10">
+                  <ngc-container *ngIf="sitem.get('type').value == 'ND'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.weight"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.measurement.unit.code"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.no.dimension.available"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.length.dimension"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.width.dimension"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.height.dimension"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.no.of.pieces"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-weightinput formControlName="weight" required="true"></ngc-weightinput>
+                              </td>
+                              <td>
+                                <ngc-dropdownlist formControlName="measurementUnitCode"
+                                  sourceId="Shipment$MeasurementUnitCode" [width]="70" required="true">
+                                </ngc-dropdownlist>
+                              </td>
+                              <td>
+                                <ngc-checkbox (modelChange)='onDimensionValue($event, index, sindex)'
+                                  formControlName="noDimensionAvailable"></ngc-checkbox>
+                              </td>
+                              <td>
+                                <ngc-numberinput [width]="80" digits="5" formControlName="dimensionLength"
+                                  decimalDigits="0" required></ngc-numberinput>
+                              </td>
+                              <td>
+                                <ngc-numberinput [width]="80" digits="5" formControlName="dimensionWIdth"
+                                  decimalDigits="0" required></ngc-numberinput>
+                              </td>
+                              <td>
+                                <ngc-numberinput [width]="80" digits="5" formControlName="dimensionHeight"
+                                  decimalDigits="0" required></ngc-numberinput>
+                              </td>
+                              <td>
+                                <ngc-piecesinput formControlName="numberOfPieces" required>
+                                </ngc-piecesinput>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NS'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="export.NAWB.slac"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-numberinput [width]="80" digits="5" max="99999" formControlName="slacCount"
+                                  decimalDigits="0" required></ngc-numberinput>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey">
+                                  </ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NG'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label [width]='200' label="export.NAWB.nature.of.goods.ng"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-input [width]='200' required formControlName="natureOfGoodsDescription"
+                                  (ngModelChange)='nog($event, index)' [maxlength]='20' uppercase='true'>
+                                </ngc-input>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NV'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="export.NAWB.volume.code"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.NAWB.volume.amount"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-dropdownlist [width]="70" formControlName="volumeUnitCode"
+                                  sourceId="EXPORT$Volume_Code" required></ngc-dropdownlist>
+                              </td>
+                              <td>
+                                <ngc-numberinput required [width]="100" formControlName="volumeAmount">
+                                </ngc-numberinput>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="9">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NC'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label [width]='200' label="export.NAWB.nature.of.goods.nc" required></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-input [width]='200' formControlName="natureOfGoodsDescription"
+                                  (ngModelChange)='nog($event)' [maxlength]='20' uppercase='true' required>
+                                </ngc-input>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NU'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="uld.uldNumber"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-uldinput formControlName="uldNumber" required></ngc-uldinput>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NH'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="export.NAWB.harmonised.commodity.code"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+
+                                <ngc-alphanuminput required [maxlength]="18" [width]='180'
+                                  formControlName="harmonisedCommodityCode">
+                                </ngc-alphanuminput>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-container *ngIf="sitem.get('type').value === 'NO'">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="export.NAWB.iso.country.code"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="g.delete"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            <tr>
+                              <td>
+                                <ngc-lov [maxlength]="2" required formControlName="countryCode" sourceId="COUNTRY"
+                                  title="g.country" dataField="code" width="50%">
+                                  <ngc-data-column text="g.country" dataField="code" [width]="50">
+                                  </ngc-data-column>
+                                  <ngc-data-column text="g.description" [width]="150" dataField="desc">
+                                  </ngc-data-column>
+                                </ngc-lov>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onDeleteRateDescOtherInfoForNawb(index,sindex)">
+                                  <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <div>
+                    <ngc-button priority="secondary" (click)="onAddRowNotificationForNawb(index)"
+                      value="export.NAWB.add.other.info">
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            </tbody>
+            </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  </ngc-tab-card>
+  <ngc-tab-card title="awb.charge.details" [indicatorIconType]="chargeDetailsIndicatorIcon" indicatorIconColor="red">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column='5'>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label='awb.other.charges.due.agent'></ngc-label>
+              </ngc-column>
+              <ngc-column align="right">
+                <ngc-button priority="secondary" (click)="addOtherChargesDueAgent($event)" label="g.addRow">
+                </ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value='awb.pc.indicator.other.charges' [width]="70"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="awb.other.charge.code" [width]='70'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="awb.charge.amount"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.delete"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="otherChargesDueAgent">
+                    <tr *ngFor="let item of nawbForm.get('otherChargesDueAgent').controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-input [width]='70' formControlName="otherChargeIndicator" uppercase='true' maxLength="1"
+                          (ngModelChange)="onaddingDueAgentCharge($event,index)"></ngc-input>
+                        <!--<ngc-dropdownlist [width]='80' formControlName="otherChargeIndicator" sourceId='AWB$Service_Code' uppercase='true'></ngc-dropdownlist>-->
+                      </td>
+                      <td>
+                        <ngc-lov formControlName="otherChargeCode" [width]="60" upperCase="true" [dropDownWidth]="60"
+                          sourceId="NAWB_CHARGE_CODE" title="CHARGECODE" displayMember="code" dataField="code">
+                          <ngc-data-column text="g.code" dataField="code" [width]="100">
+                          </ngc-data-column>
+                          <ngc-data-column text="g.name" dataField="desc" [width]="150">
+                          </ngc-data-column>
+                        </ngc-lov>
+                      </td>
+
+                      <td>
+
+                        <ngc-currencyinput formControlName="chargeAmount"
+                          (ngModelChange)="onAddChargesDueAgentSumEvent(index)"></ngc-currencyinput>
+                      </td>
+                      <td>
+                        <ngc-link (linkClick)="deleteOtherChargesDueAgent($event, index)" iconType="delete">
+                          <ngc-i18n value="g.delete"></ngc-i18n>
+
+                        </ngc-link>
+
+                        <!--<ngc-button [height]="30" (click)="onDelete($event, index)" value="g.delete" iconType="delete"> </ngc-button>-->
+                      </td>
+
+                    </tr>
+
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label value=" "></ngc-label>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label='awb.charge.amount'></ngc-label>
+              </ngc-column>
+              <ngc-column align="right">
+                <ngc-button priority="secondary" (click)="addOtherChargesDueCarrier($event)" label="g.addRow">
+                </ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value='awb.pc.indicator.other.charges' [width]="70"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="awb.other.charge.code" [width]='70'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="awb.charge.amount"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.delete"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="otherChargesDueCarrier">
+                    <tr *ngFor="let item of nawbForm.get('otherChargesDueCarrier').controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-input [width]='70' formControlName="otherChargeIndicator" uppercase='true' maxLength="1"
+                          (ngModelChange)="onaddingDueCarrierCharge(indicator, index)">
+                        </ngc-input>
+                        <!--<ngc-dropdownlist [width]='80' formControlName="otherChargeIndicator" sourceId='AWB$Service_Code' uppercase='true'></ngc-dropdownlist>-->
+                      </td>
+                      <td>
+                        <ngc-lov formControlName="otherChargeCode" [width]="60" upperCase="true" [dropDownWidth]="60"
+                          sourceId="NAWB_CHARGE_CODE" title="CHARGECODE" displayMember="code" dataField="code">
+                          <ngc-data-column text="g.code" dataField="code" [width]="100">
+                          </ngc-data-column>
+                          <ngc-data-column text="g.name" dataField="desc" [width]="150">
+                          </ngc-data-column>
+                        </ngc-lov>
+                      </td>
+
+                      <td>
+
+                        <ngc-currencyinput formControlName="chargeAmount"
+                          (ngModelChange)="onAddChargesDueCarrierSumEvent(index)">
+                        </ngc-currencyinput>
+                      </td>
+                      <td>
+                        <ngc-link (linkClick)="deleteOtherChargesDueCarrier($event, index)" iconType="delete">
+                          <ngc-i18n value="g.delete"></ngc-i18n>
+
+                        </ngc-link>
+
+                        <!--<ngc-button [height]="30" (click)="onDelete($event, index)" value="g.delete" iconType="delete"> </ngc-button>-->
+                      </td>
+
+                    </tr>
+
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+        <ngc-column column="1">
+        </ngc-column>
+        <ngc-column column='6'>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label='export.NAWB.ppd.col'></ngc-label>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th width="150"></th>
+                      <th></th>
+                      <th>
+                        <ngc-label value="export.NAWB.ppd.amount"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="export.NAWB.col.amount"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+
+                  <tbody>
+                    <tr>
+                      <td class="ngc-table-sub-header" width="150">
+                        <ngc-label value="export.NAWB.total.weight.charge"></ngc-label>
+                      </td>
+                      <td class="ngc-table-sub-header">
+                        <ngc-label value="WT"></ngc-label>
+                      </td>
+                      <td formGroupName="ppd">
+
+                        <ngc-currencyinput formControlName="totalWeightChargeAmount" [disabled]="weightChargePpdFlag">
+                        </ngc-currencyinput>
+                      </td>
+                      <td formGroupName="col">
+                        <ngc-currencyinput formControlName="totalWeightChargeAmount" [disabled]="weightChrgeColFlag">
+                        </ngc-currencyinput>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="ngc-table-sub-header" width="150">
+                        <ngc-label value="export.NAWB.valuation.charge"></ngc-label>
+                      </td>
+                      <td class="ngc-table-sub-header">
+                        <ngc-label value="VC"></ngc-label>
+                      </td>
+                      <td formGroupName="ppd">
+                        <ngc-currencyinput formControlName="valuationChargeAmount" [disabled]="valuationChargePpdFlag">
+                        </ngc-currencyinput>
+                      </td>
+                      <td formGroupName="col">
+                        <ngc-currencyinput formControlName="valuationChargeAmount" [disabled]="valuationChargeColFlag">
+                        </ngc-currencyinput>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="ngc-table-sub-header" width="150">
+                        <ngc-label value="export.NAWB.taxes"></ngc-label>
+                      </td>
+                      <td class="ngc-table-sub-header">
+                        <ngc-label value="TX"></ngc-label>
+                      </td>
+                      <td formGroupName="ppd">
+
+                        <ngc-currencyinput formControlName="taxesChargeAmount">
+                        </ngc-currencyinput>
+                      </td>
+                      <td formGroupName="col">
+                        <ngc-currencyinput formControlName="taxesChargeAmount">
+                        </ngc-currencyinput>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="ngc-table-sub-header" width="150">
+                        <ngc-label value="export.NAWB.total.other.charges.due.agent"></ngc-label>
+                      </td>
+                      <td class="ngc-table-sub-header">
+                        <ngc-label value="OA"></ngc-label>
+                      </td>
+                      <td formGroupName="ppd">
+                        <ngc-currencyinput formControlName="totalOtherChargesDueAgentChargeAmount"
+                          [disabled]="totalDueAgentPpdFlag">
+                        </ngc-currencyinput>
+                      </td>
+                      <td formGroupName="col">
+                        <ngc-currencyinput formControlName="totalOtherChargesDueAgentChargeAmount"
+                          [disabled]="totalDueAgentColFlag"></ngc-currencyinput>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="ngc-table-sub-header" width="150">
+                        <ngc-label value="export.NAWB.total.other.charges.due.carrier"></ngc-label>
+                      </td>
+                      <td class="ngc-table-sub-header">
+                        <ngc-label value="OC"></ngc-label>
+                      </td>
+                      <td formGroupName="ppd">
+
+                        <ngc-currencyinput formControlName="totalOtherChargesDueCarrierChargeAmount"
+                          [disabled]="totalDueCarrierPpdFlag"></ngc-currencyinput>
+                      </td>
+                      <td formGroupName="col">
+                        <ngc-currencyinput formControlName="totalOtherChargesDueCarrierChargeAmount"
+                          [disabled]="totalDueCarrierColFlag"></ngc-currencyinput>
+                      </td>
+                    </tr>
+                    <tr>
+                      <td class="ngc-table-sub-header" width="150">
+                        <ngc-label value="export.NAWB.charge.summary.total"></ngc-label>
+                      </td>
+                      <td class="ngc-table-sub-header">
+                        <ngc-label value="CT"></ngc-label>
+                      </td>
+                      <td formGroupName="ppd">
+
+                        <ngc-currencyinput formControlName="chargeSummaryTotalChargeAmount"
+                          [disabled]="totalSummaryChargePpdFlag"></ngc-currencyinput>
+                      </td>
+                      <td formGroupName="col">
+                        <ngc-currencyinput formControlName="chargeSummaryTotalChargeAmount"
+                          [disabled]="totalSummaryChargeColFlag"></ngc-currencyinput>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-tab-card>
+  <ngc-tab-card title="export.NAWB.accounting.info" [indicatorIconType]="accoutingInfoIndicatorIcon" indicatorIconColor="red">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column="5">
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label='export.NAWB.acc'></ngc-label>
+              </ngc-column>
+              <ngc-column align="right">
+                <ngc-button priority="secondary" (click)="addNewAccountingInfo()" value="g.addRow"
+                  (ngModelChange)="onChange($event)"> </ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value='export.NAWB.accounting.information.identifier'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.description"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.delete"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="accountingInfo">
+                    <tr *ngFor="let item of nawbForm.get('accountingInfo').controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-lov formControlName="informationIdentifier" [width]="60" upperCase="true"
+                          [dropDownWidth]="60" sourceId="NAWB_ACCOUNTING_INFO" title="g.currency" displayMember="code"
+                          dataField="code" (select)="onSelectAccountingIdentifier($event,index)">
+                          <ngc-data-column text="g.code" dataField="code" [width]="100">
+                          </ngc-data-column>
+                          <ngc-data-column text="g.name" dataField="desc" [width]="100">
+                          </ngc-data-column>
+                        </ngc-lov>
+                      </td>
+                      <td>
+                        <ngc-input maxLength="34" formControlName="accountingInformation" uppercase='true'
+                          [width]="310">
+                        </ngc-input>
+                      </td>
+                      <td>
+                        <ngc-link (linkClick)="onDeleteAccountInfo($event, index)" iconType="delete">
+                          <ngc-i18n value="g.delete"></ngc-i18n>
+                        </ngc-link>
+                        <!--<ngc-button [height]="30" (click)="onDelete(index)" value="g.delete" iconType="delete"> </ngc-button>-->
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+
+
+        <ngc-column column='1'>
+        </ngc-column>
+
+
+        <ngc-column>
+          <ngc-container formGroupName="chargeDeclaration">
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label='export.NAWB.iso.currency.code'></ngc-label>
+                <div>
+
+                  <ngc-lov formControlName="currencyCode" [width]="60" upperCase="true" [dropDownWidth]="60"
+                    sourceId="CURRENCY" title="g.currency" displayMember="code" dataField="code" required
+                    [validOnly]="true">
+                    <ngc-data-column text="g.code" dataField="code" [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.name" dataField="desc" [width]="150">
+                    </ngc-data-column>
+                  </ngc-lov>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label='export.NAWB.charge.code'></ngc-label>
+                <div>
+                  <!--<ngc-input [width]="100" formControlName="chargeCode"></ngc-input>-->
+                  <ngc-dropdownlist [maxlength]='2'  formControlName="chargeCode"  sourceId="CHARGESCODE"
+                     sourceType="query"  title="CHARGECODE" [width]="70"  required></ngc-dropdownlist>
+
+
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label='export.NAWB.charge.declaration'></ngc-label>
+                <div>
+                  <!-- <ngc-input [width]="50" required formControlName="prepaIdCollectChargeDeclaration"
+                              (ngModelChange)="OnChargeCodeSelection($event)"></ngc-input> -->
+                  <ngc-lov [maxlength]='2' formControlName="prepaIdCollectChargeDeclaration"
+                    sourceId="PREPAIDCOLLECT_DATA"  title="export.NAWB.charge.declaration"  dataField="code" width="50%" required
+                    [validOnly]="true">
+                    <ngc-data-column text="g.code" dataField="code" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                  </ngc-lov>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label='export.NAWB.charge.declaration'></ngc-label>
+                <div>
+                  <!--<ngc-numberinput [width]="80" textAlign='right' formControlName="fwbCarriageValueDeclaration"></ngc-numberinput>-->
+                  <ngc-digitinput [width]="140" formControlName="carriageValueDeclaration" placeHolder="NVD"
+                    maxlength='12' [allowDecimals]="true"></ngc-digitinput>
+                  <!-- <ngc-input formControlName="carriageValueDeclaration"></ngc-input> -->
+                </div>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column></ngc-column>
+              <ngc-column></ngc-column>
+              <ngc-column>
+                <ngc-label label='export.NAWB.customs.declaration'></ngc-label>
+                <div>
+                  <!--<ngc-numberinput [width]="80" textAlign='right' formControlName="fwbCustomsValueDeclaration"></ngc-numberinput>-->
+                  <ngc-digitinput [width]="140" formControlName="customsValueDeclaration" placeHolder="NCV"
+                    maxlength='12' [allowDecimals]="true"></ngc-digitinput>
+                  <!-- <ngc-input formControlName="customsValueDeclaration"></ngc-input> -->
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label='export.NAWB.insurance.declaration'></ngc-label>
+                <div>
+                  <!--<ngc-numberinput [width]="80" textAlign='right' formControlName="fwbInsuranceValueDeclaration"></ngc-numberinput>-->
+                  <ngc-digitinput [width]="140" formControlName="insuranceValueDeclaration" placeHolder="XXX"
+                    maxlength='11' [allowDecimals]="true"></ngc-digitinput>
+                  <!-- <ngc-input formControlName="insuranceValueDeclaration"></ngc-input> -->
+
+                </div>
+
+              </ngc-column>
+
+            </ngc-row>
+
+          </ngc-container>
+
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-tab-card>
+  <div ngc-tab-card title='export.NAWB.customs' [indicatorIconType]="customsIndicatorIcon" indicatorIconColor="red">
+
+    <ngc-container title="export.NAWB.local.authority" formGroupName="neutralAwbCustoms">
+      <ngc-row>
+        <ngc-column column="2">
+          <ngc-dropdownlist formControlName="type" sourceId="Acceptance_Type$Local_Authority_info" width="170"
+            (select)="onSelectLocalAuthDetails($event)" required></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column>
+          <ngc-container *ngIf="permitToFollowFlag">
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label label="export.NAWB.aces"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="agent.appointed.agent"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="neutralAWBLocalAuthDetails">
+                    <tr
+                      *ngFor="let item of nawbForm.get('neutralAwbCustoms.neutralAWBLocalAuthDetails').controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-input maxLength="20" formControlName="aces"></ngc-input>
+                      </td>
+                      <td>
+                        <ngc-lov formControlName="customerAppAgentId" sourceId="NAWB_APPOINTED_AGENT_CODE"
+                           title="Appointed Agent "  dataField="code" width="50%" displayField='param1'>
+                          <ngc-data-column text="g.code" dataField="param1" [width]="50"></ngc-data-column>
+                          <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <ngc-container *ngIf="permitNumberFlag">
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label label="export.NAWB.customs.permit.number"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label=" "></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label=" "></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="neutralAWBLocalAuthDetails">
+                    <tr
+                      *ngFor="let item of nawbForm.get('neutralAwbCustoms.neutralAWBLocalAuthDetails').controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-input maxLength="20" formControlName="referenceNumber"></ngc-input>
+                      </td>
+                      <td>
+                        <ngc-button iconType="add" priority="quaternary" (click)="onAddPermitNumber(index)">
+                        </ngc-button>
+                      </td>
+                      <td *ngIf="index > 0">
+                        <ngc-link (linkClick)="onDeletePermitNumberRows(index)">
+                          <ngc-icon type="delete" label="del" value="true" true-color="grey"></ngc-icon>
+                        </ngc-link>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+              <!--<ngc-column>
+                          <ngc-button iconType="add" priority="quaternary" (click)="onAddPermitNumber()"></ngc-button>
+                      </ngc-column>-->
+            </ngc-row>
+          </ngc-container>
+          <ngc-container *ngIf="excemptionCodeFlag">
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label label="export.NAWB.customs.exemption.code"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="export.NAWB.license"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="g.reason"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="neutralAWBLocalAuthDetails">
+                    <tr
+                      *ngFor="let item of nawbForm.get('neutralAwbCustoms.neutralAWBLocalAuthDetails').controls; let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-lov formControlName='exemptionCode' upperCase='true' sourceId='ACES_EXEMPTION'
+                          title='export.exemption' dataField='code' valueMember="code" [dropDownWidth]='70' accessEnableOn="r">
+                          <ngc-data-column text='g.code' dataField='code' [width]='180'></ngc-data-column>
+                          <ngc-data-column text='g.description' dataField='desc' [width]='180'></ngc-data-column>
+                        </ngc-lov>
+                      </td>
+                      <td>
+                        <ngc-input maxLength="20" formControlName="license"></ngc-input>
+                      </td>
+                      <td>
+                        <ngc-input maxLength="65" formControlName="remarks"></ngc-input>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-container title='export.NAWB.OCI.information'>
+      <ngc-row>
+        <ngc-column>
+          <ngc-column>
+            <ngc-button label="g.addRow" (click)="onOciAddRow()"></ngc-button>
+          </ngc-column>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th [width]='150'>
+                  <ngc-label label='export.NAWB.iso.country.code'></ngc-label>
+                </th>
+                <th [width]='150'>
+                  <ngc-label label='export.NAWB.OCI.information.identifier'></ngc-label>
+                </th>
+                <th [width]='150'>
+                  <ngc-label label='export.NAWB.OCI.custom.information.identifier'></ngc-label>
+                </th>
+                <th [width]='600'>
+                  <ngc-label label='export.NAWB.OCI.suppl.custom.information'></ngc-label>
+                </th>
+                <th [width]='50'>
+
+                  <ngc-label label='delete'></ngc-label>
+
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="otherCustomsInfo">
+              <tr *ngFor="let item of nawbForm.controls.otherCustomsInfo.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-lov  formControlName="countryCode" sourceId="COUNTRY"  title="g.country"  dataField="code"
+                    width="50%">
+                    <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                  </ngc-lov>
+                </td>
+                <td>
+                  <ngc-input formControlName='informationIdentifier' [width]='150' maxLength="3"></ngc-input>
+                </td>
+                <td>
+                  <ngc-input formControlName='csrciIdentifier' [width]='150' maxLength="2"></ngc-input>
+                </td>
+                <td>
+                  <ngc-input formControlName='scrcInformation' [width]='150' maxLength="35"></ngc-input>
+                </td>
+
+                <td>
+                  <ngc-link (click)="deleteOCI(index)" iconType="delete"></ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+  </ngc-tabs>
+  </ngc-column>
+  </ngc-row>
+  </ngc-container>
+</form>
+
+
+
+<form [formGroup]="stockForm">
+  <ngc-window #awbWindow title="export.NAWB.select.awb" [showCloseButton]="true" [width]="500" height='500'>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label value='carrier'></ngc-label>
+          </div>
+          <ngc-lov formControlName='carrierCode' width='40px' upperCase='true' sourceId='CARRIER' title='g.carrier.type'
+            dataField='code' displayMember="code" [dropDownWidth]='60'>
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="g.category"></ngc-label>
+          </div>
+          <ngc-dropdownlist formControlName='stockCategoryCode' [width]='100' sourceId='Shipment$NAWBStock'
+            [dropDownWidth]="140"></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="export.NAWB.stock.id"></ngc-label>
+          </div>
+          <ngc-input formControlName='stockId' [width]='100'></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label=" ">
+            </ngc-label>
+          </div>
+          <ngc-button label='g.search' (click)="onSearch($event)" iconType="search" #searchButton></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="awbListArray" (onRowClick)="onRowClick($event)">
+
+            <ngc-data-column text="awb.awbnumber" cellsAlign="center" dataField="awbNumber" [width]="200">
+            </ngc-data-column>
+            <ngc-data-column text="export.category" cellsAlign="center" dataField="stockCategoryCode" [width]="200">
+            </ngc-data-column>
+            <ngc-data-column text="export.stockId" cellsAlign="center" dataField="stockId" [width]="200"></ngc-data-column>
+            <ngc-data-column hidden="true" text="awbStockId" cellsAlign="center" dataField="awbStockDetailsId"
+              [width]="200"></ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report #reportWindow title="g.report"  reportId='nawbPrintPreview'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['NAWB']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="printNAWB()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

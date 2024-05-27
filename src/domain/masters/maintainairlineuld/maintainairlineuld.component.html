@@ -1,0 +1,329 @@
+<form [formGroup]="maintainUldTypeForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-titlebar title="master.maintain.uld.characteristic">
+        </ngc-titlebar>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov formControlName="codeDetails" sourceId='CARRIER' title='masters.carrierType' [width]="60"
+            dataField='code' uppercase='true' accessEnableOn="r">
+            <ngc-data-column text="masters.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="masters.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="!uldGroupFeatureEnabled">
+        <ngc-label label='uld.uld.type'></ngc-label>
+        <div>
+          <ngc-lov formControlName="uldDetails" sourceId='ULDTYPE' title='uld.uld.type' dataField='code' [width]="60"
+            uppercase='true' accessEnableOn="r">
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" feature="ULD.Group">
+        <ngc-label label='imp.uld.grp'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldGroup" sourceId='ULDGROUP' title='imp.uld.grp'
+            dataField='code' width='50px' upperCase='true' displayMember="code" [dropDownWidth]='60'
+            (select)="onSelectUldGroup($event)">
+            <ngc-data-column text="imp.uld.grp" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" feature="ULD.Group">
+        <ngc-label label='uld.uld.type'></ngc-label>
+        <div>
+          <ngc-lov formControlName="uldDetails" sourceId='ULDTYPE_FOR_ULDGROUP'
+            [sourceParameters]="{ 'param1': maintainUldTypeForm.get('uldGroupId').value }" title='uld.uld.type'
+            dataField='code' [width]="60" uppercase='true' accessEnableOn="r">
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" #searchButton (click)="onSearchUldType($event)" value="master.SEARCH"
+            iconType="search" [disabled]="false"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="onEditAddLink($event)" value="g.addRow" type="link"></ngc-button>
+        <ngc-button (click)="deleteData($event)" value="g.delete" accessSectionId="DELETE" value="g.delete">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable *ngIf="showResults" formArrayName="uldTypeList" (linkClick)="onEditAddLink($event)"
+          [enablePageSizeHeight]="false" [columnsHeight]="50" [pageSize]="15">
+          <ngc-data-column text="g.select" dataField="scInd" [width]="50" type="check" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.carrier" dataField="carrierCode" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.uld.grp" dataField="uldGroup" [width]="80" align="center" cellsAlign="center"
+            feature="ULD.Group">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uld.type" dataField="uldType" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="uld.contour.indicator.br" dataField="contourIndicator" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="uld.tare.weight" dataField="tareWeight" [width]="100" align="center" cellsAlign="right"
+            type="displayWeight"></ngc-data-column>
+          <ngc-data-column text="import.main.deck.cargo.net.weight.br" dataField="mainCargoNetWeight" [width]="120"
+            align="center" cellsAlign="right" type="displayWeight"></ngc-data-column>
+          <ngc-data-column text="master.cargo.net.weight.lower.deck" dataField="lowerCargoNetWeight" [width]="120"
+            align="center" cellsAlign="right" type="displayWeight"></ngc-data-column>
+          <ngc-data-column text="master.minium.stock" dataField="minimumStock" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="master.maximum.stock" dataField="maximumStock" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="master.maximum.aging" dataField="maximumAging" [width]="100" align="center"
+            entityAttribute="ULD.MaximumAging" cellsAlign="center">
+          </ngc-data-column>
+          <!--<ngc-data-column text="Plastic Sheet <br> Quantity" dataField="containerCount" [width]="130" align="center" cellsAlign="center"></ngc-data-column>
+    <ngc-data-column text="Contour Default" dataField="defualt" [width]="146" align="center" cellsAlign="center"></ngc-data-column>-->
+          <ngc-data-column text="master.compatible.aircraft.type" dataField="add" [width]="100" type="link"
+            iconType="add" align="left" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="edit" [width]="100" type="link" iconType="edit" align="left"
+            cellsAlign="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #window [width]="600" [height]="500" title="master.airline.master">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='g.carrier'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='uld.uld.type'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='uld.contour.indicator'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='uld.tare.weight'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <!--<ngc-input [width]="80" formControlName="carrierCodeDetails" ></ngc-input>-->
+          <ngc-display *ngIf="updateForm" formControlName="carrierCodeDetails" uppercase='true'></ngc-display>
+          <ngc-lov *ngIf="!updateForm" formControlName="carrierCodeDetails" sourceId='CARRIER' title='Carrier Type'
+            dataField='code' [width]="50" (select)="onSelectCarrier($event)" uppercase='true' required>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+
+        <ngc-column>
+          <!--<ngc-input [width]="80" formControlName="uldTypeDetails"></ngc-input>-->
+          <ngc-display *ngIf="updateForm" formControlName="uldTypeDetails" uppercase='true'></ngc-display>
+          <ngc-lov *ngIf="!updateForm" formControlName="uldTypeDetails" sourceId='ULDTYPE' title='uld.uld.type'
+            dataField='code' [width]="50" (select)="onSelectUldType($event)" uppercase='true' required>
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column>
+          <!--<ngc-input [width]="120" formControlName="contourIndicatorDetails"></ngc-input>-->
+          <!--<ngc-display *ngIf="updateForm" formControlName="contourIndicator" uppercase='true'></ngc-display>-->
+          <ngc-lov formControlName="contourIndicator" sourceId='CONTOURINDICATOR' title='uld.contour.type'
+            dataField='code' [width]="50" (select)="onSelectContour($event)" uppercase='true' required>
+            <ngc-data-column text="contourIndicator" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="0" digits="5" max="99999" formControlName="tareWeightDetails"
+            required></ngc-numberinput>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='uldType.mainDeckMaxCargoNetWeight'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='uldType.lowerDeckMaxCargoNetWeight'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="master.minium.stock"></ngc-label>
+          <br>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="master.maximum.stock"></ngc-label>
+          <br>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="master.maximum.aging" entityAttribute="ULD.MaximumAging"></ngc-label>
+          <br>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="1" digits="7" max="9999999.9"
+            formControlName="mainCargoNetWeightDetails" required></ngc-numberinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="1" digits="7" max="9999999.9"
+            formControlName="lowerCargoNetWeightDetails" required></ngc-numberinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="0" digits="4" max="9999" formControlName="minimumStockDetails">
+          </ngc-numberinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="0" digits="4" max="9999" formControlName="maximumStockDetails">
+          </ngc-numberinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="0" digits="4" max="9999" formControlName="maximumAgingDetails"
+            entityAttribute="ULD.MaximumAging">
+          </ngc-numberinput>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <!--<ngc-column>
+          <ngc-label label="Plastic Sheet Quantity "></ngc-label>
+          <br>
+        </ngc-column>-->
+        <!--<ngc-column column="9">
+          <ngc-label label="Default"></ngc-label>
+          <br>
+        </ngc-column>-->
+
+      </ngc-row>
+      <ngc-row>
+        <!--<ngc-column>-->
+        <!--<ngc-label></ngc-label>-->
+        <!--<ngc-input [width]="100" formControlName="containerCountDetails" uppercase='true' required></ngc-input>
+        </ngc-column>-->
+        <!--<ngc-column column="9">
+          <ngc-input [width]="100" formControlName="default"></ngc-input>
+        </ngc-column>-->
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="submitUldData($event)" value="g.save"></ngc-button>
+            <ngc-button (click)="cancelWindowButton($event)" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #windowAdd [width]="490" [height]="550" title="flight.add.aircraft.type">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="addNewLov()" value="g.addNew" iconType="add"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <!--<table class="table table-bordered table-hover table-responsive" [width]='200'>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value='uldType.sno ' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="AircraftType" width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="Delete" width='40'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="uldAircraftType">
+              <tr *ngFor="let item of maintainUldTypeForm.controls.uldAircraftType.controls; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-checkbox formControlName="scInds">
+                  </ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-lov formControlName="aircraftType" sourceId='AIRCRAFTTYPE' title='aircraft Type' dataField='code' [width]="50" (select)="onSelectAircraftType($event)"
+                    uppercase='true' required>
+                    <ngc-data-column text="aircraftType" dataField="code" [width]="100"></ngc-data-column>
+                    <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                  </ngc-lov>
+                    <!--<ngc-input [width]="100" formControlName="aircraftType"></ngc-input>
+                </td>
+                <td>
+                  <ngc-button (click)="deleteAircraftType(index)" label="Delete"></ngc-button>
+                </td>
+              </tr>
+            </tbody>
+          </table>-->
+
+          <ngc-edittable #goTo formArrayName="uldAircraftType">
+
+            <ngc-data-column text="g.sNo" dataField="scInds" type="check" [width]='25' align="center"
+              cellsAlign="center">
+            </ngc-data-column>
+
+            <ngc-data-column text="AircraftType" dataField="aircraftType" [width]='150'>
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-lov [formControlName]='name' [width]='60' [maxlength]="3" title='flight.aircraftType'
+                    upperCase='true' sourceId='AIRCRAFTTYPE' title='g.destination'
+                    (select)="onSelectAircraftType($event)" required dataField="code">
+                    <ngc-data-column text='aircraftType' dataField='code' [width]='100'></ngc-data-column>
+                    <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+                  </ngc-lov>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <ngc-data-column text="g.delete" dataField="scInds" [width]='25' align="center" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link [formControlName]='name' (linkClick)="deleteAircraftType(group)" iconType="delete"
+                    [hideValue]="true"></ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+          </ngc-edittable>
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onAircraftType($event)" value="g.save"></ngc-button>
+            <ngc-button (click)="onCancelWindow()" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

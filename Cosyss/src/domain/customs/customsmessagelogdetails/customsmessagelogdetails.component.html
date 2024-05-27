@@ -1,0 +1,181 @@
+<form [formGroup]="customsmessage">
+  <ngc-titlebar title='customs.message.log.details' (clear)="onClear($event)" (cancel)="onCancel()">
+  </ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='g.message.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="messageType" sourceId="DROPDOWN_CUSTOMSMESSAGETYPES"
+            (select)="onChange($event)" sourceType="query" [width]="90"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="messaging.sub.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="subMessageType" sourceId="DROPDOWN_SUBMESSAGETYPE"
+            [sourceParameters]="subMessageParameter" [noCache]="true" sourceType="query" [width]="110">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="messageStatus" sourceId='Customs$StatusDropdown'
+            [width]="110"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="messageFromDateTime" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="messageToDateTime" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='0.5'>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="g.flightKey"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flightDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="flightDate"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.shipmentNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="display.search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="customsMessages" (linkClick)="onLinkClick($event)" [pageSize]=10
+          [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.sNo" dataField="sequenceNumber" [width]="40" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="customs.msg.type" dataField="messageType" [width]="60" type="link" align="center"
+            cellsAlign="center" accessEnableOn="r"></ngc-data-column>
+          <ngc-data-column text="customs.sub.msg.type" dataField="subMessageType" [width]="70" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="messaging.version" dataField="messageVersion" [width]="70" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="customs.uniqueId" dataField="uniqueIdentifier" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="customs.record.type" dataField="recordType" [width]="70" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="customs.hash.total" dataField="hashTotal" [width]="200" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="customs.ack.date.time" dataField="acknowledgementDateTime" [width]="120" align="center"
+            cellsAlign="center" type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="message.log.received.date.time" dataField="messageDateTime" [width]="130"
+            align="center" cellsAlign="center" type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="g.shipmentNumber" dataField="shipmentNumber" align="center" cellsAlign="center"
+            [width]="100">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.flightKey" dataField="flightKey" [width]="70" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightDate" dataField="flightDate" [width]="90" align="center"
+            cellsAlign="center" type="displayDate"></ngc-data-column>
+          <ngc-data-column text="g.status" dataField="messageStatus" [width]="90" align="left" cellsAlign="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #messageLog title="Message Log View - {{indexNumberDisplay}}" [width]="1600" [height]="700"
+    [showCloseButton]="true" (close)="onCloseWindow($event)">
+    <ngc-container type="tab" *ngIf="showWindow">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-codeeditor formControlName="message" height="590px" viewMode="edi" disabled="false" width="1500"
+              [attr.upperCase]="false" subTheme='courier'></ngc-codeeditor>
+          </div>
+        </ngc-column>
+        <ngc-column *ngIf="processingerrorcheck">
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label='message.log.error.code' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='g.message' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='message.log.line.item' width='20'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="processingErrorsArray">
+              <tr *ngFor="let contact of customsmessage.get('processingErrorsArray').controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="errorCode" [width]="20"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="errorMessage" [width]="20" uppercase='true'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="lineItem" [width]="20"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer *ngIf="showWindow">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="4" align="right">
+            <ngc-button (click)="onPrevious()" priority="quaternary" height="30" width="50" iconType="previous-simple">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column align="left">
+            <ngc-button (click)="onNext()" width="50" height="30" priority="quaternary" iconType="next-simple">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

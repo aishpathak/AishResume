@@ -1,0 +1,581 @@
+<form [formGroup]="Form">
+  <!-- Title Bar (Begin) -->
+  <ngc-titlebar title="import.ecc.inbound.worksheet" (cancel)="onBack($event)" (save)="onSave($event)" (print)='onPrintReport($event)'></ngc-titlebar>
+  <!-- Title Bar (End) -->
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="4">
+        <ngc-label label="import.working.shift.time"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='ECC_TEAM'  sourceType='query' formControlName="workingShift" width="250" required
+            (select)="assignData($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="date" [showCalendarButton]="true" width="130" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="flight.flightNumber"></ngc-label>
+        <div>
+            <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" upperCase="true"  [width]="120" ></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="import.ecc.agent"></ngc-label>
+        <div>
+          <!-- <ngc-dropdownlist accessEnableOn="r" sourceId='AGENTDROPDOWN'   formControlName="agentsearch" width="130"
+            sourceType='query'></ngc-dropdownlist> -->
+          <ngc-lov formControlName="agentsearch" sourceId='KEY_AGENTLOV' title='Agent' dataField='code' [width]="130" uppercase='true'
+            [validOnly]="true" (select)="onSelectAgent($event)" accessEnableOn="r">
+            <ngc-data-column text="agent.agent.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label></ngc-label>
+        </div>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch($event)" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column *ngIf="displayData">
+        <ngc-label label="Team Name"></ngc-label>
+        <div>
+          <ngc-display formControlName="teamName"></ngc-display>
+        </div>
+      </ngc-column> -->
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="displayData" type="tab">
+    <ngc-row>
+
+      <ngc-column column="4">
+        <ngc-label label="import.ecc.import.detailer"></ngc-label>
+        <div>
+          <ngc-taginput formControlName="plannedBy" [maxChars]='300'></ngc-taginput>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label label="import.ecc.import.checker"></ngc-label>
+        <div>
+          <ngc-taginput formControlName="flightHandledBy" [maxChars]='300'></ngc-taginput>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label label="import.ecc.eo.summary"></ngc-label>
+        <div>
+          <ngc-display formControlName="eoArray"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="6"></ngc-column>
+      <!--<ngc-column align="right">
+        <ngc-button (click)="addFlight($event)" label="Add Flight"></ngc-button>
+        <ngc-button (click)="noShow($event)" label="No Show"></ngc-button>-->
+      <!--<ngc-button value="Print" (click)="onPrintReport($event)"></ngc-button>
+        <ngc-button value="Maintain Agent Location" (click)="navigate($event)"></ngc-button>
+        <ngc-button value="Shipment Info" (click)="navigateShipmentInfo($event)"></ngc-button> -->
+      <!--</ngc-column>-->
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-container *ngIf="displayData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+
+              <th [width]="30">
+                <ngc-label></ngc-label>
+              </th>
+
+              <th>
+                <ngc-label label="import.s.no"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.flight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flight.sta"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="ETA"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flight.ata"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Bay"></ngc-label>
+              </th>
+
+              <th>
+                <ngc-label label="g.add"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.delete"></ngc-label>
+              </th>
+              <th *ngIf="hideCode">
+                <ngc-label label="import.ecc.user.code"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="import.ecc.eo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="import.ecc.agent"></ngc-label>
+              </th>
+              <th width="300">
+                <ngc-label label="g.awbNumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.weight"></ngc-label>
+              </th>
+
+              <th>
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="import.ecc.loading.advice"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="import.ecc.delivery.location.br"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.status"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="import.ecc.late.booking"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="shipmentList">
+            <ng-container *ngFor="let item of Form.get('shipmentList').controls; let index=index" [formGroupName]="index">
+              <tr *ngIf="item.get(['shipmentListDetails']).value.length && item.get(['shipmentListDetails',0,'colour']).value" class="getColour">
+                <td>
+                  <ng-container formArrayName="shipmentListDetails">
+                    <ng-container *ngFor="let sitem of item.controls.shipmentListDetails.controls| page :1 :1; let sindex=index" [formGroupName]="0">
+                      <ngc-checkbox accessEnableOn="r" formControlName="select" [width]="30"></ngc-checkbox>
+                    </ng-container>
+                  </ng-container>
+                </td>
+                <td>
+                  <ngc-display value={{index+1}}></ngc-display>
+                </td>
+                <td>
+                  <div>
+                    <ngc-flightkeyinput *ngIf="item.controls.flagCRUD.value==='C'" [width]="80" formControlName="flightKey" (ngModelChange)="onFlightKey(index,$event)"
+                      required>
+                    </ngc-flightkeyinput>
+                    <ngc-display *ngIf="item.controls.flagCRUD.value!=='C'" [width]="80" formControlName="flightKey" required></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display [onlyTime]="true" formControlName="sta"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display [onlyTime]="true" formControlName="eta"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display [onlyTime]="true" formControlName="ata"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display formControlName="bay"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <ngc-link type="link" formControlName="add" (linkClick)="onAdd(index)" iconType="add" align="center" cellsAlign="center"></ngc-link>
+                </td>
+                <ng-container formArrayName="shipmentListDetails">
+                  <ng-container *ngFor="let sitem of item.controls.shipmentListDetails.controls| page :1 :1; let sindex=index" [formGroupName]="0">
+                    <td>
+                      <ngc-link type="link" formControlName="del" (linkClick)="delete(sindex,index)" iconType="delete" align="center" cellsAlign="center"></ngc-link>
+                    </td>
+
+                    <td>
+                      <div>
+                        <ngc-taginput formArrayName="eqpOperator" sourceId='EO' sourceType='query' dataField="eo" [maxChars]='30'></ngc-taginput>
+                      </div>
+                    </td>
+                    <td>
+
+                      <!-- <ngc-dropdownlist [width]="70" sourceId='AGENTDROPDOWN'   formControlName="agent"
+                        sourceType='query' [noCache]="true" required (select)="OnSelectAgentCode($event, index, 0)">
+                      </ngc-dropdownlist> -->
+                      <ngc-lov required formControlName="agent" sourceId='KEY_AGENTLOV' title='import.ecc.agent' displayMember="code" dataField='code' [width]="50"
+                        uppercase='true' [validOnly]="true" (select)="OnSelectAgentCode($event, index, 0)">
+                        <ngc-data-column text="agent.agent.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+
+                    </td>
+                    <td>
+                      <ngc-shipmentinput [shipmentType]="sitem.get('shipmentType').value" [noDN]="true" [noCBN]="true" formControlName="shipmentNumber"
+                        required (select)="onShipmentSelect($event, index, 0)">
+                      </ngc-shipmentinput>
+
+                    </td>
+                    <td>
+
+                      <ngc-piecesinput formControlName="pieces" required [width]="50"></ngc-piecesinput>
+
+                    </td>
+                    <td>
+
+                      <ngc-weightinput formControlName="weight" [width]="80" required></ngc-weightinput>
+                    </td>
+                    <td>
+                      <div>
+                        <ngc-shcinput formArrayName="shcList" [softDelete]="false" dataField="shc"></ngc-shcinput>
+                      </div>
+
+                    </td>
+                    <td>
+
+                      <ngc-textarea [width]="250" formControlName="loadingAdivce"></ngc-textarea>
+                    </td>
+                    <!-- <td *ngIf="sitem.get('flagCRUD').value!=='R'">
+
+                      <ngc-dropdownlist [width]="80" [sourceId]="sitem.get('sourceId').value"
+                        formControlName="deliveryLocation">
+                      </ngc-dropdownlist>
+                    </td> -->
+                    <td>
+                      <ngc-dropdownlist [width]="80" sourceId="DELIVERY_LOCATION_ECCWORKSHEET" formControlName="deliveryLocation" [sourceParameters]="{'parameter1':sitem.get('agentCustomerId').value, 'parameter2':sitem.get('agent').value}"
+                        sourceType='query'>
+                      </ngc-dropdownlist>
+
+                    </td>
+                    <td *ngIf="!sitem.get('noShow').value">
+
+                      <ngc-dropdownlist [width]="120" sourceId='STATUS' formControlName="status" sourceType='query'>
+                      </ngc-dropdownlist>
+
+                    </td>
+                    <td *ngIf="sitem.get('noShow').value">
+
+                      <ngc-display [width]="120" value="import.ecc.inbound.no.show"  [i18n]="true"></ngc-display>
+
+                    </td>
+                    <td>
+                      <ngc-display formControlName="lateBooking"></ngc-display>
+                    </td>
+
+                  </ng-container>
+                </ng-container>
+              </tr>
+              <tr *ngIf="item.get(['shipmentListDetails']).value.length && !item.get(['shipmentListDetails',0,'colour']).value">
+                <td>
+                  <ng-container formArrayName="shipmentListDetails">
+                    <ng-container *ngFor="let sitem of item.controls.shipmentListDetails.controls| page :1 :1; let sindex=index" [formGroupName]="0">
+                      <ngc-checkbox accessEnableOn="r" formControlName="select" [width]="30"></ngc-checkbox>
+                    </ng-container>
+                  </ng-container>
+                </td>
+                <td>
+                  <ngc-display value={{index+1}}></ngc-display>
+                </td>
+                <td>
+                  <div>
+                    <ngc-flightkeyinput *ngIf="item.controls.flagCRUD.value==='C'" [width]="80" formControlName="flightKey" (ngModelChange)="onFlightKey(index,$event)"
+                      required>
+                    </ngc-flightkeyinput>
+                    <ngc-display *ngIf="item.controls.flagCRUD.value!=='C'" [width]="80" formControlName="flightKey" required></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display [onlyTime]="true" formControlName="sta"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display [onlyTime]="true" formControlName="eta"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display [onlyTime]="true" formControlName="ata"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div>
+                    <ngc-display formControlName="bay"></ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <ngc-link type="link" formControlName="add" (linkClick)="onAdd(index)" iconType="add" align="center" cellsAlign="center"></ngc-link>
+                </td>
+                <ng-container formArrayName="shipmentListDetails">
+                  <ng-container *ngFor="let sitem of item.controls.shipmentListDetails.controls| page :1 :1; let sindex=index" [formGroupName]="0">
+                    <td>
+                      <ngc-link type="link" formControlName="del" (linkClick)="delete(sindex,index)" iconType="delete" align="center" cellsAlign="center"></ngc-link>
+                    </td>
+
+                    <td>
+                      <div>
+                        <ngc-taginput formArrayName="eqpOperator" sourceId='EO' sourceType='query' dataField="eo" [maxChars]='30'></ngc-taginput>
+                      </div>
+                    </td>
+                    <td>
+
+                      <!-- <ngc-dropdownlist [width]="70" sourceId='AGENTDROPDOWN'   formControlName="agent"
+                        sourceType='query' [noCache]="true" required (select)="OnSelectAgentCode($event, index, 0)">
+                      </ngc-dropdownlist> -->
+                      <ngc-lov required formControlName="agent" sourceId='KEY_AGENTLOV' title='import.ecc.agent' displayMember="code" dataField='code' [width]="50"
+                        uppercase='true' [validOnly]="true" (select)="OnSelectAgentCode($event, index, 0)">
+                        <ngc-data-column text="agent.agent.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+
+                    </td>
+                    <td>
+                      <ngc-shipmentinput [shipmentType]="sitem.get('shipmentType').value" [noDN]="true" [noCBN]="true" formControlName="shipmentNumber"
+                        required (select)="onShipmentSelect($event, index, 0)">
+                      </ngc-shipmentinput>
+
+                    </td>
+                    <td>
+
+                      <ngc-piecesinput formControlName="pieces" required [width]="50"></ngc-piecesinput>
+
+                    </td>
+                    <td>
+
+                      <ngc-weightinput formControlName="weight" [width]="80" required></ngc-weightinput>
+                    </td>
+                    <td>
+                      <div>
+                        <ngc-shcinput formArrayName="shcList" [softDelete]="false" dataField="shc"></ngc-shcinput>
+                      </div>
+
+                    </td>
+                    <td>
+
+                      <ngc-textarea [width]="250" formControlName="loadingAdivce"></ngc-textarea>
+                    </td>
+
+                    <td>
+                      <ngc-dropdownlist [width]="80" sourceId="DELIVERY_LOCATION_ECCWORKSHEET" formControlName="deliveryLocation" [sourceParameters]="{'parameter1':sitem.get('agentCustomerId').value, 'parameter2':sitem.get('agent').value}"
+                        sourceType='query'>
+                      </ngc-dropdownlist>
+
+                    </td>
+                    <td *ngIf="!sitem.get('noShow').value">
+
+                      <ngc-dropdownlist [width]="120" sourceId='STATUS' formControlName="status" sourceType='query'>
+                      </ngc-dropdownlist>
+
+                    </td>
+                    <td *ngIf="sitem.get('noShow').value">
+
+                      <ngc-display [width]="120" value="import.ecc.inbound.no.show" [i18n]="true"></ngc-display>
+
+                    </td>
+                    <td>
+                      <ngc-display formControlName="lateBooking"></ngc-display>
+                    </td>
+                  </ng-container>
+                </ng-container>
+              </tr>
+              <ng-container formArrayName="shipmentListDetails">
+                <ng-container *ngFor="let sitem of item.controls.shipmentListDetails.controls; let sindex=index">
+                  <tr *ngIf="sindex > 0 && !sitem.get('colour').value" [formGroupName]="sindex">
+                    <td>
+                      <ngc-checkbox formControlName="select" [width]="30"></ngc-checkbox>
+                    </td>
+                    <td colspan="7"></td>
+                    <td>
+                      <ngc-link type="link" formControlName="del" (linkClick)="delete(sindex,index)" iconType="delete" align="center" cellsAlign="center"></ngc-link>
+                    </td>
+                    <td>
+                      <div>
+                        <ngc-taginput formArrayName="eqpOperator" sourceId='EO' sourceType='query' dataField="eo" [maxChars]='30'>
+                        </ngc-taginput>
+                      </div>
+                    </td>
+                    <td>
+
+                      <!-- <ngc-dropdownlist [width]="70" sourceId='AGENTDROPDOWN'   formControlName="agent"
+                        sourceType='query' [noCache]="true" (select)="OnSelectAgentCode($event, index, sindex)"
+                        required>
+                      </ngc-dropdownlist> -->
+                      <ngc-lov formControlName="agent" sourceId='KEY_AGENTLOV' title='import.ecc.agent' displayMember="code" dataField='code' [width]="50"
+                        uppercase='true' [validOnly]="true" (select)="OnSelectAgentCode($event, index, 0)">
+                        <ngc-data-column text="agent.agent.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+
+                    </td>
+                    <td>
+                      <ngc-shipmentinput [shipmentType]="sitem.get('shipmentType').value" [noDN]="true" [noCBN]="true" formControlName="shipmentNumber"
+                        required (select)="onShipmentSelect($event, index, sindex)">
+                      </ngc-shipmentinput>
+                    </td>
+                    <td>
+
+                      <ngc-piecesinput formControlName="pieces" required [width]="50"></ngc-piecesinput>
+
+                    </td>
+                    <td>
+
+                      <ngc-weightinput formControlName="weight" [width]="80" required></ngc-weightinput>
+                    </td>
+                    <td>
+                      <div>
+                        <ngc-shcinput formArrayName="shcList" dataField="shc"></ngc-shcinput>
+                      </div>
+
+                    </td>
+                    <td>
+
+                      <ngc-textarea [width]="250" formControlName="loadingAdivce"></ngc-textarea>
+                    </td>
+                    <!-- <td *ngIf="sitem.get('flagCRUD').value!=='R'">
+
+                      <ngc-dropdownlist [width]="80" [sourceId]="sitem.get('sourceId').value"
+                        formControlName="deliveryLocation">
+                      </ngc-dropdownlist>
+                    </td> -->
+                    <td>
+                      <ngc-dropdownlist [width]="80" sourceId="DELIVERY_LOCATION_ECCWORKSHEET" formControlName="deliveryLocation" [sourceParameters]="{'parameter1':sitem.get('agentCustomerId').value, 'parameter2':sitem.get('agent').value}"
+                        sourceType='query'>
+                      </ngc-dropdownlist>
+                    </td>
+                    <td *ngIf="!sitem.get('noShow').value">
+
+                      <ngc-dropdownlist [width]="120" sourceId='STATUS' formControlName="status" sourceType='query'>
+                      </ngc-dropdownlist>
+
+                    </td>
+                    <td *ngIf="sitem.get('noShow').value">
+
+                      <ngc-display [width]="120" value="import.ecc.inbound.no.show"  [i18n]="true"></ngc-display>
+
+                    </td>
+                    <td>
+                      <ngc-display formControlName="lateBooking"></ngc-display>
+                    </td>
+
+                  </tr>
+                  <tr *ngIf="sindex > 0 && sitem.get('colour').value" class="getColour" [formGroupName]="sindex">
+                    <td>
+                      <ngc-checkbox formControlName="select" [width]="30"></ngc-checkbox>
+                    </td>
+                    <td colspan="7"></td>
+                    <td>
+                      <ngc-link type="link" (linkClick)="delete(sindex,index)" iconType="delete" align="center" cellsAlign="center"></ngc-link>
+                    </td>
+                    <td>
+                      <div>
+                        <ngc-taginput formArrayName="eqpOperator" sourceId='EO' sourceType='query' dataField="eo" [maxChars]='30'>
+                        </ngc-taginput>
+                      </div>
+                    </td>
+                    <td>
+
+                      <!-- <ngc-dropdownlist [width]="70" sourceId='AGENTDROPDOWN'   formControlName="agent"
+                        sourceType='query' [noCache]="true" required
+                        (select)="OnSelectAgentCode($event, index, sindex)">
+                      </ngc-dropdownlist> -->
+                      <ngc-lov required formControlName="agent" sourceId='KEY_AGENTLOV' title='import.ecc.agent' displayMember="code" dataField='code' [width]="50"
+                        uppercase='true' [validOnly]="true" (select)="OnSelectAgentCode($event, index, 0)">
+                        <ngc-data-column text="agent.agent.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+
+                    </td>
+                    <td>
+                      <ngc-shipmentinput [shipmentType]="sitem.get('shipmentType').value" [noDN]="true" [noCBN]="true" formControlName="shipmentNumber"
+                        required (select)="onShipmentSelect($event, index, sindex)">
+                      </ngc-shipmentinput>
+                    </td>
+                    <td>
+
+                      <ngc-piecesinput formControlName="pieces" required [width]="50"></ngc-piecesinput>
+
+                    </td>
+                    <td>
+
+                      <ngc-weightinput formControlName="weight" [width]="80" required></ngc-weightinput>
+                    </td>
+                    <td>
+                      <div>
+                        <ngc-shcinput formArrayName="shcList" dataField="shc"></ngc-shcinput>
+                      </div>
+
+                    </td>
+                    <td>
+
+                      <ngc-textarea [width]="250" formControlName="loadingAdivce"></ngc-textarea>
+                    </td>
+                    <!-- <td *ngIf="sitem.get('flagCRUD').value!=='R'">
+
+                      <ngc-dropdownlist [width]="80" [sourceId]="sitem.get('sourceId').value"
+                        formControlName="deliveryLocation">
+                      </ngc-dropdownlist>
+                    </td> -->
+                    <td>
+                      <ngc-dropdownlist [width]="80" sourceId="DELIVERY_LOCATION_ECCWORKSHEET" formControlName="deliveryLocation" [sourceParameters]="{'parameter1':sitem.get('agentCustomerId').value, 'parameter2':sitem.get('agent').value}"
+                        sourceType='query'>
+                      </ngc-dropdownlist>
+                    </td>
+                    <td *ngIf="!sitem.get('noShow').value">
+
+                      <ngc-dropdownlist [width]="120" sourceId='STATUS' formControlName="status" sourceType='query'>
+                      </ngc-dropdownlist>
+
+                    </td>
+                    <td *ngIf="sitem.get('noShow').value">
+
+                      <ngc-display [width]="120" value="import.ecc.inbound.no.show"  [i18n]="true"></ngc-display>
+
+                    </td>
+                    <td>
+                      <ngc-display formControlName="lateBooking"></ngc-display>
+                    </td>
+
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" format="pdf"  reportId='ECCInbound'  [reportParameters]='reportParameters'>
+    </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column *ngIf="displayData">
+      <ngc-button accessEnableOn="r" value="ecc.agtloc" (click)="navigate($event)"></ngc-button>
+      <ngc-button accessEnableOn="r" value="ecc.shpinfo" (click)="navigateShipmentInfo($event)"></ngc-button>
+      <ngc-button accessEnableOn="r" value="import.ecc.display.ffm" (click)="navigateDisplayFfm($event)"></ngc-button>
+      <ngc-button accessEnableOn="r" value="import.ecc.breakdown.worklist" (click)="navigateBreakdownWorkingList($event)"></ngc-button>
+      <ngc-button accessEnableOn="r" value="import.ecc.cargo.preannouncement.table" (click)="navigateCargoPreAnnouncementTable($event)"></ngc-button>
+    </ngc-column>
+    <ngc-column *ngIf="displayData" align="right">
+      <ngc-button (click)="addFlight($event)" label="import.ecc.inbound.add.flight"></ngc-button>
+      <ngc-button (click)="noShow($event)" label="import.ecc.inbound.no.show"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

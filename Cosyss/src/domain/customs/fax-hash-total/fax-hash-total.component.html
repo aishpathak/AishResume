@@ -1,0 +1,158 @@
+<ngc-titlebar title='hash.title' (cancel)="onCancel($event)" (clear)="OnClear()">
+</ngc-titlebar>
+<form [formGroup]="hashForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label label='flight.flightNumber'></ngc-label>
+        <div>
+          <ngc-flightkeyinput [disabled]="onSearchFlag" accessEnableOn="r" required [width]="100" formControlName="flightNo">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='2'>
+        <ngc-label label='flight.arrival.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput [disabled]="onSearchFlag" accessEnableOn="r" onlyDate='true' required [width]="100" formControlName="flightDate">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button [width]="100" accessEnableOn="r" (click)="onSearch()" value="awb.search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="4">
+        <ngc-label label='documentview.flightNumber'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-display emphasis="md" formControlName="flightNo"> </ngc-display>
+      </ngc-column>
+
+      <ngc-column [column]="4">
+        <ngc-label label='hash.faxNo'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-display emphasis="md" formControlName=""> </ngc-display>
+      </ngc-column>
+
+      <ngc-column [column]="4">
+        <ngc-label label='hash.versionNo'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-dropdownlist required accessEnableOn="r" [width]="80"
+          [sourceParameters]="{ 'parameter1':hashForm.get('flightNo').value,'parameter2':hashForm.get('flightDate').value,'parameter3':hashForm.get('submissionType').value}"
+          sourceId='CUSTOMS_VERSION_INFO' sourceType='query' formControlName="submissionVersion" valueMember="desc">
+        </ngc-dropdownlist>
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="4">
+        <ngc-label label='event.flightDate'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-display emphasis="md" formControlName="flightDate" [onlyDate]="true"> </ngc-display>
+      </ngc-column>
+
+      <ngc-column [column]="4">
+        <ngc-label label='hash.printerType'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-dropdownlist accessEnableOn="r" [width]="100" required formControlName="" upperCase='true' sourceId=''
+          sourceType='query' valueMember='desc' accessEnableOn="r">
+        </ngc-dropdownlist>
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="4">
+        <ngc-label label='g.itfs.no.date'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ng-container *ngIf="hashForm.get('customsFlightNumber').value !=null">
+          <ngc-display emphasis="md" formControlName="customsFlightNumber">
+          </ngc-display>/<ngc-display emphasis="md" formControlName="customsFlightDate" [onlyDate]="true">
+          </ngc-display>
+        </ng-container>
+      </ngc-column>
+
+      <ngc-column [column]="4">
+        <ngc-label label='dls.std'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-display emphasis="md" formControlName="std" [onlyTime]="true"> </ngc-display>
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row>
+
+      <ngc-column [column]="4">
+        <ngc-label label='flight.ata'></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-display emphasis="md" formControlName="ata" [onlyTime]="true"> </ngc-display>
+      </ngc-column>
+
+      <ngc-column [column]="1.5">
+        <ngc-label label='hash.submissionType'></ngc-label>&nbsp;&nbsp;&nbsp;
+      </ngc-column>
+
+      <ngc-column column='1'>
+        <ngc-checkbox accessEnableOn="r" formControlName="byINT" (click)="selectSubmissionType()">
+          <ngc-label label="hash.intial"></ngc-label>
+        </ngc-checkbox>
+      </ngc-column>
+
+      <ngc-column column='1'>
+        <ngc-checkbox accessEnableOn="r" formControlName="byAMD" (click)="selectSubmissionType()">
+          <ngc-label label="hash.amended"></ngc-label>
+        </ngc-checkbox>
+      </ngc-column>
+
+      <ngc-column column='1'>
+        <ngc-checkbox accessEnableOn="r" formControlName="byLBS" (click)="selectSubmissionType()">
+          <ngc-label label="hash.leftBehind"></ngc-label>
+        </ngc-checkbox>
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-label></ngc-label>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="12" align='right'>
+        <div>
+          <ngc-button  [disabled]="itfsFlag" accessEnableOn="r" label="hash.checklist" (click)="onViewSubmissionChecklist()">
+          </ngc-button>
+          <ngc-button   [disabled]="!itfsFlag" accessEnableOn="r" label="hash.view" (click)="onView()">
+          </ngc-button>
+          <ngc-button [disabled]="itfsFlag" accessEnableOn="r" label="hash.print" (click)="onPrint()">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" label="hash.fax" (click)="onreportcreation()">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" label="hash.hst" (click)="onSendHashTotal()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-report format='pdf' #reportWindow title="Import Paper Manifest"  reportId='SubmissionPaperManifest'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report format='pdf' #reportWindow1 title="ITFS Paper Manifest"  reportId='ITFS_PaperManifest'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report format='pdf' #reportWindow2 title="Flight Paper Manifest"  reportId='FlightPaperManifest'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+
+</form>

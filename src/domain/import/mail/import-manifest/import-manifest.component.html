@@ -1,0 +1,263 @@
+<form [formGroup]="importmanifestForm">
+  <ngc-titlebar title='import.mail.manifest' (clear)="OnClear()" (print)="onimportmanifestReport()"
+    (cancel)="onBack($event)">
+  </ngc-titlebar>
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" required></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label text="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.destination"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="destination" sourceId="COUNTRY_AND_CITY" title="g.destination" [width]="125"
+            dataField="code" UPPERCASE="true">
+            <ngc-data-column text="g.destination" dataField="code" displayMember="code" [width]="30"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="import.mail.next.destination"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="nextDestination" sourceId="COUNTRY_AND_CITY" title="import.mail.next.destination"
+            [width]="125" dataField="code" UPPERCASE="true">
+            <ngc-data-column text="import.mail.next.destination" dataField="code" displayMember="code" [width]="30">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="import.mail.breakdown"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="breakDownLocation"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="import.mail.shipment.location"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="shipmentLocation"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="OnSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label="&nbsp"></ngc-label>
+        <div>
+          <ngc-label label="g.totalpieces" color="black"></ngc-label>: {{totalPieces}}
+          <ngc-label label="g.totalweight" color="black"></ngc-label>: {{totalWeight}}
+        </div>
+      </ngc-column>
+      <ngc-column column="5"></ngc-column>
+      <ngc-column *ngIf="documentFlag">
+        <ngc-label label="import.mail.document.complete"></ngc-label>
+        <div>
+          <ngc-icon type="yesno" formControlName="mailFirstTimeDocumentVerificationCompletedBy"></ngc-icon>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="breakDownFlag">
+        <ngc-label label="import.mail.breakdown.complete"></ngc-label>
+        <div>
+          <ngc-icon type="yesno" formControlName="mailFirstTimeBreakDownCompletedBy"></ngc-icon>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showTableButtons">
+      <ngc-column column="2"></ngc-column>
+      <!-- <ngc-column column="1.8" align="right">
+        <ngc-button value=" Print Import Manifest" (click)="onimportmanifestReport()" *ngIf="hideContextualButtonsFlag"></ngc-button>
+      </ngc-column> -->
+      <ngc-column column="1.8" align="right">
+        <ngc-button accessEnableOn="r" value="import.mail.print.manifest.detail" (click)="onImportManifestDetailReport()"
+          *ngIf="hideContextualButtonsFlag"></ngc-button>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showTable">
+      <ngc-column>
+        <ngc-edittable formArrayName="shipments">
+          <ngc-data-column text=" " type="check" [width]="20" align="left" cellsAlign="left" dataField="check">
+          </ngc-data-column>
+          <ngc-data-column [width]="70" text="BreakDownLocation" dataField="uldTrollyNo"></ngc-data-column>
+          <ngc-data-column text="import.mail.dispatch" [width]="50" align="left" cellsAlign="left"
+            dataField="dispatchNumber">
+          </ngc-data-column>
+          <ngc-data-column text="g.origin" [width]="30" align="left" cellsAlign="left" dataField="origin">
+          </ngc-data-column>
+          <ngc-data-column text="g.destination" [width]="55" align="left" cellsAlign="left" dataField="destination">
+          </ngc-data-column>
+          <ngc-data-column text="import.mail.next.destination" [width]="60" align="left" cellsAlign="left"
+            dataField="nextDestination"></ngc-data-column>
+          <ngc-data-column text="import.mail.transfer.carrier" [width]="60" align="left" cellsAlign="left"
+            dataField="transferCarrierFrom"></ngc-data-column>
+          <ngc-data-column text="import.mail.breakdown.pieces" [width]="30" align="left" cellsAlign="left"
+            dataField="breakDownPieces"></ngc-data-column>
+          <ngc-data-column text="import.mail.brakdown.weight" [width]="30" align="left" cellsAlign="left"
+            dataField="breakDownWeight"></ngc-data-column>
+          <ngc-data-column text="import.mail.document.pieces" [width]="30" align="left" cellsAlign="right"
+            dataField="pieces" type="displayPieces"></ngc-data-column>
+          <ngc-data-column text="import.mail.document.weight" [width]="30" align="left" cellsAlign="right"
+            dataField="weight" type="displayWeight"></ngc-data-column>
+          <ngc-data-column [width]="70" text="import.mail.store.location" dataField="storeLocations"></ngc-data-column>
+          <ngc-data-column [width]="70" text="import.mail.warehouse.location" dataField="brkdwnLocation">
+          </ngc-data-column>
+          <ngc-data-column [width]="20" type="icon" iconType="yesno" text="BUP" align="left" cellsAlign="center"
+            dataField="bup"></ngc-data-column>
+          <ngc-data-column text="import.mail.transfer.type" [width]="50" align="left" cellsAlign="left"
+            dataField="transferType">
+          </ngc-data-column>
+          <ngc-data-column text="airmail.uitility.embargo" type="icon" iconType="yesno" [width]="38" align="left"
+            cellsAlign="center" dataField="embargo"></ngc-data-column>
+          <ngc-data-column text="import.mail.sub.type" [width]="35" align="left" cellsAlign="left" dataField="mailType">
+          </ngc-data-column>
+          <ngc-data-column text="import.mail.delivered" type="icon" iconType="yesno" [width]="35" align="left"
+            cellsAlign="center" dataField="delivered"></ngc-data-column>
+          <ngc-data-column text="import.mail.dn.remark" [width]="50" align="left" cellsAlign="left" dataField="remarks">
+          </ngc-data-column>
+          <ngc-data-row>
+            <ng-template let-group>
+              <ng-container [formGroupName]="group">
+                <ngc-datatable formArrayName="inventory" [pageable]="false" [enablePageSizeHeight]="false">
+                  <ngc-data-column text=" " type="check" [width]="20" align="left" cellsAlign="left"
+                    dataField="checkChild"></ngc-data-column>
+                  <ngc-data-column [width]="50" text="airmail.uitility.mailbagnumber" dataField="mailBagNumber"
+                    dataType="string">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" text="import.mail.warehouse.location" dataField="breakDownLocation">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" text="import.mail.store.location" dataField="storageLocation">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" text="import.mail.next.destination" dataField="nextDestination">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" text="import.mail.transfer.carrier" dataField="transferCarrierFrom">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" type="icon" iconType="yesno" text="airmail.uitility.embargo"
+                    dataField="embargoFlag" cellsAlign="center"></ngc-data-column>
+                  <ngc-data-column [width]="40" type="icon" iconType="yesno" text="airmail.uitility.damaged"
+                    align="left" cellsAlign="center" dataField="damaged"></ngc-data-column>
+                </ngc-datatable>
+              </ng-container>
+            </ng-template>
+          </ngc-data-row>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <!-- <ngc-row *ngIf="showTableButtons">
+      <ngc-column align="right">
+        <ngc-button value="Service Report" (click)="TransferToServiceReport()"></ngc-button>
+      </ngc-column>
+    </ngc-row> -->
+    <ngc-window #showPopUpWindowUpdateLocation width="800" height="400" title="import.mail.nitact.container.dn.details">
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="Storage Loation"></ngc-label>
+            <div>
+              <ngc-movable-storage-location [maxlength]="12" [minlength]="3" *ngIf="commonStorageLoc"
+                formControlName="commonStorageLocation" (ngModelChange)="patchSameValueForShipmentLocation($event)">
+              </ngc-movable-storage-location>
+              <!-- <ngc-input *ngIf="commonStorageLoc" formControlName="commonStorageLocation" (ngModelChange)="patchSameValueForShipmentLocation($event)"></ngc-input> -->
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="import.mail.warehouse.location"></ngc-label>
+            <div>
+              <ngc-locations-list [noTerminal]="true" *ngIf="commonBreakDownLoc" formControlName="commonBreakLocation"
+                [displayOnlyLocation]="true" (ngModelChange)="patchSameValueForWareHouseLocation($event)">
+              </ngc-locations-list>
+              <!-- <ngc-input *ngIf="commonBreakDownLoc" formControlName="commonBreakLocation"
+                (ngModelChange)="patchSameValueForWareHouseLocation($event)"></ngc-input> -->
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-table>
+              <thead>
+                <th>
+                  <ngc-label label="airmail.uitility.mailbagnumber"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="import.mail.current.location"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="import.mail.current.warehouse.location"></ngc-label>
+                </th>
+              </thead>
+              <tbody formArrayName="popUpArray">
+                <tr *ngFor="let item of importmanifestForm.controls.popUpArray.controls; let index=index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-display formControlName="mailBagNumber"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="storageLocation"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="breakDownLocation"></ngc-display>
+                  </td>
+
+                </tr>
+              </tbody>
+            </ngc-table>
+
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column column="&nbsp"></ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button [disabled]="hasReadPermission" value="g.save" (click)="OnUpdateLocation()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='ImportMailmanifest'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportDetailWindow title="g.report"  reportId='ImportMailmanifestDetail'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row *ngIf="showTableButtons">
+    <ngc-column>
+      <ngc-button *ngIf="hideContextualButtonsFlag" value="1.mail" (click)="Transfer()"></ngc-button>
+      <ngc-label label="  "></ngc-label>
+      <ngc-button *ngIf="documentCompleteButtonFlag" value="2.mail" (click)="OnDocumentComplete()"></ngc-button>
+      <ngc-label label="  "></ngc-label>
+      <ngc-button *ngIf="reOpenDocumentButtonFlag" value="3.mail" (click)="OnDocumentComplete()"></ngc-button>
+      <ngc-label label="  "></ngc-label>
+      <ngc-button *ngIf="breakDownCompleteButtonFlag" value="4.mail" (click)="OnBreakDownComplete()"></ngc-button>
+      <ngc-label label="  "></ngc-label>
+      <ngc-button *ngIf="reopenBreakdownButtonFlag" value="5.mail" (click)="OnBreakDownComplete()"></ngc-button>
+      <ngc-label label="  "></ngc-label>
+      <ngc-button accessEnableOn="r" *ngIf="hideContextualButtonsFlag" value="6.mail" (click)="OpenUpdateLocationPop()"></ngc-button>
+      <ngc-label label="  "></ngc-label>
+      <ngc-button accessEnableOn="r" value="8.mail" (click)="TransferToServiceReport()"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

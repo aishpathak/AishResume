@@ -1,0 +1,282 @@
+<form [formGroup]="formHeader">
+  <ngc-titlebar title="export.fill.check.list" (save)="onSave($event)" (clear)="onClear($event)"
+    [disableSave]="disableSaveFlag" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]='1'>
+        <ngc-label label="awb.awbnumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label="awb.destination"></ngc-label>
+        <div>
+          <ngc-display [sourceId]="APT" sourceCategory="lov" formControlName="destination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label="export.check.list.type"></ngc-label>
+        <div>
+          <ngc-display sourceId="CHECKLIST_TYPES" sourceCategory="dropdown" formControlName="comCheckListTypesId">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.shc">
+        </ngc-label>
+        <div>
+          <ngc-display formControlName="shc"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button *ngIf="formHeader.get('status').value === 'Completed'" label="g.print" (click)="checklistreport()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-container type="tab">
+  <ngc-row>
+    <ngc-column>
+      <div [ngStyle]="{'border' : '1px solid black'}">
+        <ng-container *ngFor="let itemHeader of fillHeader">
+          <ng-container *ngIf="itemHeader.question">
+            <div
+              [ngStyle]="{'font-weight':'bold', 'width' : '100%', 'text-decoration':'underline' ,'font-size': 20 + 'px', 'text-align': itemHeader.alignment, 'background-color': 'white'}">
+              {{itemHeader.question}}
+            </div>
+          </ng-container>
+        </ng-container>
+      </div>
+    </ngc-column>
+  </ngc-row>
+</ngc-container>
+<ngc-container type="tab">
+  <ngc-row>
+    <ngc-column>
+      <ng-container *ngFor="let itemDetails of fillDetails;  let index = index">
+        <ng-container
+          *ngIf="itemDetails.fontStyle === 'bold' ||itemDetails.fontStyle === 'italic' || itemDetails.fontStyle === 'underline'">
+          <ng-container *ngIf="itemDetails.applyBorder">
+            <div
+              [ngStyle]="{'font-weight': itemDetails.fontStyle, 'border' : '1px solid black', 'font-style': itemDetails.fontStyle, 'text-decoration':itemDetails.fontStyle ,'font-size': 15 + 'px', 'text-align': itemDetails.alignment, 'background-color': 'white'}">
+              {{itemDetails.question}}
+            </div>
+          </ng-container>
+          <ng-container *ngIf="!itemDetails.applyBorder">
+            <div
+              [ngStyle]="{'font-weight': itemDetails.fontStyle, 'font-style': itemDetails.fontStyle, 'text-decoration':itemDetails.fontStyle ,'font-size': 15 + 'px', 'text-align': itemDetails.alignment, 'background-color': 'white'}">
+              {{itemDetails.question}}
+            </div>
+          </ng-container>
+        </ng-container>
+      </ng-container>
+    </ngc-column>
+  </ngc-row>
+</ngc-container>
+<form [formGroup]="form">
+  <ngc-container type="square">
+    <ngc-row formArrayName="fillChecklistParameterHeader">
+      <ngc-column column="2"
+        *ngFor="let fillChecklistParameterHeader of form.getList('fillChecklistParameterHeader'); let index = index"
+        [formGroupName]="index">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label formControlName="label">
+              </ngc-label>
+              <div>
+                <ng-container *ngIf="fillChecklistParameterHeader.get('dataType').value === 'Date'">
+                  <ngc-datetimeinput formControlName="name">
+                  </ngc-datetimeinput>
+                </ng-container>
+                <ng-container *ngIf="fillChecklistParameterHeader.get('dataType').value === 'DateTime'">
+                  <ngc-datetimeinput formControlName="name" [showCalendarButton]="true" [showTimeButton]="true">
+                  </ngc-datetimeinput>
+                </ng-container>
+                <ng-container *ngIf="fillChecklistParameterHeader.get('dataType').value === 'Text'">
+                  <ngc-input formControlName="name">
+                  </ngc-input>
+                </ng-container>
+                <ng-container *ngIf="fillChecklistParameterHeader.get('dataType').value === 'Number'">
+                  <ngc-numberinput decimalDigits="0" formControlName="name">
+                  </ngc-numberinput>
+                </ng-container>
+                <ng-container *ngIf="fillChecklistParameterHeader.get('dataType').value === 'AWB'">
+                  <ngc-awbinput formControlName="name">
+                  </ngc-awbinput>
+                </ng-container>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row formArrayName="fillChecklistwithHeadings">
+      <ngc-column>
+        <ngc-container *ngFor="let item of form.getList('fillChecklistwithHeadings'); let index=index"
+          [formGroupName]="index">
+          <ngc-row *ngIf="!form.get(['fillChecklistwithHeadings', index, 'checkListType']).value">
+            <ngc-column>
+              <ngc-display
+                *ngIf="index == 0 || form.get(['fillChecklistwithHeadings', index, 'lineItemHeading']).value !=form.get(['fillChecklistwithHeadings', index-1, 'lineItemHeading']).value"
+                style="font-weight:bold" formControlName="lineItemHeading">
+              </ngc-display>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="!form.get(['fillChecklistwithHeadings', index, 'checkListType']).value">
+            <ngc-column></ngc-column>
+            <ngc-column column="5">
+              <ngc-label label=" ">
+              </ngc-label>
+              <div>
+                <ngc-display formControlName="question">
+                </ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="export.check.list.na">
+              </ngc-label>
+              <div>
+                <ngc-radiobutton [groupName]="index + 'fillchecklist'" formControlName="notApplicable">
+                </ngc-radiobutton>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="export.check.list.yes">
+              </ngc-label>
+              <div>
+                <ngc-radiobutton [groupName]="index + 'fillchecklist'" formControlName="accepted">
+                </ngc-radiobutton>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="export.check.list.no">
+              </ngc-label>
+              <div>
+                <ngc-radiobutton [groupName]="index + 'fillchecklist'" formControlName="notAccepted">
+                </ngc-radiobutton>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row formArrayName="fillChecklistwithoutHeadings">
+      <ngc-column>
+        <ngc-container>
+          <ngc-row *ngFor="let item of form.getList('fillChecklistwithoutHeadings'); let index=index"
+            [formGroupName]="index">
+            <ngc-column column="6" *ngIf="!form.get(['fillChecklistwithoutHeadings', index, 'checkListType']).value">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label=" ">
+                    </ngc-label>
+                    <div>
+                      <ngc-display formControlName="question">
+                      </ngc-display>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+            <ngc-column column="2" *ngIf="!form.get(['fillChecklistwithoutHeadings', index, 'checkListType']).value">
+              <ngc-label label="export.check.list.na">
+              </ngc-label>
+              <div>
+                <ngc-radiobutton [groupName]="index + 'fillchecklist1'" formControlName="notApplicable">
+                </ngc-radiobutton>
+              </div>
+            </ngc-column>
+            <ngc-column column="2" *ngIf="!form.get(['fillChecklistwithoutHeadings', index, 'checkListType']).value">
+              <ngc-label label="export.check.list.yes">
+              </ngc-label>
+              <div>
+                <ngc-radiobutton [groupName]="index + 'fillchecklist1'" formControlName="accepted">
+                </ngc-radiobutton>
+              </div>
+            </ngc-column>
+            <ngc-column column="2" *ngIf="!form.get(['fillChecklistwithoutHeadings', index, 'checkListType']).value">
+              <ngc-label label="export.check.list.no">
+              </ngc-label>
+              <div>
+                <ngc-radiobutton [groupName]="index + 'fillchecklist1'" formControlName="notAccepted">
+                </ngc-radiobutton>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="square">
+    <ngc-row formArrayName="fillChecklistParameterFooter">
+      <ngc-column column="2"
+        *ngFor="let itemParameterFooter of form.getList('fillChecklistParameterFooter'); let index = index"
+        [formGroupName]="index">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label formControlName="label">
+              </ngc-label>
+              <div>
+                <ng-container *ngIf="itemParameterFooter.get('dataType').value === 'Date'">
+                  <ngc-datetimeinput formControlName="name">
+                  </ngc-datetimeinput>
+                </ng-container>
+                <ng-container *ngIf="itemParameterFooter.get('dataType').value === 'DateTime'">
+                  <ngc-datetimeinput formControlName="name" [showCalendarButton]="true" [showTimeButton]="true">
+                  </ngc-datetimeinput>
+                </ng-container>
+                <ng-container *ngIf="itemParameterFooter.get('dataType').value === 'Text'">
+                  <ngc-input formControlName="name">
+                  </ngc-input>
+                </ng-container>
+                <ng-container *ngIf="itemParameterFooter.get('dataType').value === 'Number'">
+                  <ngc-numberinput decimalDigits="0" formControlName="name">
+                  </ngc-numberinput>
+                </ng-container>
+                <ng-container *ngIf="itemParameterFooter.get('dataType').value === 'AWB'">
+                  <ngc-awbinput formControlName="name">
+                  </ngc-awbinput>
+                </ng-container>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-report  #reportWindow title="g.report"  reportId='DG_Checklist_with_answers'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>
+<ngc-container type="tab">
+  <ngc-row>
+    <ngc-column *ngIf="fillFooter">
+      <div [ngStyle]="{ 'border' : '1px solid black'} ">
+        <ng-container *ngFor="let itemFooter of fillFooter; let index=index ">
+          <ng-container *ngIf="itemFooter.fontStyle==='bold' ||itemFooter.fontStyle==='italic' || itemFooter.fontStyle==='underline' ||
+          itemFooter.fontStyle==='BOLD' ||itemFooter.fontStyle==='ITALIC' || itemFooter.fontStyle==='UNDERLINE' ">
+            <div [ngStyle]="{ 'font-size': itemFooter.fontSize + 'px', 'text-align': itemFooter.alignment,
+                      'background-color': 'white'} ">
+              {{itemFooter.question}}
+            </div>
+            <ng-container *ngFor="let itemFoterNotes of itemFooter.pageFooterNotes; let index=i ndex ">
+              <div [ngStyle]="{ 'font-size': itemFoterNotes.fontSize + 'px', 'text-align': itemFoterNotes.alignment
+                      , 'background-color':'white' } ">
+                {{itemFoterNotes.question}}
+              </div>
+            </ng-container>
+          </ng-container>
+        </ng-container>
+      </div>
+    </ngc-column>
+  </ngc-row>
+</ngc-container>

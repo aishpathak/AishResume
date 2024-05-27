@@ -1,0 +1,309 @@
+<ngc-titlebar title="warehouse.eventnotification" (save)="save()"></ngc-titlebar>
+<!-- Form tag Begin for Event Notification data -->
+<form [formGroup]="eventNotification">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.purpose"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="purpose" sourceId='EVENT_PURPOSE' [noCache]="true" sourceType='query'
+            sourceType='query' [width]="200" [dropDownWidth]="190" (ngModelChange)="onChangePurpose($event)" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.audit.EventType"></ngc-label>
+        <div align="left">
+          <ngc-dropdownlist accessEnableOn="r" formControlName='eventTypesId' sourceId='EVENT_TYPE' sourceType='query' [width]="350"
+            [noCache]="true" [sourceParameters]="eventTypes" [dropDownWidth]="340" valueMember="numericCode"
+            displayMember="desc" required (select)="onChange($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="fetchEventNotifications()" value="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="6"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="sectiontop" *ngIf='showCreate'>
+    <ngc-row *ngIf='showCreate'>
+      <ngc-column column="11"></ngc-column>
+      <ngc-column>
+        <ngc-button (click)="createSLA()" value="warehouse.create"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf='showTableFlag'>
+      <ngc-column>
+        <ngc-table>
+          <thead align="Center">
+            <tr>
+              <th [width]="100">
+                <ngc-label value="event.SLA Type" cellsAlign="center" align="center"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.aircraftType"></ngc-label>
+              </th>
+              <th [width]="100" feature="SlaConfiguration.AircraftBodyType">
+                <ngc-label value="messaging.aircraft.body.type"></ngc-label>
+              </th>
+              <th [width]="100" entityAttribute="Flight.DomesticInternationalHandling">
+                <ngc-label value="imp.intl.dom.full"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.flightType"></ngc-label>
+              </th>
+              <th *ngIf='showTransferType' [width]="100">
+                <ngc-label value="event.transferType"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="event.SHCPusrpose"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="event.flightTime"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="event.equation"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.minutes"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.count"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.notificationType"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.userConfiguration"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.flightInformation"></ngc-label>
+              </th>
+              <th [width]="100" colspan="2">
+                <ngc-label value="event.frequency"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.templateType"></ngc-label>
+              </th>
+              <th [width]="100" colspan="2">
+                <ngc-label value="g.delete"></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th *ngIf='showTransferType' colspan="12">
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th *ngIf='!showTransferType' colspan="11">
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.fixedTime"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="event.repeatTime"></ngc-label>
+              </th>
+              <th colspan="4">
+                <ngc-label value=""></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody align="center" formArrayName="eventNotificationList">
+            <tr *ngFor="let item of eventNotification.controls.eventNotificationList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-dropdownlist formControlName='slaCategory' sourceId="Events$SLAType" [width]="100"
+                  [dropDownWidth]="90" required></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName='aircraftType' sourceId="AIRCRAFT_TYPE" [width]="100"
+                  sourceType='query' [noCache]="true" valueMember="code" [dropDownWidth]="90" displayMember="code">
+                </ngc-dropdownlist>
+              </td>
+              <td feature="SlaConfiguration.AircraftBodyType">
+                <ngc-dropdownlist formControlName="aircraftBodyType" sourceId="Master$Mst_AircraftType" [width]="130"
+                  [dropDownWidth]="120">
+                </ngc-dropdownlist>
+              </td>
+              <td entityAttribute="Flight.DomesticInternationalHandling">
+                <ngc-dropdownlist formControlName="domIntl" sourceId="DomIntl$DomIntlDrop" [autoSelect]="true"
+                  [width]="140" [dropDownWidth]="130">
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist *ngIf="this.eventNotification.get('purpose').value === 'FLIGHT'"
+                  formControlName='flightType' sourceId="Events$AirCraftType" [width]="100" [dropDownWidth]="90"
+                  required></ngc-dropdownlist>
+                <ngc-dropdownlist *ngIf="this.eventNotification.get('purpose').value !== 'FLIGHT'"
+                  formControlName='flightType' sourceId="Events$AirCraftType" [width]="100" [dropDownWidth]="90">
+                </ngc-dropdownlist>
+              </td>
+
+
+              <td *ngIf='showTransferType'>
+                <ngc-dropdownlist formControlName='code' sourceId='TRANSFER_TYPE_CODE' sourceType='query'
+                  displayMember="code" valueMember="code" [noCache]="true" [sourceParameters]="transferType"
+                  [width]="70" [dropDownWidth]="60" required></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName='shcPurpose' sourceId="SHC_HANDLING_LOADED" [width]="100"
+                  [noCache]="true" [dropDownWidth]="90" sourceType='query' displayMember="code"></ngc-dropdownlist>
+              </td>
+              <td>
+
+                <ngc-dropdownlist formControlName='flightTime' sourceId="Events$FlightTime" [width]="100"
+                  [dropDownWidth]="90"></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist *ngIf="this.eventNotification.get('purpose').value === 'FLIGHT'"
+                  formControlName='equation' sourceId="Events$Equations" [width]="100" [dropDownWidth]="90" required>
+                </ngc-dropdownlist>
+                <ngc-dropdownlist *ngIf="this.eventNotification.get('purpose').value !== 'FLIGHT'"
+                  formControlName='equation' sourceId="Events$Equations" [width]="100" [dropDownWidth]="90">
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-numberinput formControlName='occurenceInMinutes' [width]="80" [decimalDigits]="0" [digits]="4"
+                  [min]="0"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-numberinput formControlName='occurenceInCount' [digits]="5" [width]="80" [decimalDigits]="0"
+                  [min]="0"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName='notificationType' sourceId='COMMUNCTN_TYPE' sourceType='query'
+                  [noCache]="true" [width]="130" [dropDownWidth]="120" [multiSelect]="true" valueMember="numericCode"
+                  displayMember="desc" required></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-button accessEnableOn="r" [disabled]="(item.get('flagCRUD').value === 'C' ? true : false)"
+                  (click)="addNotifyUser(item,index)" value="warehouse.notifyuser"></ngc-button>
+              </td>
+              <td>
+                <ngc-button accessEnableOn="r" [disabled]="(item.get('flagCRUD').value === 'C' ? true : false)"
+                  (click)="addFlightInfo(index)" value="warehouse.flightinfo"></ngc-button>
+              </td>
+              <td>
+                <ngc-timeinput formControlName="fixedTime" dataType="string" [disabled]="false"></ngc-timeinput>
+              </td>
+              <td>
+                <ngc-numberinput formControlName='repeatTime' [width]="80" [decimalDigits]="0" [digits]="5" [min]="0">
+                </ngc-numberinput>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName='eventTemplateId' sourceId="NOTIFICATION_TEMPLATE" [width]="200"
+                  sourceType='query' [dropDownWidth]="190" valueMember="numericCode"></ngc-dropdownlist>
+              </td>
+              <!--<td>
+                <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='dlsPrecisionTime' [width]="160"></ngc-datetimeinput>
+
+              </td>
+              <td>
+                <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='fltPrecisionTime' [width]="160"></ngc-datetimeinput>
+
+              </td>-->
+              <td>
+                <ngc-link iconType="delete" (linkClick)="deleteEventNotification(index)"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="userConfiguration">
+  <ngc-window #addUserWindow width="500" height="400" title="warehouse.userconfig" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th [width]="60">
+                  <ngc-label label="event.notifyUser"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="g.delete"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="userList">
+              <tr *ngFor="let item of userConfiguration.get('userList').controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-dropdownlist formControlName="eventGroupId" sourceId='USER_GROUP_ID' sourceType='query'
+                    [sourceParameters]='eventInfo' valueMember="numericCode" [noCache]="true"></ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-link iconType="delete" (linkClick)="deleteUser(index)"></ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button value="g.add" (click)="addUserRow()"></ngc-button>
+          <ngc-button value="g.save" (click)="saveUsers()"></ngc-button>
+        </ngc-column>
+        <ngc-column column="1"></ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<form [formGroup]="flightInformation">
+  <ngc-window #addFlightWindow width="1000" height="400" title="event.flightInformation" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th [width]="60">
+                  <ngc-label label="event.carrierCode"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="event.fightKey"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="event.flightDate"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="g.delete"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="flightList">
+              <tr *ngFor="let item of flightInformation.get('flightList').controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-input [width]="100" formControlName="carrierCode"></ngc-input>
+                </td>
+                <td>
+                  <ngc-flightkeyinput [width]="200" formControlName="flightKey"></ngc-flightkeyinput>
+                </td>
+                <td>
+                  <ngc-dateinput formControlName="flightDate"></ngc-dateinput>
+                </td>
+                <td>
+                  <ngc-link iconType="delete" (linkClick)="deleteFlight(index)"></ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button value="g.add" (click)="addFlightRow()"></ngc-button>
+          <ngc-button value="g.save" (click)="saveFlight()"></ngc-button>
+        </ngc-column>
+        <ngc-column column="1"></ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

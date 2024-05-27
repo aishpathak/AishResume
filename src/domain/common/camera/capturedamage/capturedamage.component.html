@@ -1,0 +1,354 @@
+<ngc-titlebar title="common.capture.damage" (save)="onSave($event)" (cancel)="onCancel($event)" *ngIf=!showAsPopup
+   [disableSave]="showSave">
+</ngc-titlebar>
+<ngc-row *ngIf=showAsPopup>
+  <ngc-column align="right">
+    <ngc-button label="savehold" (click)="onSave($event)"> </ngc-button>
+  </ngc-column>
+  <ngc-column [column]="1">
+    <ngc-label label=""></ngc-label>
+  </ngc-column>
+</ngc-row>
+<form [formGroup]="captureDamageForm">
+  <ngc-capturephoto [previewSelectable]='true' [entityType]="captureDamageForm.get('entityType').value"
+    [entityKey]="captureDamageForm.get('entityKey').value" [entityKey2]="captureDamageForm.get('subEntityKey').value"
+    [entityType2]="captureDamageForm.get('entityType2').value"
+    [associatedTo]="captureDamageForm.get('entityType').value" stage="DAMAGE">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column [column]="2.5">
+          <ngc-label label="g.select"></ngc-label>
+          <div>
+            <ngc-shipmentinput accessEnableOn="r" formControlName="entityKey" required (select)="selectData($event)"
+              [noULD]="false" [noMBN]="false" [shipmentType]="captureDamageForm.get('entityType').value"
+              [readonly]="isReadOnly"></ngc-shipmentinput>
+          </div>
+        </ngc-column>
+
+        <ngc-column *ngIf=handledbyHouse column="2">
+          <div>
+            <ngc-label label="g.hawb.number"></ngc-label>
+          </div>
+          <ngc-lov formControlName="subEntityKey" upperCase='true' accessEnableOn="r" [width]="150" sourceId='HWBNUMBER'
+            [noCache]="true" [maxlength]="13"  dataField='code' valueMember="code"
+            [sourceParameters]="{'parameter1': captureDamageForm.get('entityKey').value}"
+            (select)="setAWBNumber($event)" required>
+            <ngc-data-column text="g.hawb.number" dataField="code" [width]="100" required></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+
+
+        <ngc-column [column]="2">
+          <ngc-label label="g.flight"></ngc-label>
+          <div>
+            <ngc-flightkeyinput accessEnableOn="r" formControlName="flight" [width]="100" [maxlength]="8"
+              (modelChange)="onFlightChange()"></ngc-flightkeyinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="g.date"></ngc-label>
+          <div>
+            <ngc-datetimeinput accessEnableOn="r" [width]="100" (modelChange)="onFlightDate()"
+              formControlName="flightDate" [showCalendarButton]="true" [showTimeButton]="false"></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="uld.Segment"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="flightSegmentId" sourceId="IRREGULARITY_SEGMENT_DETAILS"
+              sourceType="query"
+              [sourceParameters]="{ 'parameter1': captureDamageForm.get('flight').value, 'parameter2': captureDamageForm.get('flightDate').value }"
+              [required]="importExportFlag && captureDamageForm.get('flight').value != null && captureDamageForm.get('flightDate').value != null 
+                 && (captureDamageForm.get('entityType').value == 'AWB' || captureDamageForm.get('entityType').value == 'CBV' || captureDamageForm.get('entityType').value == 'UCB')"
+              [autoSelectOnSingle]="true" [width]="90">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label=''></ngc-label>
+          <div>
+            <ngc-button accessEnableOn="r" label='customs.search' (click)='onFetch()' iconType="search"
+              [disabled]=showAsPopup>
+            </ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=''></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="2">
+          <ngc-label label="mb.pdamage"></ngc-label>
+          <div>
+            <ngc-display [width]="100" formControlName="damagePieces"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="g.natureOfGoods"></ngc-label>
+          <div>
+            <ngc-input [width]="150" formControlName="content" [maxlength]="20" required></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="g.remark"></ngc-label>
+          <div>
+            <ngc-input formControlName="remark" [width]="500" [maxlength]="65"></ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=''></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="1">
+          <ngc-label entityAttribute="Gen.ACCSHandler" label="imp.accs.handler"></ngc-label>&nbsp;&nbsp;&nbsp;
+          <div>
+            <ngc-display entityAttribute="Gen.ACCSHandler" [width]="100" formControlName="accsHandler"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="0.75">
+          <ngc-label entityAttribute="import.console" label="awb.console"></ngc-label>
+          <div>
+            <ngc-display entityAttribute="import.console" [width]="100" formControlName="console"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-label entityAttribute="Import.AwbPiceWeight" label="accept.awbpcs/weight"></ngc-label>
+          &nbsp;&nbsp;&nbsp;
+          <div>
+            <ngc-display entityAttribute="Import.AwbPiceWeight" [width]="100" formControlName="awbPcsWt"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-label entityAttribute="Import.ManifestPieceWeight" label="g.man.pcs.wts"></ngc-label>
+          <div>
+            <ngc-display entityAttribute="Import.ManifestPieceWeight" [width]="100" formControlName="manifestPcsWt">
+            </ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=''></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button label="mb.addDamage" (click)="addDamage()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="val.s.no"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="awb.nature.of.damage"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="mb.pdamage"></ngc-label>
+                </th>
+                <th entityAttribute="Import.IrregularityWeight">
+                  <ngc-label value="imp.dam.wt"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.severity"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.occurance"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.remarks"></ngc-label>
+                </th>
+                <th *ngIf="hawbInfoFeatureEnabled">
+                  <ngc-label *ngIf="hawbInfoFeatureEnabled" value="House"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value=""></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="captureDetails">
+              <tr *ngFor=" let item of captureDamageForm.controls.captureDetails.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-dropdownlist formControlName="listNatureOfDamage" [sourceId]="natureOfDamageSourceId"
+                    (modelChange)="onSelect($event,index)" [width]="120" required [multiSelect]="true">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-piecesinput formControlName="damagePieces" [width]="100" (ngModelChange)="sumPieces($event)"
+                    required [maxlength]="4"></ngc-piecesinput>
+                </td>
+                <td entityAttribute="Import.IrregularityWeight">
+                  <ngc-weightinput entityAttribute="Import.IrregularityWeight" formControlName="damageWeight">
+                  </ngc-weightinput>
+                </td>
+                <td>
+                  <ngc-dropdownlist formControlName="severity" sourceId="CaptureDamage$Severity" [width]="80" required>
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-dropdownlist formControlName="occurrence" sourceId="CaptureDamage$Occurrence" [width]="130">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-textarea [width]="700" [height]="30" formControlName="lineRemarks" [maxlength]="65">
+                  </ngc-textarea>
+                </td>
+                <td *ngIf="hawbInfoFeatureEnabled">
+                  <ngc-link *ngIf="hawbInfoFeatureEnabled" (linkClick)="addHosue(item, index)" type="link"
+                    iconType="edit" [disabled]="item.get('flagCRUD').value == 'C'"> </ngc-link>
+                </td>
+                <td align="center">
+                  <!-- <ngc-link iconType="delete" (click)="onDelete(index)" formControlName="selectDeleteIcon"></ngc-link> -->
+                  <ngc-link (linkClick)="onLocationLinkClick($event, index)" type="link" iconType="delete">
+                  </ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column [column]="4">
+          <ngc-label value="capturedamage.emailto.m"></ngc-label>
+          <div>
+            <ngc-taginput [width]="250" formControlName="emailTo"></ngc-taginput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <br>
+          <ngc-button value="common.sendb" (click)="sendEmailWithUploadedDoc()" [disabled]="disableSendEmail">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-capturephoto>
+</form>
+<form [formGroup]="maintainDamageHouseInfoFormGroup">
+  <ngc-window #addMaintainHouseWindow [width]="1400" [height]="400" *ngIf="hawbInfoFeatureEnabled"
+    title="Gen.maintainHouse">
+    <ngc-container type="section">
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+        </div>
+      </ngc-column>
+      <ngc-row>
+        <ngc-column column="4">
+          <div>
+            <ngc-label label="Gen.HawbNo"></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <ngc-lov formControlName="houseNum" [noCache]="true" title="g.hawbNumber" dataField='code'
+              sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO" [width]="200"
+              [sourceParameters]="{'parameter1': captureDamageForm.get('entityKey').value,r:variable}" maxlength="20"
+              [noValidation]="true">
+              <ngc-data-column text="g.hawbNumber" dataField="code" [width]="200"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column column="5">
+          <div>
+            <ngc-button iconType="search" accessEnableOn="r" (click)="maintainHouseSearch()" value="g.search">
+            </ngc-button>
+          </div>
+        </ngc-column>
+        <ngc-column column="1" align="right">
+          <div>
+            <ngc-button iconType="add" accessEnableOn="r" (click)="maintainAddNewHouse()" value="Gen.addHawb">
+            </ngc-button>
+          </div>
+        </ngc-column>
+        <ngc-column column="1" align="right">
+          <div>
+            <ngc-button iconType="save" (click)="saveMaintainHouseInfo()" label="save"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="damageHouseInfo" [pageable]="false">
+            <ngc-data-column text="Gen.HawbNo" dataField="houseNumber" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-lov formControlName="houseNumber" [noCache]="true" title="g.hawbNumber" dataField='code'
+                    sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO"
+                    [sourceParameters]="{'parameter1': captureDamageForm.get('entityKey').value,r:variable}"
+                    (select)="setHouseInfo($event,group)" maxlength="20" [width]="200" [noValidation]="true" required>
+                    <ngc-data-column text="g.hawbNumber" dataField="code" [width]="200">
+                    </ngc-data-column>
+                  </ngc-lov>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Gen.housePcsWt" dataField="housePicecWeight" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-piecesinput formControlName="hawbPieces" [width]="100">
+                  </ngc-piecesinput>
+                  <ngc-weightinput formControlName="hawbWeight" [width]="100">
+                  </ngc-weightinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="imp.HAWB.DamPcs" dataField="" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-piecesinput formControlName="hawbDamagePcs" [width]="100"
+                    (ngModelChange)="onHouseWayBillPieceChange($event,group)" required>
+                  </ngc-piecesinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="imp.HAWB.DamWt" dataField="" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-weightinput formControlName="hawbDamageWt" [width]="100" required>
+                  </ngc-weightinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="remarks" dataField="hawbRemarks" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="center">
+                  <ngc-input formControlName="hawbRemarks" [width]="400" maxlength="65">
+                  </ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Delete" [width]="10" align="center" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="center">
+                  <ngc-link (linkClick)="deleteDamageHouse($event,group)" iconType="delete">
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

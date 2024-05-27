@@ -1,0 +1,403 @@
+<ngc-page>
+  <ngc-page-header [height]="310">
+    <form [formGroup]='manifestReconsilationStatementForm'>
+      <ngc-titlebar title='customs.manifest.reconcilStatement' (save)="onSave($event)" (delete)="onDelete($event)"
+        (cancel)="onCancel($event)"></ngc-titlebar>
+
+      <ngc-container type="rectangle">
+
+        <ngc-row>
+          <ngc-column [column]="1">
+            <ngc-label label='customs.export.import'></ngc-label>
+            <div>
+              <ngc-dropdownlist accessEnableOn="r" [width]="90" [noCache]="true" formControlName="exportOrImport"
+                sourceId="Type$TracingType"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1">
+            <ngc-label label='g.flight'></ngc-label>
+            <div>
+              <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100"></ngc-flightkeyinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1">
+            <ngc-label label='g.FlightDate'></ngc-label>
+            <div>
+              <ngc-dateinput accessEnableOn="r" [width]="90" formControlName="flightDate"></ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label label='g.shipmentNumber'></ngc-label>
+            <div>
+              <ngc-awbinput accessEnableOn="r" [width]="120" formControlName="shipmentNumber"></ngc-awbinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1">
+            <ngc-label label=''></ngc-label>
+            <br>
+            <div>
+              <ngc-button accessEnableOn="r" (click)="onSearchMrs()" value="customs.search" iconType="search" #searchbutton>
+              </ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+        </ngc-row>
+      </ngc-container>
+
+      <ngc-container type="rectangle" *ngIf="showTable">
+        <ngc-row>
+          <!--<ngc-column [column]="1">
+        <ngc-label label='Export/Import'></ngc-label>
+        <div>
+          <ngc-display [width]="90" required formControlName="exportOrImport"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='Flight'></ngc-label>
+        <div>
+          <ngc-display [width]="90" required formControlName="flightKey"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='Date'></ngc-label>
+        <div>
+          <ngc-display [width]="90" required [onlyDate]="true" formControlName="flightDate"></ngc-display>
+        </div>
+      </ngc-column>-->
+          <ngc-column [column]="2">
+            <ngc-label label='customs.status.desc'></ngc-label>
+            <div>
+              <ngc-dropdownlist [width]="90" [noCache]="true" formControlName="shipmentstatus"
+                sourceId="Custshpt_Status$Custshpt_Status"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1">
+            <ngc-label label='customs.status.mrs'></ngc-label>
+            <div>
+              <ngc-display [width]="90" formControlName="mrsSequenceNo"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1">
+            <ngc-label label='customs.ack.code'></ngc-label>
+            <div>
+              <ngc-display [width]="90" formControlName="acknowledgeCode"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="1">
+            <ngc-label label='customs.ack.date'></ngc-label>
+            <div>
+              <ngc-display [width]="90" [onlyDate]="true" formControlName="acknowledgeDate"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container *ngIf="showTable">
+
+        <ngc-row>
+
+
+          <ngc-column align="right">
+            <ngc-button (click)="exportToExcel()" [width]="100" value="customs.print"></ngc-button>
+            <ngc-button accessEnableOn="r" (click)="onRefresh()" [width]="100" value="customs.refresh"></ngc-button>
+            <ngc-button (click)="onUpdate()" [width]="100" value="customs.update"></ngc-button>
+            <ngc-button (click)="onAddRow()" [width]="100" value="customs.addRow"></ngc-button>
+          </ngc-column>
+
+        </ngc-row>
+      </ngc-container>
+    </form>
+
+  </ngc-page-header>
+  <form [formGroup]='manifestReconsilationStatementForm'>
+    <ngc-container *ngIf="showTable">
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <th>
+                <ngc-checkbox type="checkbox" formControlName="selectAll"></ngc-checkbox>
+              </th>
+              <th>
+                <ngc-label label='g.sNo'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.awbNumber'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.org'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.des'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.shp_awb.pcs'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.shp_awb.wgt'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.natureOfGoods'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.aces'> </ngc-label>
+              </th>
+
+
+              <th>
+                <ngc-label label='g.agent'> </ngc-label>
+              </th>
+
+
+              <th>
+                <ngc-label label='customs.status.code'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.status.desc'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.cmd'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.cmd.details'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.history'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='customs.aces.detail'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label=''> </ngc-label>
+              </th>
+            </thead>
+
+            <tbody formArrayName="mrsModel" height=10>
+              <tr *ngFor="let record of manifestReconsilationStatementForm.controls.mrsModel.controls let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-checkbox accessEnableOn="r" type="checkbox" formControlName="select"></ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-display [width]="50" value={{index+1}}></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="shipmentNumber">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="shipmentNumber"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="origin"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="origin"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="destination">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="destination"></ngc-display>
+                </td>
+                <td *ngIf="record.get('shipmentPiece').value!==record.get('totalPiece').value">
+                  <ngc-piecesdisplay [width]="100" formControlName="shipmentPiece"></ngc-piecesdisplay>
+                  <ngc-display [width]="100" value="/"></ngc-display>
+                  <ngc-piecesdisplay [width]="100" formControlName="totalPiece"></ngc-piecesdisplay>
+                </td>
+                <td *ngIf="record.get('shipmentPiece').value===record.get('totalPiece').value">
+                  <ngc-piecesdisplay [width]="100" formControlName="shipmentPiece"></ngc-piecesdisplay>
+                </td>
+                <td *ngIf="record.get('shipmentWeight').value!==record.get('totalWeight').value">
+                  <ngc-weightdisplay [width]="100" formControlName="shipmentWeight"></ngc-weightdisplay>
+                  <ngc-display [width]="100" value="/"></ngc-display>
+                  <ngc-weightdisplay [width]="100" formControlName="totalWeight"></ngc-weightdisplay>
+                </td>
+                <td *ngIf="record.get('shipmentWeight').value===record.get('totalWeight').value">
+                  <ngc-weightdisplay [width]="100" formControlName="shipmentWeight"></ngc-weightdisplay>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="natureOfGoods">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="natureOfGoods"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="90" formControlName="referenceNumber">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="90" formControlName="referenceNumber"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="appointedAgentCode">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="appointedAgentCode"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="mrsStatusCode">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="mrsStatusCode"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="shipmentStatus">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="shipmentStatus"></ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value === this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display style=" color:rgb(238, 86, 15)" [width]="100" formControlName="cmdReceived">
+                  </ngc-display>
+                </td>
+                <td
+                  *ngIf="record.get('shipmentNumber').value !== this.manifestReconsilationStatementForm.get('shipmentNumber').value">
+                  <ngc-display [width]="100" formControlName="cmdReceived"></ngc-display>
+                </td>
+                <td>
+                  <ngc-link accessEnableOn="r" (linkClick)="onLinkClick($evnet, index)" type="link" iconType="edit" [disabled]="false">
+
+                  </ngc-link>
+                </td>
+                <td>
+                  <ngc-link accessEnableOn="r" (linkClick)="onClick($evnet, index)" type="link" iconType="edit" [disabled]="false">
+                  </ngc-link>
+                </td>
+                <td>
+                  <ngc-link accessEnableOn="r" (click)="onACES($evnet, index)" type="link" iconType="edit">
+
+                  </ngc-link>
+                </td>
+                <td>
+                  <ngc-link (click)="ondelete($evnet, index)" type="link" iconType="delete">
+
+                  </ngc-link>
+                </td>
+              </tr>
+
+            </tbody>
+
+          </ngc-table>
+          <ngc-row *ngIf="nilCargo">
+            <ngc-column align="center">
+              <ngc-label style="font-size: 25px;" label="customs.heading.nilcargo"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+
+    <ngc-footer [height]="40">
+      <ngc-container type="tab" *ngIf="showTable">
+        <ngc-row>
+          <ngc-column align="left">
+            <ngc-button (click)="openMrs()" [disabled]="openMRSButton" value="aces.openmrs"></ngc-button>
+
+          </ngc-column>
+          <ngc-column align="right">
+            <!-- <ngc-button (click)="openpopwindow()" value="Print MRS Accounting Report"></ngc-button> -->
+            <ngc-button accessEnableOn="r" (click)="openAwbDocumentPage()" value="aces.afb.document"></ngc-button>
+            <ngc-button accessEnableOn="r" (click)="onAcesFlightSchedule()" value="customs.aces.flightSchedule"></ngc-button>
+            <ngc-button accessEnableOn="r" (click)="OnShipment()" value="customs.smInfo"></ngc-button>
+            <ngc-button (click)="OnSend()" [disabled]="false" accessSectionId="ACCESSMRS" value="customs.aces.mrs">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+
+    </ngc-footer>
+    <ngc-window #confirm title="customs.confirmation" [showCloseButton]="true" [width]="400" height='200'>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='customs.proceed.msg'>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="ondeleteYes()" value="Yes"></ngc-button>
+              <ngc-button (click)="ondeleteNo()" value="No"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+    <ngc-window #showPopUpWindow width="1700" height="600" title="customs.mrsReport">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="3" align="left">
+            <ngc-label label="g.month"></ngc-label>
+            <div>
+              <ngc-dropdownlist formControlName="month" sourceType='query' sourceId="REPORT_MONTH" displayMember="desc"
+                [width]="100" required></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3" align="left">
+            <div>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="3" align="right">
+            <ngc-label label="g.year"></ngc-label>
+            <div>
+              <ngc-numberinput decimalDigits="0" digits="4" formControlName="year" required [width]="100">
+              </ngc-numberinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <div>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="center">
+            <div>
+              <ngc-button label='g.print.report' (click)="printMRSreport()"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+    <ngc-report #reportWindow title="g.report" format="xls"  reportId='customMrsReconcilation'
+       [reportParameters]='reportParameters'></ngc-report>
+    <ngc-report #reportWindow1 title="g.report"  reportId='MRS_report'  [reportParameters]='reportParameters1'>
+    </ngc-report>
+    <ngc-report #reportWindow2 title="g.report"  reportId='auditAces'  [reportParameters]='reportParameters2'>
+    </ngc-report>
+
+
+
+  </form>
+</ngc-page>

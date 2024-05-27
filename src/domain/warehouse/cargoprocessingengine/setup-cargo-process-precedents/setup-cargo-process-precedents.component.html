@@ -1,0 +1,988 @@
+<ngc-titlebar title='warehouse.cargo.processingrules' [disableSave]="saveDisableMode" (save)="onSave(event)"
+  (onClear)="onClear(event)" (cancel)="onCancel()">
+</ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="warehouse.processname"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="processAreaCode" sourceType="query"
+            (select)="processingRuleSelection($event)" sourceId="CPE_PROCESS_AREA_TYPES_FOR_MESSAGE_PRECEDENTS">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.carrier"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [displayBoth]="true" [width]="60" formControlName="processCarrierCode" sourceId="CARRIER"
+            [maxlength]="2"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="warehouse.offpoint"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [displayBoth]="true" [width]="70" formControlName="processOffPoint" sourceId="APT" [maxlength]="3">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.destination"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [displayBoth]="true" [width]="70" formControlName="processDestination" sourceId="APT"
+            [maxlength]="3"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="warehouse.country.ofdestination"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [displayBoth]="true" [width]="60" formControlName="processCountryOfDestination" sourceId="COUNTRY"
+            [maxlength]="2"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <br />
+        <div>
+          <ngc-button accessEnableOn="r" label="g.search" iconType="search" [disabled]="disableMode" (click)="getProcessingRules()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <br />
+        <ngc-button label="g._add" [disabled]="disableMode" (click)="addLineItem($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="displayTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ng-container *ngIf="displaySector">
+          <ngc-table>
+            <thead>
+              <tr>
+                <ng-container *ngFor="let parameter of parameterData">
+                  <ng-container *ngIf="parameter.desc == 'Carrier'
+                                    || parameter.precedentsParameterName == 'Carrier'">
+                    <th>
+                      <ngc-label label='g.carrier'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'From Airline'
+                                    || parameter.precedentsParameterName == 'From Airline'">
+                    <th>
+                      <ngc-label label='flight.fromairline'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Boarding Point'
+                                    || parameter.precedentsParameterName == 'Boarding Point'">
+                    <th>
+                      <ngc-label label='warehouse.bordingpoint.br'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Country of Origin'
+                                    || parameter.precedentsParameterName == 'Country of Origin'">
+                    <th>
+                      <ngc-label label='warehouse.country.oforigin.br'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Origin'
+                                    || parameter.precedentsParameterName == 'Origin'">
+                    <th>
+                      <ngc-label label='g.origin'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Off Point'
+                                    || parameter.precedentsParameterName == 'Off Point'">
+                    <th>
+                      <ngc-label label='warehouse.offpoint'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Country of Destination'
+                                    || parameter.precedentsParameterName == 'Country of Destination'">
+                    <th>
+                      <ngc-label label='warehouse.countryof.destination'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Destination'
+                                    || parameter.precedentsParameterName == 'Destination'">
+                    <th>
+                      <ngc-label label='g.destination'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'DryIceWeightSector'
+                                    || parameter.precedentsParameterName == 'DryIceWeightSector'">
+                    <th>
+                      <ngc-label label='g.sector'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Flight Type'
+                                    || parameter.precedentsParameterName == 'Flight Type'">
+                    <th>
+                      <ngc-label label='warehouse.flighttype'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'AirCraft Type'
+                                    || parameter.precedentsParameterName == 'AirCraft Type'">
+                    <th>
+                      <ngc-label label='flight.aircrafttype.br'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'RCAR'
+                                    || parameter.precedentsParameterName == 'RCAR'">
+                    <th>
+                      <ngc-label label='warehouse.rcar'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'AED Indicator'
+                                    || parameter.precedentsParameterName == 'AED Indicator'">
+                    <th>
+                      <ngc-label label='warehouse.aedindicator'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'PSN Code'
+                                    || parameter.precedentsParameterName == 'PSN Code'">
+                    <th>
+                      <ngc-label label='warehouse.psncode'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'FWB Exists'
+                                    || parameter.precedentsParameterName == 'FWB Exists'">
+                    <th>
+                      <ngc-label label='warehouse.fwb.exists'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Checklist Type'
+                                    || parameter.precedentsParameterName == 'Checklist Type'">
+                    <th>
+                      <ngc-label label='warehouse.checklisttype'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'SHC Handling Group'
+                                    || parameter.precedentsParameterName == 'SHC Handling Group'">
+                    <th>
+                      <ngc-label label='warehouse.shcgroup.bypass'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Special Handling Code'
+                                    || parameter.precedentsParameterName == 'Special Handling Code'">
+                    <th>
+                      <ngc-label label='warehouse.special.handlingcode'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'SHC Group ByPass'
+                                    || parameter.precedentsParameterName == 'SHC Group ByPass'">
+                    <th>
+                      <ngc-label label='warehouse.shcgroup.bypass'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'SHC ByPass'
+                                    || parameter.precedentsParameterName == 'SHC ByPass'">
+                    <th>
+                      <ngc-label label='warehouse.shcbypass'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Max DryIce Weight'
+                                    || parameter.precedentsParameterName == 'Max DryIce Weight'">
+                    <th>
+                      <ngc-label label='warehouse.max.dryiceweight'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Weight Tolerance'
+                                    || parameter.precedentsParameterName == 'Weight Tolerance'">
+                    <th>
+                      <ngc-label label='warehouse.weighttolerance'></ngc-label>
+                    </th>
+                  </ng-container>
+                  <ng-container *ngIf="parameter.desc == 'Threshold'
+                                    || parameter.precedentsParameterName == 'Threshold'">
+                    <th>
+                      <ngc-label label='warehouse.threshold'></ngc-label>
+                    </th>
+                  </ng-container>
+                </ng-container>
+                <th>
+                  <ngc-label label='warehouse.failuremessage'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='warehouse.effective.fromdate'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='warehouse.effective.todate'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='g.delete'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="precedents">
+              <ng-container *ngFor="let precedent of form.getList('precedents');
+                    let index=index" [formGroupName]="index">
+                <tr>
+                  <ng-container *ngFor="let parameter of parameterData">
+                    <ng-container *ngIf="parameter.desc == 'Carrier'
+                                      || parameter.precedentsParameterName == 'Carrier'">
+                      <td>
+                        <ngc-input [displayBoth]="true" [width]="60" formControlName='carrierCode' sourceId='CARRIER'
+                          [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'From Airline'
+                                      || parameter.precedentsParameterName == 'From Airline'">
+                      <td>
+                        <ngc-input [width]="60" [displayBoth]="true" formControlName='fromAirline' sourceId='CARRIER'
+                          [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Boarding Point'
+                                      || parameter.precedentsParameterName == 'Boarding Point'">
+                      <td>
+                        <ngc-input [displayBoth]="true" [width]="60" formControlName='boardingPoint' sourceId='APT'
+                          [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Country of Origin'
+                                      || parameter.precedentsParameterName == 'Country of Origin'">
+                      <td>
+                        <ngc-input [width]="60" formControlName='countryOfOrigin' sourceId='COUNTRY'
+                          [displayBoth]="true" [maxlength]="2"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Origin'
+                                      || parameter.precedentsParameterName == 'Origin'">
+                      <td>
+                        <ngc-input [displayBoth]="true" [width]="60" formControlName='shipmentOrigin' sourceId='APT'
+                          [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Off Point'
+                                      || parameter.precedentsParameterName == 'Off Point'">
+                      <td>
+                        <ngc-input [width]="60" formControlName='offPoint' sourceId='APT' [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Country of Destination'
+                                      || parameter.precedentsParameterName == 'Country of Destination'">
+                      <td>
+                        <ngc-input [width]="60" formControlName='countryOfDestination' [displayBoth]="true"
+                          sourceId='COUNTRY' [maxlength]="2"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Destination'
+                                      || parameter.precedentsParameterName == 'Destination'">
+                      <td>
+                        <ngc-input [width]="60" [displayBoth]="true" formControlName='shipmentDestination'
+                          sourceId='APT' [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'DryIceWeightSector'
+                                      || parameter.precedentsParameterName == 'DryIceWeightSector'">
+                      <td>
+                        <ngc-input [displayBoth]="true" [width]="60" formControlName='offPoint' sourceId='APT'
+                          [maxlength]="3"></ngc-input>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Flight Type'
+                                      || parameter.precedentsParameterName == 'Flight Type'">
+                      <td>
+                        <ngc-dropdownlist [width]="100" formControlName='flightType' sourceId="CPE$FlightType">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc=='AirCraft Type'
+                                      || parameter.precedentsParameterName=='AirCraft Type'">
+                      <td>
+                        <ngc-taginput [width]="50" formArrayName='aircraftTypes' dataField="aircraftType">
+                        </ngc-taginput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'RCAR'
+                                      || parameter.precedentsParameterName == 'RCAR'">
+                      <td>
+                        <ngc-dropdownlist [width]="100" formControlName='rcar' sourceId="Admin$Admin_Rcar">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'AED Indicator'
+                                      || parameter.precedentsParameterName == 'AED Indicator'">
+                      <td>
+                        <ngc-dropdownlist [width]="100" formControlName='aedIndicator' sourceId="CPE$AEDIndicator">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'PSN Code'
+                                      || parameter.precedentsParameterName == 'PSN Code'">
+                      <td>
+                        <ngc-dropdownlist [width]="100" formControlName='psnCode' sourceId="CPE$psnCode">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'FWB Exists'
+                                      || parameter.precedentsParameterName == 'FWB Exists'">
+                      <td>
+                        <ngc-checkbox [width]="100" formControlName='fwbExists'></ngc-checkbox>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Checklist Type'
+                                      || parameter.precedentsParameterName == 'Checklist Type'">
+                      <td>
+                        <ngc-dropdownlist [width]="200" formControlName="checkListTypesIds" sourceType='query'
+                          [multiSelect]="true" sourceId="CHECKLIST_TYPES"></ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'SHC Handling Group'
+                                      || parameter.precedentsParameterName == 'SHC Handling Group'">
+                      <td>
+                        <ngc-shcinput [width]="50" formArrayName='shcHandlingGroups' [maxItems]="100"
+                          dataField="specialHandlingGroupCode"></ngc-shcinput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Special Handling Code'
+                                      || parameter.precedentsParameterName == 'Special Handling Code'">
+                      <td>
+                        <ngc-shcinput [width]="50" formArrayName='shcs' [maxItems]="100"
+                          dataField="specialHandlingCode"></ngc-shcinput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'SHC Group ByPass'
+                                      || parameter.precedentsParameterName == 'SHC Group ByPass'">
+                      <td>
+                        <ngc-shcinput [width]="50" formArrayName='shcHandlingGroups' [maxItems]="100"
+                          dataField="specialHandlingGroupCode"></ngc-shcinput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'SHC ByPass'
+                                      || parameter.precedentsParameterName == 'SHC ByPass'">
+                      <td>
+                        <ngc-shcinput [width]="50" formArrayName='shcs' [maxItems]="100"
+                          dataField="specialHandlingCode"></ngc-shcinput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Max DryIce Weight'
+                                      || parameter.precedentsParameterName == 'Max DryIce Weight'">
+                      <td>
+                        <ngc-numberinput [width]="50" formControlName='maxDryIceWeight'></ngc-numberinput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Weight Tolerance'
+                                      || parameter.precedentsParameterName == 'Weight Tolerance'">
+                      <td>
+                        <ngc-numberinput [width]="50" formControlName='weightTolerance'></ngc-numberinput>
+                      </td>
+                    </ng-container>
+                    <ng-container *ngIf="parameter.desc == 'Threshold'
+                                      || parameter.precedentsParameterName == 'Threshold'">
+                      <td>
+                        <ngc-numberinput [width]="200" formControlName="threshold"></ngc-numberinput>
+                      </td>
+                    </ng-container>
+                  </ng-container>
+                  <td>
+                    <ngc-input [width]="400" [maxlength]="200" formControlName='remarks' required></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-datetimeinput [width]="120" formControlName='effectiveFromDate' required></ngc-datetimeinput>
+                  </td>
+                  <td>
+                    <ngc-datetimeinput [width]="120" formControlName='effectiveToDate'></ngc-datetimeinput>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="precedent.get(['delFlag']).value === 'N'">
+                      <ngc-link (linkClick)="deleteLineItem(index)" iconType="delete"></ngc-link>
+                    </ng-container>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ng-container>
+        <ng-container *ngIf="displayEAWB">
+          <ngc-edittable #eAWBTable formArrayName="precedents" (itemSelect)="onClick($event)" [pageable]="false">
+            <ngc-data-column text="g.carrier" dataField="carrierCode">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [displayBoth]="true" [width]="60" [formControlName]='name' sourceId='CARRIER'
+                    [maxlength]="3"></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.shc.handlinggroup" dataField="shcs">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-shcinput [width]="50" [maxItems]="100" [formArrayName]='name' dataField="specialHandlingCode">
+                  </ngc-shcinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.full.cutover" dataField="fullCutover">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-switchbutton [width]="60" [formControlName]='name'
+                    (ngModelChange)="cutoverToggleChange($event, group)">
+                  </ngc-switchbutton>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.failuremessage" dataField="remarks">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [width]="240" [maxlength]="200" [formControlName]='name' required></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.effective.fromdate" dataField="effectiveFromDate">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.effective.todate" dataField="effectiveToDate">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.add.agent" [dataField]="addAgents">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-button align="center" formControlName='addAgents' iconType="add" priority="quaternary"
+                    (click)="addInlineAgentItem($event, name, group)"></ngc-button>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.add.sectors" [dataField]="addSectors">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-button align="center" formControlName='addSectors' iconType="add" priority="quaternary"
+                    (click)="addInlineSectorItem($event, name, group)"></ngc-button>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.delete" [dataField]="delete">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ng-container *ngIf="form.get(['precedents', group, 'delFlag']).value === 'N'">
+                    <ngc-link iconType="delete" align="center" (linkClick)="deleteEAWBLineItem($event, name, group, i)">
+                    </ngc-link>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-row>
+              <ng-template let-parentgroup>
+                <ng-container [formGroupName]="parentgroup">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column column="6">
+                        <ngc-label label="warehouse.agent.caps">
+                        </ngc-label>
+                        <ngc-edittable formArrayName="agents" [pageable]="false">
+                          <ngc-data-column text="warehouse.add.agent" dataField="agentCode">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-input [displayBoth]="true" [width]="60" [formControlName]='name'
+                                  sourceId='COMPANY_AGENT_LIST' [maxlength]="3"></ngc-input>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.startdate" dataField="effectiveStartDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.enddate" dataField="effectiveEndDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="g.delete" dataField="delete">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link iconType="delete" align="center"
+                                  (linkClick)="deleteAgentInlineItem($event, parentgroup, group)"></ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                      <ngc-column column="6">
+                        <ngc-label label="warehouse.sector.caps"></ngc-label>
+                        <ngc-edittable formArrayName="sectors" (itemSelect)="onClick($event)" [pageable]="false">
+                          <ngc-data-column text="g.sector" dataField="sector">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-input [displayBoth]="true" [width]="60" [formControlName]='name' sourceId='APT'
+                                  [maxlength]="3"></ngc-input>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.copies" dataField="copies">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [maxlength]="2" [width]="60" decimalDigits="0"
+                                  [formControlName]='name'></ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.singleprocessprint" dataField="singleProcessPrint">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-dropdownlist [width]="150" (select)="singleProcessPrintHandler(event, group)"
+                                  sourceId="CPE$SingleProcessPrint" [formControlName]='name'></ngc-dropdownlist>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.startdate" dataField="singleProcessPrintStartDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.enddate" dataField="singleProcessPrintEndDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="g.delete" [dataField]="delete">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link iconType="delete" align="center"
+                                  (linkClick)="deleteSectorInlineItem($event, parentgroup, group)" type="icon">
+                                </ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-row>
+          </ngc-edittable>
+        </ng-container>
+        <ng-container *ngIf="displayWeightTolerance">
+          <ngc-edittable formArrayName="precedents" (itemSelect)="onClick($event)" [pageable]="false">
+            <ngc-data-column text="g.carrier" dataField="carrierCode">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [displayBoth]="true" [width]="60" [formControlName]='name' sourceId='CARRIER'
+                    [maxlength]="3"></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.weight.differencelimit" dataField="absoluteWeight">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-numberinput [width]="50" decimalDigits="2" [formControlName]='name'>
+                  </ngc-numberinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.weight" dataField="weightPercentage">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-numberinput [width]="50" decimalDigits="0" [formControlName]='name'>
+                  </ngc-numberinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.failuremessage" dataField="remarks">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [maxlength]="200" [width]="400" [formControlName]='name' required></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.effective.fromdate" dataField="effectiveFromDate">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.effective.todate" dataField="effectiveToDate">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.complexslab">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-button align="center"
+                    [disabled]="(form.get(['precedents', group, 'flatSlab']) && form.get(['precedents', group, 'flatSlab']).length > 0) || (form.get(['precedents', group, 'shcHandlingGroups']) && form.get(['precedents', group, 'shcHandlingGroups']).length > 0)"
+                    iconType="add" priority="quaternary" (click)="addComplexSlabInlineItem($event, name, group)">
+                  </ngc-button>
+                  <ngc-icon
+                    [hidden]="(form.get(['precedents', group, 'flatSlab']) && form.get(['precedents', group, 'flatSlab']).length > 0) || (form.get(['precedents',
+                          group, 'shcHandlingGroups']) && form.get(['precedents', group, 'shcHandlingGroups']).length > 0)"
+                    type="yesno" value="true">
+                  </ngc-icon>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.flatlab">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-button align="center"
+                    [disabled]="(form.get(['precedents', group, 'complexSlab']) && form.get(['precedents', group, 'complexSlab']).length > 0) || (form.get(['precedents', group, 'shcHandlingGroups']) && form.get(['precedents', group, 'shcHandlingGroups']).length > 0)"
+                    iconType="add" priority="quaternary" (click)="addFlatSlabInlineItem($event, name, group)">
+                  </ngc-button>
+                  <ngc-icon
+                    [hidden]="(form.get(['precedents', group, 'complexSlab']) && form.get(['precedents', group, 'complexSlab']).length > 0) || (form.get(['precedents',
+                          group, 'shcHandlingGroups']) && form.get(['precedents', group, 'shcHandlingGroups']).length > 0)"
+                    type="yesno" value="true">
+                  </ngc-icon>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.shc.grouptolerance">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-button align="center"
+                    [disabled]="(form.get(['precedents', group, 'complexSlab']) && form.get(['precedents', group, 'complexSlab']).length > 0) || (form.get(['precedents', group, 'flatSlab']) && form.get(['precedents', group, 'flatSlab']).length > 0)"
+                    iconType="add" priority="quaternary" (click)="addSHCSlabInlineItem($event, name, group)">
+                  </ngc-button>
+                  <ngc-icon [hidden]="(form.get(['precedents', group, 'complexSlab']) && form.get(['precedents', group, 'complexSlab']).length > 0) || (form.get(['precedents',
+                          group, 'flatSlab']) && form.get(['precedents', group, 'flatSlab']).length > 0)" type="yesno"
+                    value="true">
+                  </ngc-icon>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.delete">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ng-container *ngIf="form.get(['precedents', group, 'delFlag']).value === 'N'">
+                    <ngc-link iconType="delete" align="center"
+                      (linkClick)="deleteWeightToleranceLineItem($event, name, group, group)">
+                    </ngc-link>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-row>
+              <ng-template let-parentgroup>
+                <ng-container [formGroupName]="parentgroup">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column column="4">
+                        <ngc-label label="warehouse.complexslab">
+                        </ngc-label>
+                        <ngc-edittable formArrayName="complexSlab" [pageable]="false">
+                          <ngc-data-column text="warehouse.tolerance.operator" dataField="toleranceOperator">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-dropdownlist [formControlName]='name' sourceId="CPE$EquationTypes" [width]="100"
+                                  [dropDownWidth]="90"></ngc-dropdownlist>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.tolerance.weight" dataField="toleranceWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="50" decimalDigits="0" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.discrepancy.operator" dataField="discrepancyOperator">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-dropdownlist [formControlName]='name' sourceId="CPE$EquationTypes" [width]="100"
+                                  [dropDownWidth]="90"></ngc-dropdownlist>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.discrepancy.weight" dataField="discrepancyWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="50" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.amend" dataField="amendFlag">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-switchbutton [formControlName]='name'></ngc-switchbutton>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.startdate.br " dataField="effectiveFromDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.enddate.br" dataField="effectiveToDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="g.delete" dataField="delete">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link iconType="delete" align="center"
+                                  (linkClick)="deleteComplexSlab($event, parentgroup, group)"></ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                      <ngc-column column="4">
+                        <ngc-label label="warehouse.flatslab">
+                        </ngc-label>
+                        <ngc-edittable formArrayName="flatSlab" [pageable]="false">
+                          <ngc-data-column text="warehouse.from.weight.br" dataField="fromWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="50" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.toweight" dataField="toWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="50" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.tolerance.weight.br" dataField="toleranceWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="50" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.startdate.br" dataField="effectiveFromDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.enddate.br" dataField="effectiveToDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="g.delete" dataField="delete">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link iconType="delete" align="center"
+                                  (linkClick)="deleteFlatSlab($event, parentgroup, group)"></ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                      <ngc-column column="4">
+                        <ngc-label label="warehouse.shc.grouptolerance">
+                        </ngc-label>
+                        <ngc-edittable formArrayName="shcHandlingGroups" [pageable]="false">
+                          <ngc-data-column text="warehouse.shcgroup" dataField="specialHandlingGroupCode">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-input [width]="50" [formControlName]='name'></ngc-input>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.tolerance.weight.br" dataField="weightTolerancePercent">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="50" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.startdate.br" dataField="effectiveFromDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.effective.enddate.br" dataField="effectiveToDate">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="g.delete" dataField="delete">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link iconType="delete" align="center"
+                                  (linkClick)="deleteSHCSlab($event, parentgroup, group)"></ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-row>
+          </ngc-edittable>
+        </ng-container>
+        <ng-container *ngIf="displayVolumetricTolerance">
+          <ngc-edittable formArrayName="precedents" (itemSelect)="onClick($event)" [pageable]="false">
+            <ngc-data-column text="g.carrier" dataField="carrierCode">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [displayBoth]="true" [width]="60" [formControlName]='name' sourceId='CARRIER'
+                    [maxlength]="3"></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.weight.differencelimit" dataField="absoluteWeight">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-numberinput [width]="75" digits="5" decimalDigits="2" [formControlName]='name'></ngc-numberinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.weight" dataField="weightPercentage">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-numberinput [width]="50" digits="2" decimalDigits="0" [formControlName]='name'></ngc-numberinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.shcbypass" dataField="shcs">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-shcinput [width]="50" [maxItems]="100" [formArrayName]='name' dataField="specialHandlingCode">
+                  </ngc-shcinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.failuremessage" dataField="remarks">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [maxlength]="200" [width]="400" [formControlName]='name' required></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.effective.startdate" dataField="effectiveFromDate">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="120" [formControlName]='name' required></ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.effective.todate" dataField="effectiveToDate">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="120" [formControlName]='name'></ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="warehouse.volumetricsslab">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-button align="center" iconType="add" priority="quaternary"
+                    (click)="addVolumetricSlabInlineItem($event, name, group)"></ngc-button>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.delete">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ng-container *ngIf="form.get(['precedents', group, 'delFlag']).value === 'N'">
+                    <ngc-link iconType="delete" align="center"
+                      (linkClick)="deleteVolumetricToleranceLineItem($event, name, group, group)">
+                    </ngc-link>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-row>
+              <ng-template let-parentgroup>
+                <ng-container [formGroupName]="parentgroup">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column column="6">
+                        <ngc-label label="warehouse.volumetricsslab">
+                        </ngc-label>
+                        <ngc-edittable formArrayName="volumetricSlab" [pageable]="false">
+                          <ngc-data-column text="warehouse.from.weight.br" dataField="fromWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="120" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.toweight" dataField="toWeight">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="120" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.tolerance.inkg" dataField="toleranceInPercentage">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="120" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="warehouse.tolerance.inpercent" dataField="toleranceInKG">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-numberinput [width]="120" decimalDigits="2" [formControlName]='name'>
+                                </ngc-numberinput>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="g.delete" dataField="delete">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link iconType="delete" align="center"
+                                  (linkClick)="deleteVolumetricSlabInlineItem($event, parentgroup, group)"></ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-row>
+          </ngc-edittable>
+        </ng-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column column="11" align="right">
+        <ngc-button label="g._add" [disabled]="disableMode" (click)="addLineItem($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

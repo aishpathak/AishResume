@@ -1,0 +1,445 @@
+<ngc-titlebar title="title.request.dollies.bt" [disableSave]="true"></ngc-titlebar>
+
+<!-- SEARCH SECTION STARTS  -->
+<form [formGroup]="searchFormGroup">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label="exp.ramp.request.date.from"></ngc-label>
+        </div>
+        <ngc-datetimeinput [width]='175' formControlName="requestedDateTimeFrom" showCalendarButton="true"
+          showTimeButton="true" midnight="true" accessEnableOn="r" (modelChange)="onSearchChange()">
+        </ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="exp.ramp.request.date.to"></ngc-label>
+        </div>
+        <ngc-datetimeinput [width]='175' formControlName="requestedDateTimeTo" showCalendarButton="true"
+          showTimeButton="true" midnight="true" accessEnableOn="r" (modelChange)="onSearchChange()" [endOfDay]="true">
+        </ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.rho"></ngc-label>
+        </div>
+        <ngc-lov formControlName='customerId' accessEnableOn="r" upperCase='true' sourceId='KEY_RHO_CUSTOMERS_LIST'
+          sourceType='query' dataField="code" displayField="desc" (modelChange)="onSearchChange()" [width]='200'>
+          <ngc-data-column text='Code' dataField='code' [width]='100'></ngc-data-column>
+          <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="g.flight"></ngc-label>
+        </div>
+        <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" (modelChange)="onSearchChange()"
+          [required]="this.searchFormGroup.get('flightDate').value != null">
+        </ngc-flightkeyinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="g.date"></ngc-label>
+        </div>
+        <ngc-dateinput accessEnableOn="r" formControlName='flightDate' (modelChange)="onSearchChange()"
+          [required]="this.searchFormGroup.get('flightKey').value != null">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="exp.ramp.request.no"></ngc-label>
+        </div>
+        <ngc-alphanuminput accessEnableOn="r" formControlName='requestNo' [maxlength]="30" [width]="200"
+          (modelChange)="onSearchChange()">
+        </ngc-alphanuminput>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <div>
+          <ngc-label label=""> </ngc-label>
+        </div>
+        <ngc-button label='display.search' accessEnableOn="r" (click)="onSearch()" iconType="search">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column column="0.5" align="right">
+        <div>
+          <ngc-label label=""> </ngc-label>
+        </div>
+        <ngc-button label='bill.create' accessEnableOn="r" (click)="onCreate()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- SEARCH SECTION ENDS  -->
+
+<!-- Search Result Section STARTS  -->
+<form [formGroup]="requestDolliesBTModelFormGroup">
+  <ngc-container *ngIf="displayFlag">
+    <ngc-row>
+      <ngc-column column="6">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width="1%">
+              </th>
+              <th>
+                <ngc-label label='exp.ramp.20ft.dollies'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='exp.ramp.10ft.dollies'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='exp.ramp.5ft.dollies'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.bt'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-label label='equipment.requested'></ngc-label>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoDolliesRequested20Ft'>
+                </ngc-display>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoDolliesRequested10Ft'>
+                </ngc-display>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoDolliesRequested5Ft'>
+                </ngc-display>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoBTRequested'>
+                </ngc-display>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <ngc-label label='imp.pouch.lbl.receive'></ngc-label>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoDolliesReceived20Ft'>
+                </ngc-display>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoDolliesReceived10Ft'>
+                </ngc-display>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoDolliesReceived5Ft'>
+                </ngc-display>
+              </td>
+              <td align="right">
+                <ngc-display formControlName='totalNoBTReceived'>
+                </ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button label='flight.sendmail' accessEnableOn="r" (click)="onSend()" [disabled]="!isRowSelected()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="requestDolliesBTInfo" [showToolbar]="true">
+          <ngc-data-column text="g.sel" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="select"
+                  *ngIf="!this.requestDolliesBTModelFormGroup.get(['requestDolliesBTInfo',group,'confirmed']).value">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="exp.ramp.request.no" align="center" dataField="requestNo" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.flight.no.date" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container
+                  *ngFor="let item of requestDolliesBTModelFormGroup.get(['requestDolliesBTInfo',group,'flightDetails']).controls; let index=index">
+                  <div *ngIf="item.controls.flightKey.value!=null">
+                    <ngc-display [value]="item.controls.flightKey.value"></ngc-display>/
+                    <ngc-display [value]="item.controls.flightDate.value" [onlyDate]="true"></ngc-display>
+                  </div>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.rho" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName='customerId' sourceId='KEY_RHO_CUSTOMERS_LIST' sourceCategory="lov">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column name="exp.ramp.20ft.dollies" text="exp.ramp.20ft.dollies" align="center">
+            <ngc-data-column text="exp.ramp.req" dataField="dolliesRequested20Ft" align="center"
+              cellsAlign="right">
+            </ngc-data-column>
+            <ngc-data-column text="exp.ramp.rec" dataField="dolliesReceived20Ft" align="center"
+              cellsAlign="right">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column name="exp.ramp.10ft.dollies" text="exp.ramp.10ft.dollies" align="center">
+            <ngc-data-column text="exp.ramp.req" dataField="dolliesRequested10Ft" align="center"
+              cellsAlign="right">
+            </ngc-data-column>
+            <ngc-data-column text="exp.ramp.rec" dataField="dolliesReceived10Ft" align="center"
+              cellsAlign="right">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column name="exp.ramp.5ft.dollies" text="exp.ramp.5ft.dollies" align="center">
+            <ngc-data-column text="exp.ramp.req" dataField="dolliesRequested5Ft" align="center"
+              cellsAlign="right">
+            </ngc-data-column>
+            <ngc-data-column text="exp.ramp.rec" dataField="dolliesReceived5Ft" align="center"
+              cellsAlign="right">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column name="g.bt" text="g.bt" align="center">
+            <ngc-data-column text="exp.ramp.req" dataField="btRequested" align="center" cellsAlign="right">
+            </ngc-data-column>
+            <ngc-data-column text="exp.ramp.rec" dataField="btReceived" align="center" cellsAlign="right">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="awb.remarks" align="center" dataField="remarks" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="exp.ramp.final.confirm.receive.time" align="center" dataField="confirmationOn"
+            cellsAlign="center" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="exp.ramp.1st.nft.time" align="center" dataField="firstNftTime" cellsAlign="center"
+            type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="exp.ramp.2nd.nft.time" align="center" dataField="seconfNftTime" cellsAlign="center"
+            type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="exp.ramp.3rd.nft.time" align="center" dataField="thirdNftTime" cellsAlign="center"
+            type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="g.last.updated.by" align="center" dataField="lastUpdatedUserCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.edit" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onEdit(group)" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Search Result Section ENDS  -->
+
+<!-- Create/Edit Popup Window STARTS  -->
+<form [formGroup]="requestDolliesBTInfoModelFormGroup">
+  <ngc-window #RequestDolliesBTInfoWindow title="exp.ramp.create.modify.dolly.req" width="1550" height="600"
+    [showCloseButton]="true" (close)="onCloseWindow()">
+    <ngc-container type='tab'>
+      <ngc-row>
+        <ngc-column column="1"
+          *ngIf="this.requestDolliesBTInfoModelFormGroup.get('expRequestDolliesBTId').value != null">
+          <div>
+            <ngc-label label="exp.ramp.request.no"></ngc-label>
+          </div>
+          <ngc-display formControlName='requestNo'></ngc-display>
+        </ngc-column>
+        <ngc-column column="2">
+          <div>
+            <ngc-label label="flight.rho"></ngc-label>
+          </div>
+          <ngc-lov formControlName='customerId' accessEnableOn="r" upperCase='true' sourceId='KEY_RHO_CUSTOMERS_LIST'
+            sourceType='query' dataField="code" displayField="desc" [width]='200' required>
+            <ngc-data-column text='Code' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="awb.remarks"></ngc-label>
+          </div>
+          <ngc-alphanuminput accessEnableOn="r" formControlName='remarks' [maxlength]="65" [width]='700'>
+          </ngc-alphanuminput>
+        </ngc-column>
+        <ngc-column align="right" *ngIf="!this.requestDolliesBTInfoModelFormGroup.get('confirmed').value">
+          <div>
+            <ngc-label label=""></ngc-label>
+          </div>
+          <ngc-button value="offload.save" (click)="onClickSave()"></ngc-button>
+          <ngc-button value="exp.ramp.confirm" (click)="onClickConfirm()"
+            *ngIf="this.requestDolliesBTInfoModelFormGroup.get('expRequestDolliesBTId').value">
+          </ngc-button>
+          <ngc-button value="exp.ramp.cancel" (click)="onClickCancel()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type='tab'>
+      <ngc-row>
+        <ngc-column column="4">
+          <ngc-edittable formArrayName="flightDetails" [pageable]="false" [sortable]="false">
+            <ngc-data-column text="g.sNo" align="center" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display [value]="group + 1"></ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.flight" align="center" cellsAlign="center" type="displayDateTime">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey"
+                    [disabled]="this.requestDolliesBTInfoModelFormGroup.get(['confirmed']).value"
+                    [required]="group==0 || this.requestDolliesBTInfoModelFormGroup.get(['flightDetails',group,'flightDate']).value != null">
+                  </ngc-flightkeyinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.date" dataField="flightDate" align="center" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dateinput accessEnableOn="r" formControlName='flightDate'
+                    [disabled]="this.requestDolliesBTInfoModelFormGroup.get(['confirmed']).value"
+                    [required]="group==0 || this.requestDolliesBTInfoModelFormGroup.get(['flightDetails',group,'flightKey']).value != null">
+                  </ngc-dateinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+        <ngc-column column="8">
+          <ngc-table>
+            <thead>
+              <tr>
+                <th width="1%">
+                </th>
+                <th align="center">
+                  <ngc-label label='exp.ramp.20ft.dollies'></ngc-label>
+                </th>
+                <th align="center">
+                  <ngc-label label='exp.ramp.10ft.dollies'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='exp.ramp.5ft.dollies'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='g.bt'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <ngc-label label='equipment.requested'></ngc-label>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='dolliesRequested20Ft' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='dolliesRequested10Ft' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='dolliesRequested5Ft' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='btRequested' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+              </tr>
+              <tr>
+                <td>
+                  <ngc-label label='imp.pouch.lbl.receive'></ngc-label>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='dolliesReceived20Ft' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='dolliesReceived10Ft' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='dolliesReceived5Ft' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName='btReceived' [digits]="8" [decimalDigits]="0">
+                  </ngc-numberinput>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type='tab'
+      *ngIf="this.requestDolliesBTInfoModelFormGroup.get('expRequestDolliesBTId').value != null">
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-label emphasis="md" label='exp.ramp.req.rec.dolly.log'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="requestDolliesBTLogInfo">
+            <ngc-data-column text="exp.date.time" dataField="notificationSentOn" align="center" cellsAlign="center"
+              type="displayDateTime">
+            </ngc-data-column>
+            <ngc-data-column text="exp.ramp.event.desc" dataField="eventDescription" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column name="exp.ramp.20ft.dollies" text="exp.ramp.20ft.dollies" align="center">
+              <ngc-data-column text="exp.ramp.req" dataField="dolliesRequested20Ft" align="center"
+                cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="exp.ramp.rec" dataField="dolliesReceived20Ft" align="center"
+                cellsAlign="right">
+              </ngc-data-column>
+            </ngc-data-column>
+            <ngc-data-column name="exp.ramp.10ft.dollies" text="exp.ramp.10ft.dollies" align="center">
+              <ngc-data-column text="exp.ramp.req" dataField="dolliesRequested10Ft" align="center"
+                cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="exp.ramp.rec" dataField="dolliesReceived10Ft" align="center"
+                cellsAlign="right">
+              </ngc-data-column>
+            </ngc-data-column>
+            <ngc-data-column name="exp.ramp.5ft.dollies" text="exp.ramp.5ft.dollies" align="center">
+              <ngc-data-column text="exp.ramp.req" dataField="dolliesRequested5Ft" align="center"
+                cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="exp.ramp.rec" dataField="dolliesReceived5Ft" align="center"
+                cellsAlign="right">
+              </ngc-data-column>
+            </ngc-data-column>
+            <ngc-data-column name="g.bt" text="g.bt" align="center">
+              <ngc-data-column text="exp.ramp.req" dataField="btRequested" align="center" cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="exp.ramp.rec" dataField="btReceived" align="center" cellsAlign="right">
+              </ngc-data-column>
+            </ngc-data-column>
+            <ngc-data-column text="awb.remarks" align="center" dataField="remarks" cellsAlign="center">
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<!-- Create/Edit Popup Window Ends  -->

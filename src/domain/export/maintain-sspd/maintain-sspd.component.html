@@ -1,0 +1,215 @@
+<ngc-titlebar title="export.sspd.title" (save)="onSave($event)" [disableSave]="!displayFlag" (cancel)="onBack($event)"
+  (clear)="onClear($event)">
+</ngc-titlebar>
+<form [formGroup]="sspdForm">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="110" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" formControlName='flightDate' [width]="100"
+            required='true'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='awb.awbnumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="awbNumber" upperCase='true' required [width]="110">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" #searchButton  (click)="search()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="7">
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>&nbsp;
+      <ngc-column>&nbsp;</ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf='displayFlag'>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.Flight"></ngc-label>
+        </div>
+        <ngc-display formControlName='flight'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.date"></ngc-label>
+        </div>
+        <ngc-display formControlName='date'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-display formControlName='awbNo'></ngc-display>
+      </ngc-column>
+      <ngc-column [column]='8'>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf='displayFlag' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]='80'>
+                <ngc-label label='uld.uld/trolley.number'></ngc-label>
+              </th>
+              <th [width]='80'>
+                <ngc-label label='awb.origin'></ngc-label>
+              </th>
+              <th [width]='80'>
+                <ngc-label label='awb.destination'></ngc-label>
+              </th>
+              <th [width]='80'>
+                <ngc-label label='awb.loaded.pieces'></ngc-label>
+              </th>
+              <th [width]='80'>
+                <ngc-label label='awb.loaded.weight'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td *ngIf='showUldFlag'>
+                <div>
+                  <ngc-dropdownlist formControlName='uldNumber' [source]='uldArray' [noCache]="true" [width]="130"
+                    required (ngModelChange)="onselectUldNumber($event)">
+                  </ngc-dropdownlist>
+                </div>
+              </td>
+              <td>
+                <ngc-display formControlName='origin' [width]='100'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='destination' [width]='100'></ngc-display>
+              </td>
+              <td>
+                <ngc-piecesdisplay formControlName='builtTotalPieces' [width]='100'></ngc-piecesdisplay>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName='builtTotalWeight' [width]='100'></ngc-weightdisplay>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title='g.location.details' *ngIf='displayFlag' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]='80' feature="Exp.PartSuffix" *ngIf="partShowFlag">
+                <ngc-label label='awb.part.suffix'></ngc-label>
+              </th>
+              <th [width]='80' *ngIf="partShowFlag">
+                <ngc-label label='export.sspd.total.part.booking.pcs'></ngc-label>
+              </th>
+              <th [width]='80' *ngIf="partShowFlag">
+                <ngc-label label='export.sspd.total.part.booking.wt'></ngc-label>
+              </th>
+              <th [width]='80'>
+                <ngc-label label='awb.shipment.location'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.warehouse.location'></ngc-label>
+              </th>
+              <th [width]='80'>
+                <ngc-label label='awb.pieces'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.weight'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.shc'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.house'></ngc-label>
+              </th>
+              <th [width]='50'>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="shipmentDetails">
+            <ng-container *ngFor="let item of sspdForm.get('shipmentDetails').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td feature="Exp.PartSuffix" *ngIf='partShowFlag'>
+                  <div>
+                    <ngc-dropdownlist formControlName='partSuffix' [noCache]="true" [width]="80"
+                      [sourceId]="suffixDropDownSourceId" displayMember="desc" valueMember="code" required
+                      (select)="eventCallPartSuffixDropdown($event, index)">
+                    </ngc-dropdownlist>
+                  </div>
+                </td>
+                <td *ngIf='partShowFlag'>
+                  <ngc-piecesdisplay formControlName='partPieces' [width]='80'></ngc-piecesdisplay>
+                </td>
+                <td *ngIf='partShowFlag'>
+                  <ngc-weightdisplay formControlName='partWeight' [width]='80'></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-movable-storage-location upperCase="true" [destination]="destination" [origin]="origin"
+                    [maxlength]="12" [minlength]="3" [autoFocus]="true" [width]="130"
+                    formControlName="shipmentLocation">
+                  </ngc-movable-storage-location>
+                </td>
+                <td>
+                  <ngc-locations-list [noTerminal]="true" [displayOnlyLocation]="true" [locationTypeList]="['STORAGE']"
+                    formControlName="warehouseLocation" [width]="120"></ngc-locations-list>
+                </td>
+                <td>
+                  <ngc-piecesinput formControlName='pieces' (ngModelChange)="onPiecesChange($event,index)" required
+                    [width]="80">
+                  </ngc-piecesinput>
+                </td>
+                <td>
+                  <ngc-weightinput formControlName='weight' required [width]="80"></ngc-weightinput>
+                </td>
+                <td>
+                  <ng-container>
+                    <ngc-dropdownlist [autoSelect]="true" [multiSelect]="true" formControlName="shcList"
+                      [width]="shc.length * 35" [source]="shc">
+                    </ngc-dropdownlist>
+                  </ng-container>
+                </td>
+                <td>
+                  <div>
+                    <ngc-dropdownlist [multiSelect]="true" formControlName="houseList" [dropDownWidth]="80"
+                      [source]="house" [width]="80"></ngc-dropdownlist>
+                  </div>
+                </td>
+                <td [width]='50'>
+                  <ngc-link (linkClick)="onDeleteLocation(index)" iconType="delete"></ngc-link>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align='right'>
+        <ngc-button label='export.addLocation' (click)="onAddRow()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

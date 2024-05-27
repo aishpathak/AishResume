@@ -1,0 +1,496 @@
+<ngc-titlebar title="offload.uld.awb" (clear)="onClear($event)" (print)="onoffloadServiceReport($event,index)"
+  [disablePrint]="!displayFlag" (cancel)="onCancel()">
+</ngc-titlebar>
+<form [formGroup]="offloadForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" formControlName='flightOriginDate'
+            [width]="100" required='true'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button #searchButton accessEnableOn="r"   (click)="fetchFlightULD()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="8">
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf='displayFlag'>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.Flight"></ngc-label>
+        </div>
+        <ngc-display formControlName='flight1'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.date"></ngc-label>
+        </div>
+        <ngc-display formControlName='flightDate' [onlyDate]="true"></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.std"></ngc-label>
+        </div>
+        <ngc-display formControlName='std'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.etd"></ngc-label>
+        </div>
+        <ngc-display formControlName='etd'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="paxCAO"></ngc-label>
+        </div>
+        <ngc-display formControlName='flightType'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="abycRegistration"></ngc-label>
+        </div>
+        <ngc-display formControlName='aircraftRegistration'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="g.status"></ngc-label>
+        </div>
+        <ngc-display formControlName='status'></ngc-display>
+      </ngc-column>
+      <ngc-column [column]='3'>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type='tab' *ngIf='displayFlag'>
+    <!-- Changes for JV01-1141: Display Total AWB,ULD,PC/WGT -->
+    <ngc-row feature="Uld.OffloadUldAwb.TotalCount">
+      <ngc-column>
+        <ngc-label label="total.awb"></ngc-label>
+        <div>
+          <ngc-display formControlName='totalAwb'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="uld.total.uld"></ngc-label>
+        <div>
+          <ngc-display formControlName='totalUld'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="uld.total.pcwgt"></ngc-label>
+        <div>
+          <ngc-display formControlName='totalPcWt'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-accordion>
+          <ng-container formArrayName="segments">
+            <ng-container *ngFor="let segment of offloadForm.get('segments').controls; let segmentIndex=index"
+              [formGroupName]="segmentIndex">
+              <ngc-accordion-card
+                [title]="segment.get('flightBoardPoint').value + '-' + segment.get('flightOffPoint').value"
+                [selected]="expandorcollapse">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th [width]='30'>
+                              <ngc-label label='g.select'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='export.offload.uldTrolleyAwbNumber'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='awb.part'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='g.origin'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='g.destination'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='export.book.pieces'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='g.weight'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='g.shc'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                              <ngc-label label='awb.natureofgoods'></ngc-label>
+                            </th>
+                            <!-- Changes for JV01-1141: Tag header in search table -->
+                            <th [width]='80' feature="Uld.OffloadUldAwb.Tag">
+                              <ngc-label label="loadshipment.label.tag"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="uldList">
+                          <ng-container
+                            *ngFor="let uld of offloadForm.get(['segments', segmentIndex, 'uldList']).controls; let uldIndex=index">
+                            <ng-container [formGroupName]="uldIndex">
+                              <tr>
+                                <td>
+                                  <ngc-checkbox formControlName='sel'></ngc-checkbox>
+                                </td>
+                                <td>
+                                  <ngc-label formControlName='uldNumber'></ngc-label>
+                                  <ngc-button label="export.offload.uld.awb.offload.uld" iconType="storage"
+                                    priority='secondary' (click)="onOffloadOnly(segmentIndex, uldIndex)"></ngc-button>
+
+                                </td>
+                                <td colspan="3">
+                                  <ngc-label label='export.offload.awb'></ngc-label>
+                                  <ngc-label formControlName='numberOfAWB'></ngc-label>
+                                </td>
+                                <td>
+                                  <ngc-label label='export.offload.pieces'></ngc-label>
+                                  <ngc-label formControlName='pieces'></ngc-label>
+                                </td>
+                                <td>
+                                  <ngc-label label='export.offload.weight'></ngc-label>
+                                  <ngc-label formControlName='weight'></ngc-label>
+                                </td>
+                                <td *ngIf="!(uld.get('trolleyInd').value)">
+                                </td>
+                                <td>
+                                  <ngc-display label="export.offload.ramp.handover"></ngc-display>
+                                </td>
+                                <!-- Changes for JV01-1141 -->
+                                <td feature="Uld.OffloadUldAwb.Tag">
+                                </td>
+                              </tr>
+                              <ng-container formArrayName="shipments">
+                                <ng-container
+                                  *ngFor="let shipment of offloadForm.get(['segments', segmentIndex, 'uldList', uldIndex, 'shipments']).controls; let shipmentIndex=index">
+                                  <tr [formGroupName]="shipmentIndex">
+                                    <td>
+                                      <ngc-checkbox formControlName='innerSel'></ngc-checkbox>
+                                    </td>
+                                    <td>
+                                      <ngc-display formControlName='awbNumber'></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-icon type="yesno" formControlName='partFlag'></ngc-icon>
+                                    </td>
+                                    <td>
+                                      <ngc-display formControlName='origin'></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-display formControlName='destination'></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-piecesdisplay formControlName='pieces'></ngc-piecesdisplay>
+                                    </td>
+                                    <td>
+                                      <ngc-weightdisplay formControlName='weight'></ngc-weightdisplay>
+                                    </td>
+                                    <td>
+                                      <ngc-display formControlName='shcs'></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-display formControlName='natureOfGoods'></ngc-display>
+                                    </td>
+                                    <!-- Changes for JV01-1141: Display Tag data in search table -->
+                                    <td feature="Uld.OffloadUldAwb.Tag">
+                                      <ngc-display formControlName="tag"></ngc-display>
+                                    </td>
+                                  </tr>
+                                </ng-container>
+                              </ng-container>
+                              <!-- Shipments -->
+                            </ng-container>
+                          </ng-container>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-accordion-card>
+            </ng-container>
+          </ng-container>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- Changes for JV01-1141: Pre Offload Remarks Table -->
+  <ngc-container type="tab" *ngIf='displayFlag' feature="Uld.OffloadUldAwb.OffloadRemarks">
+    <ngc-row>
+      <ngc-column column="5.5">
+        <ngc-label label="uld.offload.remarks"></ngc-label>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-button accessEnableOn="r" (click)="addOffloadReason()" value="add"></ngc-button>
+        <ngc-button accessEnableOn="r" (click)="saveOffloadRemarks()" value="uld.save.remarks"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="7">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="uld.preoffloadremarks"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.delete"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="preOffloadRemarks">
+            <tr *ngFor="let item of offloadForm.get('preOffloadRemarks').controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                {{index+1}}
+              </td>
+              <td>
+                <ngc-input formControlName="remarks" [width]="600"></ngc-input>
+              </td>
+              <td>
+                <ngc-link (linkClick)="onDelete(index)" iconType="delete">
+                </ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="offloadWindowForm">
+  <ngc-window #offloadWindow title="export.offload.select.awb" [showCloseButton]="true" [width]="1500" height='600'
+    (close)="onCloseWindow($event)">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column [column]='5'>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label value='export.reason'></ngc-label>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-dropdownlist sourceId="OFFLOAD_REASON" sourceType='query' formControlName="commonReason" [width]="200"
+            [dropDownWidth]="200" [filterable]="true">
+          </ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button #applyButton  (click)="onApply()" value="offloadAwbUld.apply"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th [width]='80'>
+                  <ngc-label label='uld.uld.number'></ngc-label>
+                </th>
+                <th [width]='50'>
+                  <ngc-label label='awb.awbnumber'></ngc-label>
+                </th>
+                <th [width]='80'>
+                  <ngc-label label='awb.origin'></ngc-label>
+                </th>
+                <th [width]='80'>
+                  <ngc-label label='awb.destination'></ngc-label>
+                </th>
+                <th [width]='50' feature="Exp.PartSuffix">
+                  <ngc-label label='awb.part.suffix'></ngc-label>
+                </th>
+                <th [width]='50' feature="Exp.PartSuffix">
+                  <ngc-label label='export.offload.booking.pcs'></ngc-label>
+                </th>
+                <th [width]='50' feature="Exp.PartSuffix">
+                  <ngc-label label='export.offload.booking.wt'></ngc-label>
+                </th>
+                <th [width]='50'>
+                  <ngc-label label='export.offload.manifested.pieces'></ngc-label>
+                </th>
+                <th [width]='50'>
+                  <ngc-label label='export.offload.manifested.weight'></ngc-label>
+                </th>
+                <th [width]='80'>
+                  <ngc-label label='g.reason'></ngc-label>
+                </th>
+                <th [width]='50'>
+                  <ngc-label label='awb.offload.pieces'></ngc-label>
+                </th>
+                <th [width]='50'>
+                  <ngc-label label='awb.offload.weight'></ngc-label>
+                </th>
+                <th [width]='60'>
+                  <ngc-label label='shipmentLocation'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='awb.warehouse.location'></ngc-label>
+                </th>
+                <th [width]='80'>
+                  <ngc-label label='loadshipment.label.tag'></ngc-label>
+                </th>
+                <th [width]='50'>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="preOffload">
+              <ng-container *ngFor="let item of offloadWindowForm.get('preOffload').controls; let index=index"
+                [formGroupName]="index">
+                <ng-container *ngIf="item !== null">
+                  <tr>
+                    <td>
+                      <ngc-display formControlName='uldNumber' [width]='50'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='awbNumber' [width]='50'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='origin' [width]='50'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='destination' [width]='50'></ngc-display>
+                    </td>
+                    <td feature="Exp.PartSuffix">
+                      <ngc-display formControlName='partSuffix' [width]='50'></ngc-display>
+                    </td>
+                    <td feature="Exp.PartSuffix">
+                      <ngc-piecesdisplay formControlName='partPieces' [width]='50'>
+                      </ngc-piecesdisplay>
+                    </td>
+                    <td feature="Exp.PartSuffix">
+                      <ngc-weightdisplay formControlName='partWeight' [width]='50'>
+                      </ngc-weightdisplay>
+                    </td>
+                    <td>
+                      <ngc-piecesdisplay formControlName='pieces' [width]='50'></ngc-piecesdisplay>
+                    </td>
+                    <td>
+                      <ngc-weightdisplay formControlName='weight' [width]='50'></ngc-weightdisplay>
+                    </td>
+                    <td>
+                      <ngc-dropdownlist sourceId="OFFLOAD_REASON" sourceType='query' formControlName="reason"
+                        [width]="200" [dropDownWidth]="200" valueMember='desc' [filterable]="true" required>
+                      </ngc-dropdownlist>
+                    </td>
+                    <td colspan="4">
+                    </td>
+                    <td>
+                      <ngc-button label='export.offload.location' (click)="onAddLocation(index)"></ngc-button>
+                    </td>
+                    <td [width]='50'>
+                      <ngc-link (linkClick)="onDeletePreoffload(index)" iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+                  <ng-container formArrayName="preoffloadLocations">
+                    <ng-container
+                      *ngFor="let subItem of offloadWindowForm.get(['preOffload', index, 'preoffloadLocations']).controls; let subIndex=index"
+                      [formGroupName]="subIndex">
+                      <tr>
+                        <td colspan="7">
+                        </td>
+                        <td feature="Exp.PartSuffix" colspan="3">
+                        </td>
+                        <td>
+                          <ngc-piecesinput formControlName='offloadPieces'
+                            (ngModelChange)="onPiecesChange($event,index,subIndex)" [width]="80" required>
+                          </ngc-piecesinput>
+                        </td>
+                        <td>
+                          <ngc-weightinput formControlName='offloadWeight' [width]="80" required></ngc-weightinput>
+                        </td>
+                        <td>
+                          <!-- <ngc-input formControlName='offloadLocation' [width]='110' required></ngc-input> -->
+                          <ngc-movable-storage-location upperCase="true" [destination]="item.get('destination').value"
+                            [origin]="item.get('origin').value" [maxlength]="12" [minlength]="3" [autoFocus]="true"
+                            [width]="130" formControlName="offloadLocation">
+                          </ngc-movable-storage-location>
+                        </td>
+                        <td>
+                          <ngc-locations-list [noTerminal]="true" [displayOnlyLocation]="true"
+                            [locationTypeList]="['STORAGE']" formControlName="warehouseLocation" [width]="120">
+                          </ngc-locations-list>
+                        </td>
+                        <td colspan="1">
+                          <ngc-dropdownlist feature="Uld.OffloadUldAwb.Tag">
+                          </ngc-dropdownlist>
+                        </td>
+                        <td [width]='50'>
+                          <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" iconType="delete"></ngc-link>
+                        </td>
+                      </tr>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-button id="savePreoffload" #saveButton  (click)="savePreoffload()" value="savehold"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<form [formGroup]="onlyOffloadWindowForm">
+  <ngc-window #onlyOffloadWindow title="export.offload.reason" [showCloseButton]="true" [width]="400" height='50'
+    (close)="onCloseOnlyWindow($event)">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='g.reason'></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="OFFLOAD_REASON" sourceType='query' formControlName="reasonField" [width]="200"
+              [dropDownWidth]="200" [filterable]="true" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align='right'>
+            <ngc-button id="offLoadULD" #okButton (click)="offloadOnly()" value="offload.save"></ngc-button>
+            <ngc-button #cancelButton (click)="onCloseOnlyWindow($event)" value="cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-report #reportWindow title="g.report"  reportId='OffloadULDorAWB'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+
+<ngc-footer>
+  <ngc-row *ngIf='displayFlag'>
+    <ngc-column align="left">
+      &nbsp;&nbsp;
+      <ngc-button #offloadButton  (click)="onOffload()" value="offloadAwbUld.offload"></ngc-button>
+      <ngc-button accessEnableOn="r" value='export.offload.summary.btn' (click)='navigateToOffLoad()'></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

@@ -1,0 +1,326 @@
+<ngc-titlebar title='exp.book.bookmultipleshipments' (clear)="onClear($event)" (cancel)=onBack()></ngc-titlebar>
+<form [formGroup]="MultipleShipmentForm">
+  <ngc-container type='section' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true"
+            [autoFocus]="true" required></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required width='110px' formControlName="flightDate"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column align='left' column=9>
+        <br>
+        <ngc-button value='g.search' accessEnableOn="r" (click)="searchBookingList()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf='searchButtonClicked'>
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-display formControlName='flightKey'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.std'></ngc-label>
+        <div>
+          <ngc-display formControlName="std"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='flight.segment'></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.book.weightcode'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='EXPORT$Weight_Code' formControlName="weightUnitCode" required width='100px'
+            [autoSelect]="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2"></ngc-column>
+      <ngc-column column='4'>
+        <ngc-container type='square'>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label='export.book.totalshipment'></ngc-label>
+              <div>
+                <ngc-display formControlName='totalShipment'></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='export.book.totalPieces'></ngc-label>
+              <div>
+                <ngc-piecesdisplay formControlName='totalPieces'></ngc-piecesdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='export.book.totalWeight'></ngc-label>
+              <div>
+                <ngc-weightdisplay formControlName='totalWeight'></ngc-weightdisplay>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf='searchButtonClicked' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='reasonofcancellation'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceType='query' sourceId='KEY_BOOKING_CANCELLATION_REMARKS' [filterable]="true"
+            formControlName="bookingCancellationReason"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column align='right'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="cancelSelectedShipmentRecords()" label='export.booking.cancel' [disabled]='cancelButton'>
+          </ngc-button>
+          <ngc-button [disabled]="flightDepartedFlag" (click)="addMultipleShipments()" label='export.book.addShipment'>
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='searchButtonClicked' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="flightShipmentList" [groups]="['offPointGroup']" [groupsRenderer]="groupsRenderer"
+          [pageable]="false" (linkClick)="onLinkClick($event)" (itemSelect)="changeButtonFlag($event)"
+          [showToolbar]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.sNo" [width]='15' dataField="sno" align="left" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Sel" [width]='15' dataField="cancelationCheckBox" type="check" align="left"
+            cellsAlign="left" [cellsStyleRenderer]="checkBoxCellStyleRender"></ngc-data-column>
+          <ngc-data-column text="svc" [width]='15' dataField="serviceFlag" type="icon" iconType="yesno" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="exp.eacceptance.shipmentnumber.m" height='35' dataField="shipmentNumber" [width]="50"
+            align="center" cellsAlign="left" [cellsRenderer]="awbNumberCellsRenderer"></ngc-data-column>
+          <ngc-data-column text="org" [width]='15' dataField="origin" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="des" [width]='15' dataField="destination" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="offPointGroup" [width]='20' [hidden]="true" dataField="offPointGroup" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="offPoint" [width]='20' [hidden]="true" dataField="offPoint" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.book.pieces" [width]='20' dataField="bookingPieces" type="displayPieces"
+            align="center" cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="export.book.weight" [width]='20' dataField="bookingWeight" type="displayWeight"
+            align="center" cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="export.booking.total.br.pieces" [width]='20' dataField="totalPieces" type="totalPieces"
+            align="center" cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="export.book.natureofgoods" [width]='40' dataField="natureOfGoodsDescription"
+            cellsFormat="d2" align="center" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shc" [width]='20' align="left" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="export.book.densitygroup" [width]='25' dataField="densityGroupCode" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.booking.volume" dataField="volumeWeight" [width]='25' align="centrighter"
+            cellsAlign="centrighter"></ngc-data-column>
+          <ngc-data-column text="export.book.shipper" dataField="shipperName" [width]='70' align="left"
+            cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="export.book.bookingcancelled" [width]='20' type="icon" iconType="yesno"
+            dataField="bookingCancellationFlag" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.booking.status.br" [width]='25' dataField="bookingStatusCode" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <!--<ngc-data-column text="export.book.messagerejected" [width]='30' type="icon" cellsAlign="center" iconType="yesno" dataField="messageRejected" align="center"></ngc-data-column>-->
+          <ngc-data-column text="export.book.fbl" [width]='20' type="icon" cellsAlign="center" iconType="yesno"
+            dataField="fbl" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="manual" type="icon" [width]='20' cellsAlign="center" iconType="yesno"
+            dataField="manual" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.book.dimensionandremark" [width]='35' dataField="dimension" type="link"
+            [cellsStyleRenderer]="trolleyCellsStyleRenderer" iconType="edit" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="edit" [width]='20' type="link" iconType="edit" align="center"
+            [cellsStyleRenderer]="trolleyCellsStyleRenderer" cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #dimensionWindow title="export.book.capdimandrem" [showCloseButton]="true" [width]="780" [height]='500'
+    (onClose)="closeDimentionPopup()">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="{{shipmentNumberLabel}}"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+
+        <ngc-column>
+          <div>
+            <ngc-label label="export.book.muc"></ngc-label>
+          </div>
+          <ngc-dropdownlist [source]='mesurementData' [autoSelect]="true" [noBlank]="true"
+            formControlName="shipmentUnitCode" (select)="eventCall($event)" width='80px' required></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='export.book.volumecode'></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId='EXPORT$Volume_Code' formControlName="volumeUnitCode" width='100px'
+              (select)="eventCall($event)" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label='export.book.volume'></ngc-label>
+          </div>
+          <!-- <ngc-numberinput negativeSymbol=" " [digits]="7" formControlName="volumeWeight" decimalDigits="2" width='100px'></ngc-numberinput> -->
+          <ngc-display formControlName="volumeWeight" decimalDigits="2"></ngc-display>
+        </ngc-column>
+
+        <ngc-column [align]="'right'">
+          <ngc-button label="export.book.adddimension" (click)='addDimensionRow()'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <!--  *ngFor="let record of MultipleShipmentForm.controls.MultipleShipmentFlightBookingDetails.controls; let index=index" [formGroupName]="index" -->
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label=""></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.book.pieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.length"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.width"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.height"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.volume"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody formArrayName="dimensionList">
+              <tr *ngFor="let record of MultipleShipmentForm.get('dimensionList').controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-checkbox formControlName="checkBoxFlag" (click)="checkForDelete()"></ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-digitinput [width]='80' [maxlength]="5" formControlName="pieces"
+                    (ngModelChange)="changeModel($event,0,record,index)" groupSize="0" required></ngc-digitinput>
+                </td>
+                <td>
+                  <ngc-digitinput [width]='80' [maxlength]="5" (ngModelChange)="changeModel($event,1,record,index)"
+                    formControlName="length" required>
+                  </ngc-digitinput>
+                </td>
+                <td>
+                  <ngc-digitinput [width]='80' [maxlength]="5" (ngModelChange)="changeModel($event,2,record,index)"
+                    formControlName="width" required>
+                  </ngc-digitinput>
+                </td>
+                <td>
+                  <ngc-input [width]='80' [maxlength]="5" (ngModelChange)="changeModel($event,3,record,index)"
+                    formControlName="height" required>
+                  </ngc-input>
+                </td>
+                <td>
+                  <ngc-display [width]='80' formControlName="volume" decimalDigits="2"></ngc-display>
+                </td>
+
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="export.booking.total"></ngc-label>
+          <ngc-piecesdisplay [width]='40' formControlName="totalDimentionPieces"></ngc-piecesdisplay>
+        </ngc-column>
+        <ngc-column>
+
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-label value="export.booking.total.volume"></ngc-label>
+          <ngc-display [width]='40' formControlName="volumeWeight" decimalDigits="2"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-label value="export.booking.total.volumetric.weight"></ngc-label>
+          <ngc-weightdisplay [width]='40' formControlName="totalDimentionVolumetricWeight"></ngc-weightdisplay>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='export.book.workinglistremark'></ngc-label>
+          <div>
+            <ngc-input [width]='720' pattern="^[A-Za-z0-9-. ]*$" maxlength="65" formControlName="workingListRemarks">
+            </ngc-input>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='export.book.manifestremark'></ngc-label>
+          <div>
+            <ngc-input [width]='720' pattern="^[A-Za-z0-9-. ]*$" maxlength="65" formControlName="manifestRemarks">
+            </ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='export.book.additionalremark'></ngc-label>
+          <div>
+            <ngc-input [width]='720' pattern="^[A-Za-z0-9-. ]*$" maxlength="65" formControlName="additionalRemarks">
+            </ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="saveFlightShipment()"></ngc-button>
+            <ngc-button label="g.delete" (click)="deleteFlightDimention()" [disabled]="dimenstionDeleteButton">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+</form>

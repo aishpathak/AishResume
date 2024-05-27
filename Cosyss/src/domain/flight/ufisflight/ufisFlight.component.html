@@ -1,0 +1,158 @@
+<!-- Card Heading (Begin) -->
+<ngc-titlebar title='flight.UFIS.title' (clear)="onClear()" (cancel)="onCancel()"></ngc-titlebar>
+<form [formGroup]="ufisFlightForm">
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column [column]="1">
+                <ngc-label label='g.flight'></ngc-label>
+                <div>
+                    <ngc-flightkeyinput upperCase="true" formControlName="flightNo" [width]="100"></ngc-flightkeyinput>
+
+                    <!-- <ngc-input [width]="100" maxLength="8" formControlName="flightNo" upperCase="true" accessEnableOn="r"></ngc-input> -->
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1">
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button (click)="onSearch()"  label='g.search' iconType="search" #searchbutton
+                        accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <br>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align="right">
+                <ngc-button (click)='clickAddRow()' label='flight.add' iconType="add"></ngc-button>
+                <ngc-button *ngIf="isUfisFlightDatatableVisible" label='g.delete' (click)="onConfirm($event)"
+                    iconType="delete" #deletebutton></ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable (linkClick)="onLinkClick($event)" [pageable]="true" [pagerMode]="'advanced'"
+                    formArrayName="ufisList" *ngIf="isUfisFlightDatatableVisible">
+                    <ngc-data-column text='g.select' dataField="flagDelete" [width]="50" type="check"
+                        cellsAlign="center" align="center"></ngc-data-column>
+                    <ngc-data-column text='flight.AsPerCOSYS' dataField="cosysFlightNo" [width]="100" cellsAlign="left"
+                        align="left"></ngc-data-column>
+                    <ngc-data-column text='flight.AsPerUFIS' dataField="ufisFlightNo" [width]="100" cellsAlign="left"
+                        align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text='flight.EffectiveFrom' dataField="flightFromDate" [width]="100"
+                        type="displayDate" cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text='flight.EffectiveTo' dataField="flightToDate" [width]="100" type="displayDate"
+                        cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text='flight.exportimport' dataField="flightRoute" [width]="80" cellsAlign="left"
+                        align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text='flight.edit' dataField="edit" [width]="60" type="link" iconType="edit"
+                        cellsAlign="left" align="left"></ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <form formGroupName="insertionForm">
+        <ngc-window #insertionWindow [width]="600" [height]="210" title="flight.addUFIS" [showCloseButton]="false">
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column>
+                        <ngc-label label='flight.AsPerCOSYS' shortcutFor="cosysFlightNo"></ngc-label>
+                        <div>
+
+                            <ngc-flightkeyinput upperCase="true" label="flight.AsPerCOSYS"
+                                formControlName="cosysFlightNo" [width]="100" required></ngc-flightkeyinput>
+
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label label='flight.AsPerUFIS' shortcutFor="ufisFlightNo"></ngc-label>
+                        <div>
+                            <ngc-flightkeyinput upperCase="true" formControlName="ufisFlightNo" [width]="100" required>
+                            </ngc-flightkeyinput>
+
+                            <!-- <ngc-input [width]="100" minLength="5" maxLength="8" formControlName="ufisFlightNo"
+                                upperCase="true" required="true"></ngc-input> -->
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label label='flight.EffectiveFrom' shortcutFor="flightFromDate"></ngc-label>
+                        <div>
+                            <ngc-datetimeinput [width]="100" formControlName="flightFromDate" required="true">
+                            </ngc-datetimeinput>
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label label='flight.EffectiveTo' shortcutFor="flightToDate"></ngc-label>
+                        <div>
+                            <ngc-datetimeinput
+                                [min]="ufisFlightForm.controls.insertionForm.controls.flightFromDate.value"
+                                [width]="100" formControlName="flightToDate"></ngc-datetimeinput>
+                        </div>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+            <ngc-window-footer>
+                <ngc-container type="tab">
+                    <ngc-row>
+                        <ngc-column align="right">
+                            <ngc-button (click)="onUfisFlightCreate()" label='cus.save' #createbutton></ngc-button>
+                            <ngc-button (click)="onToggleInsert()" label='fltpouch.cancel'></ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-window-footer>
+        </ngc-window>
+    </form>
+    <form formGroupName="updateForm">
+        <ngc-window #updateWindow [width]="600" [height]="210" title="flight.editUFISg" label='flight.editUFIS'
+            [showCloseButton]="false">
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column>
+                        <ngc-label label='flight.AsPerCOSYS' shortcutFor="cosysFlightNo"></ngc-label>
+                        <div>
+                            <ngc-input [width]="100" maxLength="8" label="flight.AsPerCOSYS"
+                                formControlName="cosysFlightNo" upperCase="true" required="true" disabled='true'>
+                            </ngc-input>
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label label='flight.AsPerUFIS' shortcutFor="ufisFlightNo"></ngc-label>
+                        <div>
+                            <ngc-input [width]="100" minLength="5" maxLength="8" formControlName="ufisFlightNo"
+                                upperCase="true" required="true" disabled='true'></ngc-input>
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label value='flight.EffectiveFrom'></ngc-label>
+                        <div>
+                            <ngc-datetimeinput [width]="100" formControlName="flightFromDate" required="true">
+                            </ngc-datetimeinput>
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label label='flight.EffectiveTo' shortcutFor="flightToDate"></ngc-label>
+                        <ngc-datetimeinput [min]="ufisFlightForm.controls.updateForm.controls.flightFromDate.value"
+                            [width]="100" formControlName="flightToDate"></ngc-datetimeinput>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+            <ngc-window-footer>
+                <ngc-container type="tab">
+                    <ngc-row>
+                        <ngc-column align="right">
+                            <ngc-button (click)="onUfisFlightUpdate()" label='g.update' #updatebutton></ngc-button>
+                            <ngc-button accessEnableOn="r" (click)="onToggleUpdate()" label='fltpouch.cancel'>
+                            </ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-window-footer>
+        </ngc-window>
+    </form>
+</form>

@@ -1,0 +1,480 @@
+<form [formGroup]="truckDockMonitoring">
+  <ngc-titlebar title="tcs.truckDockMonitoring" [displayOnFullScreen]="false"></ngc-titlebar>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-buttoninput sourceId="TCS$TD_MONITORING_PARK_DOCK" (select)="onParkDockClick($event)"
+          formControlName="parkOrDock">
+        </ngc-buttoninput>
+        <span>
+          <ngc-link (linkClick)="onlegendClick(legendWindow)" iconType="edit"></ngc-link>
+        </span>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="parkOrDock == 'DOCK'">
+        <ngc-buttoninput sourceId="TCS$TD_MONITORING_TERMINAL" (select)="onTerminalClick($event)"
+          formControlName="terminal">
+        </ngc-buttoninput>
+      </ngc-column>
+      <ngc-column [column]="4" *ngIf="parkOrDock == 'DOCK'">
+        <ngc-buttoninput sourceId="TCS$TD_MONITORING_LEVEL" (select)="onLevelClick($event)" formControlName="level">
+        </ngc-buttoninput>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label="warehouse.autorefresh"></ngc-label>
+        <ngc-label></ngc-label>
+        <ngc-switchbutton formControlName="auto" (change)="onSwitchChange($event)"></ngc-switchbutton>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ng-container *ngFor="let terminal of terminals; let terminalIndex = index">
+    <!-- 
+      Vehicle Park 
+    -->
+    <ng-container *ngIf="parkOrDock == 'PARK' && terminal.parkOrDock == 'PARK'">
+      <div class="tcs-terminal-container">
+        <div class="tcs-terminal-name">
+          <ngc-label label="tcs.vehiclePark" emphasis="lg"></ngc-label>
+          <ngc-link (linkClick)="onTruckParkSummary(summaryWindow)" iconType="edit"></ngc-link>
+        </div>
+        <div class="tcs-level-container">
+          <ng-container *ngFor="let sector of terminal.sectors; let levelIndex = index">
+            <div #levelDiv class="level" [ngStyle]="{ 'width.px': levelWidth(levelDiv)}">
+              <div class="tcs-sector">
+                <div class="tcs-park-container">
+                  <div #parkId class="tcs-park" *ngFor="let dock of sector.subSectors"
+                    [ngStyle]=" { backgroundColor: dock.dockPurposeColor }">
+                    <ngc-display [value]="dock.vehicleNo" emphasis="md"></ngc-display>
+                    <ngc-contextmenu [target]="parkId" [source]="getVehicleMenu(dock)"
+                      (select)="onVehicleMenuSelect($event, dock, assignWindow, banTruckWindow, releaseWindow, connectingWindow)">
+                    </ngc-contextmenu>
+                    <span class="tcs-overstay-time">
+                      <ngc-display [value]="dock.overstayTime"></ngc-display>
+                    </span>
+                    <div class="tcs-park-info">
+                      <ng-container *ngIf="dock.vehicleNo">
+                        <ng-container *ngIf="dock.dockNo">
+                          <i class="fa fa-lock tcs-allocated-dock-onway"></i>
+                        </ng-container>
+                        <ng-container [ngSwitch]="dock.natureOfBusiness">
+                          <ng-container *ngSwitchCase="'AAT_STAFF'"></ng-container>
+                          <ng-container *ngSwitchCase="'VIP'"></ng-container>
+                          <ng-container *ngSwitchCase="'SERVICE'"></ng-container>
+                          <ng-container *ngSwitchDefault>
+                            <span #vehicleId (click)="onVehicleClick($event, dock,truckInfoWindow)">
+                              <img class="tcs-vehicle-img-1" />
+                            </span>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+    <!-- 
+      Vehicle Dock 
+    -->
+    <ng-container *ngIf="parkOrDock == 'DOCK' && terminal.parkOrDock == 'DOCK'">
+      <div *ngIf="terminal.terminal == preferredTerminal || preferredTerminal == 'ALL'" class="tcs-terminal-container">
+        <div class="tcs-terminal-name">
+          <ngc-display [value]="terminal.terminal" emphasis="lg"></ngc-display>
+        </div>
+        <div class="tcs-level-container">
+          <ng-container *ngFor="let sector of terminal.sectors; let levelIndex = index">
+            <div #levelDiv *ngIf="sector.level == preferredLevel || preferredLevel == 'ALL'" class="level"
+              [ngStyle]="{ 'width.px': levelWidth(levelDiv)}">
+              <div class="tcs-level-name">
+                <ngc-display [value]="sector.level == 'G' ? '0' : sector.level" sourceId="TCS$TD_MONITORING_LEVEL"
+                  sourceCategory="dropdown" sourceType="master" emphasis="md">
+                </ngc-display>
+              </div>
+              <div class="tcs-sector">
+                <div class="tcs-dock-container">
+                  <div #dockId class="tcs-dock" *ngFor="let dock of sector.subSectors"
+                    (click)="onDockClick($event, dock, dockInfoWindow)"
+                    [ngStyle]=" { backgroundColor: dock.dockPurposeColor }">
+                    <ngc-display [value]="dock.dockNo" emphasis="md"></ngc-display>
+                    <ngc-contextmenu [target]="dockId" [source]="getDockMenu(dock)"
+                      (select)="onDockMenuSelect($event, dock, assignWindow, reserveWindow, releaseWindow, adhocWindow, unReserveWindow)">
+                    </ngc-contextmenu>
+                    <span class="tcs-overstay-time">
+                      <ngc-display [value]="dock.overstayTime"></ngc-display>
+                    </span>
+                    <div class="tcs-dock-info">
+                      <!-- Not Allocated -->
+                      <ng-container *ngIf="!dock.vehicleNo">
+                        <ng-container *ngIf="dock.free"></ng-container>
+                        <ng-container *ngIf="dock.wrongOccupancy">
+                          <ng-container [ngSwitch]="dock.natureOfBusiness">
+                            <ng-container *ngSwitchCase="'AAT_STAFF'"></ng-container>
+                            <ng-container *ngSwitchCase="'VIP'"></ng-container>
+                            <ng-container *ngSwitchCase="'SERVICE'"></ng-container>
+                          </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="dock.reserved">
+                          <i class="fa fa-clock-o tcs-reserved-dock"></i>
+                        </ng-container>
+                        <ng-container *ngIf="dock.dockPurpose == 'TENANT'">
+                          <i class="fa fa-lock tcs-tenant-dock"></i>
+                        </ng-container>
+                      </ng-container>
+                      <!-- Allocated -->
+                      <ng-container *ngIf="dock.vehicleNo">
+                        <span #vehicleId class="tcs-vehicle" (click)="onVehicleClick($event, dock,truckInfoWindow)">
+                          <ng-container *ngIf="!dock.occupied">
+                            <i class="fa fa-lock tcs-allocated-dock-onway"></i>
+                          </ng-container>
+                          <ng-container *ngIf="dock.occupied">
+                            <img class="tcs-vehicle-img" />
+                          </ng-container>
+                          <ngc-display [value]="dock.vehicleNo"></ngc-display>
+                          <ngc-contextmenu [target]="vehicleId" [source]="getVehicleMenu(dock)"
+                            (select)="onVehicleMenuSelect($event, dock,assignWindow, banTruckWindow, releaseBanWindow,connectingWindow)">
+                          </ngc-contextmenu>
+                        </span>
+                      </ng-container>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </ng-container>
+        </div>
+      </div>
+    </ng-container>
+  </ng-container>
+  <!-------------------------------- Dock Info Popup ---------------------------------------------->
+  <ng-container formGroupName="dockInfo">
+    <ngc-window #dockInfoWindow title="tcs.dockInfo" [width]="600" [height]="400">
+      <ngc-container type="section">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.dockNo"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockNo"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.vehicleNo"></ngc-label>
+            <div>
+              <ngc-display formControlName="vehicleNo"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.occupied"></ngc-label>
+            <div>
+              <ngc-icon formControlName="occupied" type="yesno" falseColor="inherit"></ngc-icon>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.allocatedTime"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockAllocatedDateTime"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.allocatedTill"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockAllocatedTillDateTime"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.overstay"></ngc-label>
+            <div>
+              <ngc-icon formControlName="overstayed" type="yesno" [negative]="true" trueColor="inherit">
+              </ngc-icon>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.primaryPurpose"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockPurpose" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                sourceType="query"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.secondaryPurpose"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockPurpose2" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                sourceType="query"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.thirdPurpose"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockPurpose3" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                sourceType="query"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.fourthPurpose"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockPurpose4" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                sourceType="query"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="tcs.fifthPurpose"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockPurpose5" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                sourceType="query"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="sectiontop">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.cancel" (click)="cancel(dockInfoWindow)"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </ng-container>
+  <!-----------------Truck Park Summary -------------------->
+
+  <ngc-window #summaryWindow title="tcs.truckParkSummary" [width]="600" [height]="500">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="tcs.purpose"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="tcs.total"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="parkSummary">
+              <tr *ngFor="let item of truckDockMonitoring.getList('parkSummary'); let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="purpose" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                    sourceType="query"></ngc-display>
+                </td>
+                <td align="right">
+                  <ngc-display formControlName="totalVehicles"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="cancel" (click)="cancel(summaryWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <!-- ---------------------------Legend ---------------------->
+
+  <ngc-window #legendWindow title="tcs.legend" [width]="600" [height]="500">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column type="tab">
+          <ngc-row>
+            <ngc-column [column]="1"><img class="tcs-vehicle-img" /></ngc-column>
+            <ngc-column [column]="4">
+              <ngc-label label="tcs.occupied"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="1"><img class="tcs-vehicle-img-1" /></ngc-column>
+            <ngc-column [column]="4">
+              <ngc-label label="tcs.truckinpark"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="1"><i class="fa fa-lock tcs-allocated-dock-onway"></i></ngc-column>
+            <ngc-column [column]="4">
+              <ngc-label label="tcs.allocated"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="1"><i class="fa fa-clock-o tcs-reserved-dock"></i></ngc-column>
+            <ngc-column [column]="4">
+              <ngc-label label="tcs.reserved"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-table>
+            <tbody formArrayName="legendArray">
+              <tr *ngFor="let item of truckDockMonitoring.getList('legendArray'); let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="purpose" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+                    sourceType="query">
+                  </ngc-display>
+                </td>
+                <td align="right">
+                  <div class="tcs-purpose" [ngStyle]=" { backgroundColor: item.get('dockPurposeColor').value }">
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="cancel" (click)="cancel(legendWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <!----------------------------- Child Popup ------------------------------------------------------------------->
+  <ngc-window #banTruckWindow title="tcs.banTruck" [width]="800" [height]="400" (open)="onBanTruckOpen(banTruckScreen)">
+    <app-create-ban #banTruckScreen [vehicleNo]="vehicleNumber">
+    </app-create-ban>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onBanTruckSave(banTruckScreen, banTruckWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(banTruckWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #reserveWindow title="tcs.reserveDock" [width]="800" [height]="400"
+    (open)="onReserveDockOpen(reserveDockScreen)">
+    <app-reserve-truck-dock-save #reserveDockScreen>
+    </app-reserve-truck-dock-save>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onReserveDock(reserveDockScreen, reserveWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(reserveWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #adhocWindow title="tcs.adhocDockUpdate" [width]="1300" [height]="550"
+    (open)="onAdhocOpen(adhocDockScreen)">
+    <app-adhoc-dock-update #adhocDockScreen>
+    </app-adhoc-dock-update>
+    <ngc-window-footer>
+      <ngc-container>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onAdhocDock(adhocDockScreen, adhocWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(adhocWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #assignWindow title="tcs.assignDock" [width]="800" [height]="400"
+    (open)="onAssignDockOpen(assignDockScreen)">
+    <app-assign-truck-dock #assignDockScreen [dockNo]="dockNumber">
+    </app-assign-truck-dock>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onAssignDock(assignDockScreen, assignWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(assignWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #releaseWindow title="tcs.releaseDock" [width]="800" [height]="400"
+    (open)="onReleaseDockOpen(releaseDockScreen)">
+    <app-release-truck-dock #releaseDockScreen>
+    </app-release-truck-dock>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onReleaseDock(releaseDockScreen, releaseWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(releaseWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #connectingWindow title="tcs.connectingTruck" [width]="800" [height]="450">
+    <app-connecting-truck #connectingTruckScreen [dockNo]="dockNumber" [vehicleNo]="vehicleNumber">
+    </app-connecting-truck>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onConnectTruck(connectingTruckScreen, connectingWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(connectingWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #truckInfoWindow title="tcs.truckInfo" [width]="800" [height]="550">
+    <app-truck-information [tripId]="tripId">
+    </app-truck-information>
+    <ngc-window-footer>
+      <ngc-container>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="cancel" (click)="cancel(truckInfoWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #unReserveWindow title="tcs.unReserveTruckDock" [width]="800" [height]="400"
+    (open)="onUnreserveDockOpen(unReserveDockScreen)">
+    <app-unreserve-truck-dock #unReserveDockScreen (cancel)="cancel(unReserveWindow)">
+    </app-unreserve-truck-dock>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onUnReserveDock(unReserveDockScreen, unReserveWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(unReserveWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

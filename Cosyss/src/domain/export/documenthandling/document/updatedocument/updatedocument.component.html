@@ -1,0 +1,211 @@
+<form [formGroup]="updateDocumentForm">
+  <ngc-titlebar *ngIf="router.url.includes('/export/cdh/updatedocument')" title="documentViewUpdate"
+    (save)="updateDocumentPigeonHoleLoc()"></ngc-titlebar>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label value="documentViewUpdate.scanDocument"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [maxLength]="11" formControlName="shipmentNumber" #shipmentNumber
+            (blur)="scanRequest()" type="number"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <br>
+        <ngc-button (click)="updateDocumentPigeonHoleLoc()" [disabled]="saveIsDisabled" value="viewUpdate.save">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column column="2">
+        <br>
+        <ngc-button (click)="onCreateBarcodeCopy()" [disabled]="createCopyIsDisabled" value="createBarcodeCopy">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column *ngIf='isPouchFinalized' column="6">
+        <br>
+        <ngc-display style="color: red; font-weight:bold" value='export.pouch.finalized'></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="box" *ngIf="showData">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <td>
+                <ngc-label value="agent.sno"></ngc-label>
+              </td>
+              <td>
+                <ngc-label value="cdh.document" width="100"></ngc-label>
+              </td>
+              <td>
+                <ngc-label value="cdh.copy"></ngc-label>
+              </td>
+              <td>
+                <ngc-label value="flt/Date"></ngc-label>
+              </td>
+              <th>
+                <ngc-label value="g.status"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="cdh.location"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="fltpouch.deletereason"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="fltpouch.remarks"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="flight.delete"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="fltpouch.reprint"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="documentViewUpdateTableData">
+            <tr *ngFor="let item of updateDocumentForm.controls.documentViewUpdateTableData.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                {{index + 1}}
+              </td>
+              <td>
+                <!-- {{item.controls.shipmentNumber.value}} -->
+                <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+              </td>
+              <td>
+                {{item.controls.copyNum.value}}
+              </td>
+              <td>
+                {{item.controls.flightNumDate.value}}
+              </td>
+              <td>
+                {{item.controls.docstatus.value}}
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value!='Finalized'">
+                <ngc-lov [noCache]="true" sourceId="LOCATIONS" formControlName="pigeonHoleLocationId" dataField="code"
+                  valueMember="desc" displayField="desc" title="pigeonHoleLoc" [width]="150" [validOnly]='true'
+                  [sourceParameters]="pigeonHoleLocLOV">
+                  <ngc-data-column text="g.location.id" dataField="code" [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.location.name" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value=='Finalized'">
+                {{item.controls.pigeonHoleLoc.value}}
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value!='Finalized'">
+                <ngc-dropdownlist #deleteReasonCode formControlName="deleteReasonCode"
+                  sourceId="DeleteReason$AWB_DeleteReason" [width]="180"></ngc-dropdownlist>
+                <!-- <div>
+                  <span style="color: red; font-size: 10px; vertical-align: super;">
+                    (Mandatory)
+                  </span>
+                </div> -->
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value=='Finalized'">
+                <!--{{item.controls.deleteReasonCode.value}}-->
+                <ngc-display value=""></ngc-display>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value!='Finalized'">
+                <ngc-input [maxLength]="65" formControlName="deleteRemarks"></ngc-input>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value=='Finalized'">
+                <ngc-display value=""></ngc-display>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value!='Finalized'">
+                <ngc-link iconType="delete" (linkClick)="onDeleteShipmentRecord(item.controls, index)" [width]="10">
+                </ngc-link>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value=='Finalized'">
+                <i aria-hidden="true"></i>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value!='Finalized'">
+                <ngc-link iconType="print" (linkClick)="onPrintPopup(item.controls)" [width]="10"></ngc-link>
+              </td>
+              <td *ngIf="item.controls.pouchStatus.value==='Finalized'">
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+        <br>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="flight.export.flights"></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ng-container formArrayName="exportFlt">
+          <ngc-row *ngFor="let item of updateDocumentForm.controls.exportFlt.controls; let index=index"
+            [formGroupName]="index">
+            <ngc-column>
+              <ngc-display formControlName="flightKey"></ngc-display>/
+              <ngc-display formControlName="flightOriginDate"></ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ng-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="flight.import.flights"></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ng-container formArrayName="importFlt">
+          <ngc-row *ngFor="let item of updateDocumentForm.controls.importFlt.controls; let index=index"
+            [formGroupName]="index">
+            <ngc-column>
+              <ngc-display formControlName="flightKey"></ngc-display>/
+              <ngc-display formControlName="flightOriginDate"></ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ng-container>
+      </ngc-column>
+    </ngc-row>
+   
+  </ngc-container>
+</form>
+
+<form [formGroup]='popupCreateCopy'>
+  <ngc-window #windowPrinter1 [width]="400" [height]="70" title="export.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['AWB']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="CreateCopyData()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['AWB']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="onRePrintBarcodeCopy()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

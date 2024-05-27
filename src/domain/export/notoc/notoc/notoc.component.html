@@ -1,0 +1,1329 @@
+<!-- Title Bar (Begin).-->
+<ngc-titlebar title="export.notoc.title.notoc" (save)="onSave($event)" (cancel)="onCancel()"></ngc-titlebar>
+<!-- Title Bar (End) -->
+
+<!-- Notoc Form Group (Begin) -->
+<form [formGroup]="notocForm">
+  <!-- This container contains the fields of Flight details -->
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='export.notoc.search.flightkey'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.search.flightdate'></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]="100" formControlName="flightOriginDate" required accessEnableOn="r">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='6'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='g.search' (click)="onSearch($event)" iconType="search" #searchbutton accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='export.notoc.print.notoc' (click)="onPrintNotoc($event)" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='export.notoc.notification.to.captain' (click)="onPrint($event)" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.flightkey'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKey"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.flightdate'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightOriginDate1" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.flightstd'></ngc-label>
+        <div>
+          <ngc-display formControlName="std" [onlyTime]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.flightetd'></ngc-label>
+        <div>
+          <ngc-display formControlName="etd"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.flightpaxcao'></ngc-label>
+        <div>
+          <ngc-display formControlName="paxCao"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.flightaircraftreg'></ngc-label>
+        <div>
+          <ngc-display formControlName="aircraftReg"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.search.selectsegment'></ngc-label>
+        <div>
+          <ngc-dropdownlist [autoSelect]="true" formControlName="seg" required [source]="segment" accessEnableOn="r" (ngModelChange)="onSegmentSelect($event)"
+            [width]="90"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='export.notoc.button.finalize' [disabled]="flightDep" *ngIf="finalizeButton" (click)="onFinaliZe()"></ngc-button>
+          <ngc-button label='uld.unfinalize' *ngIf="!finalizeButton" [disabled]="flightDep" (click)="onUnFinaliZe()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.createdBy'></ngc-label>
+        <div>
+          <ngc-display formControlName="createdBy"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.finalizentmversion'></ngc-label>
+        <div>
+          <ngc-display formControlName="ntmVersionSent"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.finalizestatus'></ngc-label>
+        <div>
+          <ngc-display formControlName="finalizestatus"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.finalizeversion'></ngc-label>
+        <div>
+          <ngc-display formControlName="finalizeVersion"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.notoc.result.finalizesentby'></ngc-label>
+        <div>
+          <ngc-display formControlName="sentBy"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- This container contains the fields of DG Report -->
+  <ngc-container type="section" *ngIf="isTab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs (select)="onTabSelect($event)">
+          <ngc-tab-card title="export.notoc.title.dgreport">
+            <ngc-container *ngIf="isULDflg">
+              <ngc-row>
+                <ngc-column [id]=21>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column *ngIf="btnFlag" align="right">
+                        <ngc-button label='export.notoc.button.addunid' (click)="onAddRowDG($event)"></ngc-button>
+                        <ngc-button *ngIf="disableForSQ" label='export.notoc.button.addoverpack' (click)="onAddOverpack($event)"></ngc-button>
+                        <ngc-button *ngIf="disableForSQ" label='export.notoc.button.addallpack' (click)="onAddAllPack($event)"></ngc-button>
+                        <ngc-button label='export.notoc.button.delete' (click)="onDelete($event)" iconType="delete">
+                        </ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-accordion>
+                    <ngc-accordion-card [selected]="true">
+                      <ngc-accordion-titlebar [id]=0>
+                        <ngc-display></ngc-display>UNID
+                      </ngc-accordion-titlebar>
+                      <ngc-edittable formArrayName="unid" [onDemand]="true">
+                        <ngc-data-column text="" dataField="select" [width]="50" cellsAlign="center" [useNotOnDemand]="true">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-checkbox [formControlName]="name" value="select" [width]="30"></ngc-checkbox>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.sno" dataField="" cellsAlign="center" [useNotOnDemand]="true">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-display [width]="40" value={{group+1}}></ngc-display>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.uldbulk" dataField="uldNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-lov [lazy]="true" [formControlName]="name" placeHolder="uld.uld.number" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                                [width]="100" dataField='code' (select)="onULDTrolleyNoSelect($event)" [sourceParameters]="uldSourceParameter">
+                                <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                              </ngc-lov>
+                              <!--<ngc-input [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.awb" dataField="awbNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <!--<ngc-input required [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                              <ngc-lov [lazy]="true" [formControlName]="name" required placeHolder="awb.awbnumber" sourceId="AWB_AWBNUMBER" [sourceParameters]="awbSourceParameter"
+                                title="awb.awbnumber" dataField="code" [width]="100" (select)="awbNumberMaxWeight($event, group)">
+                                <ngc-data-column text="awb.awbnumber" dataField="code" [width]="50"></ngc-data-column>
+                              </ngc-lov>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.unid" dataField="unidNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-lov [formControlName]="name" required (select)="getDgIDUnid($event, group)" sourceId="UNID_PSN" title="export.unid" dataField="code"
+                                [width]="50">
+                                <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+                                <ngc-data-column text="export.notoc.properShippingName" dataField="desc" [width]="80">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.impcode" dataField="param3" [width]="80"></ngc-data-column>
+                              </ngc-lov>
+                              <psn-dtl *ngIf="notocForm.get(['unid', group, 'dgRegulationId'])" [searchRequest]="{'dgRegulationId': notocForm.get(['unid', group, 'dgRegulationId']).value}">
+                              </psn-dtl>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pg" dataField="packingGroupCode" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null">
+                              <ngc-dropdownlist *ngIf="!notocForm.get(['unid', group, 'pgList'])" [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['unid', group, 'dgClassCode']).value != 7 ? true : false" placeHolder=""
+                                [formControlName]="name" sourceId="EXP_DGD$DGD_PG" [width]="50">
+                              </ngc-dropdownlist>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['unid', group, 'pgList'])" [source]="notocForm.get(['unid', group, 'pgList']).value"
+                                [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value == 7" [required]="notocForm.get(['unid', group, 'dgClassCode']).value != 7 ? true : false"
+                                [formControlName]="name" (ngModelChange)="getUnidPi($event, group)" placeHolder="" [width]="50">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.weight" dataField="packageWeight" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-numberinput decimalDigits="0" min="0" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null" (ngModelChange)="weightCheckAwbNumberUnid($event,group)"
+                                required [formControlName]="name"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pieces" dataField="packagePieces" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-piecesinput *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null" required [formControlName]="name"></ngc-piecesinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.quantity" dataField="packageQuantity" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-numberinput *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null" [decimalDigits]="3" min="0" [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['unid', group, 'dgClassCode']).value != 7 ? true : false" [formControlName]="name"
+                                [width]="80" (ngModelChange)="unidQuantityCheck($event, group)"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pi" dataField="packingInstructions" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null">
+                              <ngc-display *ngIf="notocForm.get(['unid', group, 'piList']) == null" [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['unid', group, 'dgClassCode']).value != 7 ? true : false" [formControlName]="name"
+                                [width]="70"></ngc-display>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['unid', group, 'piList'])" required [formControlName]="name" displayMember="code"
+                                valueMember="code" [source]="notocForm.get(['unid', group, 'piList']).value" [width]="70" [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['unid', group, 'dgClassCode']).value != 7 ? true : false" placeHolder=""
+                                (ngModelChange)="unidQuantityCheckPI($event, group)"></ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.cat" dataField="packingInstructionCategory" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null">
+                              <ngc-input *ngIf="!notocForm.get(['unid', group, 'categoryList'])" [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value != 7"
+                                [required]="notocForm.get(['unid', group, 'dgClassCode']).value == 7 ? true : false" [formControlName]="name"
+                                [width]="70" placeHolder=""></ngc-input>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['unid', group, 'categoryList'])" [source]="notocForm.get(['unid', group, 'categoryList']).value"
+                                [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value != 7" [required]="notocForm.get(['unid', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="60" placeHolder="">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.ti" dataField="transportIndex" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null">
+                              <ngc-numberinput [disabled]="notocForm.get(['unid', group, 'dgClassCode']).value != 7" [required]="notocForm.get(['unid', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="70"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.cao" dataField="notificationFlightType" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null">
+                              <ngc-dropdownlist [disabled]="this.arraylist.flight.serviceType != 'C' " [source]="caoDropdown" placeHolder="" [formControlName]="name"
+                                [width]="40">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.tech" dataField="technicalName" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-input *ngIf="notocForm.get(['unid', group, 'technicalNameFlag']) != null" [disabled]="notocForm.get(['unid', group, 'technicalNameFlag']).value == 0"
+                                [required]="notocForm.get(['unid', group, 'technicalNameFlag']).value ==1" [formControlName]="name"
+                                maxlength="40" [width]="150"></ngc-input>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.remarks" dataField="packingRemarks" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['unid', group, 'dgClassCode']) != null">
+                              <ngc-input [formControlName]="name" maxlength="40" [width]="150">
+                              </ngc-input>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                      </ngc-edittable>
+                    </ngc-accordion-card>
+                  </ngc-accordion>
+                </ngc-column>
+              </ngc-row>
+
+              <!--overPack accordion (Begin)  -->
+              <ngc-row>
+                <ngc-column>
+                  <ngc-accordion formArrayName="overPack">
+                    <ngc-accordion-card *ngFor="let item of notocForm.controls.overPack.controls let index=index" [formGroupName]="index" [selected]="true">
+                      <ngc-accordion-titlebar [id]="'OVERPACK'+index">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <div>
+                                OVERPACK
+                                <ngc-numberinput decimalDigits=0 max=9999 formControlName="overpackNumber" [width]="50">
+                                </ngc-numberinput>
+                              </div>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-accordion-titlebar>
+
+                      <!--unid inside overPack accordion (Begin)  -->
+                      <ngc-edittable formArrayName="unids" [onDemand]="true">
+                        <ngc-data-column text="" dataField="select" [width]="50" cellsAlign="center" [useNotOnDemand]="true">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-checkbox [formControlName]="name" value="select" [width]="30"></ngc-checkbox>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.sno" dataField="" cellsAlign="center" [useNotOnDemand]="true">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-display [width]="40" value={{group+1}}></ngc-display>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.uldbulk" dataField="uldNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <!--<ngc-input [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                              <ngc-lov [lazy]="true" [formControlName]="name" placeHolder="uld.uld.number" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                                [width]="100" dataField='code' (select)="onULDTrolleyNoSelect($event)" [sourceParameters]="uldSourceParameter">
+                                <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                              </ngc-lov>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.awb" dataField="awbNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <!--  <ngc-input required [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                              <ngc-lov [lazy]="true" [formControlName]="name" required placeHolder="awb.awbnumber" sourceId="AWB_AWBNUMBER" [sourceParameters]="awbSourceParameter"
+                                title="awb.awbnumber" dataField="code" [width]="100" (select)="awbNumberMaxWeightOverPack($event,index , group)">
+                                <ngc-data-column text="awb.awbnumber" dataField="code" [width]="50"></ngc-data-column>
+                              </ngc-lov>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.unid" dataField="unidNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-lov [formControlName]="name" required (select)="getDgIdOvrUnid($event,index , group)" sourceId="UNID_PSN" title="export.unid"
+                                dataField="code" [width]="50">
+                                <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+                                <ngc-data-column text="export.notoc.properShippingName" dataField="desc" [width]="80">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.impcode" dataField="param3" [width]="80"></ngc-data-column>
+                              </ngc-lov>
+                              <psn-dtl *ngIf="notocForm.get(['overPack', index, 'unids', group, 'dgRegulationId'])" [searchRequest]="{'dgRegulationId': notocForm.get(['overPack', index, 'unids', group, 'dgRegulationId']).value}">
+                              </psn-dtl>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pg" dataField="packingGroupCode" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-dropdownlist *ngIf="!notocForm.get(['overPack', index,'unids', group, 'pgList'])" [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                placeHolder="" [formControlName]="name" sourceId="EXP_DGD$DGD_PG" [width]="50">
+                              </ngc-dropdownlist>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index,'unids', group, 'pgList'])" [source]="notocForm.get(['overPack', index,'unids', group, 'pgList']).value"
+                                [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7" [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                [formControlName]="name" (ngModelChange)="getOverpackPi($event, index , group)" placeHolder=""
+                                [width]="50">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.weight" dataField="packageWeight" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-numberinput decimalDigits="0" min="0" required [formControlName]="name" (ngModelChange)="weightCheckAwbNumberovrUnid($event, index , group)"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pieces" dataField="packagePieces" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-piecesinput required [formControlName]="name"></ngc-piecesinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.quantity" dataField="packageQuantity" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-numberinput [decimalDigits]="3" min="0" [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                formControlName="packageQuantity" [width]="80" (ngModelChange)="ovrQuantityCheck($event, index, group)"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pi" dataField="packingInstructions" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-display *ngIf="!notocForm.get(['overPack', index,'unids', group, 'piList'])" [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                [formControlName]="name" [width]="70"></ngc-display>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index,'unids', group, 'piList'])" required [formControlName]="name" [source]="notocForm.get(['overPack', index,'unids', group, 'piList']).value"
+                                displayMember="code" valueMember="code" [width]="70" [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                placeHolder="" (ngModelChange)="ovrQuantityCheckPI($event, index, group)">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.cat" dataField="packingInstructionCategory" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-input *ngIf="!notocForm.get(['overPack', index,'unids', group, 'categoryList'])" [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="70" placeHolder=""></ngc-input>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index,'unids', group, 'categoryList'])" [source]="notocForm.get(['overPack', index,'unids', group, 'categoryList']).value"
+                                [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7" [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="60" placeHolder="">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.ti" dataField="transportIndex" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-numberinput *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null" [disabled]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value != 7"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="70"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.cao" dataField="notificationFlightType" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null" [disabled]="this.arraylist.flight.serviceType != 'C' "
+                                [source]="caoDropdown" placeHolder="" [formControlName]="name" [width]="40"></ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.tech" dataField="technicalName" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-input *ngIf="notocForm.get(['overPack', index,'unids', group, 'technicalNameFlag']) != null" [disabled]="notocForm.get(['overPack', index,'unids', group, 'technicalNameFlag']).value == 0"
+                                [required]="notocForm.get(['overPack', index,'unids', group, 'technicalNameFlag']).value ==1"
+                                [formControlName]="name" maxlength="40" [width]="150"></ngc-input>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.remarks" dataField="packingRemarks" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-input [formControlName]="name" maxlength="40" [width]="150">
+                              </ngc-input>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                      </ngc-edittable>
+                      <ngc-container>
+                        <ngc-row>
+                          <ngc-column>
+                            <ngc-label label='export.notoc.dgreport.weight'></ngc-label>
+                            <div>
+                              <ngc-weightdisplay formControlName="totalWeight"></ngc-weightdisplay>
+                            </div>
+                          </ngc-column>
+                          <ngc-column>
+                            <ngc-label label='export.notoc.dgreport.pieces'></ngc-label>
+                            <div>
+                              <ngc-piecesdisplay formControlName="totalPieces"></ngc-piecesdisplay>
+                            </div>
+                          </ngc-column>
+                          <ngc-column align="right">
+                            <ngc-button label='export.notoc.button.addunid' (click)="onAddRowDGOverpack($event, index)">
+                            </ngc-button>
+                            <ngc-button label='export.notoc.button.addallpack' (click)="onAddOverpackAllPack($event, index)"></ngc-button>
+                            <ngc-button label='export.notoc.dgreport.total' (click)="sumOverPack($event, index ,allPackindex)"></ngc-button>
+                          </ngc-column>
+                        </ngc-row>
+                      </ngc-container>
+                      <!--unid inside overPack accordion (End)  -->
+                      <!--AllPack inside overPack accordion (Begin)  -->
+                      <ngc-accordion formArrayName="allPacks">
+                        <ngc-accordion-card *ngFor="let allpackitem of item.controls.allPacks.controls let allPackindex=index" [formGroupName]="allPackindex"
+                          [selected]="true">
+                          <ngc-accordion-titlebar [id]="'allPack'+allPackindex">
+                            <ngc-container>
+                              <ngc-row>
+                                <ngc-column>
+                                  <div>
+                                    ALLPACK
+                                    <ngc-display upperCase="true" formControlName="apioNumber"></ngc-display>
+                                  </div>
+                                </ngc-column>
+                              </ngc-row>
+                            </ngc-container>
+                          </ngc-accordion-titlebar>
+
+                          <!--unid inside AllPack of overPack accordion (Begin)  -->
+
+                          <ngc-edittable formArrayName="unids" [onDemand]="true">
+                            <ngc-data-column text="" dataField="select" [width]="50" cellsAlign="center" [useNotOnDemand]="true">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-checkbox [formControlName]="name" value="select" [width]="30"></ngc-checkbox>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.sno" dataField="" cellsAlign="center" [useNotOnDemand]="true">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-display [width]="40" value={{group+1}}></ngc-display>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.uldbulk" dataField="uldNumber" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <!-- <ngc-input [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                                  <ngc-lov [lazy]="true" [formControlName]="name" placeHolder="uld.uld.number" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                                    [width]="100" dataField='code' (select)="onULDTrolleyNoSelect($event)" [sourceParameters]="uldSourceParameter">
+                                    <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                                  </ngc-lov>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.awb" dataField="awbNumber" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <!-- <ngc-input required [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                                  <ngc-lov [lazy]="true" [formControlName]="name" required placeHolder="awb.awbnumber" sourceId="AWB_AWBNUMBER" [sourceParameters]="awbSourceParameter"
+                                    title="awb.awbnumber" dataField="code" [width]="100" (select)="awbNumberMaxWeightOverPackAllPack($event, index, allPackindex, group)">
+                                    <ngc-data-column text="awb.awbnumber" dataField="code" [width]="50"></ngc-data-column>
+                                  </ngc-lov>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.unid" dataField="unidNumber" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-lov [formControlName]="name" required (select)="getDgIdOvrAllUnid($event, index, allPackindex, group)" sourceId="UNID_PSN"
+                                    title="UNID" dataField="code" [width]="50">
+                                    <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="export.notoc.properShippingName" dataField="desc" [width]="80">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.impcode" dataField="param3" [width]="80"></ngc-data-column>
+                                  </ngc-lov>
+                                  <psn-dtl *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgRegulationId']) != null" [searchRequest]="{'dgRegulationId': notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgRegulationId']).value}">
+                                  </psn-dtl>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.pg" dataField="packingGroupCode" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']) != null">
+                                  <ngc-dropdownlist *ngIf="!notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'pgList'])" [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']).value == 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                    placeHolder="" [formControlName]="name" sourceId="EXP_DGD$DGD_PG" [width]="50">
+                                  </ngc-dropdownlist>
+                                  <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'pgList'])" [source]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'pgList']).value"
+                                    [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                    [formControlName]="name" (ngModelChange)="getOverpackAllPi($event, index, allPackindex, group)"
+                                    placeHolder="" [width]="50">
+                                  </ngc-dropdownlist>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.weight" dataField="packageWeight" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-numberinput decimalDigits="0" min="0" required [formControlName]="name" (ngModelChange)="weightCheckAwbNumberovrAllUnid($event, index, allPackindex, group)">
+                                  </ngc-numberinput>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.pieces" dataField="packagePieces" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-piecesinput required [formControlName]="name"></ngc-piecesinput>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.quantity" dataField="packageQuantity" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']) != null">
+                                  <ngc-numberinput [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                    [formControlName]="name" [width]="80" [decimalDigits]="3" min="0" (ngModelChange)="ovrAllQuantityCheck($event, index, allPackindex, group)">
+                                  </ngc-numberinput>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.pi" dataField="packingInstructions" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-display *ngIf="!notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'piList'])" [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                    [formControlName]="name" [width]="70"></ngc-display>
+                                  <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'piList'])" required [formControlName]="name"
+                                    [source]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'piList']).value"
+                                    displayMember="code" valueMember="code" [width]="70" [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                    placeHolder="" (ngModelChange)="ovrAllQuantityCheckPI($event, index, allPackindex, group)">
+                                  </ngc-dropdownlist>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.cat" dataField="packingInstructionCategory" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-input *ngIf="!notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'categoryList'])" [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                    [formControlName]="name" [width]="70" placeHolder=""></ngc-input>
+                                  <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'categoryList'])" [source]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'categoryList']).value"
+                                    [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                    [formControlName]="name" [width]="70" placeHolder="">
+                                  </ngc-dropdownlist>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.ti" dataField="transportIndex" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-numberinput [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value != 7"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                    [formControlName]="name" [width]="70" digits="4"></ngc-numberinput>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.cao" dataField="notificationFlightType" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-dropdownlist *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'dgClassCode']) != null"
+                                    [disabled]="this.arraylist.flight.serviceType != 'C' " [source]="caoDropdown" placeHolder=""
+                                    [formControlName]="name" [width]="70"></ngc-dropdownlist>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.tech" dataField="technicalName" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-input *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'technicalNameFlag']) != null"
+                                    [disabled]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'technicalNameFlag']).value == 0"
+                                    [required]="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group, 'technicalNameFlag']).value ==1"
+                                    [formControlName]="name" maxlength="40" [width]="150"></ngc-input>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="export.notoc.dgreport.remarks" dataField="packingRemarks" [width]="50" cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" *ngIf="notocForm.get(['overPack', index, 'allPacks',allPackindex,'unids', group,'dgClassCode']) != null">
+                                  <ngc-input [formControlName]="name" maxlength="40" [width]="150">
+                                  </ngc-input>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                          </ngc-edittable>
+                          <ngc-container>
+                            <ngc-row>
+                              <ngc-column>
+                                <ngc-label label='export.notoc.dgreport.weight'></ngc-label>
+                                <div>
+                                  <ngc-weightdisplay formControlName="totalWeight" upperCase="true"></ngc-weightdisplay>
+                                </div>
+                              </ngc-column>
+                              <ngc-column>
+                                <ngc-label label='export.notoc.dgreport.pieces'></ngc-label>
+                                <div>
+                                  <ngc-piecesdisplay formControlName="totalPieces" upperCase="true"></ngc-piecesdisplay>
+                                </div>
+                              </ngc-column>
+                              <ngc-column align="right">
+                                <ngc-button label='export.notoc.button.addunid' (click)="onAddRowDGOverpackAllpack($event, index, allPackindex)"></ngc-button>
+                                <ngc-button label='export.notoc.dgreport.total' (click)="sumAllPackOverPack($event, index, allPackindex)"></ngc-button>
+                              </ngc-column>
+                            </ngc-row>
+                          </ngc-container>
+                        </ngc-accordion-card>
+                        <!--unid inside AllPack of overPack accordion (end)  -->
+                        <!--AllPack inside overPack accordion (end)  -->
+                      </ngc-accordion>
+                    </ngc-accordion-card>
+                  </ngc-accordion>
+                </ngc-column>
+              </ngc-row>
+              <!--AllPack  accordion (Begin)  -->
+              <ngc-row>
+                <ngc-column>
+                  <ngc-accordion formArrayName="allPack">
+                    <ngc-accordion-card *ngFor="let itemAllPack of notocForm.controls.allPack.controls let index=index" [formGroupName]="index"
+                      [selected]="true">
+                      <ngc-accordion-titlebar [id]="'allPack'+index">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <div>
+                                ALLPACK
+                                <ngc-display [disabled]="true" upperCase="true" formControlName="apioNumber" [width]="50"></ngc-display>
+                              </div>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-accordion-titlebar>
+
+                      <ngc-edittable formArrayName="unids" [onDemand]="true">
+                        <ngc-data-column text="" dataField="select" [width]="50" cellsAlign="center" [useNotOnDemand]="true">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-checkbox [formControlName]="name" value="select" [width]="30"></ngc-checkbox>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.sno" dataField="" cellsAlign="center" [useNotOnDemand]="true">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-display [width]="40" value={{group+1}}></ngc-display>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.uldbulk" dataField="uldNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <!-- <ngc-input [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                              <ngc-lov [lazy]="true" [formControlName]="name" placeHolder="uld.uld.number" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                                [width]="100" dataField='code' (select)="onULDTrolleyNoSelect($event)" [sourceParameters]="uldSourceParameter">
+                                <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                              </ngc-lov>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.awb" dataField="awbNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <!--<ngc-input required [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                              <ngc-lov [lazy]="true" [formControlName]="name" required placeHolder="awb.awbnumber" sourceId="AWB_AWBNUMBER" [sourceParameters]="awbSourceParameter"
+                                title="awb.awbnumber" dataField="code" [width]="100" (select)="awbNumberMaxWeightAllPack($event, index ,group)">
+                                <ngc-data-column text="awb.awbnumber" dataField="code" [width]="50"></ngc-data-column>
+                              </ngc-lov>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.unid" dataField="unidNumber" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-lov [formControlName]="name" required (select)="getDgIdAllUnid($event, index ,group)" sourceId="UNID_PSN" title="export.unid"
+                                dataField="code" [width]="50">
+                                <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+                                <ngc-data-column text="export.notoc.properShippingName" dataField="desc" [width]="80">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.impcode" dataField="param3" [width]="80"></ngc-data-column>
+                              </ngc-lov>
+                              <psn-dtl *ngIf="notocForm.get(['allPack', index, 'unids', group, 'dgRegulationId'])!= null" [searchRequest]="{'dgRegulationId': notocForm.get(['allPack', index, 'unids', group, 'dgRegulationId']).value}">
+                              </psn-dtl>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pg" dataField="packingGroupCode" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-dropdownlist *ngIf="!notocForm.get(['allPack', index,'unids', group, 'pgList'])" [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                placeHolder="" [formControlName]="name" sourceId="EXP_DGD$DGD_PG" [width]="50">
+                              </ngc-dropdownlist>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['allPack', index,'unids', group, 'pgList'])" [source]="notocForm.get(['allPack', index,'unids', group, 'pgList']).value"
+                                [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7" [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                [formControlName]="name" (ngModelChange)="getAllPi($event, index,group)" placeHolder="" [width]="50">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.weight" dataField="packageWeight" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-numberinput decimalDigits="0" min="0" required [formControlName]="name" (ngModelChange)="weightCheckAwbNumberAllUnid($event, index,group)"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pieces" dataField="packagePieces" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-piecesinput required [formControlName]="name"></ngc-piecesinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.quantity" dataField="packageQuantity" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-numberinput [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7" [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                [formControlName]="name" [decimalDigits]="3" min="0" [width]="80" (ngModelChange)="allQuantityCheck($event, index, group )"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.pi" dataField="packingInstructions" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-display *ngIf="!notocForm.get(['allPack', index,'unids', group, 'piList'])" [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                [formControlName]="name" [width]="70"></ngc-display>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['allPack', index,'unids', group, 'piList'])" required [formControlName]="name" [source]="notocForm.get(['allPack', index,'unids', group, 'piList']).value"
+                                displayMember="code" valueMember="code" [width]="70" [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7"
+                                [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7 ? true : false"
+                                placeHolder="" (ngModelChange)="allQuantityCheckPI($event, index,group)">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.cat" dataField="packingInstructionCategory" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-input *ngIf="!notocForm.get(['allPack', index,'unids', group, 'categoryList'])" [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7"
+                                [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="70" placeHolder=""></ngc-input>
+                              <ngc-dropdownlist *ngIf="notocForm.get(['allPack', index,'unids', group, 'categoryList'])" [source]="notocForm.get(['allPack', index,'unids', group, 'categoryList']).value"
+                                [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7" [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="70" placeHolder="">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.ti" dataField="transportIndex" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-numberinput *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null" [disabled]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value != 7"
+                                [required]="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']).value == 7 ? true : false"
+                                [formControlName]="name" [width]="70"></ngc-numberinput>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.cao" dataField="notificationFlightType" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-dropdownlist [disabled]="this.arraylist.flight.serviceType != 'C' " [source]="caoDropdown" placeHolder="" [formControlName]="name"
+                                [width]="70">
+                              </ngc-dropdownlist>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.tech" dataField="technicalName" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                              <ngc-input *ngIf="notocForm.get(['allPack', index,'unids', group, 'technicalNameFlag']) != null" [disabled]="notocForm.get(['allPack', index,'unids', group, 'technicalNameFlag']).value == 0"
+                                [required]="notocForm.get(['allPack', index,'unids', group, 'technicalNameFlag']).value ==1"
+                                [formControlName]="name" maxlength="40" [width]="150"></ngc-input>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="export.notoc.dgreport.remarks" dataField="packingRemarks" [width]="50" cellsAlign="center">
+                          <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group" *ngIf="notocForm.get(['allPack', index,'unids', group, 'dgClassCode']) != null">
+                              <ngc-input [formControlName]="name" maxlength="40" [width]="150">
+                              </ngc-input>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column>
+                        <!-- -->
+                      </ngc-edittable>
+                      <ngc-container>
+                        <ngc-row>
+                          <ngc-column>
+                            <ngc-label label='export.notoc.dgreport.weight'></ngc-label>
+                            <div>
+                              <ngc-weightdisplay formControlName="totalWeight" upperCase="true"></ngc-weightdisplay>
+                            </div>
+                          </ngc-column>
+                          <ngc-column>
+                            <ngc-label label='export.notoc.dgreport.pieces'></ngc-label>
+                            <div>
+                              <ngc-piecesdisplay formControlName="totalPieces" upperCase="true"></ngc-piecesdisplay>
+                            </div>
+                          </ngc-column>
+                          <ngc-column align="right">
+                            <ngc-button label='export.notoc.button.addunid' (click)="onAddRowDGAllpack($event, index)">
+                            </ngc-button>
+                            <ngc-button label='export.notoc.dgreport.total' (click)="sumAllPack($event, index)">
+                            </ngc-button>
+                          </ngc-column>
+                        </ngc-row>
+                      </ngc-container>
+                    </ngc-accordion-card>
+                  </ngc-accordion>
+                  <!--AllPack  accordion (End)  -->
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+
+          </ngc-tab-card>
+          <!-- This container contains the fields of Other Special Load-->
+          <ngc-tab-card title="export.notoc.title.osl">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="otherSpecialLoadArray" [onDemand]="true" [pageable]="false">
+                    <ngc-data-column text="" dataField="select" [width]="50" cellsAlign="center" [useNotOnDemand]="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox [formControlName]="name" value="select" [width]="30"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.sno" dataField="" cellsAlign="center" [useNotOnDemand]="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display [width]="40" value={{group+1}}></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.dgreport.uldbulk" dataField="uldKey" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <!-- <ngc-input [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                          <ngc-lov [lazy]="true" [formControlName]="name" placeHolder="uld.uld.number" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                            [width]="100" dataField='code' (select)="onULDTrolleyNoSelect($event)" [sourceParameters]="uldSourceParameter">
+                            <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                          </ngc-lov>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.dgreport.weight" dataField="packageWeight" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-numberinput decimalDigits="0" min="0" [formControlName]="name" required></ngc-numberinput>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.dgreport.awb" dataField="awbNumber" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <!--<ngc-input required [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                          <ngc-lov [lazy]="true" [formControlName]="name" required placeHolder="awb.awbnumber" sourceId="AWB_AWBNUMBER" [sourceParameters]="awbSourceParameter"
+                            title="awb.awbnumber" dataField="code" [width]="100" (select)="awbNumberMaxWeightOtherSpecialLoad($event, group)">
+                            <ngc-data-column text="awb.awbnumber" dataField="code" [width]="50"></ngc-data-column>
+                          </ngc-lov>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.osl.shc" dataField="specialHandlingCode" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input [formControlName]="name" maxlength="3" [width]="100" required></ngc-input>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.dgreport.pieces" dataField="packagePieces" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-piecesinput [formControlName]="name" required></ngc-piecesinput>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.dgreport.quantity" dataField="packageQuantity" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-numberinput [formControlName]="name" [decimalDigits]="3" min="0" [width]="80" required>
+                          </ngc-numberinput>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="export.notoc.osl.nature" dataField="natureOfGoodsDescription" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input [formControlName]="name" maxlength="40" [width]="150" required>
+                          </ngc-input>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.dgreport.remarks" dataField="packingRemarks" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input [formControlName]="name" maxlength="40" [width]="120">
+                          </ngc-input>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.notoc.osl.ice" dataField="dryIceQuantity" [width]="50" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-numberinput [formControlName]="name" [width]="70"></ngc-numberinput>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button (click)="onAddRowotherSpecialLoad($event)" value="g.addRow"></ngc-button>
+                        <ngc-button label='g.delete' (click)="onDeleteowOtherSpecialLoad($event)" iconType="delete">
+                        </ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <!-- This container contains Special Instruction-->
+          <ngc-tab-card title="export.notoc.title.si">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label value=""></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.sno"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.remarks"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="specialInstructionArray">
+                      <tr *ngFor="let specialInstruction of notocForm.controls.specialInstructionArray.controls let specialInstructionIndex=index"
+                        [formGroupName]="specialInstructionIndex">
+                        <td>
+                          <ngc-checkbox formControlName="select" value="select" [width]="20"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-display value={{specialInstructionIndex+1}}></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="specialRemarks" maxlength="248" [width]="500"></ngc-input>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button (click)="onAddRowspecialInstruction($event)" value="g.addRow"></ngc-button>
+                        <ngc-button label='g.delete' (click)="onDeleteSpecialInstruction($event)" iconType="delete">
+                        </ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <!--free text entry-->
+          <ngc-tab-card title="export.notoc.free.text.entry">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label value=""></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.sno"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.uldbulk"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.weight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.awb"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.unid"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="PSN"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.tech"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="CLS"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="SHC"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="ERG"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="SBR1"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="IMP1"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="SBR2"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="IMP2"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.pg"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.PI.DES"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="PCS"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="QTY"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="export.notoc.dgreport.PI.max"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="Unit"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="PI"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="CAT"></ngc-label>
+                        </th>
+
+                        <th>
+                          <ngc-label value="TI"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="CAO"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="Remarks"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="freeText">
+                      <tr *ngFor="let item of notocForm.controls.freeText.controls let index=index" [formGroupName]="index">
+                        <td>
+                          <ngc-checkbox formControlName="select" value="select" [width]="30"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-display [width]="40" value={{index+1}}></ngc-display>
+                        </td>
+                        <td>
+                          <!-- <ngc-input [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                          <ngc-lov [lazy]="true" formControlName="uldNumber" placeHolder="uld.uld.number" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                            [width]="100" dataField='code' (select)="onULDTrolleyNoSelect($event)" [sourceParameters]="uldSourceParameter">
+                            <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                          </ngc-lov>
+                        </td>
+                        <td>
+                          <ngc-numberinput decimalDigits="0" min="0" required formControlName="packageWeight"></ngc-numberinput>
+                        </td>
+                        <td>
+                          <!-- <ngc-input required [formControlName]="name" [width]="100" placeHolder=""></ngc-input>-->
+                          <ngc-lov [lazy]="true" formControlName="awbNumber" required placeHolder="awb.awbnumber" sourceId="AWB_AWBNUMBER" [sourceParameters]="awbSourceParameter"
+                            title="awb.awbnumber" dataField="code" [width]="100">
+                            <ngc-data-column text="awb.awbnumber" dataField="code" [width]="50"></ngc-data-column>
+                          </ngc-lov>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="unidNumber" maxlength="4" [width]="70" placeHolder="">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="properShippingName" maxlength="120" [width]="150" placeHolder=""></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="technicalName" [width]="100" maxlength="120" placeHolder="">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="dgClassCode" [width]="50" maxlength="4" placeHolder="">
+                          </ngc-input>
+                        </td>
+
+                        <td>
+                          <ngc-input required formControlName="impCode" [width]="70" maxlength="3" placeHolder="">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="emergencyRespondGroup" maxlength="4" [width]="50" placeHolder=""></ngc-input>
+                        </td>
+
+                        <td>
+                          <ngc-input formControlName="dgSubRiskCode1" [width]="50" maxlength="4" placeHolder="">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="dgSubRiskIMPCode1" [width]="50" maxlength="3" placeHolder="">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="dgSubRiskCode2" [width]="50" maxlength="4" placeHolder="">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="dgSubRiskIMPCode2" maxlength="3" [width]="50" placeHolder="">
+                          </ngc-input>
+                        </td>
+
+                        <td>
+                          <ngc-input required formControlName="packingGroupCode" maxlength="4" [width]="50" placeHolder=""></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="packingInstructionDescription" maxlength="3" [width]="70" placeHolder=""></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-piecesinput required formControlName="packagePieces"></ngc-piecesinput>
+                        </td>
+
+                        <td>
+                          <ngc-numberinput required formControlName="packageQuantity" min="0" [width]="50" placeHolder="">
+                          </ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-numberinput required formControlName="packageMaximumQty" [width]="50" placeHolder="">
+                          </ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist required formControlName="notificationWeightUnitCode" [width]="80" sourceId="EXP_DGD$DGD_UNIT"></ngc-dropdownlist>
+                        </td>
+
+                        <td>
+                          <ngc-input required formControlName="packingInstructions" maxlength="4" [width]="50" placeHolder=""></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="packingInstructionCategory" maxlength="3" [width]="50" placeHolder=""></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-numberinput formControlName="transportIndex" [width]="50" placeHolder="">
+                          </ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist [source]="caoDropdown" placeHolder="" formControlName="notificationFlightType" [width]="40"></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="packingRemarks" maxlength="40" [width]="150">
+                          </ngc-input>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button (click)="onAddRowFreeText($event)" value="g.addRow"></ngc-button>
+                        <ngc-button label='g.delete' (click)="onDeleteFreeText($event)" iconType="delete"></ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportGeneralNOTOC title="g.report"  reportId='generalNOTOC'  [reportParameters]='reportParameters'>
+    </ngc-report>
+    <ngc-report #reportBritishAirways title="g.report"  reportId='BritishAirways'  [reportParameters]='reportParameters'>
+      </ngc-report>
+      <ngc-report #reportTransmileAirways title="g.report"  reportId='TransmileAIR'  [reportParameters]='reportParameters'>
+        </ngc-report>
+        <ngc-report #reportTNTAirways title="g.report"  reportId='TNT'  [reportParameters]='reportParameters'></ngc-report>
+          <ngc-report #reportValueAirways title="g.report"  reportId='valuAirwithoffpt'  [reportParameters]='reportParameters'>
+            </ngc-report>
+            <ngc-report #reportCargoLuxAirways title="g.report"  reportId='CARGOLUX'  [reportParameters]='reportParameters'>
+              </ngc-report>
+              <ngc-report #reportNIUGINI title="g.report"  reportId='Air_Niugini'  [reportParameters]='reportParameters'></ngc-report>
+                <ngc-report #reportANA title="g.report"  reportId='ANA'  [reportParameters]='reportParameters'></ngc-report>
+                  <ngc-report #reportCardigAirways title="g.report"  reportId='CARDIGAIR'  [reportParameters]='reportParameters'>
+                    </ngc-report>
+                    <ngc-report #reportCEBUPacific title="g.report"  reportId='CEBU_PACIFIC'  [reportParameters]='reportParameters'>
+                      </ngc-report>
+                      <ngc-report #reportEVAAirways title="g.report"  reportId='EvaAir_report'  [reportParameters]='reportParameters'>
+                        </ngc-report>
+                        <ngc-report #reportTigerAirways title="g.report"  reportId='tigerAirways'  [reportParameters]='reportParameters'>
+                          </ngc-report>
+                          <ngc-report #reportTurkishAirways title="g.report"  reportId='TurkishAirlines'  [reportParameters]='reportParameters'>
+                            </ngc-report>
+                            <ngc-report #reportJetStar3Kwithoffpt title="g.report"  reportId='jetStar(3K)withoffpt'  [reportParameters]='reportParameters'></ngc-report>
+                              <ngc-report #reportJetStarJQwithoffpt title="g.report"  reportId='jetStar(JQ)withoffpt'  [reportParameters]='reportParameters'></ngc-report>
+                                <ngc-report #reportLionAir title="g.report"  reportId='LionAir'  [reportParameters]='reportParameters'></ngc-report>
+                                  <ngc-report #reportKoreanAirwithOffPt title="g.report"  reportId='koreanAirwithOffPt'  [reportParameters]='reportParameters'></ngc-report>
+                                    <ngc-report #reportGeneral title="g.report"  reportId='general'  [reportParameters]='reportParameters'></ngc-report>
+                                      <ngc-report #reportChinaCargo title="g.report"  reportId='chinaCargoAirlines'  [reportParameters]='reportParameters'>
+                                        </ngc-report>
+</form>

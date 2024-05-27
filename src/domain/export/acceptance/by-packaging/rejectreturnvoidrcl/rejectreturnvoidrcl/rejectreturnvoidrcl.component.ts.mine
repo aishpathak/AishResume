@@ -1,0 +1,261 @@
+import { Component, OnInit } from '@angular/core';
+import { ComponentFactoryResolver, ElementRef, NgZone, ViewChild, ViewContainerRef } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { NgcApplication, NgcButtonComponent, PageConfiguration, NgcFormArray, NgcFormControl, NgcFormGroup, NgcReportComponent, NgcPage } from 'ngc-framework';
+import { ReplaceDummyAWBModel } from '../../../../export.sharedmodel';
+import { RclserviceService } from '../../rclservice.service';
+
+
+@Component({
+  selector: 'app-rejectreturnvoidrcl',
+  templateUrl: './rejectreturnvoidrcl.component.html',
+  styleUrls: ['./rejectreturnvoidrcl.component.scss']
+})
+export class RejectreturnvoidrclComponent extends NgcPage implements OnInit {
+  selectionRowIndex: any;
+  showStorageDetails: boolean = false;
+  hideULD: boolean = false;
+  hideAWB: boolean = false;
+  searchResult: boolean = false;
+  constructor(appZone: NgZone, appElement: ElementRef, appContainerElement: ViewContainerRef, private router: Router, private activatedRoute: ActivatedRoute,
+    appComponentResolver: ComponentFactoryResolver, private rclService: RclserviceService) {
+    super(appZone, appElement, appContainerElement);
+  }
+  showTable: boolean = false;
+  createfunction: boolean = false;
+  searchButton: boolean = false;
+
+  RclReturnTypes: any;
+  navigateData: any;
+  private RejectReturnVoidForm: NgcFormGroup = new NgcFormGroup({
+
+    mrclnumber: new NgcFormControl(),
+    Sno: new NgcFormControl(),
+    natureOfGoodsDescription: new NgcFormControl(),
+    weight: new NgcFormControl(),
+    RclList: new NgcFormControl(),
+    pieces: new NgcFormControl(),
+    uldWeight: new NgcFormControl(),
+    uldPieces: new NgcFormControl(),
+    returnPieces: new NgcFormControl(),
+    returnWeight: new NgcFormControl(),
+    locationWeight: new NgcFormControl(),
+    locationPieces: new NgcFormControl(),
+    originDestination: new NgcFormControl(),
+    specialHandlingCode: new NgcFormControl(),
+    location: new NgcFormControl(),
+    mRCLDate: new NgcFormControl(),
+    packagingType: new NgcFormControl(),
+    shipmentNumber: new NgcFormControl(),
+    shipmentInventory_Id: new NgcFormControl(),
+    nonIATAAwb: new NgcFormControl(),
+    uldNumber: new NgcFormControl(),
+    shipmentLocation: new NgcFormControl(),
+    wareHouseLocation: new NgcFormControl(),
+    wareHouseDestination: new NgcFormControl(),
+    reason: new NgcFormControl(),
+    status: new NgcFormControl(),
+    rclNumber: new NgcFormControl(),
+    select: new NgcFormControl(),
+    // actionType: new NgcFormControl(),
+    reqretreasonrejectwaivechg: new NgcFormControl(),
+    truckno: new NgcFormControl(),
+    actionType: new NgcFormControl(),
+    type: new NgcFormControl(),
+    detail: new NgcFormControl(),
+    code: new NgcFormControl(),
+    name: new NgcFormControl(),
+    accountNumber: new NgcFormControl(),
+    address: new NgcFormControl(),
+    place: new NgcFormControl(),
+    postalCode: new NgcFormControl(),
+    stateCode: new NgcFormControl(),
+    countryCode: new NgcFormControl(),
+    appointedAgentCode: new NgcFormControl(),
+    email: new NgcFormControl(),
+    hkid: new NgcFormControl(),
+    serialNo: new NgcFormControl(),
+
+    contactInformation: new NgcFormArray([]),
+    contactInformationSecond: new NgcFormArray([]),
+    contactInformationThird: new NgcFormArray([]),
+    RejectReturnVoidFormSearchData: new NgcFormArray([]),
+    RejectStorageDetailData: new NgcFormArray([]),
+    rclInformationList: new NgcFormArray([]),
+    storageDetailsList: new NgcFormArray([])
+  });
+
+  changeRclReturnTypes() {
+    // this.RclReturnTypes = this.RejectReturnVoidForm.get('actionType').value;
+    // if (this.RclReturnTypes != null) {
+    //   // this.maintainrclForm.get('acceptanceType').setValue(null);
+    //   // this.showErrorMessage('Please First Clear the Page then choose the acceptanceType'); return;
+    //   //this.maintainrclForm.reset();
+    //   this.createfunction = true;
+    //   this.showErrorMessage('exp.clear.and.update.RclReturnType'); return;
+    // }
+    this.RclReturnTypes = this.RejectReturnVoidForm.get('actionType').value;
+    this.RejectReturnVoidForm.get('shipmentNumber').setValue(null);
+    this.RejectReturnVoidForm.get('uldNumber').setValue(null);
+    this.hideULD = false;
+    this.hideAWB = false;
+
+    if (this.RejectReturnVoidForm.get('this.RclReturnTypes').value != 'Reject' && this.RejectReturnVoidForm.get('this.RclReturnTypes').value != 'Return' && this.RejectReturnVoidForm.get('this.RclReturnTypes').value != 'Void') {
+      this.searchButton = true;
+    }
+    else {
+      this.searchButton = false;
+    }
+  }
+
+  onCancel() {
+    this.navigateBack(this.navigateData);
+  }
+
+  ngOnInit() {
+  }
+
+  clear(event): void {
+    this.RejectReturnVoidForm.reset();
+    this.hideULD = false;
+    this.hideAWB = false;
+    this.resetFormMessages();
+  }
+
+
+  private RejRetVoidData = ["Reject", "Return", "Void"];
+
+  search() {
+    if (this.RejectReturnVoidForm.get('actionType').value == 'Void') {
+      const searchRequest = { rclNumber: this.RejectReturnVoidForm.get('rclNumber').value };
+      this.showTable = true;
+      this.rclService.voidSearch(searchRequest).subscribe(resp => {
+
+        if (resp.data.rclInformationList || resp.data.storageDetailsList) {
+          this.searchResult = true;
+          this.RejectReturnVoidForm.get('rclInformationList').patchValue(resp.data.rclInformationList);
+          this.RejectReturnVoidForm.get('storageDetailsList').patchValue(resp.data.storageDetailsList);
+
+        }
+        else {
+          this.showErrorMessage("export.report.noshipmentfound");
+        }
+      });
+    }
+    else if (this.RejectReturnVoidForm.get('actionType').value == 'Reject') {
+      if (this.RejectReturnVoidForm.get('shipmentNumber').value && this.RejectReturnVoidForm.get('shipmentNumber').value != '') {
+        const searchRequest = { shipmentNumber: this.RejectReturnVoidForm.get('shipmentNumber').value };
+        this.showTable = true;
+        // this.rclService.rejectSearchByAWB(searchRequest).subscribe(resp => {
+        //   if (!resp.data == null) {
+        //     if (resp.data.rclInformationList || resp.data.storageDetailsList) {
+        //       // this.RejectReturnVoidForm.get('rclInformationList').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('RejectStorageDetailData').patchValue(resp.data.storageDetailsList);
+        //       this.searchResult = true;
+        //     }
+        //   }
+        //   else {
+        //     this.showErrorMessage("export.report.noshipmentfound");
+        //   }
+        // });
+      }
+      else if (this.RejectReturnVoidForm.get('uldNumber').value && this.RejectReturnVoidForm.get('uldNumber').value != '') {
+        const searchRequest = { uldNumber: this.RejectReturnVoidForm.get('uldNumber').value };
+        this.showTable = true;
+        // this.rclService.rejectSearchByULD(searchRequest).subscribe(resp => {
+        //   if (!resp.data == null) {
+        //     if (resp.data.rclInformationList || resp.data.storageDetailsList) {
+        //       this.searchResult = true;
+        //       this.RejectReturnVoidForm.get('rclInformationList').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('storageDetailsList').patchValue(resp.data.storageDetailsList);
+        //     }
+        //   }
+        //   else if (resp.data == null) {
+        //     this.showErrorMessage("export.report.noshipmentfound");
+        //   }
+        // });
+      }
+    }
+    else if (this.RejectReturnVoidForm.get('actionType').value == 'Return') {
+      if (this.RejectReturnVoidForm.get('shipmentNumber').value && this.RejectReturnVoidForm.get('shipmentNumber').value != '') {
+        const searchRequest = { shipmentNumber: this.RejectReturnVoidForm.get('shipmentNumber').value };
+        this.showTable = true;
+        // this.rclService.returnSearchByAWB(searchRequest).subscribe(resp => {
+        //   if (!resp.data == null) {
+        //     if (resp.data.rclInformationList || resp.data.storageDetailsList) {
+        //       this.searchResult = true;
+        //       this.RejectReturnVoidForm.get('contactInformation').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('contactInformationSecond').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('contactInformationThird').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('storageDetailsList').patchValue(resp.data.storageDetailsList);
+        //     }
+        //   }
+        //   else {
+        //     this.showErrorMessage("export.report.noshipmentfound");
+        //   }
+        // });
+      }
+      else if (this.RejectReturnVoidForm.get('uldNumber').value && this.RejectReturnVoidForm.get('uldNumber').value != '') {
+        const searchRequest = { uldNumber: this.RejectReturnVoidForm.get('uldNumber').value };
+        this.showTable = true;
+        // this.rclService.returnSearchByULD(searchRequest).subscribe(resp => {
+        //   if (!resp.data == null) {
+        //     if (resp.data.rclInformationList || resp.data.storageDetailsList) {
+        //       this.searchResult = true;
+        //       this.RejectReturnVoidForm.get('contactInformation').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('contactInformationSecond').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('contactInformationThird').patchValue(resp.data.rclInformationList);
+        //       this.RejectReturnVoidForm.get('storageDetailsList').patchValue(resp.data.storageDetailsList);
+        //     }
+        //   }
+        //   else {
+        //     this.showErrorMessage("export.report.noshipmentfound");
+        //   }
+        // });
+      }
+    }
+  }
+
+  onSelectAWB(event) {
+    this.hideULD = true;
+  }
+  onSelectULD(event) {
+    this.hideAWB = true;
+  }
+  onFocusOut(event) {
+    this.hideULD = false;
+    this.hideAWB = false;
+  }
+  onContactDelete(event, index) {
+    this.selectionRowIndex = index;
+    this.showStorageDetails = true;
+
+  }
+  //voidRclAndRemoveInventories
+  onSave() {
+    this.resetFormMessages();
+    if (this.RejectReturnVoidForm.get('actionType').value == 'Reject') {
+      const saveRequest = { shipmentNumber: this.RejectReturnVoidForm.get('shipmentNumber').value };
+      this.rclService.rejectSave(saveRequest).subscribe(resp => {
+        if (resp.data) {
+          this.showSuccessStatus('Status got updated as Rejected');
+        }
+      });
+    }
+    else if (this.RejectReturnVoidForm.get('actionType').value == 'Void') {
+      //  const searchRequest = { rclNumber: this.RejectReturnVoidForm.get('rclnumber').value };
+      let obj = (this.RejectReturnVoidForm.get(['storageDetailsList']) as NgcFormArray).getRawValue().filter(obj => obj.select === true);
+      const saveobj = this.RejectReturnVoidForm.getRawValue();
+      saveobj.storageDetailsList = obj;
+      console.log("shipmentInventoryID", saveobj.RejectStorageDetailData.shipmentInventory_Id);
+      this.rclService.voidRclAndRemoveInventories(saveobj).subscribe(resp => {
+        if (resp.data) {
+          this.showSuccessStatus("RCL void got success");
+
+        }
+        console.log(resp.data);
+      });
+    }
+
+  }
+}

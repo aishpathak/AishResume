@@ -1,0 +1,522 @@
+<ngc-titlebar title='bil.chargeModel' (save)="onSave($event)" (cancel)='onCancel($event)' 
+  [disableSave]="isExpired || hasReadPermission">
+</ngc-titlebar>
+<form [formGroup]='chargeModelForm'>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label value='bil.chargeCode'></ngc-label>
+        <div>
+          <ngc-display [value]='chargeFactorData.chargeCodeName'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='bil.chargeCodeDescription'></ngc-label>
+        <div>
+          <ngc-display [value]='chargeFactorData.chargeCodeDescription'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column='6' [grid48]="true">
+        <ngc-label [value]='chargeFactorData.chargeFactorName1' [i18n]="true"></ngc-label>
+        <div>
+          <ngc-display [sourceId]="chargeFactorData.sourceId1" sourceCategory="lov"
+            [value]='chargeFactorData.chargeParameters[0].chargeFactorValue1'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='6' [grid48]="true">
+        <ngc-label [value]='chargeFactorData.chargeFactorName2'></ngc-label>
+        <div>
+          <ngc-display [sourceId]="chargeFactorData.sourceId2" sourceCategory="lov"
+            [value]='chargeFactorData.chargeParameters[0].chargeFactorValue2'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='6' [grid48]="true">
+        <ngc-label [value]='chargeFactorData.chargeFactorName3'></ngc-label>
+        <div>
+          <ngc-display [sourceId]="chargeFactorData.sourceId3" sourceCategory="lov"
+            [value]='chargeFactorData.chargeParameters[0].chargeFactorValue3'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='6' [grid48]="true">
+        <ngc-label [value]='chargeFactorData.chargeFactorName4'></ngc-label>
+        <div>
+          <ngc-display [sourceId]="chargeFactorData.sourceId4" sourceCategory="lov"
+            [value]='chargeFactorData.chargeParameters[0].chargeFactorValue4'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column='7'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]='300'>
+                <ngc-label value='bil.chargeModel'></ngc-label>
+              </th>
+              <th [width]='300'>
+                <ngc-label value='g.startDate'></ngc-label>
+              </th>
+              <th [width]='300'>
+                <ngc-label value='g.endDate'></ngc-label>
+              </th>
+              <th [width]='300'>
+                <ngc-label value='g.status'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label value='g.edit'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+          </thead>
+          <tbody formArrayName='chargeModelInfo' align='center'>
+            <tr *ngFor="let item of chargeModelForm.controls.chargeModelInfo.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName='serial'></ngc-display>
+              </td>
+              <td>
+                <ngc-display [onlyDate]="true" formControlName='startDate'></ngc-display>
+              </td>
+              <td>
+                <ngc-display [onlyDate]="true" formControlName='endDate'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='status'></ngc-display>
+              </td>
+              <td>
+                <ngc-link iconType="edit" (linkClick)="onEditLinkClick(item, index)"></ngc-link>
+              </td>
+              <td>
+                <ngc-link iconType="delete" (linkClick)="onDeleteLink($event, index)" [disabled]="item.get('status').value === 'EXPIRED'"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+      <ngc-column align='right'>
+        <ngc-button value='g.addNew' (click)="onAdd($event)" [disabled]="isExpired || hasReadPermission"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align='right'>
+        <ngc-button value='bil.chargeModel.copyModel' (click)="onCopyModel($event)" [disabled]="isExpired || hasReadPermission">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="add" formGroupName="charges" type='section'>
+    <ngc-row>
+      <!-- // EFFECTIVE  -->
+      <ngc-column column='2'>
+        <ngc-container title="g.effective.date" *ngIf="add">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='g.from'></ngc-label>
+              <div>
+                <ngc-datetimeinput required [width]="160" formControlName='effectiveDate'></ngc-datetimeinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value=' '></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='g.to'></ngc-label>
+              <div>
+                <ngc-datetimeinput [width]="160" formControlName='endDate'></ngc-datetimeinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value=' '></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='bil.chargeModel.effectiveDateParameter'></ngc-label>
+              <div>
+                <ngc-display sourceId="Billing$ChargeCode.QuantityDateParam" sourceCategory="dropdown"
+                  formControlName='effectiveDateParameter'></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <!-- BLOCK 2 -->
+      <ngc-column column="10">
+        <ngc-container title="bil.chargeModel.quantityModifiers" type='square'>
+          <!-- DURATION BLOCK -->
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='g.duration'></ngc-label>
+              <div>
+                <ngc-lov [width]='100' sourceId="DURATION_MODIFIER" formControlName='duration' dataField='code'>
+                  <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+              </div>
+              <div>
+                (
+                <ngc-display emphasis='sm' [value]='this.response.charges[0].durationFromAttribute1'
+                  sourceId='Billing$ChargeCode.QuantityDateParam' sourceCategory="dropdown"></ngc-display> -
+                <ngc-display emphasis='sm' [value]='this.response.charges[0].durationFromAttribute2'
+                  sourceId='Billing$ChargeCode.QuantityDateParam' sourceCategory="dropdown"></ngc-display>)
+              </div>
+            </ngc-column>
+
+            <ngc-column>
+              <ngc-label value='g.quantity'></ngc-label>
+              (
+              <ngc-display emphasis='sm' [value]='this.response.charges[0].quantityModifier1'
+                sourceId='Billing$ChargeCode.QuantityParameters' sourceCategory="dropdown"></ngc-display>)
+              <div>
+                <ngc-dropdownlist [width]='160' sourceId="Billing$ChargeModel.QuantityModifier"
+                  formControlName='quantityAttribute1'></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label value='g.quantity'></ngc-label>
+              (
+              <ngc-display emphasis='sm' [value]='this.response.charges[0].quantityModifier2'
+                sourceId='Billing$ChargeCode.QuantityParameters' sourceCategory="dropdown"></ngc-display>)
+              <div>
+                <ngc-dropdownlist [width]='160' sourceId="Billing$ChargeModel.QuantityModifier"
+                  formControlName='quantityAttribute2'></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <ngc-container title="bill.title.holiday.exempt" type='square'>
+          <ngc-row>
+            <ngc-column column='2'>
+              <ngc-label value='bil.chargeModel.exempt'></ngc-label>
+              <div>
+                <ngc-numberinput [width]='50' decimalDigits="0" digits="5" max="99999" groupSize="0"
+                  formControlName="exempt">
+                </ngc-numberinput>
+              </div>
+            </ngc-column>
+            <ngc-column column='2'>
+              <ngc-label value='bil.chargeModel.bufferHours'></ngc-label>
+              <div>
+                <ngc-numberinput [width]='50' decimalDigits="0" digits="5" max="99999" groupSize="0"
+                  formControlName="bufferHours"></ngc-numberinput>
+              </div>
+            </ngc-column>
+            <ngc-column column='2'>
+              <ngc-label value='bill.chargeModel.ignore.exempt.beyond'></ngc-label>
+              <div>
+                <ngc-numberinput [width]='50' decimalDigits="0" digits="5" max="99999" groupSize="0"
+                  formControlName="ignoreExemptionBeyond"></ngc-numberinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value=' '></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <div>
+                <ngc-label label="billing.holiday.exempt.modifier"></ngc-label>
+              </div>
+              <ngc-dropdownlist formControlName='holidayExemptModifier' [width]='150'
+                sourceId='Billing$ChargeModel.ExemptModifier'>
+              </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column>
+              <ngc-checkbox formControlName="exemptWeekendHoliday1"></ngc-checkbox>
+              <ngc-label label="billing.weekend.holiday"></ngc-label>({{primaryWeekendDay}})
+            </ngc-column>
+            <ngc-column>
+              <ngc-checkbox formControlName="exemptWeekendHoliday2"></ngc-checkbox>
+              <ngc-label label="billing.weekend.holiday.two"></ngc-label>({{secondaryWeekendDay}})
+            </ngc-column>
+            <ngc-column>
+              <ngc-checkbox formControlName="exemptBankHoliday"></ngc-checkbox>
+              <ngc-label label="billing.bank.holiday"></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-checkbox formControlName="exemptPublicHoliday"></ngc-checkbox>
+              <ngc-label label="billing.public.holiday"></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-checkbox formControlName="exemptSpecialHoliday"></ngc-checkbox>
+              <ngc-label label="billing.special.holiday"></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-numberinput [width]='50' decimalDigits="0" digits="5" max="99999" groupSize="0"
+                formControlName="exemptInCaseOfHoliday"></ngc-numberinput>
+              <ngc-label value='billing.exempt.after.holiday'></ngc-label>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="add" formGroupName="charges" type="tab">
+    <ngc-row>
+      <ngc-label value='bil.chargeModel.rateModel'></ngc-label>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label value='bil.chargeModel.rateModelType'></ngc-label>
+        <div>
+          <ngc-dropdownlist required formControlName='rateType' sourceId="Billing$ChargeModel.RateModelType">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='bil.chargeModel.rangeDeterminant'></ngc-label>
+        <div>
+          <ngc-dropdownlist required formControlName='rateDeterminant' sourceId='BILLING_CHARGE_APPLICANT'
+            sourceType='query' [sourceParameters]='drop'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='bil.chargeModel.chargeApplicant'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName='chargeApplicant1' sourceId="BILLING_CHARGE_APPLICANT" sourceType="query"
+            [sourceParameters]='drop'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='bil.chargeModel.chargeApplicant2'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName='chargeApplicant2' sourceId="BILLING_CHARGE_APPLICANT" sourceType="query"
+            [sourceParameters]='drop'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='bil.chargeModel.chargeApplicant3'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName='chargeApplicant3' sourceId="BILLING_CHARGE_APPLICANT" sourceType="query"
+            [sourceParameters]='drop'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label *ngIf="this.chargeModelForm.get(['charges','rateType']).value == 'SBT'"
+          value='bil.chargeModel.chargeFormula.sbt'>
+        </ngc-label>
+        <ngc-label *ngIf="this.chargeModelForm.get(['charges','rateType']).value != 'SBT'"
+          value='bil.chargeModel.chargeFormula'>
+        </ngc-label>
+        <div>
+          <ngc-button value='g.add' (click)="addRateModel($event)" [disabled]="isExpired || hasReadPermission"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="add" formGroupName="charges" type="tab">
+    <ngc-row>
+      <ngc-column column='12'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th colspan="2" class='text-center'>
+                <ngc-label value='bil.chargeModel.range'></ngc-label>
+              </th>
+              <th rowspan="2" class='text-center'>
+                <ngc-label value='bil.chargeModel.fixCharge'></ngc-label>
+              </th>
+              <th colspan="2" class='text-center'>
+                <ngc-label value='bil.chargeModel.rateCharge'></ngc-label>
+              </th>
+              <th colspan="2" class='text-center'>
+                <ngc-label value='bil.chargeModel.tierMaxMin'></ngc-label>
+              </th>
+              <th colspan="2" class='text-center'>
+                <ngc-label value='billing.block.min.max'></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <ngc-label value='g.start'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.end'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.chargeModel.stepValue'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.chargeModel.rate'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.chargeModel.minValue'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.chargeModel.maxValue'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.chargeModel.minValue'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.chargeModel.maxValue'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody align='center' formArrayName='chargeRates'>
+            <tr *ngFor="let item of chargeModelForm.controls.charges.controls.chargeRates.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-numberinput decimalDigits="2" [width]='175' formControlName="start"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-numberinput decimalDigits="2" [width]='175' formControlName="end"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-currencyinput decimalDigits="2" formControlName="fixCharge"></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-numberinput [width]='175' decimalDigits="0" formControlName="stepValue"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-currencyinput currencyDecimalDigits='3' formControlName="rate" [width]='200'></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-currencyinput formControlName="minValue"></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-currencyinput formControlName="maxValue"></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-currencyinput formControlName="thresholdMin"></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-currencyinput formControlName="thresholdMax"></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-link iconType="delete" (linkClick)="onDeleteLinkClick($event, index)"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="add" formGroupName="charges" type="tab">
+    <ngc-row>
+      <ngc-column column='4'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]='350'>
+                <ngc-label value='bil.chargeModel.threshold'></ngc-label>
+              </th>
+              <th [width]='200'>
+                <ngc-label></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-label value='bil.chargeModel.minAmt'></ngc-label>
+              </td>
+              <td>
+                <ngc-currencyinput formControlName="minAmount"></ngc-currencyinput>
+              </td>
+            </tr>
+            <tr>
+              <td>
+                <ngc-label value='bil.chargeModel.maxAmt'></ngc-label>
+              </td>
+              <td>
+                <ngc-currencyinput formControlName="maxAmount"></ngc-currencyinput>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+      <ngc-column column='1'></ngc-column>
+      <ngc-column>
+        <ngc-label value='billing.round.upto.least.count'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]='160' sourceId="Billing$ChargeModel.RoundAmount"
+            formControlName='chargeAmountLeastCount'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #copyModelWindow [width]="900" [height]="350" title="bil.chargeModel" [showCloseButton]="true">
+    <ngc-container type="tab" formGroupName="charges">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label [value]='chargeFactorData.chargeFactorName1'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label [value]='chargeFactorData.chargeFactorName2'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label [value]='chargeFactorData.chargeFactorName3'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label [value]='chargeFactorData.chargeFactorName4'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='g.startDate'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='g.endDate'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value=''></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align='center'>
+              <tr *ngFor="let item of copyModel; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-display [width]='200' [sourceId]="chargeFactorData.sourceId1" sourceCategory="lov"
+                    [value]="item.chargeFactor1Value"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]='200' [sourceId]="chargeFactorData.sourceId2" sourceCategory="lov"
+                    [value]="item.chargeFactor2Value"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]='200' [sourceId]="chargeFactorData.sourceId3" sourceCategory="lov"
+                    [value]="item.chargeFactor3Value"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]='200' [sourceId]="chargeFactorData.sourceId4" sourceCategory="lov"
+                    [value]="item.chargeFactor4Value"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [onlyDate]='true' [width]='80' [value]="item.effectiveDate"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [onlyDate]='true' [width]='80' [value]="item.endDate"></ngc-display>
+                </td>
+                <td>
+                  <ngc-link [width]='200' value="Copy" (linkClick)="onLinkClick($event, index)"></ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

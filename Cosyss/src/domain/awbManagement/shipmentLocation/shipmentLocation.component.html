@@ -1,0 +1,1001 @@
+<ngc-titlebar title="awb.shipment.location" (save)="onSave($event, index)" (cancel)="onCancel($event)"
+  (clear)="onClear($event)" [disableSave]="saveFlag==false" *ngIf=!showAsPopup>
+</ngc-titlebar>
+
+<ngc-error *ngIf=showAsPopup></ngc-error>
+<ngc-row *ngIf=showAsPopup>
+  <ngc-column align="right">
+    <ngc-button label="savehold" (click)="onSave($event)"> </ngc-button>
+  </ngc-column>
+  <ngc-column [column]="1">
+    <ngc-label label=""></ngc-label>
+  </ngc-column>
+</ngc-row>
+<form [formGroup]="maintainLocationForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="2.5">
+        <br>
+        <ngc-shipmentinput accessEnableOn="r" shipmentType="{{shipmentType}}" [noDN]="true" [noCBN]="true"
+          formControlName="shipmentNumber" (select)="onShipmentSelect($event)"
+          (ngModelChange)="onTabOutCheckHandledBy()" required> </ngc-shipmentinput>
+      </ngc-column>
+      <ngc-column *ngIf="handledbyHouse" column="2.5">
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <br>
+        <ngc-lov accessEnableOn="r" formControlName='hwbNumber' upperCase='true' [width]="100" sourceId='HWBNUMBER'
+          dataField='code' valueMember='code' [noCache]="true" title="g.hawb.number"
+          [sourceParameters]="hawbSourceParameters" (select)="setAWBNumber($event)" required>
+          <ngc-data-column text='g.hawb.number' [width]='80' dataField='code' required></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <br>
+        <ngc-button accessEnableOn="r" label="shp.search" (click)="onSearch()" [disabled]=showAsPopup></ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="isTableFlg">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="shpHold.origin"></ngc-label>
+        <div>
+          <ngc-display formControlName="origin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="shp.destination"></ngc-label>
+        <div>
+          <ngc-display formControlName="destination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="awb.awb.pieces"></ngc-label>
+        <div>
+          <ngc-display formControlName="pieces"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="awb.awb.weight"></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" entityAttribute="Gen.ChargeableWeight">
+        <ngc-label label="awb.awbChargeableWeight"></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="chargeableWeight">
+          </ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shp.natureofgoods"></ngc-label>
+        <div>
+          <ngc-display formControlName="natureOfGoods"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shpHold.SHC"></ngc-label>
+        <div>
+          <ngc-display formControlName="shcList"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="isTableFlg">
+    <ngc-row *ngIf="handledbyHouse && maintainLocationForm.get('shipmentTypeflag').value == 'IMPORT'"
+      formGroupName="houseInformation">
+      <ngc-column column="1">
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="shpHold.origin"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbOrigin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="shp.destination"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbDestination"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <ngc-label label="customs.hawb.pieces"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbPieces"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="customs.hawb.weight"></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="hwbWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" entityAttribute="Gen.ChargeableWeight">
+        <ngc-label label="awb.hawbChargeableWeight"></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="hwbChgWeight">
+          </ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shp.natureofgoods"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbNatureOfGoods"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shpHold.SHC"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbSHC"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <!--Code Modified For HAWB information-->
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="awb.location"></ngc-label>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width="60">
+                <ngc-label label=""></ngc-label>
+              </th>
+              <th width="140">
+                <ngc-label label="awb.shipment.location"></ngc-label>
+              </th>
+              <th width="140">
+                <ngc-label entityAttribute="Gen.WareHouseDestination"></ngc-label>
+              </th>
+              <th width="140"
+                *ngIf="actualLocationFeatureEnabled && maintainLocationForm.get('shipmentTypeflag').value == 'IMPORT'">
+                <ngc-label label="Gen.ActualLocation"></ngc-label>
+              </th>
+              <th width="80">
+                <ngc-label label="shp.pieces"></ngc-label>
+              </th>
+              <th width="80">
+                <ngc-label label="g.weight"></ngc-label>
+              </th>
+              <th width="80" entityAttribute="Gen.ChargeableWeight">
+                <ngc-label label="g.chargeableWeight"></ngc-label>
+              </th>
+              <th width="150" *ngIf="maintainLocationForm.get('flagForPartSuffixDropdown').value == true"
+                feature="Exp.PartSuffix">
+                <ngc-label label="Suffix"></ngc-label>
+              </th>
+
+              <th width="120" *ngIf="!FrieghtFlag">
+                <ngc-label label="shp.freightin"></ngc-label>
+              </th>
+              <th width="150" *ngIf="!FrieghtFlag">
+                <ngc-label label="shp.feightindate"></ngc-label>
+              </th>
+
+              <th width="120" *ngIf="!FrieghtFlag && maintainLocationForm.get('shipmentTypeflag').value == 'TRANS'">
+                <ngc-label label="flight.outbound.flight"></ngc-label>
+              </th>
+              <th width="150" *ngIf="!FrieghtFlag && maintainLocationForm.get('shipmentTypeflag').value == 'TRANS'">
+                <ngc-label label="flight.outbound.flight.date"></ngc-label>
+              </th>
+              <th width="70">
+                <ngc-label label="shpHold.SHC"></ngc-label>
+              </th>
+              <th width="70">
+                <ngc-label label="g.handlingArea"></ngc-label>
+              </th>
+              <th width="40">
+                <ngc-label label="awb.shipment.on.hold"></ngc-label>
+              </th>
+              <th width="120"
+                *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'EXPORT' || maintainLocationForm.get('shipmentTypeflag').value == 'TRANS'">
+                <ngc-label label="awb.dip.svccon.stats"></ngc-label>
+              </th>
+              <th width="40" entityAttribute="Gen.Packing"
+                *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'IMPORT'">
+                <ngc-label entityAttribute="Gen.Packing"></ngc-label>
+              </th>
+              <th width="40" feature="Imp.Bd.HAWBInfo"
+                *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'IMPORT'">
+                <ngc-label label="Gen.ByPass"></ngc-label>
+              </th>
+              <th width="40" feature="Imp.Bd.HAWBInfo"
+                *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'IMPORT'">
+                <ngc-label label="Gen.AddHouse"></ngc-label>
+              </th>
+              <th width="40">
+                <ngc-label label="g.delete"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody formArrayName='shipmentInventories'
+            *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'IMPORT'">
+            <tr *ngFor="let item of maintainLocationForm.controls.shipmentInventories.controls; let index=index"
+              [formGroupName]="index">
+              <ngc-input [hidden]="true" formControlName="referenceDetails"></ngc-input>
+              <ngc-input formControlName="oldShipmentLocation" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldPiecesInv" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldWeightInv" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldChargeableWeightInv" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldWarehouseLocation" [hidden]="true"></ngc-input>
+              <td align="center">
+                <ngc-checkbox
+                  *ngIf="item.get('hold').value===false && (!item.get('deliveryRequestOrderNo').value && !item.get('deliveryOrderNo').value) &&(!item.get('accessLocation').value)"
+                  formControlName="select"></ngc-checkbox>
+                <b>
+                  <I *ngIf="item.get('flagCRUD').value !=='C' && item.get('deliveryOrderNo').value">
+                    <font size="-2" color="blue">
+                      <ngc-label entityAttribute="Imp.bd.DOCompleted"></ngc-label>
+                    </font>
+                  </I>
+                  <I *ngIf="item.get('flagCRUD').value !=='C' && item.get('deliveryRequestOrderNo').value">
+                    <font size="-2" color="blue">
+                      <ngc-label entityAttribute="Imp.bd.POInitiated"></ngc-label>
+                    </font>
+                  </I>
+                </b>
+              </td>
+              <td [width]='600'>
+                <ngc-movable-storage-location upperCase="true"
+                  [destination]="this.maintainLocationForm.get('destination').value"
+                  [origin]="this.maintainLocationForm.get('origin').value" [flightKey]="item.get('flightKey').value"
+                  [flightDate]="item.get('flightKeyDate').value"
+                  [shipmentNumber]="this.maintainLocationForm.get('shipmentNumber').value" [maxlength]="12"
+                  [minlength]="3" [width]="130"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value)))"
+                  formControlName="shipmentLocation">
+                </ngc-movable-storage-location>
+              </td>
+              <td [width]='300'>
+                <ngc-locations-list entityAttribute="Gen.WareHouseDestination" formControlName="warehouseLocation"
+                  [noTerminal]="terminalRequired" [displayOnlyLocation]="true" [width]="200" [readonly]="(item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value
+                              ? true : false)||(item.get('accessLocation').value)))" [locationTypeList]="['STORAGE']"
+                  (select)="onLocationChange($event , index)">
+                </ngc-locations-list>
+              </td>
+              <td [width]='300' *ngIf="actualLocationFeatureEnabled">
+                <ngc-locations-list formControlName="actualLocation" [displayOnlyLocation]="true" [width]="200"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value
+                ? true : false)||(item.get('accessLocation').value)))" [locationTypeList]="['STORAGE']"
+                  [sectorId]="item.get('sector').value">
+                </ngc-locations-list>
+              </td>
+              <td align="right" [width]='300'>
+                <ngc-piecesinput [width]="70" formControlName="piecesInv" priority="transparent" required
+                  [readonly]="item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value)||(item.get('hold').value==true))"
+                  (ngModelChange)="CalculateRemainingPieces($event,index)"></ngc-piecesinput>
+              </td>
+              <td [width]='300'>
+                <ngc-weightinput formControlName="weightInv" required
+                  [readonly]="item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value)||(item.get('hold').value==true))"
+                  (ngModelChange)="CalculateRemainingWeight()"></ngc-weightinput>
+              </td>
+
+              <td [width]='300' entityAttribute="Gen.ChargeableWeight">
+                <ngc-chargeableweightinput formControlName="chargeableWeightInv" entityAttribute="Gen.ChargeableWeight"
+                  [readonly]="item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value)||(item.get('hold').value==true))"
+                  (ngModelChange)="CalculateRemainingChargeableWeight()">
+                </ngc-chargeableweightinput>
+
+              </td>
+
+              <td [width]='306' *ngIf="maintainLocationForm.get('flagForPartSuffixDropdown').value == true"
+                feature="Exp.PartSuffix">
+                <ngc-dropdownlist width="80" displayMember="code" formControlName="partSuffix"
+                  [readonly]=" item.get('autoloadFlag').value && (item.get('flagCRUD').value!=='C' && (item.get('assignedUldTrolley').value ||(item.get('accessLocation').value))? true : false)"
+                  [source]="partSuffixListDisplay">
+                </ngc-dropdownlist>
+              </td>
+
+              <td [width]='300'>
+                <ngc-flightkeyinput [width]="70" formControlName="flightKey" required
+                  [readonly]="item.get('flagCRUD').value!=='C'"></ngc-flightkeyinput>
+              </td>
+              <td [width]='300'>
+                <ngc-datetimeinput formControlName="flightKeyDate" [onlyDate]="true" required
+                  [readonly]="item.get('flagCRUD').value!=='C'"></ngc-datetimeinput>
+              </td>
+
+              <td [width]='500' *ngIf="!hawbInfoFeatureEnabled">
+                <ngc-shcinput
+                  [readonly]="item.get('flagCRUD').value!=='C' && (item.get('hold').value === true || (item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value ? true:false))"
+                  formArrayName="shcListInv" dataField="shcInv" (modelChange)="onShcChanges($event,index)"
+                  [width]="250"></ngc-shcinput>
+                <ngc-display formControlName="shcDummy"></ngc-display>
+              </td>
+              <td [width]='500' *ngIf="hawbInfoFeatureEnabled">
+                <ngc-shcinput [readonly]="hawbInfoFeatureEnabled" formArrayName="shcListInv" dataField="shcInv"
+                  [width]="250">
+                </ngc-shcinput>
+                <ngc-display formControlName="shcDummy"></ngc-display>
+              </td>
+              <td [width]='300'>
+                <ngc-dropdownlist [readonly]="item.get('flagCRUD').value!=='C'" formControlName="handlingArea"
+                  [width]="80" [dropDownWidth]="80" sourceId="WAREHOUSE_TERMINAL" sourceType="query" required>
+                </ngc-dropdownlist>
+              </td>
+              <td align="center" [ngSwitch]="item.get('hold').value" [width]='300'>
+                <i class="fa fa-lock fa-2x" style="color:red" *ngSwitchCase="true"></i>
+                <ngc-display formControlName="holdRemarks"></ngc-display>
+                <ngc-piecesinput type="text" *ngSwitchDefault [width]="70" formControlName="unableToLocate"
+                  [disabled]="((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value ? true:false))">
+                </ngc-piecesinput>
+              </td>
+              <td [width]='300' entityAttribute="Gen.Packing">
+                <ngc-dropdownlist
+                  [readonly]="item.get('flagCRUD').value!=='C' && ((item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value)||(item.get('hold').value==true))"
+                  formControlName="packing" [width]="80" [dropDownWidth]="80" sourceId="Packing$PackingValues">
+                </ngc-dropdownlist>
+              </td>
+              <td align="center" feature="Imp.Bd.HAWBInfo">
+                <ngc-checkbox
+                  *ngIf="item.get('hold').value===false && (!item.get('deliveryRequestOrderNo').value && !item.get('deliveryOrderNo').value) &&(!item.get('accessLocation').value)"
+                  formControlName="byPass"></ngc-checkbox>
+              </td>
+              <td align="center" feature="Imp.Bd.HAWBInfo">
+                <ngc-link
+                  [readonly]="item.get('flagCRUD').value!=='C' && (item.get('hold').value === true || (item.get('deliveryRequestOrderNo').value ? true : false) || (item.get('deliveryOrderNo').value ? true : false)||(item.get('accessLocation').value ? true:false))"
+                  (linkClick)="createMaintainHouseForInventory(item, index)" type="link" iconType="edit"></ngc-link>
+              </td>
+              <td align="center">
+                <ngc-link *ngIf="item.get('flagCRUD').value==='C' ||
+                   (item.get('flagCRUD').value!=='C' && item.get('hold').value===false && (!item.get('deliveryRequestOrderNo').value) && (!item.get('deliveryOrderNo').value)
+                  && (!item.get('accessLocation').value))" (linkClick)="deleteUld($event, index)" type="link"
+                  iconType="delete"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+
+          <tbody formArrayName='shipmentInventories'
+            *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'EXPORT'">
+            <tr *ngFor="let item of maintainLocationForm.controls.shipmentInventories.controls; let index=index"
+              [formGroupName]="index">
+              <td align="center">
+                <ngc-checkbox
+                  *ngIf="item.get('hold').value===false && !item.get('assignedUldTrolley').value && (!item.get('accessLocation').value)"
+                  formControlName="select"></ngc-checkbox>
+                <b>
+                  <I *ngIf="item.get('flagCRUD').value !=='C' && item.get('assignedUldTrolley').value">
+                    <font size="-2" color="blue">Loaded</font>
+                  </I>
+                </b>
+              </td>
+              <td [width]='600'>
+                <ngc-movable-storage-location upperCase="true"
+                  [destination]="this.maintainLocationForm.get('destination').value"
+                  [origin]="this.maintainLocationForm.get('origin').value"
+                  [shipmentNumber]="this.maintainLocationForm.get('shipmentNumber').value" [maxlength]="12"
+                  [minlength]="3" [width]="130"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && item.get('assignedUldTrolley').value ? true : false)||( item.get('flagCRUD').value!=='C' &&item.get('accessLocation').value ? true : false)"
+                  formControlName="shipmentLocation">
+                </ngc-movable-storage-location>
+              </td>
+              <td [width]='300'>
+                <ngc-locations-list formControlName="warehouseLocation" [noTerminal]='true' [displayOnlyLocation]="true"
+                  [width]="200" [readonly]="(item.get('flagCRUD').value!=='C' && item.get('assignedUldTrolley').value ? true :
+                  false)||(item.get('flagCRUD').value!=='C' && item.get('accessLocation').value ? true : false)"
+                  [locationTypeList]="['STORAGE']">
+                </ngc-locations-list>
+              </td>
+              <td align="right" [width]='300'>
+                <ngc-piecesinput [width]="70"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && item.get('assignedUldTrolley').value ? true : false)||(item.get('flagCRUD').value!=='C' && item.get('accessLocation').value ? true : false)"
+                  formControlName="piecesInv" priority="transparent" required
+                  (ngModelChange)="CalculateRemainingPieces($event,index)">
+                </ngc-piecesinput>
+              </td>
+              <td [width]='300'>
+                <ngc-weightinput
+                  [readonly]="(item.get('flagCRUD').value!=='C' && item.get('assignedUldTrolley').value ? true : false)||(item.get('flagCRUD').value!=='C' && (item.get('accessLocation').value ? true : false))"
+                  formControlName="weightInv" required (ngModelChange)="CalculateRemainingWeight()">
+                </ngc-weightinput>
+              </td>
+              <td [width]='300' entityAttribute="Gen.ChargeableWeight">
+                <ngc-chargeableweightinput formControlName="chargeableWeightInv"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && item.get('assignedUldTrolley').value ? true : false)||(item.get('flagCRUD').value!=='C' && (item.get('accessLocation').value ? true : false))"
+                  (ngModelChange)="CalculateRemainingChargeableWeight()">
+                </ngc-chargeableweightinput>
+              </td>
+              <td [width]='306' *ngIf="(maintainLocationForm.get('flagForPartSuffixDropdown').value == true)"
+                feature="Exp.PartSuffix">
+                <ngc-dropdownlist width="80" displayMember="code" formControlName="partSuffix"
+                  [readonly]=" (item.get('autoloadFlag').value && (item.get('flagCRUD').value!=='C' &&(item.get('assignedUldTrolley').value ? true : false)))||(item.get('flagCRUD').value!=='C' &&(item.get('accessLocation').value ? true : false))"
+                  [source]=" partSuffixListDisplay" [required]="suffixValuesExist">
+                </ngc-dropdownlist>
+
+              </td>
+
+              <td [width]='300' *ngIf='!FrieghtFlag'></td>
+              <td [width]='300' *ngIf='!FrieghtFlag'></td>
+
+              <td [width]='500'>
+                <ngc-shcinput
+                  [readonly]="(item.get('flagCRUD').value!=='C' && (item.get('hold').value === true || item.get('assignedUldTrolley').value ? true : false ))||(item.get('flagCRUD').value!=='C' &&(item.get('accessLocation').value ? true : false))"
+                  formArrayName="shcListInv" dataField="shcInv" (modelChange)="onShcChanges($event,index)"
+                  [width]="250"></ngc-shcinput>
+                <ngc-display formControlName="shcDummy"></ngc-display>
+              </td>
+              <td [width]='300'>
+                <ngc-display formControlName="handlingArea" *ngIf="item.get('flagCRUD').value!=='C'"></ngc-display>
+                <ngc-dropdownlist *ngIf="item.get('flagCRUD').value==='C'" formControlName="handlingArea" [width]="80"
+                  [dropDownWidth]="80" sourceId="WAREHOUSE_TERMINAL" sourceType="query" required></ngc-dropdownlist>
+              </td>
+              <td align="center" [ngSwitch]="item.get('hold').value" [width]='300'>
+                <i class="fa fa-lock fa-2x" style="color:red" *ngSwitchCase="true"></i>
+                <ngc-display formControlName="holdRemarks"></ngc-display>
+                <ngc-piecesinput type="text" *ngSwitchDefault [width]="70" formControlName="unableToLocate" [disabled]="item.get('assignedUldTrolley').value ? true : false ||(item.get('accessLocation').value ?
+                  true :false)">
+                </ngc-piecesinput>
+              </td>
+              <td [width]='306'>
+                <ngc-dropdownlist formControlName="dipSvcSTATS" [width]="120" [dropDownWidth]="120"
+                  sourceId="General$DipSvcSTATS">
+                </ngc-dropdownlist>
+              </td>
+              <td align="center" [width]='100'>
+                <ngc-link
+                  *ngIf="item.get('flagCRUD').value==='C' || (item.get('flagCRUD').value!=='C' && item.get('hold').value===false && !item.get('assignedUldTrolley').value && (!item.get('accessLocation').value))"
+                  (linkClick)="deleteUld($event, index)" type="link" iconType="delete"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+
+          <tbody formArrayName='shipmentInventories'
+            *ngIf="maintainLocationForm.get('shipmentTypeflag').value == 'TRANS'">
+            <tr *ngFor="let item of maintainLocationForm.controls.shipmentInventories.controls; let index=index"
+              [formGroupName]="index">
+              <ngc-input [hidden]="true" formControlName="referenceDetails"></ngc-input>
+              <ngc-input formControlName="oldShipmentLocation" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldPiecesInv" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldWeightInv" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldChargeableWeightInv" [hidden]="true"></ngc-input>
+              <ngc-input formControlName="oldWarehouseLocation" [hidden]="true"></ngc-input>
+              <td align="center">
+                <ngc-checkbox
+                  *ngIf="item.get('hold').value===false && !item.get('assignedUldTrolley').value && !item.get('accessLocation').value"
+                  formControlName="select"></ngc-checkbox>
+                <b>
+                  <I *ngIf="item.get('flagCRUD').value !=='C' && item.get('assignedUldTrolley').value">
+                    <font size="-2" color="blue">Loaded</font>
+                  </I>
+                </b>
+              </td>
+              <td [width]='600'>
+                <ngc-movable-storage-location upperCase="true"
+                  [destination]="this.maintainLocationForm.get('destination').value"
+                  [origin]="this.maintainLocationForm.get('origin').value"
+                  [shipmentNumber]="this.maintainLocationForm.get('shipmentNumber').value" [maxlength]="12"
+                  [minlength]="3" [width]="130"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && (item.get('assignedUldTrolley').value ? true : false))"
+                  formControlName="shipmentLocation">
+                </ngc-movable-storage-location>
+              </td>
+              <td [width]='300'>
+                <ngc-locations-list formControlName="warehouseLocation" [noTerminal]='true' [displayOnlyLocation]="true"
+                  [width]="200"
+                  [readonly]="(item.get('flagCRUD').value!=='C' && ((item.get('assignedUldTrolley').value ? true : false)||(item.get('accessLocation').value)))"
+                  [locationTypeList]="['STORAGE']">
+                </ngc-locations-list>
+              </td>
+              <td align="right" [width]='300'>
+                <ngc-piecesinput [width]="70"
+                  [readonly]="item.get('flagCRUD').value!=='C' && (item.get('assignedUldTrolley').value ? true : false ||(item.get('accessLocation').value))"
+                  formControlName="piecesInv" priority="transparent" required
+                  (ngModelChange)="CalculateRemainingPieces($event,index)">
+                </ngc-piecesinput>
+              </td>
+              <td [width]='300'>
+                <ngc-weightinput
+                  [readonly]="item.get('flagCRUD').value!=='C' && (item.get('assignedUldTrolley').value ? true : false ||(item.get('accessLocation').value))"
+                  formControlName="weightInv" required (ngModelChange)="CalculateRemainingWeight()">
+                </ngc-weightinput>
+              </td>
+              <td [width]='300' entityAttribute="Gen.ChargeableWeight">
+                <ngc-chargeableweightinput formControlName="chargeableWeightInv"
+                  [readonly]="item.get('flagCRUD').value!=='C' && (item.get('assignedUldTrolley').value ? true : false ||(item.get('accessLocation').value))"
+                  (ngModelChange)="CalculateRemainingChargeableWeight()">
+                </ngc-chargeableweightinput>
+              </td>
+
+              <td [width]='306' *ngIf="maintainLocationForm.get('flagForPartSuffixDropdown').value == true"
+                feature="Exp.PartSuffix">
+                <ngc-dropdownlist width="80" displayMember="code" formControlName="partSuffix"
+                  [source]="partSuffixListDisplay"
+                  [readonly]=" item.get('autoloadFlag').value && (item.get('flagCRUD').value!=='C' && (item.get('assignedUldTrolley').value ? true : false ||(item.get('accessLocation').value ? true : false)))"
+                  (select)="fetchInboundFlightKeyandDate($event,index)" [required]="suffixValuesExist">
+                </ngc-dropdownlist>
+              </td>
+
+              <td [width]='300' *ngIf="item.get('assignedUldTrolley').value">
+                <ngc-display formControlName="flightKey"></ngc-display>
+              </td>
+              <td [width]='300' *ngIf="!item.get('assignedUldTrolley').value">
+                <ngc-flightkeyinput [width]="70" formControlName="flightKey" required
+                  [readonly]="(item.get('flightKeyOld').value && item.get('flagCRUD').value != 'C') || item.get('assignedUldTrolley').value ? true : false">
+                </ngc-flightkeyinput>
+              </td>
+              <td [width]='300' *ngIf="item.get('assignedUldTrolley').value">
+                <ngc-display formControlName="flightKeyDate" [onlyDate]="true"></ngc-display>
+              </td>
+              <td [width]='300' *ngIf="!item.get('assignedUldTrolley').value">
+                <ngc-datetimeinput formControlName="flightKeyDate" required [onlyDate]="true"
+                  [readonly]="(item.get('flightKeyDateOld').value && item.get('flagCRUD').value != 'C') || item.get('assignedUldTrolley').value ? true : false">
+                </ngc-datetimeinput>
+              </td>
+
+              <td [width]='300'>
+                <ngc-display formControlName="OutboundflightKey"></ngc-display>
+              </td>
+              <td [width]='300'>
+                <ngc-display formControlName="OutboundflightKeyDate" [onlyDate]="true"></ngc-display>
+              </td>
+              <td [width]='500'>
+                <ngc-shcinput [readonly]=" (item.get('flagCRUD').value!=='C' && (item.get('hold').value===true ||
+                  item.get('assignedUldTrolley').value)) ? true : false" formArrayName="shcListInv" dataField="shcInv"
+                  (modelChange)="onShcChanges($event,index)" [width]="250"></ngc-shcinput>
+                <ngc-display formControlName="shcDummy"></ngc-display>
+              </td>
+              <td [width]='300'>
+                <ngc-display formControlName="handlingArea" *ngIf="item.get('flagCRUD').value !== 'C'"></ngc-display>
+                <ngc-dropdownlist *ngIf="item.get('flagCRUD').value === 'C'" formControlName="handlingArea" [width]="80"
+                  [dropDownWidth]="80" sourceId="WAREHOUSE_TERMINAL" sourceType="query" required></ngc-dropdownlist>
+              </td>
+              <td align="center" [width]='300'>
+                <ng-container [ngSwitch]="item.get('hold').value">
+                  <i class="fa fa-lock fa-2x" style="color:red" *ngSwitchCase="true"></i>
+                  <ngc-display formControlName="holdRemarks"></ngc-display>
+                  <ngc-piecesinput type="text" *ngSwitchDefault [width]="70" formControlName="unableToLocate"
+                    [disabled]="item.get('assignedUldTrolley').value ? true : false"></ngc-piecesinput>
+                </ng-container>
+              </td>
+              <td [width]='306'>
+                <ngc-dropdownlist formControlName="dipSvcSTATS" [width]="120" [dropDownWidth]="120"
+                  sourceId="General$DipSvcSTATS">
+                </ngc-dropdownlist>
+              </td>
+              <td align="center">
+                <ngc-link
+                  *ngIf="item.get('flagCRUD').value==='C' || (item.get('flagCRUD').value!=='C' && item.get('hold').value===false && !item.get('assignedUldTrolley').value && (!item.get('accessLocation').value))"
+                  (linkClick)="deleteUld($event, index)" type="link" iconType="delete"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='2'>
+        <b>
+          <!-- <font color="black">Total Pieces :- </font> -->
+          <ngc-label label="awb.total.pcs" color="black"></ngc-label>
+        </b>
+        <b>
+          <I>
+            <font color="blue">{{totalpieces}} </font>
+          </I>
+        </b>
+      </ngc-column>
+      <ngc-column column='2'>
+        <b>
+          <!-- <font color="black">Total Weight :- </font> -->
+          <ngc-label label="awb.total.weight" color="black"></ngc-label>
+        </b>
+        <b>
+          <I>
+            <font color="blue">
+              <ngc-weightdisplay value={{totalWeight}}></ngc-weightdisplay>
+            </font>
+          </I>
+        </b>
+      </ngc-column>
+      <ngc-column column='2'>
+        <b>
+          <!-- <font color="black">Remaining Pieces :- </font> -->
+          <ngc-label label="awb.remaining.pieces" color="black"></ngc-label>
+        </b>
+        <b>
+          <I>
+            <font color="blue"
+              *ngIf="handledbyHouse && this.maintainLocationForm.get('houseInformation').get('hwbPieces').value < totalpieces ">
+              0
+            </font>
+            <font color="blue"
+              *ngIf="handledbyHouse && this.maintainLocationForm.get('houseInformation').get('hwbPieces').value >= totalpieces ">
+              <font color="blue">
+
+                {{this.maintainLocationForm.get('houseInformation').get('hwbPieces').value -
+                this.totalpieces}}
+
+              </font>
+            </font>
+
+            <font color="blue" *ngIf="!handledbyHouse && this.maintainLocationForm.get('pieces').value < totalpieces ">0
+            </font>
+            <font color="blue" *ngIf="!handledbyHouse && this.maintainLocationForm.get('pieces').value >= totalpieces ">
+              <font color="blue">
+                {{this.maintainLocationForm.get('pieces').value - this.totalpieces}}
+
+              </font>
+            </font>
+          </I>
+        </b>
+      </ngc-column>
+      <ngc-column>
+        <b>
+          <font color="black">Remaining Weight :- </font>
+        </b>
+        <b>
+          <I>
+            <font color="blue">
+              <ngc-weightdisplay value={{remainingWeight}}></ngc-weightdisplay>
+            </font>
+          </I>
+        </b>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column column="8">
+
+      </ngc-column>
+      <ngc-column>
+        <ngc-button label="add" [width]="120" (click)="clickAddRow()"></ngc-button>
+      </ngc-column>
+      <ngc-column>
+        <ngc-button label="splitLocation" (click)="onSplit()"></ngc-button>
+      </ngc-column>
+      <ngc-column *ngIf="maintainLocationForm.get('flagForPartSuffixDropdown').value == true">
+        <ngc-button label="updateBooking" (click)="updateBookingPcsWt()" feature="Exp.Accpt.UpdateBooking"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="isTableFlgforfreightout">
+      <ngc-column column="6">
+        <ngc-label label="FREIGHT OUT"></ngc-label>
+        <ngc-datatable formArrayName="freightOutArray" [pageable]="false" [pagerMode]="'advanced'" [pageSize]="5"
+          [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.sNo" [width]="50" dataField="sno" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="awb.freight.out" dataField="freightOut" [width]="100"></ngc-data-column>
+          <ngc-data-column text="awb.freight.out.date" type="displayDate" dataField="flightKeyDate" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" dataField="piecesFreightOut" [width]="100" type="displayPieces"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="g.weight" dataField="weightFreightOut" [width]="100" type="displayWeight"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shcListFreightOut" [width]="100" cellsAlign="left"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="displayBookingInfoTable">
+
+      <ngc-column column="6" *ngIf="displayBookingInfoTable">
+
+        <br>
+        <br>
+        <ngc-label label="awb.doc.arrival.info"></ngc-label>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value="g.flightKey">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.FlightDate">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="flight.ata">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="flight.boardPoint">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.manifest.pcs">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.manifest.wgt">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.freight.in.pcs">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.freight.in.wgt">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="si.documents">
+                </ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="docArrivalInfoList">
+            <tr *ngFor="let item of maintainLocationForm.controls.docArrivalInfoList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="flightKey"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="dateATA" [onlyDate]="true"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="dateATA" [onlyTime]="true"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightBoardPoint"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="manifestPiece"></ngc-display>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="manifestWeight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="breakDownPieces"></ngc-display>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="breakDownWeight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ng-container>
+                  <ngc-icon type="yesno" formControlName="documentReceivedFlag">
+                  </ngc-icon>
+                </ng-container>
+              </td>
+
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+
+      <ngc-column column="1">
+
+      </ngc-column>
+      <ngc-column column="5">
+
+
+        <br>
+        <br>
+        <ngc-label label="title.booking.info"> </ngc-label>
+        <br>
+        <ngc-table>
+          <thead>
+            <tr>
+
+              <th colspan="7" rowspan="1" align="center">
+                <ngc-label value="awb.booking.information">
+                </ngc-label>
+              </th>
+              <th colspan="2">
+                <ngc-label value="awb.inventory.information">
+                </ngc-label>
+              </th>
+
+            </tr>
+            <tr>
+
+              <th>
+                <ngc-label value="awb.part.suffix" [width]='80'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.flightKey" [width]='100'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.FlightDate" [width]='100'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.pieces" [width]='80'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.weight" [width]='100'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="flight.boardPoint" [width]='100'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="flight.offPoint" [width]='100'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.pieces" [width]='100'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.weight" [width]='100'></ngc-label>
+              </th>
+
+            </tr>
+
+          </thead>
+          <tbody formArrayName="bookingDetails">
+            <tr *ngFor="let item of maintainLocationForm.controls.bookingDetails.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="partSuffix"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightKey"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightOriginDate"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="partPieces"></ngc-display>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="partWeight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="flightBoardPoint"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightOffPoint"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="invPiece"></ngc-display>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="invWeight"></ngc-weightdisplay>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+        <b>
+          <!-- <font color="black">Total Pieces/Weight </font> -->
+          <ngc-label label="awb.total.pieces.weight" color="black"></ngc-label>
+          <span style="padding : 145px">
+            <ngc-piecesinput [readonly]="true" formControlName="bookingPieces"></ngc-piecesinput>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <ngc-weightinput [readonly]="true" formControlName="bookingWeight"></ngc-weightinput>
+          </span>
+        </b>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="maintainBreakdownHouseInfoFormGroup">
+  <ngc-window #addMaintainHouseWindow [width]="1400" [height]="400" title="Gen.maintainHouse">
+    <ngc-container type="section">
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+        </div>
+      </ngc-column>
+      <ngc-row>
+        <ngc-column column="4">
+          <div>
+            <ngc-label label="Gen.HawbNo"></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <ngc-lov formControlName="houseNum" [noCache]="true" title="g.hawbNumber" dataField='code'
+              sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO" [width]="200"
+              [sourceParameters]="{'parameter1': this.maintainLocationForm.get('shipmentNumber').value,r:variable}"
+              maxlength="20" [noValidation]="true">
+              <ngc-data-column text="g.hawbNumber" dataField="code" [width]="200"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column column="5">
+          <div>
+            <ngc-button iconType="search" accessEnableOn="r" (click)="maintainHouseSearch()" value="g.search">
+            </ngc-button>
+          </div>
+        </ngc-column>
+        <ngc-column column="1" align="right">
+          <div>
+            <ngc-button iconType="add" accessEnableOn="r" (click)="maintainAddNewHouse()" value="Gen.addHawb">
+            </ngc-button>
+          </div>
+        </ngc-column>
+        <ngc-column column="1" align="right">
+          <div>
+            <ngc-button iconType="save" (click)="saveMaintainHouseInfo()" label="save"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="breakdownHouseInfo" [pageable]="false">
+            <ngc-data-column text="Gen.HawbNo" dataField="houseNumber" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-lov formControlName="houseNumber" [noCache]="true" title="g.hawbNumber" dataField='code'
+                    sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO"
+                    [sourceParameters]="{'parameter1': this.maintainLocationForm.get('shipmentNumber').value,r:variable}"
+                    (select)="setHouseInfo($event,group)" maxlength="20" [width]="200" [noValidation]="true" required>
+                    <ngc-data-column text="g.hawbNumber" dataField="code" [width]="200">
+                    </ngc-data-column>
+                  </ngc-lov>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Gen.housePcsWt" dataField="housePicecWeight" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-piecesinput formControlName="hawbPieces" [width]="100" required>
+                  </ngc-piecesinput>
+                  <ngc-weightinput formControlName="hawbWeight" [width]="100" required>
+                  </ngc-weightinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.hawbbdpcs" dataField="hawbBDPcs" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-piecesinput formControlName="hawbBDPcs" [width]="100"
+                    (ngModelChange)="onHouseWayBillPieceChange($event,group)" required>
+                  </ngc-piecesinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.hawbbdpwt" dataField="hawbBDWt" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-weightinput formControlName="hawbBDWt" [width]="100" required>
+                  </ngc-weightinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="remarks" dataField="hawbRemarks" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="left">
+                  <ngc-input formControlName="hawbRemarks" [width]="400" maxlength="65">
+                  </ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Delete" align="center" cellsAlign="center" [width]="10">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group" cellsAlign="center">
+                  <ngc-link (linkClick)="deleteBDHouse($event,group)" iconType="delete" [width]="50">
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<ngc-window #updateBookingWindow [showCloseButton]="true" (close)="closeUpdateBooking()" [width]="1510" [height]="600"
+  title="import.update.booking">
+  <app-update-booking [updateBookingObject]="updateBookingObject"></app-update-booking>
+</ngc-window>
+<ngc-footer *ngIf=!showAsPopup>
+  <ngc-row>
+    <ngc-column *ngIf="isTableFlg">
+      <ngc-button accessEnableOn="r" label="shipment.on.hold" (click)="onHoldShipment()" [disabled]=showAsPopup>
+      </ngc-button>
+      <ngc-button accessEnableOn="r" label="2.shipment.loc" (click)="onDisplayUldTrolley()" [disabled]=showAsPopup>
+      </ngc-button>
+      <ngc-button *ngIf="!handledbyHouse" accessEnableOn="r" label="3.shipment.loc" (click)="onShipmentInformation()"
+        [disabled]=showAsPopup>
+      </ngc-button>
+      <ngc-button *ngIf="handledbyHouse" accessEnableOn="r" label="3.hawb.info" (click)="onHAWBInformation()"
+        [disabled]=showAsPopup>
+      </ngc-button>
+      <ngc-button accessEnableOn="r" label="shp.upload" (click)="navigateToUploadPhoto()" [disabled]=showAsPopup>
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

@@ -1,0 +1,825 @@
+<ngc-titlebar title="exp.rcarScreeningPointTitle" (clear)="onClear($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+<form [formGroup]="rcarScreeningPointForm">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="awbnumber"></ngc-label>
+        <div>
+          <ngc-taginput accessEnableOn="r" [width]="100" formControlName="shipmentNumbers" patternName='digit'
+            maxChars="11">
+          </ngc-taginput>
+        </div>
+      </ngc-column>
+      <ngc-column feature="Exp.AddToScreening.ByUld">
+        <ngc-label label="export.uldNumber"></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" [width]="100" formControlName="uldNumber">
+          </ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="expbu.flightdate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" formControlName="flightDate"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="tendereddatefrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" formControlName="tenderedDateFrom"
+            [showCalendarButton]="true" [showTimeButton]="true"
+            [required]="this.rcarScreeningPointForm.get('tenderedDateTo').value">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="tendereddateto"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" formControlName="tenderedDateTo"
+            [showCalendarButton]="true" [showTimeButton]="true"
+            [required]="this.rcarScreeningPointForm.get('tenderedDateFrom').value"
+            [min]="this.rcarScreeningPointForm.get('tenderedDateFrom').value"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awb.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrier" [width]="50" title='carrier' upperCase="true"
+            dataField="code" displayMember="code" sourceId="CARRIER">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.terminal"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" [dropDownWidth]="80" sourceType='query'
+            sourceId="HANDLINGAREA" formControlName="acceptanceTerminal"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.screening.type"></ngc-label>
+        <div *ngIf="!tenantSpecific">
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" [multiSelect]="true" [source]="screeningReasons"
+            formControlName="screeningReason" #dropdown></ngc-dropdownlist>
+        </div>
+        <div feature="Exp.AddToScreening.ByUld">
+
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" #dropdown sourceId="EXPORT$SCREENINGREASON"
+            [multiSelect]="true" formControlName="screeningReason">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="export.screening.completed"></ngc-label>
+        <div *ngIf="!tenantSpecific">
+          <ngc-checkbox accessEnableOn="r"  formControlName="showScreenedShipmentsIndicator">
+          </ngc-checkbox>
+        </div>
+        <div feature="Exp.AddToScreening.ByUld">
+
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" sourceId="EXPORT$SCREENINGSTATUS"
+            formControlName="scrStatus">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)='onSearch()' label='g.search' iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column feature="Exp.AddToScreening.ByUld">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)='onULDSearch()' label='ULD Screening' iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showDataOfListFlag" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)='onDetain()' label='export.accpt.detain'></ngc-button>
+        <ngc-button accessEnableOn="r" (click)='onExportToExcel()' label='export.excel'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="screeningList" [pageable]="true" [pageSize]="20">
+          <ngc-data-column text=" " align="center" dataField="select">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="select">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.acceptanceType" feature="Exp.AddToScreening.ByUld" [width]="120" align="center"
+            dataField="acceptanceType">
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" [width]="120" align="center" dataField="shipmentNumber">
+          </ngc-data-column>
+          <ngc-data-column text="awb.origin" *ngIf="!tenantSpecific" [width]="120" align="center" dataField="origin">
+          </ngc-data-column>
+          <ngc-data-column text="awb.destination" *ngIf="!tenantSpecific" [width]="120" align="center"
+            dataField="destination">
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" *ngIf="!tenantSpecific" align="center" dataField="pieces">
+          </ngc-data-column>
+          <ngc-data-column text="g.weight" *ngIf="!tenantSpecific" align="center" dataField="weight">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.screened.br.pieces" *ngIf="!tenantSpecific" align="center"
+            dataField="totalScreenedPieces" feature="Exp.Screening.ScreeningResult.AddMoreScreenings">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.screened.br.weight" *ngIf="!tenantSpecific" align="center"
+            dataField="totalScreenedWeight" feature="Exp.Screening.ScreeningResult.AddMoreScreenings">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.reason" align="center" dataField="screeningReason">
+          </ngc-data-column>
+          <ngc-data-column text="g.uld" align="center" dataField="uldNumber" feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.chargeto" align="center" dataField="screeningChargeCustomer"
+            feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="g.ori.dest" align="center" dataField="shipmentOriDes"
+            feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="import.AwbPiecsWeight" align="center" dataField="shipmentPcsWt"
+            feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="g.assn.pcs.wt" align="center" dataField="assnPcsWt" feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="exp.screening.req.pcs" align="center" dataField="totalScreeningReqPieces"
+            feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="exp.screened.pcs.wt" align="center" dataField="screenedPcsWeight"
+            feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="export.book.natureofgoods" align="center" dataField="natureOfGoods">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.rcar.br.type" align="center" dataField="rcarType" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.part.br.shipment" align="center" dataField="partShipment"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.outbound.flight.br.datetime" align="center"
+            dataField="outboundFlight">
+          </ngc-data-column>
+          <ngc-data-column text="export.flight.type" *ngIf="!tenantSpecific" align="center" dataField="flightType"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="exp.acceptance.agent.code" *ngIf="!tenantSpecific" align="center"
+            dataField="agentCode">
+          </ngc-data-column>
+          <ngc-data-column text="g.agent" align="center" dataField="agentName" feature="Exp.AddToScreening.ByUld">
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentType" *ngIf="!tenantSpecific" align="center" dataField="shipmentType"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.acceptance.br.terminal" align="center" dataField="screeningTerminal"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.reason" align="center" name="1" [width]="420"
+            feature="Exp.Screening.ScreeningReason.SIN">
+            <ngc-data-column text="export.customs.acas" align="center" dataField="acasFlag" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="g.rcar" align="center" dataField="rcarFlag" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="export.customs.aed" align="center" dataField="aedFlag" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="export.screening.airline.request" align="center" dataField="airlRegFlag"
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="TS" align="center" dataField="tsFlag" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="eCSD" align="center" dataField="ecsdFlag" cellsAlign="center">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.datetime.br.tendered" align="center" dataField="tenderedDate"
+            type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="agent.status" align="center" dataField="completionStatus"
+            feature="Exp.Screening.ScreeningResult.AddMoreScreenings">
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.br.start" align="center" dataField="edit">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" type="link" (linkClick)="onLinkClick(group)" iconType="open-link"
+                  align="center" cellsAlign="center">
+                </ngc-link>
+                <ngc-label value="Fin"
+                  *ngIf="rcarScreeningPointForm.get(['screeningList', group, 'clearedForUplift']).value == 1"
+                  color="red" emphasis="md" feature="Exp.Screening.ScreeningReason.SIN"></ngc-label>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column feature="Exp.AddToScreening.ByUld" text="agent.status" align="center"
+            dataField="completionStatus">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <form formGroupName="updateForm">
+    <ngc-window #updateWindow [width]="windowWidth" [height]="windowHeight" title="export.screening.status"
+      [showCloseButton]="true" (close)="destroyWindow()">
+      <ngc-container type="tab" *ngIf="multipleShipmentScreeningFlag">
+        <ngc-row *ngIf="uldSearch">
+          <ngc-column [column]="2">
+            <ngc-label label="export.uldNumber"></ngc-label>
+            <div>
+              <ngc-uldinput accessEnableOn="r" [width]="120" formControlName="uldNumber">
+              </ngc-uldinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label></ngc-label>
+            <div>
+              <ngc-button accessEnableOn="r" (click)='onULDTypeSearch()' label='g.search' iconType="search">
+              </ngc-button>
+            </div>
+          </ngc-column>
+          <ngc-column align="right" *ngIf="rcarScreeningPointForm.get(['updateForm','methodList']).length >0">
+            <ngc-label></ngc-label>
+            <div>
+              <ngc-button accessEnableOn="r" (click)='onScreeningSave()' label='g.save'>
+              </ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="!uldSearch">
+          <ngc-column align="right">
+            <ngc-label></ngc-label>
+            <div>
+              <ngc-button accessEnableOn="r" (click)="onAddrow(null)" label='g.add'>
+              </ngc-button>
+              <ngc-button accessEnableOn="r" (click)='onScreeningSave()' label='g.save'>
+              </ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab" *ngIf="updateWindowShowHide && addScreeningFlag">
+        <ngc-row>
+          <ngc-column>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th rowspan="2">
+                    <ngc-label label="awbnumber"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="awb.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="weight"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="expaccpt.screeningreason.m"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.registered.br.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.br.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.br.weight"></ngc-label>
+                  </th>
+                  <th rowspan="1" colspan="2">
+                    <ngc-label label="export.screening.sticker.number"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="screening.passfail"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.method"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.bup.loose"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.remarks"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="delete"></ngc-label>
+                  </th>
+                </tr>
+                <tr>
+                  <th [width]="50">
+                    <ngc-label label="g.from"></ngc-label>
+                  </th>
+                  <th [width]="50">
+                    <ngc-label label="g.to"></ngc-label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="methodList">
+                <tr
+                  *ngFor="let item of rcarScreeningPointForm.get('updateForm').get('methodList').controls; let index = index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+                  </td>
+                  <td align="right">
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                  </td>
+                  <td align="right">
+                    <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                  </td>
+
+                  <td>
+                    <div *ngIf="item.get('screeningFlightId').value==null;else displayReason">
+
+                      <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" formControlName="screeningReason"
+                        [source]="screeningReasons">
+                      </ngc-dropdownlist>
+                    </div>
+                    <ng-template #displayReason>
+
+                      <ngc-display formControlName="screeningReason">
+                      </ngc-display>
+
+                    </ng-template>
+                  </td>
+
+
+
+                  <td>
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                  </td>
+                  <td align="right">
+                    <ngc-piecesinput formControlName="screenedPieces"
+                      (ngModelChange)="comparePiecesWithScreenedPieces($event, index, item)"
+                      [max]="rcarScreeningPointForm.get('updateForm.pieces').value"></ngc-piecesinput>
+                  </td>
+                  <td align="right">
+                    <ngc-weightinput formControlName="screenedWeight"
+                      [max]="rcarScreeningPointForm.get('updateForm.weight').value"></ngc-weightinput>
+                  </td>
+                  <td>
+                    <ngc-input [width]="100" formControlName="stickerNumberFrom"></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-input [width]="100" formControlName="stickerNumberTo"></ngc-input>
+                  </td>
+
+                  <td>
+                    <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" [source]="status"
+                      formControlName="passFailStatus"></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" sourceId="EXPORT$SCR_METHOD"
+                      formControlName="screenedMethod"></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" sourceId="EXPORT$SCR_BUPLOS"
+                      formControlName="shipmentBuildType"></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="screeningRemarks">
+                    </ngc-input>
+                  </td>
+                  <td>
+
+                    <ngc-link (linkClick)="onUpdateFormDelete(index)" iconType="delete" *ngIf="index>0">
+
+                    </ngc-link>
+                  </td>
+                </tr>
+              </tbody>
+            </ngc-table>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="2">
+            <ngc-label label="Total Pass Pieces: "></ngc-label>
+
+            <ngc-display formControlName="totalPassPieces"></ngc-display>
+
+          </ngc-column>
+          <ngc-column column="9">
+            <ngc-label label="Total Fail Pieces: "></ngc-label>
+
+            <ngc-display formControlName="totalFailPieces"></ngc-display>
+
+          </ngc-column>
+          <ngc-column>
+            <ngc-button (click)="onAddrow(null)" label="g.add">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.screening.rca.number"></ngc-label>
+            <div>
+              <ngc-display formControlName="rcaNumber"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="agent.agent"></ngc-label>
+            <div>
+              <ngc-display formControlName="agentCode"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.name"></ngc-label>
+            <div>
+              <ngc-display formControlName="agentName"></ngc-display>
+            </div>
+          </ngc-column>
+
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.remarks"></ngc-label>
+            <div>
+              <ngc-input required formControlName="screeningRemarks" [width]="600"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column column="6">
+            <ngc-label label="Screening Result"></ngc-label>
+            <div>
+              <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" [source]="status"
+                formControlName="screeningComplete">
+              </ngc-dropdownlist>
+              &nbsp;
+              &nbsp;
+              <ngc-button (click)="onCompleteScreening()" label='export.accpt.complete_screening'>
+              </ngc-button>
+            </div>
+
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+
+
+
+      <ngc-container type="tab" *ngIf="updateWindowShowHide && updateMethodFlag">
+        <ngc-row>
+          <ngc-column>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th rowspan="2">
+                    <ngc-label label="awbnumber"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="awb.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="weight"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="agentCode"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.registered.br.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.br.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.br.weight"></ngc-label>
+                  </th>
+                  <th rowspan="1" colspan="2">
+                    <ngc-label label="export.screening.sticker.number"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.cleared.for.br.uplift"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.method"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.bup.loose"></ngc-label>
+                  </th>
+                </tr>
+                <tr>
+                  <th [width]="50">
+                    <ngc-label label="g.from"></ngc-label>
+                  </th>
+                  <th [width]="50">
+                    <ngc-label label="g.to"></ngc-label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="methodList">
+                <tr
+                  *ngFor="let item of rcarScreeningPointForm.get('updateForm').get('methodList').controls; let index = index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+                  </td>
+                  <td align="right">
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                  </td>
+                  <td align="right">
+                    <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="agentCode"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                  </td>
+                  <td align="right">
+                    <ngc-piecesinput formControlName="screenedPieces"
+                      (ngModelChange)="comparePiecesWithScreenedPieces($event)"
+                      [max]="rcarScreeningPointForm.get('updateForm.pieces').value"></ngc-piecesinput>
+                  </td>
+                  <td align="right">
+                    <ngc-weightinput formControlName="screenedWeight"
+                      [max]="rcarScreeningPointForm.get('updateForm.weight').value"></ngc-weightinput>
+                  </td>
+                  <td>
+                    <ngc-input [width]="100" required formControlName="stickerNumberFrom"></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-input [width]="100" required formControlName="stickerNumberTo"></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-checkbox
+                      [disabled]="this.rcarScreeningPointForm.get('updateForm.aedFlag').value=='Y' && (
+                                                                              this.rcarScreeningPointForm.get('updateForm.reasonForRejection').value=='E' ||
+                                                                              this.rcarScreeningPointForm.get('updateForm.reasonForRejection').value=='R')"
+                      formControlName="clearedForUplift"></ngc-checkbox>
+                  </td>
+                  <td>
+                    <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" sourceId="EXPORT$SCR_METHOD"
+                      formControlName="screenedMethod"></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" sourceId="EXPORT$SCR_BUPLOS"
+                      formControlName="shipmentBuildType"></ngc-dropdownlist>
+                  </td>
+                </tr>
+              </tbody>
+            </ngc-table>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.screening.point.remark"></ngc-label>
+            <div>
+              <ngc-display formControlName="scRemarks" [width]="600"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.screening.rca.number"></ngc-label>
+            <div>
+              <ngc-display formControlName="rcaNumber"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="agent.agent"></ngc-label>
+            <div>
+              <ngc-display formControlName="agentCode"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.name"></ngc-label>
+            <div>
+              <ngc-display formControlName="agentName"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.reason"></ngc-label>
+            <div>
+              <ng-container *ngIf="!rcarScreeningPointForm.get(['updateForm','methodList',0,'clearedForUplift']).value">
+                <ng-container *ngIf="isAEDScreening">
+                  <ngc-dropdownlist required [width]="200" sourceId="EXPORT$SC_FALREA"
+                    formControlName="reasonForRejection" [dropDownWidth]="300" #dropdown></ngc-dropdownlist>
+                </ng-container>
+                <ng-container *ngIf="!isAEDScreening">
+                  <ngc-dropdownlist required [width]="200" sourceId="EXPORT$SCR_REA"
+                    formControlName="reasonForRejection" [dropDownWidth]="300" #dropdown></ngc-dropdownlist>
+                </ng-container>
+              </ng-container>
+              <ng-container *ngIf="rcarScreeningPointForm.get(['updateForm','methodList',0,'clearedForUplift']).value">
+                <ng-container *ngIf="isAEDScreening">
+                  <ngc-dropdownlist required [width]="200" sourceId="EXPORT$SC_FALREA"
+                    formControlName="reasonForRejection" [dropDownWidth]="300" #dropdown></ngc-dropdownlist>
+                </ng-container>
+                <ng-container *ngIf="!isAEDScreening">
+                  <ngc-dropdownlist required [width]="200" sourceId="EXPORT$SCR_SUC"
+                    formControlName="reasonForRejection" [dropDownWidth]="300" #dropdown></ngc-dropdownlist>
+                </ng-container>
+              </ng-container>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.remarks"></ngc-label>
+            <div>
+              <ngc-input formControlName="screeningRemarks" [width]="600"></ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab" *ngIf="updateWindowShowHide && multipleShipmentScreeningFlag">
+        <ngc-row>
+          <ngc-column>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th rowspan="2">
+                    <ngc-label label="awbnumber"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screeningreason"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="g.agent"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="g.rcar.type"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="RCAR reg"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="g.ori.dest"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="import.AwbPiecsWeight"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="g.assn.pcs.wt"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screeningreqpcs"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.br.pieces"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.br.weight"></ngc-label>
+                  </th>
+                  <th rowspan="1" colspan="2">
+                    <ngc-label label="export.screening.sticker.number"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="screening.passfail"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.screening.screened.method"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="export.remarks"></ngc-label>
+                  </th>
+                  <th rowspan="2" *ngIf="uldSearch">
+                    <ngc-label label="g.add"></ngc-label>
+                  </th>
+                  <th rowspan="2">
+                    <ngc-label label="g.delete"></ngc-label>
+                  </th>
+                </tr>
+                <tr>
+                  <th [width]="50">
+                    <ngc-label label="g.from"></ngc-label>
+                  </th>
+                  <th [width]="50">
+                    <ngc-label label="g.to"></ngc-label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="methodList">
+                <tr
+                  *ngFor="let item of rcarScreeningPointForm.controls.updateForm.controls.methodList.controls; let index=index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                  </td>
+                  <td
+                    *ngIf="rcarScreeningPointForm.get(['updateForm', 'methodList', index, 'screeningFlightId']).value != null">
+                    <ngc-display formControlName="screeningReason"></ngc-display>
+                  </td>
+                  <td
+                    *ngIf="rcarScreeningPointForm.get(['updateForm', 'methodList', index, 'screeningFlightId']).value == null">
+                    <ngc-dropdownlist (select)="onAddSelectReason(index,$event)" required [width]="120"
+                      sourceId="EXPORT$SCREENINGREASON" formControlName="screeningReason">
+                    </ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="agentName"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="rcarType"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="rcarReg"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="shipmentOriDes"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="shipmentPcsWt"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="assnPcsWt"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="screeningReqPieces"></ngc-display>
+                  </td>
+                  <td align="right">
+                    <ngc-piecesinput (ngModelChange)="onScreenedPiecesUpdate(index,item,$event)" required
+                      [max]="rcarScreeningPointForm.get(['updateForm', 'methodList', index, 'screeningReqPieces']).value"
+                      formControlName="screenedPieces"> </ngc-piecesinput>
+                  </td>
+                  <td align="right">
+                    <ngc-weightinput formControlName="screenedWeight"
+                      [max]="rcarScreeningPointForm.get(['updateForm', 'methodList', index, 'weight']).value" required>
+                    </ngc-weightinput>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="stickerNumberFrom"></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="stickerNumberTo"></ngc-input>
+                  </td>
+
+                  <td>
+                    <ngc-dropdownlist required [dropDownWidth]="80" [source]="status" formControlName="passFailStatus">
+                    </ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" sourceId="EXPORT$SCR_METHOD"
+                      formControlName="screenedMethod"></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="screeningRemarks">
+                    </ngc-input>
+                  </td>
+                  <td *ngIf="uldSearch">
+                    <ngc-link (linkClick)="onAddrow(index)" iconType="add">
+                    </ngc-link>
+                  </td>
+                  <td>
+                    <ngc-link (linkClick)="onDeleteMethodList(index)" iconType="delete">
+                    </ngc-link>
+                  </td>
+                </tr>
+
+              </tbody>
+            </ngc-table>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.remarks"></ngc-label>
+            <div>
+              <ngc-input formControlName="screeningRemarks" [width]="600"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column column="6">
+            <ngc-label label="Screening Result"></ngc-label>
+            <div>
+              <ngc-dropdownlist required [width]="130" [dropDownWidth]="80" [source]="status"
+                formControlName="screeningComplete">
+              </ngc-dropdownlist>
+              &nbsp;
+              &nbsp;
+              <ngc-button (click)="onCompleteScreening()" label='export.accpt.complete_screening'>
+              </ngc-button>
+            </div>
+
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer *ngIf="!multipleShipmentScreeningFlag">
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="onUpdateScreenedShipment()" label='g.save.e' [disabled]="disableSaveButton"
+                #updatebutton>
+              </ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+
+    </ngc-window>
+    <ngc-report format='xls' #report title="g.report" reportId='RCAR_Screening_Point'
+       [reportParameters]='reportParameters'></ngc-report>
+    <ngc-report format='xls' #report2 title="g.report" reportId='Screening_Point_ULD'
+       [reportParameters]='reportParameters'></ngc-report>
+    <ngc-report format='xls' #report1 title="g.report" reportId='Screening_Point' [reportParameters]='reportParameters'>
+    </ngc-report>
+  </form>
+</form>

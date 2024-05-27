@@ -1,0 +1,174 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='warehouse.associate.processarea' (save)="onSave($event)" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='warehouse.processname'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [noCache]="true" formControlName="processAreaId" sourceType='query'
+            (select)="onSelectDropdown($event)" sourceId="CPE_PROCESS_AREA_TYPES_FOR_MESSAGE_PRECEDENTS">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="g_search" (click)='onSearchAssociateProcessArea($event)' iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showData" type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='warehouse.processname'></ngc-label>
+        <div>
+          <ngc-display value="{{displayProcessName}}"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="warehouse.export">
+          <ngc-row>
+            <ngc-column column="11">
+              <ngc-label label=''></ngc-label>
+              <div>
+                <ngc-button label="g._add" [disabled]="disableAddExport" (click)='onAddExport($event)'>
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="11">
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="g.sNo"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.description"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="warehouse.operation"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="warehouse.actiontype"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.delete"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="exportTriggerPoints">
+                  <tr *ngFor="let item of form.controls.exportTriggerPoints.controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-label label={{index+1}}></ngc-label>
+                    </td>
+                    <ng-container formGroupName="triggerPoint">
+                      <td>
+                        <ngc-dropdownlist formControlName="triggerPointId"
+                          (select)='selectExportProcessorName($event, index)' sourceType='query'
+                          sourceId="CPE_PROCESS_AREA_TRIGGER_POINTS_FOR_EXPORT"></ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container formGroupName="triggerPointOperation">
+                      <td>
+                        <ngc-dropdownlist formControlName="triggerPointOperationId"
+                          [sourceParameters]="{'parameter1':item.get('triggerPoint.triggerPointId').value }"
+                          sourceType='query' sourceId="KEY_SETUP_TRIGGER_POINTS"></ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td>
+                      <ngc-dropdownlist [source]="activeData" formControlName="actionType"></ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-link (click)="deleteExportTriggerPoints(index)" iconType="delete">
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container title="warehouse.import">
+          <ngc-row>
+            <ngc-column column="11">
+              <ngc-label label=''></ngc-label>
+              <div>
+                <ngc-button label="g._add" [disabled]="disableAddImport" (click)='onAddImport($event)'>
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="g.sNo"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.description"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="warehouse.operation"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="warehouse.actiontype"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.delete"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="importTriggerPoints">
+                  <tr *ngFor="let item of form.controls.importTriggerPoints.controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-label label={{index+1}}></ngc-label>
+                    </td>
+                    <ng-container formGroupName="triggerPoint">
+                      <td>
+                        <ngc-dropdownlist formControlName="triggerPointId"
+                          (select)='selectImportProcessorName($event, index)' sourceType='query'
+                          sourceId="CPE_PROCESS_AREA_TRIGGER_POINTS_FOR_IMPORT"></ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <ng-container formGroupName="triggerPointOperation">
+                      <td>
+                        <ng-container *ngIf="item.get('triggerPointOperation','triggerPointOperationId').value">
+                          <ngc-dropdownlist formControlName="triggerPointOperationId"
+                            [sourceParameters]="{'parameter1':item.get('triggerPoint.triggerPointId').value }"
+                            sourceType='query' sourceId="KEY_SETUP_TRIGGER_POINTS"></ngc-dropdownlist>
+                        </ng-container>
+                      </td>
+                    </ng-container>
+                    <td>
+                      <ngc-dropdownlist [source]="activeData" formControlName="actionType"></ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-link (click)="deleteImportTriggerPoints(index)" iconType="delete">
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

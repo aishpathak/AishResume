@@ -1,0 +1,719 @@
+import { forEach } from '@angular/router/src/utils/collection';
+import { AlsoNotify } from './../awbManagement.shared';
+import { Consignee } from './../../tracing/tracing.shared';
+import { FlightBooking } from './../../import/import.shared';
+import { CustomerAddressInfo, RateDescription, CustomerContactInfo } from './../../export/export.sharedmodel';
+import { Component, OnInit, NgZone, ElementRef, ViewContainerRef, ViewChild, Input } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { Validators } from '@angular/forms';
+import { AwbManagementService } from '../awbManagement.service';
+// NGC framework imports
+import {
+  NgcFormGroup, NgcFormControl, NgcFormArray, PageConfiguration, NgcPage, NgcReportComponent, ReactiveModel, NgcInputComponent, NgcUtility
+} from "ngc-framework";
+import { AwbManagementformSearch, SearchAWB } from '../awbManagement.shared';
+
+@Component({
+  selector: 'app-fwb-log',
+  templateUrl: './fwb-log.component.html',
+  // styleUrls: ['./fwb-log.component.scss']
+})
+
+@PageConfiguration({
+  trackInit: true,
+  callNgOnInitOnClear: true,
+  restorePageOnBack: true
+})
+export class FwbLogComponent extends NgcPage {
+  /*
+     Below parameters are used for collapsing / expanding of tabs used in the screen
+  */
+  expandAwbTab = false;
+  expandFlightTab = false;
+  expandShipperInfoTab = false;
+  expandConsigneeInfoTab = false;
+  expandAgentTab = false;
+  expandSSROSITab = false;
+  expandACCCVDTab = false
+  expandRateDescTab = false;
+  expandOtherChargesTab = false;
+  expandPPDTab = false;
+  expandColTab = false;
+  expandAgentRefTab = false;
+  expandSRITab = false;
+  expandOCIInfoTab = false;
+  expandCDCTab = false;
+  expandRefTab = false;
+
+  /* For forwarded data if navigating to or from any other screen */
+  forwardedData: any;
+  /* for saving the initial respose of search in a global object */
+  response: any;
+  /* report paramter object, used only when Print is clicked */
+  reportParameters: any = new Object();
+  /* global parameter of report */
+  @ViewChild("reportWindow") reportWindow: NgcReportComponent;
+  /* This form is used for fwbLogFormSearch Form =. It carries the search request to backend */
+  fwbLogFormSearch: NgcFormGroup = new NgcFormGroup({
+    awbNumber: new NgcFormControl(),
+    expandCollapse: new NgcFormControl()
+  })
+  /* This form is used for saving the respose of Current Object */
+  fwbAfterImageForm: NgcFormGroup = new NgcFormGroup({
+    origin: new NgcFormControl(),
+    destination: new NgcFormControl(),
+    pieces: new NgcFormControl(),
+    weight: new NgcFormControl(),
+    weightUnitCode: new NgcFormControl(),
+    densityGroupCode: new NgcFormControl(),
+    volumeAmount: new NgcFormControl(),
+    volumeUnitCode: new NgcFormControl(),
+    natureOfGoodsDescription: new NgcFormControl(),
+    carriersExecutionDate: new NgcFormControl(),
+    carriersExecutionPlace: new NgcFormControl(),
+    carriersExecutionAuthSign: new NgcFormControl(),
+    customOrigin: new NgcFormControl(),
+    shpCertificateSign: new NgcFormControl(),
+    shcode: new NgcFormArray([]),
+    siiChargeAmount: new NgcFormControl(),
+    cassIndicator: new NgcFormControl(),
+    accountingInfo: new NgcFormArray([]),
+
+    chargeDeclaration: new NgcFormGroup({
+      currencyCode: new NgcFormControl(),
+      chargeCode: new NgcFormControl(),
+      prepaIdCollectChargeDeclaration: new NgcFormControl(),
+      carriageValueDeclaration: new NgcFormControl(),
+      customsValueDeclaration: new NgcFormControl(),
+      insuranceValueDeclaration: new NgcFormControl()
+    }),
+    chargeDestCurrency: new NgcFormGroup({
+      destinationCurrencyCode: new NgcFormControl(),
+      destinationCurrencyChargeAmount: new NgcFormControl(),
+      chargesAtDestinationChargeAmount: new NgcFormControl(),
+      totalCollectChargesChargeAmount: new NgcFormControl(),
+      currencyConversionExchangeRate: new NgcFormControl()
+    }),
+    consigneeInfo: new NgcFormGroup({
+      customerAccountNumber: new NgcFormControl(),
+      customerName: new NgcFormControl(),
+      customerAddressInfo: new NgcFormGroup({
+        streetAddress1: new NgcFormControl(),
+        customerPlace: new NgcFormControl(),
+        stateCode: new NgcFormControl(),
+        countryCode: new NgcFormControl(),
+        postalCode: new NgcFormControl(),
+      }),
+      customerContactInfo: new NgcFormArray([])
+    }),
+    shipperInfo: new NgcFormGroup({
+      customerAccountNumber: new NgcFormControl(),
+      customerName: new NgcFormControl(),
+      customerAddressInfo: new NgcFormGroup({
+        streetAddress1: new NgcFormControl(),
+        customerPlace: new NgcFormControl(),
+        stateCode: new NgcFormControl(),
+        countryCode: new NgcFormControl(),
+        postalCode: new NgcFormControl(),
+      }),
+      customerContactInfo: new NgcFormArray([])
+    }),
+    alsoNotify: new NgcFormGroup({
+      customerAccountNumber: new NgcFormControl(),
+      customerName: new NgcFormControl(),
+      customerAddressInfo: new NgcFormGroup({
+        streetAddress1: new NgcFormControl(),
+        customerPlace: new NgcFormControl(),
+        stateCode: new NgcFormControl(),
+        countryCode: new NgcFormControl(),
+        postalCode: new NgcFormControl(),
+      }),
+      customerContactInfo: new NgcFormArray([])
+    }),
+    agentInfo: new NgcFormGroup({
+      accountNumber: new NgcFormControl(),
+      agentName: new NgcFormControl(),
+      agentPlace: new NgcFormControl(),
+      iatacargoAgentNumericCode: new NgcFormControl(),
+      iatacargoAgentCASSAddress: new NgcFormControl(),
+      participantIdentifier: new NgcFormControl()
+    }),
+    ppd: new NgcFormGroup({
+      totalWeightChargeAmount: new NgcFormControl(),
+      valuationChargeAmount: new NgcFormControl(),
+      taxesChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueAgentChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueCarrierChargeAmount: new NgcFormControl(),
+      chargeSummaryTotalChargeAmount: new NgcFormControl(),
+    }),
+    col: new NgcFormGroup({
+      totalWeightChargeAmount: new NgcFormControl(),
+      valuationChargeAmount: new NgcFormControl(),
+      taxesChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueAgentChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueCarrierChargeAmount: new NgcFormControl(),
+      chargeSummaryTotalChargeAmount: new NgcFormControl(),
+    }),
+    otherCharges: new NgcFormArray([]),
+    otherChargesCarrier: new NgcFormArray([]),
+    shipmentReferenceInfor: new NgcFormGroup({
+      referenceNumber: new NgcFormControl(),
+      supplementaryShipmentInformation1: new NgcFormControl(),
+      supplementaryShipmentInformation2: new NgcFormControl(),
+    }),
+    fwbNominatedHandlingParty: new NgcFormGroup({
+      handlingPartyName: new NgcFormControl(),
+      handlingPartyPlace: new NgcFormControl(),
+    }),
+    otherParticipantInfo: new NgcFormArray([]),
+    senderReference: new NgcFormGroup({
+      airportCityCode: new NgcFormControl(),
+      officeFunctionDesignator: new NgcFormControl(),
+      companyDesignator: new NgcFormControl(),
+      fileReference: new NgcFormControl(),
+      refParticipantIdentifier: new NgcFormControl(),
+      refParticipantCode: new NgcFormControl(),
+      refAirportCityCode: new NgcFormControl(),
+    }),
+    agentRef: new NgcFormGroup({
+      ardAgentReference: new NgcFormControl(),
+    }),
+    flightBooking: new NgcFormArray([]),
+    routing: new NgcFormArray([]),
+    rateDescription: new NgcFormArray([]),
+    osiInfo: new NgcFormArray([]),
+    ssrInfo: new NgcFormArray([]),
+    otherCustomsInfo: new NgcFormArray([]),
+  })
+  /* This form is used for saving the respose of Previous Object */
+  fwbBeforeImageForm: NgcFormGroup = new NgcFormGroup({
+    origin: new NgcFormControl(),
+    destination: new NgcFormControl(),
+    pieces: new NgcFormControl(),
+    weight: new NgcFormControl(),
+    weightUnitCode: new NgcFormControl(),
+    densityGroupCode: new NgcFormControl(),
+    volumeAmount: new NgcFormControl(),
+    volumeUnitCode: new NgcFormControl(),
+    natureOfGoodsDescription: new NgcFormControl(),
+    carriersExecutionDate: new NgcFormControl(),
+    carriersExecutionPlace: new NgcFormControl(),
+    carriersExecutionAuthSign: new NgcFormControl(),
+    customOrigin: new NgcFormControl(),
+    shpCertificateSign: new NgcFormControl(),
+    shcode: new NgcFormArray([]),
+    siiChargeAmount: new NgcFormControl(),
+    cassIndicator: new NgcFormControl(),
+    accountingInfo: new NgcFormArray([]),
+
+    chargeDeclaration: new NgcFormGroup({
+      currencyCode: new NgcFormControl(),
+      chargeCode: new NgcFormControl(),
+      prepaIdCollectChargeDeclaration: new NgcFormControl(),
+      carriageValueDeclaration: new NgcFormControl(),
+      customsValueDeclaration: new NgcFormControl(),
+      insuranceValueDeclaration: new NgcFormControl()
+    }),
+    chargeDestCurrency: new NgcFormGroup({
+      destinationCurrencyCode: new NgcFormControl(),
+      destinationCurrencyChargeAmount: new NgcFormControl(),
+      chargesAtDestinationChargeAmount: new NgcFormControl(),
+      totalCollectChargesChargeAmount: new NgcFormControl(),
+      currencyConversionExchangeRate: new NgcFormControl()
+    }),
+    consigneeInfo: new NgcFormGroup({
+      customerAccountNumber: new NgcFormControl(),
+      customerName: new NgcFormControl(),
+      customerAddressInfo: new NgcFormGroup({
+        streetAddress1: new NgcFormControl(),
+        customerPlace: new NgcFormControl(),
+        stateCode: new NgcFormControl(),
+        countryCode: new NgcFormControl(),
+        postalCode: new NgcFormControl(),
+      }),
+      customerContactInfo: new NgcFormArray([])
+    }),
+    shipperInfo: new NgcFormGroup({
+      customerAccountNumber: new NgcFormControl(),
+      customerName: new NgcFormControl(),
+      customerAddressInfo: new NgcFormGroup({
+        streetAddress1: new NgcFormControl(),
+        customerPlace: new NgcFormControl(),
+        stateCode: new NgcFormControl(),
+        countryCode: new NgcFormControl(),
+        postalCode: new NgcFormControl(),
+      }),
+      customerContactInfo: new NgcFormArray([])
+    }),
+    alsoNotify: new NgcFormGroup({
+      customerAccountNumber: new NgcFormControl(),
+      customerName: new NgcFormControl(),
+      customerAddressInfo: new NgcFormGroup({
+        streetAddress1: new NgcFormControl(),
+        customerPlace: new NgcFormControl(),
+        stateCode: new NgcFormControl(),
+        countryCode: new NgcFormControl(),
+        postalCode: new NgcFormControl(),
+      }),
+      customerContactInfo: new NgcFormArray([])
+    }),
+    agentInfo: new NgcFormGroup({
+      accountNumber: new NgcFormControl(),
+      agentName: new NgcFormControl(),
+      agentPlace: new NgcFormControl(),
+      iatacargoAgentNumericCode: new NgcFormControl(),
+      iatacargoAgentCASSAddress: new NgcFormControl(),
+      participantIdentifier: new NgcFormControl()
+    }),
+    ppd: new NgcFormGroup({
+      totalWeightChargeAmount: new NgcFormControl(),
+      valuationChargeAmount: new NgcFormControl(),
+      taxesChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueAgentChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueCarrierChargeAmount: new NgcFormControl(),
+      chargeSummaryTotalChargeAmount: new NgcFormControl(),
+    }),
+    col: new NgcFormGroup({
+      totalWeightChargeAmount: new NgcFormControl(),
+      valuationChargeAmount: new NgcFormControl(),
+      taxesChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueAgentChargeAmount: new NgcFormControl(),
+      totalOtherChargesDueCarrierChargeAmount: new NgcFormControl(),
+      chargeSummaryTotalChargeAmount: new NgcFormControl(),
+    }),
+    otherCharges: new NgcFormArray([]),
+    otherChargesCarrier: new NgcFormArray([]),
+    shipmentReferenceInfor: new NgcFormGroup({
+      referenceNumber: new NgcFormControl(),
+      supplementaryShipmentInformation1: new NgcFormControl(),
+      supplementaryShipmentInformation2: new NgcFormControl(),
+    }),
+    fwbNominatedHandlingParty: new NgcFormGroup({
+      handlingPartyName: new NgcFormControl(),
+      handlingPartyPlace: new NgcFormControl(),
+    }),
+    otherParticipantInfo: new NgcFormArray([]),
+    senderReference: new NgcFormGroup({
+      airportCityCode: new NgcFormControl(),
+      officeFunctionDesignator: new NgcFormControl(),
+      companyDesignator: new NgcFormControl(),
+      fileReference: new NgcFormControl(),
+      refParticipantIdentifier: new NgcFormControl(),
+      refParticipantCode: new NgcFormControl(),
+      refAirportCityCode: new NgcFormControl(),
+    }),
+    agentRef: new NgcFormGroup({
+      ardAgentReference: new NgcFormControl(),
+    }),
+    flightBooking: new NgcFormArray([]),
+    routing: new NgcFormArray([]),
+    rateDescription: new NgcFormArray([]),
+    osiInfo: new NgcFormArray([]),
+    ssrInfo: new NgcFormArray([]),
+    otherCustomsInfo: new NgcFormArray([]),
+  })
+  /* successful response Flag */
+  onSuccess: boolean;
+  /* successful repost Flag */
+  printFlag: boolean = false;
+  /* constructor for dependency injection */
+  constructor(
+    appZone: NgZone,
+    appElement: ElementRef,
+    private router: Router,
+    appContainerElement: ViewContainerRef,
+    private activatedRoute: ActivatedRoute,
+    private awbManagementService: AwbManagementService
+  ) {
+    super(appZone, appElement, appContainerElement);
+  }
+  /* Oninit function */
+  ngOnInit() {
+    super.ngOnInit();
+  }
+  /* On search : called when search is clicked */
+  onSearch() {
+    this.resetFormMessages();
+    const searchRequest = this.fwbLogFormSearch.getRawValue();
+    this.fwbLogFormSearch.validate();
+    if (!this.fwbLogFormSearch.valid) {
+      this.showErrorStatus('g.enter.awb');
+      return;
+    }
+    this.onSuccess = false;
+    // this.awbManagementService.fetchFwbLogDetailsOnSearch(searchRequest).subscribe(response => {
+    //   this.resetFormMessages();
+    //   this.fwbBeforeImageForm.reset();
+    //   this.fwbAfterImageForm.reset();
+    //   if (!this.showResponseErrorMessages(response)) {
+    //     this.onSuccess = true;
+    //     this.printFlag = true;
+    //     this.refreshFormMessages(response);
+    //     this.response = response.data;
+    //     /* when current and previous FWB is received */
+    //     if (this.response.current && this.response.previous) {
+    //       /* used for date changes */
+    //       if ((this.response.current.carriersExecutionDate ? this.response.current.carriersExecutionDate.valueOf() : 0)
+    //         == (this.response.previous.carriersExecutionDate ? this.response.previous.carriersExecutionDate.valueOf() : -1)) {
+    //         this.response.current.changedFlag = true;
+    //       }
+    //       /* comparer function called */
+    //       this.comparer(this.response.current, this.response.previous);
+    //       this.fwbBeforeImageForm.patchValue(this.response.previous);
+    //       this.fwbAfterImageForm.patchValue(this.response.current);
+    //       this.fwbLogFormSearch.get('expandCollapse').setValue(true, { onlySelf: true, emitEvent: false });
+    //       this.expandAwbTab = true;
+    //       this.expandFlightTab = true;
+    //       this.expandShipperInfoTab = true;
+    //       this.expandConsigneeInfoTab = true;
+    //       this.expandAgentTab = true;
+    //       this.expandSSROSITab = true;
+    //       this.expandACCCVDTab = true
+    //       this.expandRateDescTab = true;
+    //       this.expandOtherChargesTab = true;
+    //       this.expandPPDTab = true;
+    //       this.expandColTab = true;
+    //       this.expandAgentRefTab = true;
+    //       this.expandSRITab = true;
+    //       this.expandOCIInfoTab = true;
+    //       this.expandCDCTab = true;
+    //       this.expandRefTab = true;
+    //     } if (this.response.current && !this.response.previous) {
+    //       this.onSuccess = false;
+    //       this.printFlag = false;
+    //       this.showErrorMessage('no.record');
+    //     }
+    //   }
+    // })
+  }
+
+  /**
+  @param  current , previous
+  It is used for adding changeValueFlag for all the list in this screen
+  */
+  comparer(current, previous) {
+    for (let key in current) {
+      if ((NgcUtility.isArray(current[key]) && (current[key].length > 0 || previous[key].length > 0))
+        || (!NgcUtility.isArray(current[key]) && (key == 'shipperInfo' || key == 'consigneeInfo' || key == 'alsoNotify'))) {
+        for (const eachRow of this.arrayList) {
+          if (eachRow.arrayName == key) {
+            this.isChangedFlag(current[eachRow.arrayName], previous[eachRow.arrayName], eachRow.parameters, eachRow.arrayName, eachRow.arrayNameUse);
+          }
+        }
+      }
+    }
+  }
+  /* It is called only if any change in the list is found else 
+  the parameter will be in defalut color which is black as there are not any changes
+  currentList: carries list of arrays changed
+  previousList: carrier list of arrays changed
+  comparingValue: parameter on which the comparison will occur
+  arrayName: for which array the comparison will occur
+  arrayNameUse: used for comparing value with current and previous
+   */
+  isChangedFlag(currentList, previousList, comparingValue, arrayName, arrayNameUse) {
+    let currrentListLengthFlag = arrayNameUse ?
+      currentList[arrayNameUse[0]][arrayNameUse[1]].length > 0 : currentList.length > 0 ? true : false;
+    let previousListLengthFlag = arrayNameUse ?
+      previousList[arrayNameUse[0]][arrayNameUse[1]].length > 0 : previousList.length > 0 ? true : false;
+    if ((arrayNameUse ? currentList[arrayNameUse[0]][arrayNameUse[1]].length > 0 : currentList.length > 0)
+      && ((arrayNameUse ? currentList[arrayNameUse[0]][arrayNameUse[1]].length == previousList[arrayNameUse[0]][arrayNameUse[1]].length :
+        currentList.length == previousList.length))) {
+      this.iterationToSet(currentList, previousList, comparingValue, true, arrayName, arrayNameUse);
+    } else if ((currrentListLengthFlag || previousListLengthFlag) &&
+      (!currrentListLengthFlag || !previousListLengthFlag)) {
+      for (let index = 0;
+        index < (arrayNameUse ?
+          currentList[arrayNameUse[0]][arrayNameUse[1]].length > 0 ? currentList[arrayNameUse[0]][arrayNameUse[1]].length : previousList[arrayNameUse[0]][arrayNameUse[1]].length
+          : (currentList.length > 0 ? currentList.length : previousList.length));
+        index++) {
+        if (currrentListLengthFlag) {
+          for (const eachRow of this.arrayList) {
+            if (eachRow.arrayName == arrayName) {
+              if (arrayNameUse) {
+                this.response.current[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+              } else {
+                this.response.current[arrayName][index].changedFlag = true;
+              }
+            }
+          }
+        } else {
+          for (const eachRow of this.arrayList) {
+            if (eachRow.arrayName == arrayName) {
+              if (arrayNameUse) {
+                this.response.previous[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+              } else {
+                this.response.previous[arrayName][index].changedFlag = true;
+              }
+            }
+          }
+        }
+      }
+    } else if (currrentListLengthFlag && previousListLengthFlag) {
+      let isCurrentGreater = arrayNameUse ?
+        (currentList[arrayNameUse[0]][arrayNameUse[1]].length > previousList[arrayNameUse[0]][arrayNameUse[1]].length)
+        : (currentList.length > previousList.length) ? true : false;
+      if (isCurrentGreater) {
+        this.iterationToSet(currentList, previousList, comparingValue, true, arrayName, arrayNameUse);
+      } else {
+        this.iterationToSet(currentList, previousList, comparingValue, false, arrayName, arrayNameUse);
+      }
+    }
+  }
+
+  iterationToSet(currentList, previousList, comparingValue, flag, arrayName, arrayNameUse) {
+    for (let comparingIndex = 0; comparingIndex < comparingValue.length; comparingIndex++) {
+      if (flag) {
+        for (let index = 0; index < (arrayNameUse ? currentList[arrayNameUse[0]][arrayNameUse[1]].length : currentList.length); index++) {
+          const currentObject = arrayNameUse ? currentList[arrayNameUse[0]][arrayNameUse[1]][index] : currentList[index];
+          const previousObject = arrayNameUse ? previousList[arrayNameUse[0]][arrayNameUse[1]][index] : previousList[index];
+          if (previousObject
+            && (currentObject[comparingValue[comparingIndex]] != previousObject[comparingValue[comparingIndex]])) {
+            for (const eachRow of this.arrayList) {
+              if (eachRow.arrayName == arrayName) {
+                if (arrayNameUse) {
+                  this.response.current[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+                  this.response.previous[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+                } else {
+                  this.response.current[arrayName][index].changedFlag = true;
+                  this.response.previous[arrayName][index].changedFlag = true;
+                }
+              }
+            }
+          } else if (!previousObject) {
+            for (const eachRow of this.arrayList) {
+              if (eachRow.arrayName == arrayName) {
+                if (arrayNameUse) {
+                  this.response.current[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+                } else {
+                  this.response.current[arrayName][index].changedFlag = true;
+                }
+              }
+            }
+          }
+        }
+      } else {
+        for (let index = 0; index < (arrayNameUse ? previousList[arrayNameUse[0]][arrayNameUse[1]].length : previousList.length); index++) {
+          const currentObject = arrayNameUse ? currentList[arrayNameUse[0]][arrayNameUse[1]][index] : currentList[index];
+          const previousObject = arrayNameUse ? previousList[arrayNameUse[0]][arrayNameUse[1]][index] : previousList[index];
+          if (currentObject
+            && (currentObject[comparingValue[comparingIndex]] != previousObject[comparingValue[comparingIndex]])) {
+            for (const eachRow of this.arrayList) {
+              if (eachRow.arrayName == arrayName) {
+                if (arrayNameUse) {
+                  this.response.current[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+                  this.response.previous[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+                } else {
+                  this.response.current[arrayName][index].changedFlag = true;
+                  this.response.previous[arrayName][index].changedFlag = true;
+                }
+              }
+            }
+          } else if (!currentObject) {
+            for (const eachRow of this.arrayList) {
+              if (eachRow.arrayName == arrayName) {
+                if (arrayNameUse) {
+                  this.response.previous[arrayName][arrayNameUse[0]][arrayNameUse[1]][index].changedFlag = true;
+                } else {
+                  this.response.previous[arrayName][index].changedFlag = true;
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+
+  expandCollapse(value, tabName) {
+    for (const eachRow of this.tabNameList) {
+      if (eachRow.tabName == tabName && tabName == 'expandAwbTab') {
+        this.expandAwbTab = !value;
+      } else if (eachRow.tabName == tabName && tabName == 'expandFlightTab') {
+        this.expandFlightTab = !value;
+      } else if (eachRow.tabName == tabName && tabName == 'expandShipperInfoTab') {
+        this.expandShipperInfoTab = !value;
+      } else if (eachRow.tabName == tabName && tabName == 'expandConsigneeInfoTab') {
+        this.expandConsigneeInfoTab = !value;
+      } else if (eachRow.tabName == tabName && tabName == 'expandAgentTab') {
+        this.expandAgentTab = !value;
+      } else if (eachRow.tabName == tabName && tabName == 'expandSSROSITab') {
+        this.expandSSROSITab = !value;
+      } else if (eachRow.tabName == tabName && tabName == 'expandACCCVDTab') {
+        this.expandACCCVDTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandRateDescTab') {
+        this.expandRateDescTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandOtherChargesTab') {
+        this.expandOtherChargesTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandPPDTab') {
+        this.expandPPDTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandColTab') {
+        this.expandColTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandAgentRefTab') {
+        this.expandAgentRefTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandSRITab') {
+        this.expandSRITab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandOCIInfoTab') {
+        this.expandOCIInfoTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandCDCTab') {
+        this.expandCDCTab = !value;
+      }
+      else if (eachRow.tabName == tabName && tabName == 'expandRefTab') {
+        this.expandRefTab = !value;
+      }
+    }
+  }
+  /* Print function to print current and previous FWB */
+  onPrint() {
+    if (this.response.current && this.response.previous) {
+      this.reportParameters.shipmentNumber = this.fwbLogFormSearch.getRawValue().awbNumber;
+      this.reportWindow.open();
+    }
+  }
+  /* Default list of tabs used for opening and closing of tabs */
+  tabNameList = [{
+    tabName: 'expandAwbTab'
+  }, {
+    tabName: 'expandFlightTab'
+  }, {
+    tabName: 'expandShipperInfoTab'
+  }, {
+    tabName: 'expandConsigneeInfoTab'
+  }, {
+    tabName: 'expandAgentTab'
+  }, {
+    tabName: 'expandSSROSITab'
+  }, {
+    tabName: 'expandACCCVDTab'
+  }, {
+    tabName: 'expandRateDescTab'
+  }, {
+    tabName: 'expandOtherChargesTab'
+  }, {
+    tabName: 'expandPPDTab'
+  }, {
+    tabName: 'expandColTab'
+  }, {
+    tabName: 'expandAgentRefTab'
+  }, {
+    tabName: 'expandSRITab'
+  }, {
+    tabName: 'expandOCIInfoTab'
+  }, {
+    tabName: 'expandCDCTab'
+  }, {
+    tabName: 'expandRefTab'
+  }]
+
+  /* 
+  Below parameters are used for collapsing / expanding of tabs used in the screen
+   */
+
+  /** it is used for expanding of the all the tabs together */
+  onExpand() {
+    this.expandAwbTab = true;
+    this.expandFlightTab = true;
+    this.expandShipperInfoTab = true;
+    this.expandConsigneeInfoTab = true;
+    this.expandAgentTab = true;
+    this.expandSSROSITab = true;
+    this.expandACCCVDTab = true
+    this.expandRateDescTab = true;
+    this.expandOtherChargesTab = true;
+    this.expandPPDTab = true;
+    this.expandColTab = true;
+    this.expandAgentRefTab = true;
+    this.expandSRITab = true;
+    this.expandOCIInfoTab = true;
+    this.expandCDCTab = true;
+    this.expandRefTab = true;
+  }
+
+  /** it is used for collapsing of the all the tabs together */
+  collapseall() {
+    this.expandAwbTab = false;
+    this.expandFlightTab = false;
+    this.expandShipperInfoTab = false;
+    this.expandConsigneeInfoTab = false;
+    this.expandAgentTab = false;
+    this.expandSSROSITab = false;
+    this.expandACCCVDTab = false
+    this.expandRateDescTab = false;
+    this.expandOtherChargesTab = false;
+    this.expandPPDTab = false;
+    this.expandColTab = false;
+    this.expandAgentRefTab = false;
+    this.expandSRITab = false;
+    this.expandOCIInfoTab = false;
+    this.expandCDCTab = false;
+    this.expandRefTab = false;
+  }
+
+  /* List of all the arrays used in screen
+  arrayName: is the name of array
+  arrayNameUse: hierarcy of array
+  parameters: the parameters on which comparison will occur
+  */
+  arrayList = [
+    {
+      arrayName: 'shipperInfo',
+      arrayNameUse: ['customerAddressInfo', 'customerContactInfo'],
+      parameters: ['contactIdentifier', 'contactDetail']
+    },
+    {
+      arrayName: 'consigneeInfo',
+      arrayNameUse: ['customerAddressInfo', 'customerContactInfo'],
+      parameters: ['contactIdentifier', 'contactDetail']
+    },
+    // {
+    //   arrayName: 'alsoNotify',
+    //   arrayNameUse: ['customerAddressInfo', 'customerContactInfo'],
+    //   parameters: ['contactIdentifier', 'contactDetail']
+    // },
+    {
+      arrayName: 'shcode',
+      arrayNameUse: null,
+      parameters: ['specialHandlingCode']
+    }, {
+      arrayName: 'accountingInfo',
+      arrayNameUse: null,
+      parameters: ['accountingInformation', 'informationIdentifier']
+    }, {
+      arrayName: 'ssrInfo',
+      arrayNameUse: null,
+      parameters: ['serviceRequestcontent']
+    }, {
+      arrayName: 'osiInfo',
+      arrayNameUse: null,
+      parameters: ['serviceRequestcontent']
+    }, {
+      arrayName: 'flightBooking',
+      arrayNameUse: null,
+      parameters: ['flightKey', 'flightDate']
+    }, {
+      arrayName: 'otherCustomsInfo',
+      arrayNameUse: null,
+      parameters: ['countryCode', 'informationIdentifier', 'csrciIdentifier', 'scrcInformation']
+    }, {
+      arrayName: 'otherCharges',
+      arrayNameUse: null,
+      parameters: ['otherChargeCode', 'chargeAmount']
+    }, {
+      arrayName: 'otherChargesCarrier',
+      arrayNameUse: null,
+      parameters: ['otherChargeCode', 'chargeAmount']
+    }, {
+      arrayName: 'rateDescription',
+      arrayNameUse: null,
+      parameters: ['rateLineNumber']
+    }];
+}
+

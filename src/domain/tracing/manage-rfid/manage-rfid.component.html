@@ -1,0 +1,231 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='tracing.manage.rfid.title' (save)="addTag()" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label label='tracing.awb.no' shortcutFor="shipmentNo"></ngc-label>
+        <div>
+          <ngc-awbinput required accessEnableOn="r" formControlName="shipmentNo" [width]='120' (ngModelChange)="onShipmentNumber()">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="6">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearchRfid()" value="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+
+
+
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label='tracing.printer'></ngc-label>
+        <div>
+          <ngc-printer [width]='200' (select)="onPrinterSelect($event)" required [printerTypeList]="['RFIDAWB']">
+          </ngc-printer>
+        </div>
+      </ngc-column>
+      <ngc-column column="1"></ngc-column>
+
+      <ngc-column column="1">
+        <ngc-label label='g.totalpieces'></ngc-label>
+        <div>
+          <ngc-display required formControlName="shppieces" [width]='40'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1"></ngc-column>
+      <!--   <ngc-column>
+        <ngc-label label='Tags'></ngc-label>
+        <div>
+          <ngc-numberinput formControlName="tagNumber" [width]='40' decimalDigits="0">
+          </ngc-numberinput>
+        </div>
+      </ngc-column> -->
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onReprint()" value="tracing.reprint" *ngIf="showTable" iconType="print"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="cancelTag()" value="tracing.delete.tag"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button *ngIf="isaddTAg" [disabled]='true' (click)="addTagRow()" value="tracing.add.tag"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="5"></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="6" *ngIf="showTable">
+        <ngc-edittable formArrayName="rfidList" [pageable]="true">
+          <ngc-data-column text="g.select" cellsAlign="center" dataField="select">
+            <ng-template let-name="g.name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="select"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.tag.no" dataField="pieceNo">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <!--  <ngc-input *ngIf="form.get(['rfidList', group, 'flagCRUD']).value === 'C'" formControlName='pieceNo'
+                  [width]='100'>
+                </ngc-input> -->
+                <ngc-display formControlName='pieceNo' [width]='100'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.pieces" dataField="pieces">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input *ngIf="!form.get(['rfidList', group, 'tagId']).value" formControlName='pieces' [width]='100'>
+                </ngc-input>
+                <ngc-display *ngIf="form.get(['rfidList', group, 'tagId' ]).value" formControlName='pieces'
+                  [width]='100'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.stage" dataField="stage">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="form.get(['rfidList', group, 'stage']).value=='NEW'">
+                  <ngc-display formControlName='stage' [width]='100'>
+                  </ngc-display>
+                  <!--  <ngc-icon type="yesno" label="del" value="false" true-color="red">
+                  </ngc-icon>
+                  <ngc-icon type="print" label="del" value="true" true-color="red">
+                  </ngc-icon> -->
+                  <ngc-icon type="print" label="customs.del" value="true" true-color="red">
+                  </ngc-icon>
+                </ng-container>
+                <ng-container *ngIf="form.get(['rfidList', group, 'stage']).value!='NEW'">
+                  <ngc-display formControlName='stage' [width]='100'>
+                  </ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.uld" dataField="uldNo">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName='uldNo' [width]='150'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text=" ">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onSearchByTagId(group)" iconType="edit"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+
+
+
+      </ngc-column>
+      <ngc-column column="6" *ngIf="showTable && showHistoryTable">
+        <ngc-container type="rectangle" title="tracing.history.caps">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label></ngc-label>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="showTable1" align="center" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='tracing.awb.no'></ngc-label>
+        <div>
+          <ngc-awbdisplay required formControlName="shipmentNo" [width]='40'></ngc-awbdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.totalpieces'></ngc-label>
+        <div>
+          <ngc-display required formControlName="shppieces" [width]='40'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='tracing.tags'></ngc-label>
+        <div>
+          <ngc-numberinput formControlName="tagNumber" (ngModelChange)="onAddrow($event)" [width]='40'
+            decimalDigits="0">
+          </ngc-numberinput>
+          <!-- <ngc-numberinput formControlName="tagNumber" (ngModelChange)="onAddrow($event)" [width]='40'
+            decimalDigits="0"></ngc-numberinput> -->
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+
+
+      <ngc-column column="2">
+        <ngc-label label='tracing.printer'></ngc-label>
+        <div>
+          <ngc-printer [width]='200' (select)="onPrinterSelect($event)" required [printerTypeList]="['RFIDAWB']">
+          </ngc-printer>
+        </div>
+      </ngc-column>
+      <ngc-column column="1"></ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onPrint()" value="g.print" *ngIf="showTable1" iconType="print"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="9"></ngc-column>
+
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-table>
+          <thead align="center">
+            <tr>
+              <th align="center">
+                <ngc-label label="tracing.tag.no"></ngc-label>
+              </th>
+              <th align="center">
+                <ngc-label label='tracing.pieces'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="rfidList1">
+            <tr *ngFor="let item of form.controls.rfidList1.controls let index=index" [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="pieceNo"></ngc-display>
+              </td>
+              <td>
+                <ngc-piecesinput formControlName="pieces"></ngc-piecesinput>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+</form>

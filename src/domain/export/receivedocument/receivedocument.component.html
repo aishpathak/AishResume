@@ -1,0 +1,278 @@
+<ngc-titlebar title="Receive Document" (save)="onSave($event)" (clear)="clear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+
+<form [formGroup]="ReceiveDocumentSearchForm">
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.fromDate">
+        </ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="fromDate" [width]="50">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="toDate" [width]="50">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label='exp.truck.number'></ngc-label>
+        <div>
+          <ngc-lov formControlName="truckNumber" [width]="50" sourceId='APT' title='export.airport' dataField='code'>
+            <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+            </ngc-data-column>
+            <ngc-data-column text="flight.airportName" dataField="desc" [width]="80">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="awb">
+        </ngc-label>
+        <div>
+          <ngc-awbinput formControlName="shipmentNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="g.uld"></ngc-label>
+        <div>
+          <ngc-uldinput formControlName="uldNumber"> </ngc-uldinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="g.iatacode"></ngc-label>
+        <div>
+          <ngc-input formControlName="agentIataCode" width="150"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label="g.agentCode"></ngc-label>
+        <div>
+          <ngc-input formControlName="agentName" width="200"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column verticalAlign="bottom">
+        <ngc-button (click)="onSearch()" label='g.search' iconType="search">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-label label="&nbsp;"></ngc-label>
+<form [formGroup]="ReceiveDocumentResultForm">
+  <ngc-container *ngIf="shipmentDocumentInfoTbl===true">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="shipmentDocumentInfo" [pageable]="true" [pageSize]="20" [sortable]="true">
+          <ngc-data-column text="g.sel" dataField="sel" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="sel" [width]="30"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="g.sNo" dataField="sequenceNumber">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [width]="40" value={{group+1}}></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentNumber" dataField="shipmentNumber" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="export.uldNumber" dataField="uldNumber" type="text">
+          </ngc-data-column>
+
+          <ngc-data-column text="g.fwb" dataField="fwb" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="fwb">
+                </ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.fwb.pcs.wt">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container
+                  *ngIf="ReceiveDocumentResultForm.get(['shipmentDocumentInfo', group, 'fwbPieces']).value!=null">
+                  <ngc-display [width]=" 70" formControlName="fwbPieces">
+                  </ngc-display>/
+                  <ngc-display [width]="40" formControlName="fwbWeight">
+                  </ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.fhl.pcs.wt">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container
+                  *ngIf="ReceiveDocumentResultForm.get(['shipmentDocumentInfo', group, 'fhlPieces']).value!=null">
+                  <ngc-display [width]=" 70" formControlName="fhlPieces">
+                  </ngc-display>/
+                  <ngc-display [width]="40" formControlName="fhlWeight">
+                  </ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.fhl.processed" dataField="fhlProcessed" type="text">
+          </ngc-data-column>
+
+          <ngc-data-column text="g.eawb" dataField="eawb" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="eawb">
+                </ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="Customer.RACSF" dataField="racsf" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="racsf">
+                </ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="admin.screen" dataField="screened" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="screened">
+                </ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.freeze.fwb" dataField="freezeFwb" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="freezeFwb" [width]="30"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.freeze.fhl" dataField="freezeFhl" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="freezeFhl" [width]="30"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.acceptance.awbreceived" dataField="documentReceived" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist sourceId="General$YesNoFlag" [autoSelect]="true" [noBlank]="true"
+                  formControlName="documentReceived" width='80px'>
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.acceptance.pouch" dataField="pouch" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist sourceId="General$YesNoFlag" [autoSelect]="true" [noBlank]="true"
+                  formControlName="pouch" width='80px'>
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.no.of.hwb" dataField="noOfHouse">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-numberinput formControlName='noOfHouse' [width]="50" digits="4" decimalDigits="0">
+                </ngc-numberinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.freeze.fwb.date" dataType="date" dataField="freezeFwbAt">
+          </ngc-data-column>
+          <ngc-data-column text="exp.freeze.fhl.date" dataType="date" dataField="freezeFhlAt">
+          </ngc-data-column>
+          <ngc-data-column text="exp.doc.recv.date" dataType="date" [width]="100" dataField="docReceiveDate">
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.Exp.doc.cre" dataField="documentReceived" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="documentReceived">
+                </ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.fwb.source" dataField="fwbSource">
+          </ngc-data-column>
+          <ngc-data-column text="exp.fwb.Date" dataType="date" [width]="100" dataField="fwbReceivedOn">
+          </ngc-data-column>
+          <ngc-data-column text="exp.fhl.source" dataField="fhlSource">
+          </ngc-data-column>
+          <ngc-data-column text="exp.fhl.date" dataType="date" [width]="100" dataField="fhlReceivedOn">
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.reject" dataField="shipmentRejected" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="shipmentRejected" [width]="30"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="fwb.reject.reason" dataField="shipmentRejectedReason">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist sourceId='REJECT_RETURN_REASON' formControlName="shipmentRejectedReason"
+                  [disabled]="!ReceiveDocumentResultForm.get(['shipmentDocumentInfo',group,'shipmentRejected']).value"
+                  sourceType="query">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="g.remarks">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-remarksinput formControlName="remarks" [width]="200"></ngc-remarksinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<ngc-footer>
+  <ngc-row>
+    <ngc-column>
+      <ngc-button label="EXP AWB DOC" (click)='ExpAwbDoc()'> </ngc-button>
+    </ngc-column>
+
+    <ngc-column [column]="10">
+      <ngc-button label="FHL" (click)='ExpAwbDoc()'> </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

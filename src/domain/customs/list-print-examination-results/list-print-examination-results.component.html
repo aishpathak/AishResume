@@ -1,0 +1,261 @@
+<ngc-titlebar title='cus.enquire.print.examination.results' (clear)="onClear()" (cancel)='onCancel($event)'
+  (print)="onreportcreation()">
+</ngc-titlebar>
+<form [formGroup]="printExaminationResultsForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column='1.5'>
+        <div>
+          <ngc-label label="cus.code.type">
+          </ngc-label>
+        </div>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [autoSelect]="false" [disabled]="onSearchFlag" [width]="80"
+            formControlName='codeType' sourceId="Customs$CodeType" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='1.5'>
+        <div>
+          <ngc-label label="flight.flightType">
+          </ngc-label>
+        </div>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [autoSelect]="false" [disabled]="onSearchFlag" [width]="80"
+            formControlName='flightType' sourceId="Customs$FlightTypeDropdown" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='1.5'>
+        <ngc-label value='flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput [disabled]="onSearchFlag" accessEnableOn="r" [width]="100" formControlName="flight_Key"
+            upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='1.5'>
+        <ngc-label label='date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" onlyDate='true' required [width]="80" formControlName="flight_Date">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='1.5'>
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="awb_Number" required>
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <br>
+        <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value=''></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='searchButtonClicked' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="retrievePrintExamintaionResults" (itemSelect)="onClick($event)"
+          [showToolbar]="false" [pageable]="true">
+
+          <ngc-data-column text="g.sNo" align="left" [width]="20" cellsAlign="left" dataField=""
+            [cellsRenderer]="cellsRendererSno">
+          </ngc-data-column>
+
+          <ngc-data-column text="hash.amended" dataField="amd" align="left" [width]="45" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.bd" dataField="bd" align="left" [width]="45" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="awb" dataField="awbNumber" align="left" cellsAlign="left" [width]="60">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-awbdisplay formControlName="awbNumber"></ngc-awbdisplay>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.cnsl" dataField="cnsl" align="left" [width]="45" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.constraint.code" dataField="cc" align="left" [width]="40" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.exm" dataField="exm" align="left" [width]="45" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.ce.ref.no" dataField="cerefNo" align="left" [width]="45" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.rel.pc.wt" dataField="relPcsWgt" align="center" [width]="45" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.dtn.pc.wt" dataField="dtnPcsWgt" [width]="45" align="center" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="message.log.received.date.time" dataField="recvDateTime" [width]="60" align="center"
+            cellsAlign="center" type="displayDateTime">
+          </ngc-data-column>
+
+          <ngc-data-column text="g.remarks" dataField="remarks" [width]="45" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column text="cus.hawb.history" dataField="" [width]="30">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" type="link" (linkClick)="openHistory(group)" iconType="open-link"
+                  align="center" cellsAlign="center">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #historyFormWindow [width]="1250" [height]="515" title="constraint.code.history" [showCloseButton]="true"
+    (close)="closeAddHouseWindow()">
+    <ngc-container *ngIf="windowOpenFlag">
+
+      <ngc-row>
+        <ngc-column [column]="3">
+          <ngc-label label='flight.flightType'></ngc-label>
+          &nbsp;&nbsp;
+          &nbsp;&nbsp;
+          &nbsp;&nbsp;
+          <ngc-display formControlName="flightType"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label='flight.virtual.flight.number'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display formControlName="flightKey"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label='flight.virtual.flight.date'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display [onlyDate]="true" formControlName="flightDate"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=''></ngc-label>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column [column]="3">
+          <ngc-label label='g.awbNumber'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-awbdisplay formControlName="awbNumber"></ngc-awbdisplay>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='etd.atd'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display [onlyTime]="true" formControlName="datAtd"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='eta.ata'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display [onlyTime]="true" formControlName="datAta"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='flight.std'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display [onlyTime]="true" formControlName="dateSTD"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=''></ngc-label>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+
+        <ngc-column [column]="3">
+          <ngc-label label='itfs.flight.no'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display formControlName="customsFlightNumber"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label='itfs.flight.date'></ngc-label>
+          &nbsp;
+          &nbsp;
+          &nbsp;
+          <ngc-display [onlyDate]="true" formControlName="customsFlightDate"></ngc-display>
+        </ngc-column>
+
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=''></ngc-label>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column column="12">
+          <ngc-edittable formArrayName="retrieveConstraintCodeHistory" [pageable]="false" width="600">
+
+            <ngc-data-column text="g.sNo" align="left" [width]="20" cellsAlign="left" dataField=""
+              [cellsRenderer]="cellsRendererSno">
+            </ngc-data-column>
+
+            <ngc-data-column text="g.hawb.number" dataField="hawbNumber" align="left" [width]="60" cellsAlign="left">
+            </ngc-data-column>
+
+            <ngc-data-column text="g.type" dataField="clearanceType" align="left" [width]="60" cellsAlign="left">
+            </ngc-data-column>
+
+            <ngc-data-column text="exp.constraint.code" dataField="cc" align="left" [width]="60" cellsAlign="left">
+            </ngc-data-column>
+
+            <ngc-data-column text="message.log.received.date.time" dataField="recvDateTime" align="left" [width]="60"
+              cellsAlign="left" type="displayDateTime">
+            </ngc-data-column>
+
+            <ngc-data-column text="g.remark" dataField="" align="left" [width]="100" cellsAlign="left">
+            </ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-report format='pdf' #reportWindow title="printexaminationresultsreport"  reportId='Print_Examination_Results'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+
+</form>

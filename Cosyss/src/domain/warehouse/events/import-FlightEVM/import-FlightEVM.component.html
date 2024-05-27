@@ -1,0 +1,126 @@
+<ngc-titlebar title="warehouse.inbfltevm"></ngc-titlebar>
+<form [formGroup]="importFlightEVM">
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='outbfltevm.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='fromDate' align="left"
+            required accessEnableOn="r"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='outbfltevm.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='toDate' align="left"
+            [width]="160" [min]="dateTo" align="left" required accessEnableOn="r"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='import.carrierGroup'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='warehouse.rampcomplete'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="120" [dropDownWidth]="110" sourceId="CUSTOM$ACKNOWLEDGEMENT_FLAG"
+            formControlName="rampCheckInCompleted" [noBlank]="true" [autoSelect]="true" accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='warehouse.documentcomplete'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="120" [dropDownWidth]="110" sourceId="CUSTOM$ACKNOWLEDGEMENT_FLAG"
+            formControlName="documentVerificationCompleted" [noBlank]="true" [autoSelect]="true" accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='warehouse.bdcomplete'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="120" [dropDownWidth]="110" sourceId="CUSTOM$ACKNOWLEDGEMENT_FLAG"
+            formControlName="breakdownCompleted" [noBlank]="true" [autoSelect]="true" accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='warehouse.flightcomplete'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="120" [dropDownWidth]="110" sourceId="CUSTOM$ACKNOWLEDGEMENT_FLAG"
+            formControlName="flightCompleted" [noBlank]="true" [autoSelect]="true" accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="requestTerminal" sourceId="WAREHOUSE_TERMINAL"
+            [width]="100" sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="fetchImportFlightInfo()" value="g.search" iconType="search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="6">
+
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label='warehouse.autorefresh'></ngc-label>
+        <ngc-switchbutton accessEnableOn="r" formControlName="auto" (ngModelChange)="onSwitchChange($event)" onLabel="Auto Refresh"
+          [width]="200"></ngc-switchbutton>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTableFlag" type="tab">
+    <!-- <ngc-row>
+      <ngc-column align="right">
+        <ngc-switchbutton formControlName="auto" (ngModelChange)="onSwitchChange($event)" onLabel="Auto Refresh" [width]="200"></ngc-switchbutton>
+      </ngc-column>
+    </ngc-row> -->
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="importFlightList" [pageSize]="20" [enablePageSizeHeight]="false">
+          <ngc-data-column name="outbfltevm.fltDetails" text="warehouse.flightdetails" align="center" [width]="600">
+            <ngc-data-column text="g.flight" [width]="100" align="center" cellsAlign="center" dataField="flightKey">
+            </ngc-data-column>
+            <ngc-data-column text="g.date" [width]="100" align="center" cellsAlign="center" dataField="flightDate"
+              type="displayDate"></ngc-data-column>
+            <ngc-data-column text="flight.sta" [width]="100" align="center" cellsAlign="center" dataField="sta"
+              type="displayTime"></ngc-data-column>
+            <ngc-data-column text="flight.eta" [width]="100" align="center" cellsAlign="center" dataField="eta"
+              type="displayTime"></ngc-data-column>
+            <ngc-data-column text="flight.ata" [width]="100" align="center" cellsAlign="center" dataField="ata"
+              type="displayTime"></ngc-data-column>
+            <!--<ngc-data-column text="outbfltevm.autoComplete" [width]="100" align="center" cellsAlign="center" dataField="automarkedForCompleted"></ngc-data-column>-->
+          </ngc-data-column>
+          <ngc-data-column name="ibbdfltevm.preflt" text="flight.pre.flight" align="center" [width]="200 ">
+            <ngc-data-column text="flight.FFM" [width]="100" align="center" cellsAlign="center" dataField="ffmStatus"
+              [cellsStyleRenderer]="ffmStatusCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column text="inbfltevm.ttmFnlzd" [width]="100" align="center" cellsAlign="center"
+              dataField="ttwlFinalized"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="inbfltevm.RmpCmpltd" [width]="100" align="center" cellsAlign="center"
+            dataField="rampCheckInCompleted" [cellsStyleRenderer]="rampCheckCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="inbfltevm.DcmtCmpltd" [width]="100" align="center" cellsAlign="center"
+            dataField="documentVerificationCompleted" [cellsStyleRenderer]="documentVerificationCellsStyleRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="inbfltevm.brkdnCmpltd" [width]="100" align="center" cellsAlign="center"
+            dataField="breakdownCompleted" [cellsStyleRenderer]="breakdownCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="inbfltevm.inwdSrvcFnlzd" [width]="100" align="center" cellsAlign="center"
+            dataField="inwardServiceReportFinalized" [cellsStyleRenderer]="inwardServiceCellsStyleRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="inbfltevm.fltCmpltd" [width]="100" align="center" cellsAlign="center"
+            dataField="flightCompleted" [cellsStyleRenderer]="flightCompletedCellsStyleRenderer"></ngc-data-column>
+          <!--<ngc-data-column text="inbfltevm.fltClse" [width]="100" align="center" cellsAlign="center" dataField="flightClosed" [cellsStyleRenderer]="flightClosedCellsStyleRenderer"></ngc-data-column>-->
+          <ngc-data-column text="inbfltevm.fdl" [width]="100" align="center" cellsAlign="center"
+            dataField="fdlCompleted" [cellsStyleRenderer]="fdlCompletedCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="inbfltevm.ucmSent" [width]="50" align="center" cellsAlign="center" dataField="ucmSent"
+            [cellsStyleRenderer]="ucmSentCellsStyleRenderer"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

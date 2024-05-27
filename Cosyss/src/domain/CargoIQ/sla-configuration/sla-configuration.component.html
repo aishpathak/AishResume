@@ -1,0 +1,219 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='ciq.ciq.sla.config.title' (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label='ciq.flow.type'>
+          </ngc-label>
+        </div>
+        <ngc-dropdownlist accessEnableOn="r" formControlName="flowType" sourceId="CiqConfig$Message_Type"
+          (select)="onFlowType($event)"></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label='g.message.type'>
+          </ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" [validOnly]="true" formControlName="interfaceMessageTypesId"
+          sourceId="KEY_CIQ_MESSAGETYPES" title="g.message.type" dataField="code" [displayField]="code">
+          <ngc-data-column text="g.message.type" [width]="100" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="g.sub.message.type" dataField="code" [width]="100"></ngc-data-column>
+        </ngc-lov>
+        <!-- <ngc-lov accessEnableOn="r" [validOnly]="true" *ngIf="form.get(['flowType']).value === 'I'" formControlName="interfaceMessageTypesId"
+          sourceId="KEY_CIQ_MESSAGE_TYPE_IMPORT" title="Message Type" dataField="code" [displayField]="code" (select)="onSearchSelectMessageType($event)">
+          <ngc-data-column text="Message Type" [width]="100" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="Sub Message Type" dataField="code" [width]="100"></ngc-data-column>
+        </ngc-lov>
+        <ngc-lov accessEnableOn="r" [validOnly]="true" *ngIf="form.get(['flowType']).value === 'E'" formControlName="interfaceMessageTypesId"
+          sourceId="KEY_CIQ_MESSAGE_TYPE_EXPORT" title="Message Type" dataField="code" [displayField]="code" (select)="onSearchSelectMessageType($event)">
+          <ngc-data-column text="Message Type" [width]="100" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="Sub Message Type" dataField="code" [width]="100"></ngc-data-column>
+        </ngc-lov>
+        <ngc-lov accessEnableOn="r" [validOnly]="true" *ngIf="form.get(['flowType']).value === 'T'" formControlName="interfaceMessageTypesId"
+          sourceId="KEY_CIQ_MESSAGE_TYPE_TRANSHIPMENT" title="Message Type" dataField="code" [displayField]="code" (select)="onSearchSelectMessageType($event)">
+          <ngc-data-column text="Message Type" [width]="100" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="Sub Message Type" dataField="code" [width]="100"></ngc-data-column>
+        </ngc-lov>
+        <ngc-lov accessEnableOn="r" [validOnly]="true" *ngIf="!form.get(['flowType']).value" formControlName="interfaceMessageTypesId"
+          sourceId="KEY_MESSAGE_TYPES_FOR_CARGO_MESSAGING" title="Message Type" dataField="code" [displayField]="code" (select)="onSearchSelectMessageType($event)">
+          <ngc-data-column text="Message Type" [width]="100" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="Sub Message Type" dataField="code" [width]="100"></ngc-data-column>
+        </ngc-lov> -->
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="g.airline"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" [validOnly]="true" formControlName="airline" sourceId="CARRIER" title="Airline"
+          dataField="code">
+          <ngc-data-column text="g.message.type" [width]="150" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="g.code" dataField="code" [width]="50"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label='flight.flightType'>
+          </ngc-label>
+        </div>
+        <ngc-dropdownlist accessEnableOn="r" formControlName="flightType" sourceId="CiqConfig$Aircraft_Type">
+        </ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label='g.destination'>
+          </ngc-label>
+        </div>
+        <ngc-lov formControlName="destination" sourceId="APT" title="g.destination" dataField="code">
+          <ngc-data-column text="g.code" dataField="code" [width]="50"></ngc-data-column>
+          <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label=''>
+          </ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" value="ciqsla.search" (click)='onSearch($event)' iconType='search'></ngc-button>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label=''>
+          </ngc-label>
+        </div>
+        <ngc-button value="ciqsla.create" (click)='onCreate($event)'></ngc-button>
+      </ngc-column>
+      <ngc-column *ngIf="showTable">
+        <div>
+          <ngc-label label=''>
+          </ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" value="ciqsla.print" (click)='onPrint()'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="slaConfiguration" [pageSize]="10">
+          <ngc-data-column text="g.message.type" [width]='10' align="center" dataField="interfaceMessageTypesId">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-lov [validOnly]='true' *ngIf="form.get(['slaConfiguration', group, 'flowType']).value === 'I'"
+                  formControlName="interfaceMessageTypesId" required sourceId="KEY_CIQ_MESSAGE_TYPE_IMPORT"
+                  title="g.message.type" dataField="code" displayField='code'
+                  (select)="onSelectMessageType($event , group)">
+                  <ngc-data-column text="g.message.type" [width]="100" dataField="desc"></ngc-data-column>
+                  <ngc-data-column text="g.sub.message.type" dataField="code" [width]="100"></ngc-data-column>
+                </ngc-lov>
+                <ngc-lov [validOnly]='true' *ngIf="form.get(['slaConfiguration', group, 'flowType']).value === 'E'"
+                  formControlName="interfaceMessageTypesId" required sourceId="KEY_CIQ_MESSAGE_TYPE_EXPORT"
+                  title="g.message.type" dataField="code" displayField='code'
+                  (select)="onSelectMessageType($event , group)">
+                  <ngc-data-column text="g.message.type" [width]="100" dataField="desc"></ngc-data-column>
+                  <ngc-data-column text="g.sub.message.type" dataField="code" [width]="100"></ngc-data-column>
+                </ngc-lov>
+                <ngc-lov [validOnly]='true'
+                  *ngIf="form.get(['slaConfiguration', group, 'flowType']).value && form.get(['slaConfiguration', group, 'flowType']).value != 'I' && form.get(['slaConfiguration', group, 'flowType']).value != 'E'"
+                  formControlName="interfaceMessageTypesId" required sourceId="KEY_CIQ_MESSAGE_TYPE_TRANSHIPMENT"
+                  title="g.message.type" dataField="code" displayField='code'
+                  (select)="onSelectMessageType($event , group)">
+                  <ngc-data-column text="g.message.type" [width]="100" dataField="desc"></ngc-data-column>
+                  <ngc-data-column text="g.sub.message.type" dataField="code" [width]="100"></ngc-data-column>
+                </ngc-lov>
+                <ngc-lov [validOnly]='true' *ngIf="!form.get(['slaConfiguration', group, 'flowType']).value"
+                  formControlName="interfaceMessageTypesId" required sourceId="KEY_MESSAGE_TYPES_FOR_CARGO_MESSAGING"
+                  title="g.message.type" dataField="code" displayField='code'
+                  (select)="onSelectMessageType($event , group)">
+                  <ngc-data-column text="g.message.type" [width]="100" dataField="desc"></ngc-data-column>
+                  <ngc-data-column text="g.sub.message.type" dataField="code" [width]="100"></ngc-data-column>
+                </ngc-lov>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.airline" [width]='10' align="center" dataField="airline">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-lov [validOnly]='true' required formControlName="airline" sourceId="CARRIER" title="Airline"
+                  dataField="code" (select)="forCiqMemberChange($event, group)">
+                  <ngc-data-column text="g.code" dataField="code" [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="ciq.iata.airline" cellsAlign="center" [width]='10' align="center"
+            dataField="iataAirline">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="iataAirline">
+                </ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column cellsAlign="center" text="ciq.ciq.member" [width]='10' align="center"
+            dataField="ciqMemberData">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-icon type="yesno" formControlName="ciqMemberData"></ngc-icon>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.destination" [width]='10' align="center" dataField="destination">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-lov formControlName="destination" sourceId="APT" title="g.destination" dataField="code">
+                  <ngc-data-column text="g.code" dataField="code" [width]="50"></ngc-data-column>
+                  <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                </ngc-lov>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightType" [width]='10' align="center" dataField="flightType">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist formControlName="flightType" required sourceId="CiqConfig$Aircraft_Type">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="ciq.flow.type" [width]='10' align="center" dataField="flowType">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist formControlName="flowType" required sourceId="CiqConfig$Message_Type">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="ciq.sla.time" [width]='10' align="center" dataField="slaTime">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-numberinput digits="4" max="9999" decimalDigits="0" required formControlName="slaTime">
+                </ngc-numberinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text=" " [width]='10' align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-button [disabled]="!form.get(['slaConfiguration', group, 'fsuMessageFlag']).value"
+                  value="ciq.notify.setup" (click)='onNotifySetup(group)'></ngc-button>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.delete" [width]='10' align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link iconType="delete" (linkClick)="onDeleteCiqSLAConfiguration(group)">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" reportId='CIQ_SLA_ConfigurationNew' [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

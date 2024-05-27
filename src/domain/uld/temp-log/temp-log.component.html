@@ -1,0 +1,124 @@
+<form [formGroup]="uldstempraturelogform">
+  <ngc-titlebar title="Temperature Log" (print)='print()' (save)="save($event)">
+  </ngc-titlebar>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='uld.uld'></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName="uldKey" required></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" [width]="150" formControlName="fromDate">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" [width]="150" formControlName="toDate">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button #searchButton  accessEnableOn="r" (click)="getUldList()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button #addButton  accessEnableOn="r" (click)="add()" value="Add" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-table *ngIf="this.showDataTable">
+    <thead>
+      <tr>
+        <th>
+          <ngc-label value="g.sNo"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.uld"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="import.temp.by.voltage"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.temperatureTypeValue"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.uldevent"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.temperatureValue"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.temperatureCaptureDt"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.remarks"></ngc-label>
+        </th>
+        <th>
+          <ngc-label value="uld.delete"></ngc-label>
+        </th>
+      </tr>
+    </thead>
+    <tbody formArrayName="tmpLogList">
+      <tr *ngFor="let item of uldstempraturelogform.controls.tmpLogList.controls; let index=index"
+        [formGroupName]="index">
+        <td>
+          <ngc-display formControlName='uldTemperatureLogId'></ngc-display>
+        </td>
+        <td>
+          <ngc-uldinput formControlName="uldKey" accessEnableOn="r" required
+            [readonly]="item.get('uldTemperatureLogId').value">
+          </ngc-uldinput>
+        </td>
+        <td>
+          <ngc-dropdownlist sourceId='ULD_Temp_Type$Temperature_Type' [readonly]="item.get('uldTemperatureLogId').value"
+            [width]="70" formControlName="temperatureType" required>
+          </ngc-dropdownlist>
+        </td>
+        <td>
+          <ngc-numberinput formControlName='temperatureTypeValue' [readonly]="item.get('uldTemperatureLogId').value"
+            digits="3" decimalDigits="2"></ngc-numberinput>
+        </td>
+        <td>
+          <ngc-dropdownlist sourceId='ULD_Temp_Type$ULD_Temperature_Event'
+            [readonly]="item.get('uldTemperatureLogId').value" [width]="70" formControlName="uldevent" required>
+          </ngc-dropdownlist>
+        </td>
+        <td>
+          <ngc-numberinput formControlName='temperatureValue' [readonly]="item.get('uldTemperatureLogId').value"
+            digits="11" decimalDigits="1"></ngc-numberinput>
+        </td>
+        <td>
+          <ngc-datetimeinput formControlName='temperatureCaptureDt' [readonly]="item.get('uldTemperatureLogId').value"
+            [width]="100" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </td>
+        <td>
+          <ngc-uldinput formControlName="remarks" [maxlength]="60" *ngIf="item.get('remarks').value"
+            [readonly]="item.get('remarks').value">
+          </ngc-uldinput>
+          <ngc-input formControlName="remarks" [maxlength]="60" *ngIf="!item.get('remarks').value">
+          </ngc-input>
+        </td>
+        <td>
+          <ngc-link (click)="deleteLooseShipment($event,index,group)" iconType="delete"></ngc-link>
+        </td>
+      </tr>
+    </tbody>
+  </ngc-table>
+
+  <ngc-report #reportWindow title="g.report"   reportId='ULDTempReport'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

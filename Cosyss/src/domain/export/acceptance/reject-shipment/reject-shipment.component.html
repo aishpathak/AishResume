@@ -1,0 +1,333 @@
+<form [formGroup]="rejectShipmentForm">
+  <ngc-titlebar title='exp.rejectShipmentTitle' (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="awbnumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)='onSearch()' accessEnableOn="r" label='g.search' iconType="search"
+            [disabled]="searchFlag">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+
+  <ngc-container type="section" *ngIf="isDataAvailable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width=10>
+                <ngc-label label="awb.awbnumber"></ngc-label>
+              </th>
+              <th width=7>
+                <ngc-label label="awb.origin"></ngc-label>
+              </th>
+              <th width=7>
+                <ngc-label label="awb.destination"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.natureofgoods"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+              <th width=20>
+                <ngc-label label="exp.FirstBookedFlight"></ngc-label>
+              </th>
+              <th width=150>
+                <ngc-label label="export.flightDate"></ngc-label>
+              </th>
+              <th width=150>
+                <ngc-label label="agent.agentCode"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td width=10>
+                <ngc-display formControlName="shipmentNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="origin"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="destination"></ngc-display>
+              </td>
+              <td>
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="natureOfGoods"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="concatSHC"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="firstBookedFlight"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="firstBookedFlightDate" [onlyDate]="true"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="customerCode"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="section" *ngIf="isDataAvailable && returnShipmentFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="awb.shipment.location"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.warehouse.location"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.pieces.to.return"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.weight.to.return"></ngc-label>
+              </th>
+              <th>
+            </tr>
+          </thead>
+          <tbody formArrayName="returnShipmentList">
+            <tr *ngFor="let item of rejectShipmentForm.controls.returnShipmentList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="shipmentLocation"></ngc-display>
+              </td>
+              <td>
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="warehouseLocation"></ngc-display>
+              </td>
+              <td>
+                <ngc-piecesinput *ngIf="!item.get('returnRequested').value" formControlName="piecesToReturn"
+                  (ngModelChange)="onPiecesChange($event,index)" required></ngc-piecesinput>
+                <ngc-display *ngIf="item.get('returnRequested').value" formControlName="pieces"
+                  (ngModelChange)="onPiecesChange($event,index)"></ngc-display>
+
+              </td>
+              <td>
+                <ngc-weightinput *ngIf="!item.get('returnRequested').value" formControlName="weightToReturn" required>
+                </ngc-weightinput>
+                <ngc-display *ngIf="item.get('returnRequested').value" formControlName="weight"></ngc-display>
+
+              </td>
+              <td>
+                <ngc-button label='reject.return' (click)="onReturn(index)"
+                  *ngIf="returnShipmentFlag && item.get('returnRequested').value"></ngc-button>
+                <ngc-button label='export.cancel.return' (click)="onCancelReturn(index)"
+                  *ngIf="returnShipmentFlag && item.get('returnRequested').value"></ngc-button>
+
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+
+
+  <ngc-container type="section" *ngIf="isDataAvailable">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="exp.RejectionType"></ngc-label>
+      </ngc-column>
+      <ngc-column column="1">
+        &nbsp;
+        <ngc-radiobutton inline="true" formControlName="rejectTypeDangerous" groupName="rejectionType">
+          <div>
+            <ngc-label label="export.reject.type.dgr"></ngc-label>
+          </div>
+        </ngc-radiobutton>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-radiobutton inline="true" formControlName="rejectTypeGeneral" groupName="rejectionType">
+          <div>
+            <ngc-label label="export.reject.type.gen"></ngc-label>
+          </div>
+        </ngc-radiobutton>
+      </ngc-column>
+      <ngc-column column="7"></ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <br>
+      </ngc-column>
+    </ngc-row>
+    <!--
+      <ngc-row>
+        <ngc-column column = 1>
+            <ngc-label label="exp.ReturnedTo"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-label label="exp.ICCode"></ngc-label>
+          <div>
+            <ngc-input formControlName="icCode" [width]="100"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-label label="exp.ICName"></ngc-label>
+          <div>
+            <ngc-input formControlName="icName" [width]="100"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column column="7"></ngc-column>
+      </ngc-row>
+    -->
+
+
+    <ngc-row>
+      <ngc-column column=1>
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-label label="exp.ReturnedTo"></ngc-label>
+        <!-- </ngc-column>
+            </ngc-row> -->
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="export.reject.shipment.airport.pass.number"></ngc-label>
+        <div>
+          <ngc-alphanuminput formControlName="icCode" entityAttribute="Customer.PersonalIdentificationNumberSearch"
+            (ngModelChange)="onChangeIC($event)">
+          </ngc-alphanuminput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button value='export.validate.v' (click)="checkIcCodeValidation()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <!-- <ngc-column column="2" *ngIf="disableContractorICPass"> -->
+        <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+        <div>
+          <ngc-input formControlName="icName" patternName='alphanumspace' [width]="300"
+            entityAttribute="Customer.AuthorisedPersonName">
+          </ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <br>
+      </ngc-column>
+    </ngc-row>
+
+    <!-- <ngc-row>
+      <ngc-column column=1>
+        <ngc-label label="g.reason"></ngc-label>
+      </ngc-column>
+      <ngc-column column=2>
+        <ngc-dropdownlist width="260" sourceId='REJECT_RETURN_REASON' sourceType='query' formControlName="reasonId"
+          sourceType="query"></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="7"></ngc-column>
+    </ngc-row> -->
+
+    <ngc-row>
+      <ngc-column>
+        <br>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+
+      <ngc-column column=1>
+        <ngc-label label="g.remarks"></ngc-label>
+      </ngc-column>
+
+      <ngc-column>
+
+        <ngc-table>
+          <tbody formArrayName="remarks1">
+            <ng-container *ngFor="let item of rejectShipmentForm.controls.remarks1.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-input [width]="600" [maxlength]="65" formControlName="data">
+                  </ngc-input>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+        <!-- <ngc-input [width]="450" formControlName="remarks" [required]="contractorInfoRequired"></ngc-input> -->
+      </ngc-column>
+      <ngc-column>
+        <ngc-button label="reject.addRow" (click)="addRemarksRow()"></ngc-button>
+      </ngc-column>
+
+      <!-- <ngc-column column=2>
+        <ngc-input [width]="450" formControlName="remarks" [required]="contractorInfoRequired"></ngc-input>
+      </ngc-column> -->
+      <!-- <ngc-column column=""></ngc-column> -->
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column align="center">
+        <ngc-button label='reject.reject' (click)="onReject()"></ngc-button>
+        <ngc-button label='export.reject.shipment.reject.request.btn' (click)="onReturnRequest()"
+          *ngIf="returnShipmentFlag && !showReturnButton"></ngc-button>
+        <ngc-button label='reject.enquireCharges' (click)="navigateToEnquireCharges()" *ngIf="returnShipmentFlag">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column align="center">
+
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+</form>
+<app-duplicatenamepopup #duplicateNamePopup (onConfirmNewEntry)="onConfirmNewEntry($event)"
+  (onNameSelect)="onNameSelect($event)"></app-duplicatenamepopup>

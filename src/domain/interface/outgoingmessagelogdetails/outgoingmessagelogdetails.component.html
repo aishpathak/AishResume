@@ -1,0 +1,274 @@
+<form [formGroup]="outgoingmessage">
+  <ngc-titlebar title='outgoing.message.log.details.title' (print)='onprint()' (clear)="onClear($event)"
+    (cancel)="onCancel()"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='Interface'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="interfacingSystem" sourceId="DROPDOWN_INTERFACE"
+            sourceType="query" [width]="100"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.message.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="messageType" sourceId="DROPDOWN_OUTGOINGMESSAGETYPES"
+            (select)="onChange($event)" sourceType="query" [width]="90"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.sub.message.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="subMessageType" sourceId="DROPDOWN_SUBMESSAGETYPE"
+            [sourceParameters]="subMessageParameter" [noCache]="true" sourceType="query" [width]="110">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="messageStatus" sourceId='outgoing$outgoing'
+            [width]="70"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="messageFromDateTime" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="messageToDateTime" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='messages.recipient'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="senderOriginAddress" [width]="90"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.carrierCode'></ngc-label>
+        <div>
+          <ngc-lov [width]="50" accessEnableOn="r" formControlName="carrierCode" sourceId="SATS_CARRIERCODE"
+            title="g.carrier.list" dataField="code">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.carrier.short.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flightNumber"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flightDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="flightDate"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.shipmentNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" (ngModelChange)="onTabOutCheckHandledBy()">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="isHandledByHouse && isHawbBEnabled">
+        <ngc-label label="billing.hawbsbNumber"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="150"
+            sourceId='KEY_BILL_HWBNUMBER' dataField='code' valueMember='code' [noCache]="true"
+            title="billing.hawbsbNumber"
+            [sourceParameters]="{'parameter1': this.outgoingmessage.get('shipmentNumber').value}">
+            <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="messaging.message.header"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="messageHeader" [width]="200"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="display.search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="outgoingMessages" (linkClick)="onLinkClick($event)" [pageSize]=15
+          [showToolbar]="true" [showAggregates]="false" [pageable]="true" [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.sNo" dataField="sequenceNumber" [width]="40" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.msg.type" dataField="messageType" [width]="60" type="link" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="message.log.sub.msg.type" dataField="subMessageType" [width]="60" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="message.log.ver" dataField="messageVersion" [width]="40" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.seq" dataField="sequence" [width]="40" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.message.indicator" dataField="messageEndingIndicator" [width]="50"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="message.log.sent.to" dataField="interfacingSystem" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.sender.address" dataField="senderOriginAddress" [width]="80" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="messages.recipient" dataField="recipientAddress" [width]="300" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="message.log.send.date.time" dataField="messageDateTime" [width]="100" align="center"
+            cellsAlign="center" type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="message.log.sent.by" dataField="createdBy" [width]="85" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.shipment.number" dataField="shipmentNumber" [width]="130" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column *ngIf="!showVCT && isHawbBEnabled" text="billing.hawbsbNumber" dataField="hawbNumber"
+            [width]="140" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column *ngIf="isInterfaceFileNameEnabled" text="awb.file.name" dataField="interfaceFileName"
+            [width]="140" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.carrier" dataField="carrierCode" [width]="60" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.flight.number" dataField="flightKey" [width]="60" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="flight.flightDate" dataField="flightDate" [width]="80" align="center"
+            cellsAlign="center" type="displayDate"></ngc-data-column>
+          <ngc-data-column text="message.log.message.header" dataField="messageHeader" [width]="200" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.status" dataField="messageStatus" [width]="100" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="message.log.event.details" type="link" dataField="edit" iconType='edit' [width]="40"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #messageLog title="Message Log View - {{indexNumberDisplay}}" width="1550" height="700"
+    (close)="onCloseWindow($event)" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column [column]="8">
+          <ngc-container type="tab">
+            <ngc-row>
+              <ngc-column>
+                <div *ngIf="codeEditFlag">
+                  <ngc-codeeditor formControlName="message" #message height="590px" viewMode="edi" upperCase="true"
+                    subTheme='courier'>
+                  </ngc-codeeditor>
+                </div>
+                <div *ngIf="!codeEditFlag">
+                  <ngc-codeeditor formControlName="message" height="590px" viewMode="edi" upperCase="true"
+                    disabled="true" subTheme='courier'>
+                  </ngc-codeeditor>
+                </div>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column column="5" align="right">
+                <ngc-button (click)="onPrevious()" priority="quaternary" height="30" width="50"
+                  iconType="previous-simple"></ngc-button>
+              </ngc-column>
+              <ngc-column align="left">
+                <ngc-button (click)="onNext()" width="50" height="30" priority="quaternary" iconType="next-simple">
+                </ngc-button>
+              </ngc-column>
+              <ngc-column align="left" *ngIf="codeEditFlag">
+                <ngc-button value="message.log.send.tsm" (click)="sendTsm(outgoingmessage.get('message'))" width="150"
+                  height="30" title="message.log.send.tsm">
+                </ngc-button>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+        <ngc-column column="4" *ngIf="processingerrorcheck">
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label='message.log.error.code'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='g.message' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='message.log.line.item' width='20'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="processingErrorsArray">
+              <tr *ngFor="let contact of outgoingmessage.get('processingErrorsArray').controls; let index = index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="errorCode" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="message" [width]="60" uppercase='true'></ngc-display>
+                </td>
+
+                <td>
+                  <ngc-display formControlName="lineItem" [width]="60"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-window #messageLogEdit title="Event Log View - {{indexNumberDisplay}}" width="900" height="150"
+    (close)="onCloseWindow($event)" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="1" align="center">
+          <div>
+            <ngc-label label='message.log.event.id'></ngc-label>
+            <ngc-display formControlName="eventLogid" [width]="30"></ngc-display>
+          </div>
+        </ngc-column>
+
+        <ngc-column column="1">
+        </ngc-column>
+        <ngc-column column="5">
+          <div>
+            <ngc-label label='messaging.event.name'></ngc-label>
+            <ngc-display formControlName="eventName"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report #reportWindow  title="g.report"  reportId='OutgoingMessageLog'  [reportParameters]='reportParameters'
+    dataSource='transactional'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-row>
+          <ngc-column align="left">
+            <ngc-button (click)="redirectToTSMMessage()" value="manual.tsm.message.title"></ngc-button>
+          </ngc-column>
+          <ngc-column [column]="1">
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-footer>

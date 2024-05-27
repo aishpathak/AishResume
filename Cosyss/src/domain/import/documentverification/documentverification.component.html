@@ -1,0 +1,850 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="import.documentVerification" (save)="saveUpdateDocumentVerification($event)"
+    [disableSave]="reopenDocumentTab || !isDisplayDetailsFlag">
+  </ngc-titlebar>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="100" formControlName="flightNumber" accessEnableOn="r" upperCase="true" required
+            (modelChange)='onChangeFlight($event)'>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]="100" formControlName="flightDate" accessEnableOn="r" required
+            (modelChange)='onChangeFlight($event)'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="display.search" iconType=search accessEnableOn="r"
+            (click)="getDocumentVerificationTable()"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='8' align="right" style="padding-top:22px;">
+        <div *ngIf="isDisplayDetailsFlag">
+          <ngc-printer [width]='200' feature="Imp.Bd.BarCodePrintRequired" #printerName
+            (select)="onSelectPrinter($event)" [printerTypeList]="['AWB']">
+          </ngc-printer>
+          <ngc-button label='import.print.barcode.b' feature="Imp.Bd.BarCodePrintRequired"
+            [disabled]="this.printerName['value'] === null || this.printerName['value'] === undefined "
+            (click)="navigateToPrintBarCode()"></ngc-button>
+          <ngc-button *ngIf='openDocumentTab' feature="Imp.Bd.DangerousCargoDetailsRequired" label='import.dg.entry.g'
+            (click)="dgEntry()"></ngc-button>
+          <ngc-button *ngIf='openDocumentTab' label='import.offload.o' feature="Imp.Bd.OffloadCargoRequired"
+            (click)="offloadpopup()"></ngc-button>
+          <ngc-button *ngIf='openDocumentTab' label='import.remarks.m' (click)="remarks()"></ngc-button>
+          <ngc-button *ngIf='openDocumentTab' label='import.flight.delay.shipment.f'
+            feature="Imp.Bd.UpdateFlightDelayForShipment" (click)="updateDelayforSegment()" [disabled]="delayStatus">
+          </ngc-button>
+          <ngc-button *ngIf='openDocumentTab' value='import.add.eli.elm.details' feature="Imp.Bd.EliElmDetailsRequired"
+            (click)="openEliElmShipmentList(E)">
+          </ngc-button>
+          <ngc-button *ngIf='openDocumentTab' label='import.update.booking.u'
+            feature="Imp.Bd.UpdateBookingDetailsRequired" (click)="updateBooking()"></ngc-button>
+          <ngc-button *ngIf='reopenDocumentTab' label='(R)e-openDocumentComplete' (click)="reOpenDocumentComplete()"
+            #reOpenDocumentCompleteButton accessSectionId="DOC_COMPLETE"></ngc-button>
+          <ngc-button *ngIf='openDocumentTab' label='import.document.complete.d' (click)="onDocumentComplete()"
+            accessSectionId="DOC_COMPLETE"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="isDisplayDetailsFlag">
+      <ngc-column column="1">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.sta"></ngc-label>
+        <div>
+          <ngc-display formControlName="sta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.ata"></ngc-label>
+        <div>
+          <ngc-display formControlName="ata"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.segments"></ngc-label>
+        <div>
+          <ngc-display formControlName="boardPoint" color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='import.segment'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="segment" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query"
+            [sourceParameters]="sourceIdSegmentDropdown" [width]="120" [dropDownWidth]='110'
+            (ngModelChange)="onSegmentChange($event)" accessEnableOn="r">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="import.aircraftType"></ngc-label>
+        <div>
+          <ngc-display formControlName="aircraftType"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightremarks"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightRemarks"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column entityAttribute="Gen.exportHandlingForm">
+        <ngc-button accessEnableOn="r" value="awb.export.handling.form" accessEnableOn="r" (click)="print()">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column entityAttribute="Gen.sendHandlingForm">
+        <ngc-button accessEnableOn="r" value="awb.send.handling.form" accessEnableOn="r" (click)="sendEmailReport()">
+        </ngc-button>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isDisplayDetailsFlag" type='box' formGroupName="countDetails">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="import.ffm.awb.count.br"></ngc-label>
+        <ngc-display formControlName="awbCount"></ngc-display>
+        <ngc-label label=")/"></ngc-label>
+
+        <ngc-label label="import.ewb.count.br"></ngc-label>
+        <ngc-display formControlName="eAwbCount"></ngc-display>
+        <ngc-label label="),"></ngc-label>
+
+        <ngc-label label="import.document.verification.br"></ngc-label>
+        <ngc-display formControlName="docRecCount"></ngc-display>
+        <ngc-label label="),"></ngc-label>
+
+        <ngc-label label="import.pending.verification.br"></ngc-label>
+        <ngc-display formControlName="penCount"></ngc-display>
+        <ngc-label label=")"></ngc-label>
+        <ngc-column entityAttribute="Gen.import.dir.shipment">
+          <ngc-label label=","></ngc-label>
+          <ngc-label label="import.dir.shipment.br"></ngc-label>
+          <ngc-display formControlName="noOfDIRShipments"></ngc-display>
+          <ngc-label label="),"></ngc-label>
+        </ngc-column>
+        <ngc-column entityAttribute="Gen.import.flt.handlingdate">
+          <ngc-label label="import.flt.handlingdate.br"></ngc-label>
+          <ngc-display formControlName="flightHandlingReportDocumentGeneratedAt"></ngc-display>
+          <ngc-label label=")"></ngc-label>
+        </ngc-column>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="box">
+    <ngc-row *ngIf="displayData">
+      <ngc-column>
+        <ngc-datatable *ngIf="!displayBySegmentData" formArrayName="documentVerificationShipmentModelList"
+          [rowCellsStyleRenderer]="rowCellsStyleRenderer" [groups]="['segOrign']" [groupsRenderer]="groupsRenderer"
+          [pageable]="true" (linkClick)="onLinkClick($event)" [widthInPixels]="true" [bindOnValueChange]="false"
+          [pageSize]="10" [enablePageSizeHeight]="false" [pagerMode]="'advanced'" [columnsHeight]="45"
+          [showToolbar]="true" [showPrint]="false" [showXLS]="false" [showPDF]="false" [showCSV]="false">
+          <ngc-data-column text="g.sNo" [width]='30' [cellsRenderer]="cellsRendererSno" dataField="" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="&nbsp;" dataField="selectCheck" [width]='30' align="center" cellsAlign="center"
+            type="check" [checkAll]="true"></ngc-data-column>
+          <ngc-data-column text='import.awbnumbers' dataField="shipmentNumber" [width]="140" type="link"
+            [cellsStyleRenderer]="cellsStyleRenderer" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.shipment.pcs' dataField="awbPieces" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.manifest.pcs' dataField="manifestPieces" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.shipmet.pcs.wt.br' dataField="awbPieceWeight" [width]="80">
+          </ngc-data-column>
+          <ngc-data-column text='import.manifest.pcs.wt.br' dataField="manifestPiecesWeight" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.originalAwb' dataField="docRecieved" type="check" [checkAll]="true"
+            [width]="100" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column dataField="oldDocRecieved" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.copyAwb' dataField="copyAwb" [width]="90" type="check" [checkAll]="true"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column dataField="oldCopyAwb" align="center" cellsAlign="center" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text='import.docPouch' dataField="docPouch" [width]="60" type="check" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.domesticInternational' dataField="handledByDOMINT" [width]="110" align="center"
+            cellsAlign="center" type="text" entityAttribute="Awb.DomesticInternationalHandling"></ngc-data-column>
+          <ngc-data-column text='import.handledByMasterHouse' dataField="handledByMasterHouse" [width]="40"
+            align="center" cellsAlign="center" type="text" feature="Imp.Bd.HAWBHandling"></ngc-data-column>
+          <ngc-data-column dataField="oldDocPouch" align="center" cellsAlign="center" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text='import.checkList' dataField="checkListRequired" type="check" [width]="90"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column dataField="oldCheckListRequired" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='flight.boardPoint' dataField="segOrign" hidden='true' [width]="70" iconType="delete">
+          </ngc-data-column>
+          <ngc-data-column text='import.origin' dataField="origin" [width]="70" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.destination' dataField="destination" align="center" [width]="80"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.transferType' dataField="transferType" [width]="70" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.outBoundFlight' dataField="outboundFlight" [width]="150" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column feature="Imp.Bd.EAP" text='import.eaw' dataField="eaw" [width]="50" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column feature="Imp.Bd.EAW" text='import.eap' dataField="eap" [width]="50" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.fwb' dataField="fwb" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column dataField="cpeFwbAction" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.fhl' dataField="fhl" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.natureOfGoods' dataField="natureOfGoods" [width]="150" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='g.shc' dataField="shc" [width]="100" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.irregurlarity' dataField="irregularity" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.barcode' dataField="barcode" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.consignee' dataField="consignee" [width]="150" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.appointed' dataField="appointedAgentName" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.noa' dataField="noaSent" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.chargeMode' dataField="chargesMode" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.breakdownpiece' dataField="breakdownPieces" [width]="120" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.readyforDelivery' dataField="readyfordelivery" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='g.reason' dataField="reason" [width]="150" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column dataField="flightSegmentId" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+        </ngc-datatable>
+
+
+        <ngc-datatable *ngIf="displayBySegmentData" formArrayName="documentVerificationShipmentModelListBySegemt"
+          [rowCellsStyleRenderer]="rowCellsStyleRenderer" [groups]="['segOrign']" [groupsRenderer]="groupsRenderer"
+          [pageable]="true" (linkClick)="onLinkClick($event)" [widthInPixels]="true" [bindOnValueChange]="false"
+          [pageSize]="10" [enablePageSizeHeight]="false" [pagerMode]="'advanced'" [columnsHeight]="45"
+          [showToolbar]="true" [showPrint]="false" [showXLS]="false" [showPDF]="false" [showCSV]="false">
+          <ngc-data-column text="g.sNo" [width]='30' dataField="serialNo" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="&nbsp;" dataField="selectCheck" [width]='30' align="center" cellsAlign="center"
+            type="check" [checkAll]="true"></ngc-data-column>
+          <ngc-data-column text='import.awbnumbers' dataField="shipmentNumber" [width]="140" type="link"
+            [cellsStyleRenderer]="cellsStyleRenderer" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.shipment.pcs' dataField="awbPieces" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.manifest.pcs' dataField="manifestPieces" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.shipmet.pcs.wt.br' dataField="awbPieceWeight" [width]="80">
+          </ngc-data-column>
+          <ngc-data-column text='import.manifest.pcs.wt.br' dataField="manifestPiecesWeight" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.originalAwb' dataField="docRecieved" type="check" [checkAll]="true"
+            [width]="100" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column dataField="oldDocRecieved" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.copyAwb' dataField="copyAwb" [width]="90" type="check" [checkAll]="true"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column dataField="oldCopyAwb" align="center" cellsAlign="center" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text='import.docPouch' dataField="docPouch" [width]="60" type="check" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.domesticInternational' dataField="handledByDOMINT" [width]="100" align="center"
+            cellsAlign="center" type="text" entityAttribute="Awb.DomesticInternationalHandling"></ngc-data-column>
+          <ngc-data-column text='import.handledByMasterHouse' dataField="handledByMasterHouse" [width]="40"
+            align="center" cellsAlign="center" type="text" feature="Imp.Bd.HAWBHandling"></ngc-data-column>
+          <ngc-data-column dataField="oldDocPouch" align="center" cellsAlign="center" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text='import.checkList' dataField="checkListRequired" type="check" [width]="90"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column dataField="oldCheckListRequired" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='flight.boardPoint' dataField="segOrign" hidden='true' [width]="70" iconType="delete">
+          </ngc-data-column>
+          <ngc-data-column text='import.origin' dataField="origin" [width]="70" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.destination' dataField="destination" align="center" [width]="80"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.transferType' dataField="transferType" [width]="70" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.outBoundFlight' dataField="outboundFlight" [width]="150" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.eaw' dataField="eaw" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.eap' dataField="eap" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.fwb' dataField="fwb" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column dataField="cpeFwbAction" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text='import.fhl' dataField="fhl" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.natureOfGoods' dataField="natureOfGoods" [width]="150" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='g.shc' dataField="shc" [width]="100" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.irregurlarity' dataField="irregularity" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.barcode' dataField="barcode" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.consignee' dataField="consignee" [width]="150" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.appointed' dataField="appointedAgentName" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.noa' dataField="noaSent" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.chargeMode' dataField="chargesMode" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.breakdownpiece' dataField="breakdownPieces" [width]="120" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.readyforDelivery' dataField="readyfordelivery" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='g.reason' dataField="reason" [width]="150" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column dataField="flightSegmentId" align="center" cellsAlign="center" [hidden]="true">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="displayNil">
+      <ngc-column align='center'>
+        <br>
+        <br>
+        <h4><b>NIL</b></h4>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="box" *ngIf="displayData">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button accessEnableOn="r" label='import.irregularity.i' (click)="irregularity()"></ngc-button>
+        <ngc-button accessEnableOn="r" label='import.shipment.info.h' (click)="shipmentinfo()"></ngc-button>
+        <ngc-button accessEnableOn="r" label='import.awb.document.w' (click)="awbDocument()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #updateBookingWindow [showCloseButton]="true" (close)="closeUpdateBooking()" [width]="1700" [height]="600"
+    title="UpdateBooking">
+    <app-update-booking [updateBookingObject]="updateBookingObject"></app-update-booking>
+  </ngc-window>
+
+  <form formGroupName="offloadpopup">
+    <ngc-window #offLoadPopup [width]="500" [height]="200" title="import.delivery.offload.popup">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='g.awbNumber'></ngc-label>&nbsp;&nbsp;
+            <ngc-display formControlName="awbNumber"></ngc-display>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='ar.offloadreason'></ngc-label>&nbsp;&nbsp;
+            <ngc-dropdownlist sourceId="REASONCODE_DOCUMENTVERIFICATION" sourceType="query" placeHolder="g.select"
+              [width]="300" [dropDownWidth]="300" formControlName="offloasReson" required
+              (select)="changeToCode($event)"></ngc-dropdownlist>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="offloadsave()" label="imp.doc.verify.save"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </form>
+
+  <form formGroupName="remarks">
+    <ngc-window #remarksPopup [width]="500" [height]="200" title="g.remarks">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='g.type'></ngc-label>
+            <div>
+              <ngc-dropdownlist sourceId="GeneralRemarks$General" [width]="100" [dropDownWidth]="100" [noBlank]="true"
+                formControlName="remarkType" required></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label='g.remarks'></ngc-label>
+            <ngc-textarea [width]="300" [height]="50" formControlName="remarks" [maxlength]="65" required>
+            </ngc-textarea>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="remarkSave()" label="imp.doc.verify.save"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </form>
+</form>
+<form [formGroup]="dgdRadioActiveForm">
+  <ngc-window #dgEntrypopup [width]="1800" [height]="600" title="'import.delivery.dg.details'" (save)="onSave($event)">
+    <ngc-container type="section">
+      <ngc-row formGroupName="dgdRefernceForm">
+        <ngc-column [column]="2">
+          <ngc-label label="g.awbnumber"></ngc-label>
+          <div>
+            <ngc-awbdisplay formControlName="awbNumber"></ngc-awbdisplay>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2" *ngIf="showFlag && !addFlag">
+          <ngc-label label="expdgd.dgdreferencename"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="dgdReferenceNo" [source]="dgdReferenceArray" [autoSelect]="true"
+              [width]="145"></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+    </ngc-container>
+    <ngc-container title="import.transport.details" type="section">
+      <ngc-row formGroupName="dgdDetailsForm">
+        <ngc-column [column]="2">
+          <ngc-label label="expdgd.airportofdeparture"></ngc-label>
+          <div>
+            <ngc-input required formControlName="departureAirport"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="expdgd.airportofdestination"></ngc-label>
+          <div>
+            <ngc-input required formControlName="destinationAirport"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label="expdgd.aircrafttype"></ngc-label>
+          <div>
+            <ngc-radiobutton formControlName="aircraftType1" [groupName]="'aircraftType'">
+              <ngc-i18n value="expdgd.passengerandcargo"></ngc-i18n>
+            </ngc-radiobutton>
+            <ngc-radiobutton formControlName="aircraftType2" [groupName]="'aircraftType'">
+              <ngc-i18n value="expdgd.cargoonly"></ngc-i18n>
+            </ngc-radiobutton>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label="expdgd.shipmenttype"></ngc-label>
+          <div>
+            <ngc-radiobutton formControlName="shipmentRadioactiveFlag1" [groupName]="'shipmentType'">
+              <ngc-i18n value="expdgd.radioactive"></ngc-i18n>
+            </ngc-radiobutton>
+            <ngc-radiobutton formControlName="shipmentRadioactiveFlag2" [groupName]="'shipmentType'">
+              <ngc-i18n value="expdgd.nonradioactive" inline="true" checked="true"></ngc-i18n>
+            </ngc-radiobutton>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column align="right" *ngIf="isRow()">
+          <ngc-button value="delete" (click)="onDeleteRow($event)"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row formGroupName="dgdDetailsForm">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-checkbox formControlName="checkAll"></ngc-checkbox>
+                </th>
+                <th>
+                  <ngc-label label="expdgd.unoridnumber"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="expdgd.psn"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="expdgd.classordiv"></ngc-label>
+                </th>
+
+                <th *ngIf="shipmentFlag">
+                  <ngc-label label="expdgd.cat"></ngc-label>
+                </th>
+                <th *ngIf="!shipmentFlag">
+                  <ngc-label label="expdgd.pg"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="expdgd.pieces"></ngc-label>
+                </th>
+                <th *ngIf="!shipmentFlag">
+                  <ngc-label label="expdgd.quantity"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="expdgd.typeofpacking"></ngc-label>
+                </th>
+                <th *ngIf="shipmentFlag" [width]="200">
+                  <ngc-label label="expdgd.pi"></ngc-label>
+              <tr>
+                <th colspan="3" [width]="100">TI</th>
+                <th colspan="2" [width]="100">Dimension</th>
+              </tr>
+              </th>
+              <th *ngIf="false">
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+              <th *ngIf="!shipmentFlag">
+                <ngc-label label="expdgd.pi"></ngc-label>
+              </th>
+              <th *ngIf="!shipmentFlag">
+                <ngc-label label="g.remarks"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="expdgd.authorization"></ngc-label>
+              </th>
+
+              </tr>
+            </thead>
+            <tbody>
+            <tbody formArrayName="declarationDetails">
+              <tr
+                *ngFor="let item of dgdRadioActiveForm.getList(['dgdDetailsForm', 'declarationDetails']); let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-checkbox formControlName="selectCheckBox"></ngc-checkbox>
+                </td>
+                <td [width]="100">
+                  <ngc-lov *ngIf="shipmentFlag" [displayAllInSuggestion]="true" [selectionByRowId]="true"
+                    formControlName="unidnumber" required (select)="getUnidDetailsByPsn($event, index)"
+                    sourceId="UNID_PSN" title="import.document.verification.unid" dataField="code" displayField="code"
+                    [width]="50" [items]="20">
+                    <ngc-data-column text="import.document.verification.unid" dataField="code" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="import.proper.shipping.name" dataField="desc" [width]="500">
+                    </ngc-data-column>
+                    <ngc-data-column text="import.tech" dataField="parameter5" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="param3" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.erg" dataField="param4" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.pg" dataField="param6" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.sbr1" dataField="param7" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.imp1" dataField="parameter3" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="handellingregulation.sbr2" dataField="parameter2" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="handellingregulation.imp2" dataField="parameter4" [width]="50">
+                    </ngc-data-column>
+                  </ngc-lov>
+                  <ngc-lov *ngIf="!shipmentFlag" [displayAllInSuggestion]="true" [selectionByRowId]="true"
+                    formControlName="unidnumber" required (select)="getUnidDetailsByPsn($event, index)"
+                    sourceId="UNID_NONRAD_PSN" title="import.document.verification.unid" dataField="code"
+                    displayField="code" [width]="50" [items]="20">
+                    <ngc-data-column text="import.document.verification.unid" dataField="code" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="import.proper.shipping.name" dataField="desc" [width]="500">
+                    </ngc-data-column>
+                    <ngc-data-column text="Tech" dataField="parameter5" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="param3" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.erg" dataField="param4" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.pg" dataField="param6" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.sbr1" dataField="param7" [width]="50"></ngc-data-column>
+                    <ngc-data-column text="handellingregulation.imp1" dataField="parameter3" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="handellingregulation.sbr2" dataField="parameter2" [width]="50">
+                    </ngc-data-column>
+                    <ngc-data-column text="handellingregulation.imp2" dataField="parameter4" [width]="50">
+                    </ngc-data-column>
+                  </ngc-lov>
+                  <psn-dtl *ngIf="item.get('dgRegulationId').value"
+                    [searchRequest]="{ 'dgRegulationId': item.get('dgRegulationId').value}"></psn-dtl>
+                </td>
+                <td>
+                  <ngc-display formControlName="properShippingName" [width]="100"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="dgclassCode"></ngc-display>
+                </td>
+                <td *ngIf="shipmentFlag">
+                  <ngc-input *ngIf="!item.get('categoryList')" formControlName='packingInstructionCategory'
+                    [width]="68"></ngc-input>
+                  <ngc-dropdownlist *ngIf="item.get('categoryList')" [source]="item.get('categoryList').value"
+                    formControlName='packingInstructionCategory' [width]="68">
+                  </ngc-dropdownlist>
+                </td>
+                <td *ngIf="!shipmentFlag">
+                  <ngc-dropdownlist formControlName="packingGroupCode" (select)="getPackingInstruction($event)"
+                    [source]="item.get('packingGroupCodeList').value" required [width]="100" [dropDownWidth]="100">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-piecesinput formControlName="packagePieces" [width]="80" required>
+                  </ngc-piecesinput>
+                </td>
+                <td *ngIf="!shipmentFlag">
+                  <ngc-piecesinput formControlName="packageQuantity" [width]="80" maxlength="4" required>
+                  </ngc-piecesinput>
+                </td>
+                <td>
+                  <ngc-input formControlName="packingType" [width]="90"></ngc-input>
+                </td>
+                <td *ngIf="shipmentFlag" [width]="200">
+              <tr>
+                <td [width]="100">
+                  <ngc-input formControlName="transportIndex" [width]="60" maxlength="4"></ngc-input>
+                </td>
+                <td [width]="150">
+                  <ngc-input formControlName="packingDimension1" [width]="30"></ngc-input>
+                  <ngc-input formControlName="packingDimension2" [width]="30"></ngc-input>
+                  <ngc-input formControlName="packingDimension3" [width]="30"></ngc-input>
+                </td>
+              </tr>
+              </td>
+              <td *ngIf="false">
+                <ngc-display formControlName="unidShc"></ngc-display>
+              </td>
+              <td *ngIf="!shipmentFlag">
+                <!-- <ngc-dropdownlist formControlName='packingInstructions' [source]="item.get('piList').value" [width]="85"></ngc-dropdownlist> -->
+                <ngc-dropdownlist formControlName="packingInstructions" (select)="getPackingInstruction(item,index)"
+                  [source]="item.get('packingGroupInstructionList').value" required [width]="100" [dropDownWidth]="100">
+                </ngc-dropdownlist>
+                <!-- *ngIf="item.get('piList')" [source]="item.get('piList').value" <ngc-input *ngIf="!item.get('piList')" formControlName='packingInstructions' [width]="85"></ngc-input> -->
+              </td>
+              <td *ngIf="!shipmentFlag">
+                <ngc-display formControlName="packingRemarks" [width]="100"></ngc-display>
+              </td>
+              <td>
+                <ngc-input formControlName="authorizationDetail" [width]="80"></ngc-input>
+              </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column *ngIf="isRow()" align="right">
+          <ngc-column align="right">
+          </ngc-column>
+          <!-- <ngc-column align="right">
+            <ngc-button value="Add Overpack" [width]="110" (click)="generateOverpack($event)"></ngc-button>
+          </ngc-column> -->
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button value="import.apio" (click)="generateApio($event)"></ngc-button>
+          <ngc-button value="export.addRow" (click)="onAddRow()"></ngc-button>
+          <ngc-button value="g.save" [width]="110" (click)="onSave($event)"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <form formGroupName="dgdOverpackPopupForm">
+    <ngc-window #overpackWindow [width]="400" [height]="300" style="top:170px !important;"
+      title="import.overpack.details" [showCloseButton]="true" align="center">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-radiobutton formControlName="generateOvp" groupName='autoManualFlag'>
+              <ngc-i18n value="import.generate.overpack"></ngc-i18n>
+            </ngc-radiobutton>
+            <ngc-radiobutton formControlName="manualOvp" groupName='autoManualFlag'>
+              <ngc-i18n value="import.manual.overpack"></ngc-i18n>
+            </ngc-radiobutton>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-taginput formControlName="overpackNumber" UPPERCASE="true" (input)="checkForInput($event)"
+              [disabled]="!autoOrManualFlag"></ngc-taginput>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button *ngIf="autoOrManualFlag" value="g.save" [width]="110" (click)="saveOverpackWin($event)">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button *ngIf="!autoOrManualFlag" value="import.generate.overpack" [width]="220"
+              (click)="genOverpackNum($event)"></ngc-button>
+            <ngc-button *ngIf="!autoOrManualFlag" value="g.save" [width]="110" (click)="saveOverpackWin($event)">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+  </form>
+  <!--Dg entry shipments List Display-->
+  <form formGroupName="dgGroupShipmentList">
+    <ngc-window #dgeliElmWindow [width]="1000" [height]="500" title="import.shipment.details.eli.elm" align="center"
+      (close)='closeElielm()'>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-edittable formArrayName="dgEntryShipmentList" [pageable]="true" [pageSize]="10">
+              <ngc-data-column text="g.sNo" [width]='10' dataField="" align="center" cellsAlign="center">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    {{group+1}}
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text='import.awbnumbers' dataField="shipmentNumber" [width]="30"></ngc-data-column>
+              <ngc-data-column text='g.shc' dataField="shc" [width]="60"></ngc-data-column>
+              <ngc-data-column text='flight.outbound.flight' dataField="outboundFlight" [width]="50"></ngc-data-column>
+              <ngc-data-column text='import.eli.elm.info' dataField="elielminfoStatus" [width]="20"></ngc-data-column>
+              <ngc-data-column text='g.edit' dataField="Add/Edit" [width]="20" align="center" cellsAlign="center">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    <ngc-link
+                      (linkClick)="addEliElmDataForMultipleShipmets(dgdRadioActiveForm.get(['dgGroupShipmentList','dgEntryShipmentList',group]).value,group)"
+                      iconType="edit">
+                    </ngc-link>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+            </ngc-edittable>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+  </form>
+  <!--Dg entry update and insert-->
+  <form formGroupName="eliElmFormGroup">
+    <ngc-window #eliElmWindow [width]="900" [height]="400" style="top:170px !important;" title="import.eli.elm.details"
+      align="center">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-edittable formArrayName="eliElmFormDetails" [pageable]="false">
+              <ngc-data-column text="" dataField="selectEliCheckBox" [width]="10" cellsAlign="center">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    <ngc-checkbox formControlName="selectEliCheckBox" [width]="10" align="center"></ngc-checkbox>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text="g.carrier" [width]="20" cellsAlign="left">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group" *ngIf='freeTextifOutboundFlightNotExist'>
+                    <ngc-input formControlName="carrierCode" [width]="70" required maxlength="3"
+                      [disabled]="dgdRadioActiveForm.get(['eliElmFormGroup','eliElmFormDetails',group,'flagCRUD']).value != 'C' || handlingInstrctionsFound">
+                    </ngc-input>
+                  </ng-container>
+                  <ng-container [formGroupName]="group" *ngIf='!freeTextifOutboundFlightNotExist' cellsAlign="center">
+                    <ngc-display formControlName="carrierCode" [width]="70" align="center">
+                    </ngc-display>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text="import.eli.elm" dataField="eliElm" [width]="20" cellsAlign="left">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    <ngc-dropdownlist sourceId="DgImpCode$EliElmImp" formControlName="eliElm"
+                      (ngModelChange)="getRemark($event,group)" [width]="70" required [disabled]='elielmDropdownCheck'>
+                    </ngc-dropdownlist>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text="flight.flightType" dataField="flightType" [width]="20" cellsAlign="left">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    <ngc-dropdownlist [width]="100" formControlName='flightType'
+                      (ngModelChange)="getRemark($event,group)" sourceId="DG_DECLARTION_FLIGHT_TYPES" sourceType="query"
+                      required></ngc-dropdownlist>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text="handellingregulation.pi" dataField="piData" [width]="20" cellsAlign="left">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    <ngc-input formControlName="piData" [width]="70" (ngModelChange)="getRemark($event,group)" required
+                      maxlength="4">
+                    </ngc-input>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text="import.remark" dataField="remark" [width]="50" cellsAlign="center">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group" *ngIf='!freeTextifOutboundFlightNotExist'>
+                    <ngc-display formControlName="remark" [width]="350" required></ngc-display>
+                  </ng-container>
+                  <ng-container [formGroupName]="group" *ngIf='freeTextifOutboundFlightNotExist'>
+                    <ngc-input formControlName="remark" [width]="350" required maxlength="65"
+                      [disabled]="dgdRadioActiveForm.get(['eliElmFormGroup','eliElmFormDetails',group,'flagCRUD']).value !='C' || handlingInstrctionsFound">
+                    </ngc-input>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+            </ngc-edittable>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button value="g.add.row.r" (click)="onAddEliRow()"></ngc-button>
+            <ngc-button value="g.delete.t" (click)="onDeleteEliRow($event)"></ngc-button>
+            <ngc-button value="g.save.e" (click)="saveEliElmDetails()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+    <ngc-report accessEnableOn="r" format='xls' #reportWindow title="g.report" reportId='SpecialCargoHandlingForm'
+      [reportParameters]='reportParameters'>
+
+    </ngc-report>
+  </form>
+
+</form>

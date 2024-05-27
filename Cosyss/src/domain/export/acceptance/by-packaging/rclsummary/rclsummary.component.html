@@ -1,0 +1,442 @@
+<form [formGroup]="RCLSummaryForm">
+  <ngc-titlebar title="RCL Summary" [disabled]=saveFlag (print)="print(pdf)" (clear)="onClear()" (cancel)="onCancel()">
+  </ngc-titlebar>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-dateinput required accessEnableOn="r" [width]="50" showCalendarButton="true" showTimeButton="false"
+            formControlName="fromDate" [min]="dateTo" [max]="dateToMax">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-dateinput required accessEnableOn="r" [width]="50" showCalendarButton="true" showTimeButton="false"
+            formControlName="toDate" [min]="dateTo" [max]="dateToMax">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.shipmentNumber">
+        </ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.uldNumber">
+        </ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName='uldNumber'></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="exp.rcl.no">
+        </ngc-label>
+        <div>
+          <ngc-input [width]="100" formControlName='serviceNumber'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="agent.agent.name"></ngc-label>
+        <div>
+          <!-- <ngc-lov formControlName="agentName" sourceId='CUSTOMER_LIST_AGT_DEREG' title='g.airline' displayMember="code"
+            dataField='code' [width]="100" uppercase='true' (select)="onCarrierCodeSelect($event)">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="100">
+            </ngc-data-column>
+          </ngc-lov> -->
+
+          <ngc-lov formControlName="agentName" placeHolder="agent.agent.name" sourceId="COMPANY_AGENT_LIST"
+            title="agent.list" dataField="desc" displayMember='desc' [width]="110" (ngModelChange)="setAgentName()">
+            <ngc-data-column text="agent.agent.name" [width]="150" dataField="desc"></ngc-data-column>
+            <ngc-data-column text="agent.agent.code" dataField="code" [width]="50"></ngc-data-column>
+
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="Flight No.">
+        </ngc-label>
+        <div>
+          <ngc-input [width]="100" formControlName='incomingFlight'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flightDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="incomingFlightDate" [showCalendarButton]="true"
+            [width]="50">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="exp.carrier.group"></ngc-label>
+        <div>
+          <!-- <ngc-lov formControlName="carrierGroup" sourceId="CARRIER_GROUP" title='g.airline' displayMember="code"
+            dataField='code' [width]="80" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov> -->
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100" (select)="getCarrierCodeByCarrierGroup($event)" [noCache]="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column>
+        <ngc-label label="flight.carrier">
+        </ngc-label>
+        <div>
+          <ngc-lov formControlName="carrierCode" sourceId='CARRIER' title='g.airline' displayMember="code" dataField='code'
+            [width]="80" uppercase='true' (select)="getCarrierCodeByCarrierGroup($event)">
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column> -->
+      <ngc-column [column]="carrierColumn" [grid36]="true" *ngIf="this.RCLSummaryForm.get('carrierGroup').value">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='DISPLAY_CARRIER_CODE'
+             sourceType='query'  title="g.carrierCode" [sourceParameters]="carrierGroupCodeParam"  dataField='code'
+             [width]="100"  [noCache]="true">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="carrierColumn" [grid36]="true" *ngIf="!this.RCLSummaryForm.get('carrierGroup').value">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+             sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="100">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="agent.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="status" sourceId='EXPORT$RCL_status' width="100"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <div>
+          <ngc-button #searchButton accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-row>
+  </ngc-row>
+
+  <ngc-container type="tab" *ngIf="searchResult">
+    <!-- <ngc-row>
+      <ngc-column> -->
+    <!-- <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value="g.sel"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.rcl.no"></ngc-label>
+              </th>
+              <th>
+            <ngc-label value="rcl.date"></ngc-label>
+          </th> 
+              <th>
+                <ngc-label value="awb.acceptancetype"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.shipmentNumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.bt.code"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.origin"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="export.dest"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="export.airline"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="Customer.RACSF"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.mrcl.pcs"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.mrcl.weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.rcl.pcs"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.rcl.wt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.nog"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.shc"></ngc-label>
+              </th> 
+          <th>
+            <ngc-label value="exp.screening"></ngc-label>
+          </th>
+          <th>
+            <ngc-label value="export.accpt.exportAWBDoc"></ngc-label>
+          </th>
+              <th>
+                <ngc-label value="exp.return.pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="exp.return.weight "></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.trm.number"></ngc-label>
+              </th>
+             <th>
+            <ngc-label value="transfer.carrier.code"></ngc-label>
+          </th>
+          <th>
+            <ngc-label value="exp.constraint.code"></ngc-label>
+          </th>
+              <th>
+                <ngc-label value="agent.agent.name"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="rcl.status"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          // rcl tbody starts 
+          <tbody formArrayName="rcltable">
+            <tr *ngFor="let item of RCLSummaryForm.controls.rcltable.controls; let index=index" [formGroupName]="index">
+              <td>
+                <ngc-radiobutton (click)="selectionRow(index)" formControlName='select'>
+                </ngc-radiobutton>
+              </td>
+              <td>
+                <ngc-display value={{index+1}}></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='serviceInformationId'></ngc-display>
+              </td>
+             <td>
+            <ngc-display formControlName='rcl_date'></ngc-display>
+          </td>
+              <td>
+                <ngc-display formControlName='acceptanceType'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='shipmentNumber'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='uldNumber'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='origin'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='destination'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='airsideAcceptance'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='racsf'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='documentPieces'>
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='documentWeight'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='piece'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='weight'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='natureOfGoods'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='specialHandlingCode'></ngc-display>
+              </td>
+               <td>
+            <ngc-display formControlName='sc'></ngc-display>
+          </td>
+          <td>
+            <ngc-display formControlName='car'></ngc-display>
+          </td> 
+              <td>
+                <ngc-display formControlName='returnPiece'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='returnWeight'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='trmNumber'></ngc-display>
+              </td>
+               <td>
+            <ngc-display formControlName='trf_carr'></ngc-display>
+          </td>
+          <td>
+            <ngc-display formControlName='cc'></ngc-display>
+          </td> 
+              <td>
+                <ngc-display formControlName='agentName'></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName='status'></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+
+
+        </ngc-table> -->
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="rcltable" (linkClick)="onEdit($event)" [pageable]="true" [pageSize]="10">
+          <ngc-data-column text="g.sel" dataField="select" type="radio">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-radiobutton formControlName="select" (click)="selectionRow($event,group,index)">
+                </ngc-radiobutton>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" dataField="sequenceNumber">
+          </ngc-data-column>
+          <ngc-data-column text="RCL Number&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;" dataField="serviceNumber">
+          </ngc-data-column>
+          <ngc-data-column text="RCL Date" dataField="rclDate" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text="awb.acceptancetype" dataField="acceptanceType">
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentNumber" dataField="shipmentNumber" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="uld.bt.code" dataField="uldNumber" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="awb.origin" dataField="documentOrigin" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="g.destination" dataField='documentDestination'>
+          </ngc-data-column>
+
+          <ngc-data-column text="g.airline" dataField='airline'></ngc-data-column>
+
+          <ngc-data-column text="Customer.RACSF" dataField="racsfResult" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="MRCL Pcs" dataField="documentPieces" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="exp.mrcl.weight" dataField="documentWeight">
+          </ngc-data-column>
+          <ngc-data-column text="exp.rcl.pcs" dataField="piece">
+          </ngc-data-column>
+
+          <ngc-data-column text="exp.rcl.wt" dataField='weight'>
+          </ngc-data-column>
+
+
+          <ngc-data-column text="awb.nog" dataField="natureOfGoodsDescription">
+          </ngc-data-column>
+          <ngc-data-column text="exp.shc" dataField="shcCodes" cellsAlign="left" align="center" [width]="300">
+          </ngc-data-column>
+          <ngc-data-column text="SC" dataField="requiredScreening">
+          </ngc-data-column>
+          <ngc-data-column text="CAR" dataField="car">
+          </ngc-data-column>
+          <ngc-data-column text="exp.return.pieces" dataField="returnPiece">
+          </ngc-data-column>
+          <ngc-data-column text="Rtn Weight" dataField="returnWeight">
+          </ngc-data-column>
+          <ngc-data-column text="exp.accpt.trmnumber" dataField="trmNumber">
+          </ngc-data-column>
+          <ngc-data-column text="TRF Carrier" dataField="transferCarrier">
+          </ngc-data-column>
+          <ngc-data-column text="CC" dataField="constraintCode">
+          </ngc-data-column>
+          <ngc-data-column text="agent.agent.name" dataField="agentName">
+          </ngc-data-column>
+          <ngc-data-column text="rcl.status" dataField="status">
+          </ngc-data-column>
+
+
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+
+    <!-- <ngc-container>
+          <ngc-row>
+
+            <ngc-column align='right'>
+
+              <ngc-label label="&nbsp;"></ngc-label>
+              <div>
+                <ngc-button label="export.maintain.rcl" (click)="editRCL()" [disabled]="this.selectionRowIndex==null">
+
+                </ngc-button>
+                <ngc-button label="return.reject.rcl" (click)="Return_RejectRCL()">
+
+                </ngc-button>
+
+                <ngc-button label="maintain.bup.list" (click)="Mainatinbuplist()">
+
+                </ngc-button>
+                <ngc-button label="rcl.summary.xls" (click)="RCLSummaryXLS()">
+
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container> -->
+    <!-- </ngc-column>
+    </ngc-row> -->
+  </ngc-container>
+
+</form>
+
+<ngc-footer [height]="80" *ngIf="searchResult">
+  <ngc-row>
+    <!-- <ngc-column column="0.5"></ngc-column> -->
+    <ngc-column column="0.5"></ngc-column>
+    <ngc-column>
+      <ngc-button label="export.maintain.rcl" (click)="editRCL()" [disabled]="this.selectionRowIndex==null">
+      </ngc-button>
+      <!-- </ngc-column>
+    <ngc-column> -->
+      <ngc-button label="return.reject.rcl" (click)="Return_RejectRCL()">
+      </ngc-button>
+      <!-- </ngc-column>
+    <ngc-column> -->
+      <ngc-button label="maintain.bup.list" (click)="Mainatinbuplist()">
+      </ngc-button>
+      <!-- </ngc-column>
+    <ngc-column> -->
+      <ngc-button label="rcl.summary.xls" (click)="RCLSummaryXLS()" [disabled]="this.searchResultData">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>
+<ngc-report #reportWindow1 format="pdf" title="g.report" [reportId]='this.rcl_summaryReport1'
+  [reportParameters]='reportParameters1'></ngc-report>
+<ngc-report #reportWindow2 format="xls" title="g.report" [reportId]='this.rcl_summaryReport2'
+  [reportParameters]='reportParameters2'></ngc-report>

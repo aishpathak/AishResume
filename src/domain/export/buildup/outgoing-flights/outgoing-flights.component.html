@@ -1,0 +1,586 @@
+<form [formGroup]="outgoingFightsSearchFormGroup">
+  <ngc-titlebar type="header" (print)="onPrint('')" [disablePrint]="!searchFlg" title="export.outgoing.flights.title">
+  </ngc-titlebar>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column [column]="dateColumn" [grid36]="true">
+        <ngc-label label='shp.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="requestTerminal" sourceId="WAREHOUSE_TERMINAL"
+            [width]="100" sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="4" [grid36]="true" entityAttribute="Flight.DomesticInternationalHandling">
+        <ngc-label label='dropdown.International.domestic'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="domIntl" sourceId="DomIntl$DomIntlDrop"
+            [autoSelect]="true" [width]="150"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="terminalColumn" [grid36]="true">
+        <ngc-label value="export.dateTimeFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" required [showCalendarButton]="true"
+            [showTimeButton]="true" formControlName="dateTimeFrom"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="terminalColumn" [grid36]="true">
+        <ngc-label value="export.dateTimeTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required [width]="150" [showCalendarButton]="true"
+            [showTimeButton]="true" formControlName="dateTimeTo"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="dateColumn" [grid36]="true">
+        <ngc-label value='import.carrierGroup'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100" (select)="getCarrierCodeByCarrierGroup($event)" [noCache]="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="carrierColumn" [grid36]="true" *ngIf="carrierFlg">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='DISPLAY_CARRIER_CODE'
+             sourceType='query'  title="g.carrierCode" [sourceParameters]="carrierGroupCodeParam"  dataField='code'
+             [width]="100"  [noCache]="true">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="carrierColumn" [grid36]="true" *ngIf="!carrierFlg">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+             sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="100">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="dateColumn" [grid36]="true">
+        <ngc-label label='export.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="requestFlight" maxlength="30"
+            [noCarrier]="true">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="dateColumn" [grid36]="true">
+        <ngc-label value="expbu.flightype"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" sourceId="Flight$Flight_Type" formControlName="flightType">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="carrierColumn" [grid36]="true">
+        <ngc-label label='flight.offPoint'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [maxlength]="3" formControlName="offPoint" [width]="100"
+            title='flight.destination' upperCase="true" dataField="code" displayMember="code" sourceId="APT">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="aircrafttypeColumn" [grid36]="true">
+        <ngc-label value="flight.aircraftType" entityAttribute="Flight.AircraftType"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" formControlName="aircraft" [width]="55" sourceId='AIR' title='flight.aircraft'
+            dataField='code' displayMember="code" maxlength='3' entityAttribute="Flight.AircraftType">
+            <ngc-data-column text="flight.aircraftType" dataField="code" [width]="100">
+            </ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="aircrafttypeColumn" [grid36]="true">
+        <ngc-label value="g.status" entityAttribute="Flight.ArrDepStatus"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" sourceId="Flight$FlightStatus"
+            formControlName="arrDepStatus" entityAttribute="Flight.ArrDepStatus">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="aircrafttypeColumn" [grid36]="true">
+        <ngc-label value="exp.whlevel" entityAttribute="Flight.WarehouseLevel"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" sourceId="Flight$WarehouseLevel"
+            formControlName="warehouseLevel" entityAttribute="Flight.WarehouseLevel">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="aircrafttypeColumn" [grid36]="true" entityAttribute="Flight.BuBdOffice">
+        <ngc-label value="exp.bubdoffice"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" sourceId="Flight$BuBdOffice" formControlName="buBdOffice"
+            entityAttribute="Flight.BuBdOffice" [skipEntityAttribute]="['required']">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="display.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="box" *ngIf="searchFlg">
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <div>
+            <ul class="heading-list">
+              <li style="width:34px;">Sel</li>
+              <li style="width:40px;">S/N</li>
+              <li class="flight" style="width:85px;">Flight</li>
+              <li class="data" style="width:93px">Date</li>
+              <li class="sta" style="width:65px;">STD</li>
+              <li class="eta" style="width:65px;">ETD</li>
+              <li class="ata" style="width:65px;">ATD</li>
+              <li class="customsFlightNumber" style="width:65px;" entityAttribute="Flight.CustomsExportFlightDate">EGM
+              </li>
+              <li class="customsFlightDate" style="width:90px;" entityAttribute="Flight.CustomsExportFlightDate">EGM
+                Date</li>
+              <li class="ac-type" style="width:56px;">A/C Type</li>
+              <li class="ac-reg" style="width:55px;">A/C Reg</li>
+              <li class="bay" style="width:48px;">Bay</li>
+              <li class="routing" style="width:95px;">Routing</li>
+              <li class="dls-precision" style="width:80px;">DLS</li>
+              <li class="dls" style="width:80px;">DLS Prec. <br />Time</li>
+              <li class="man" style="width:80px;">MAN</li>
+              <li class="flight-precision" style="width:80px;">Flight Close <br />Prec. Time</li>
+              <li class="dep" style="width:54px;">DEP</li>
+              <li class="ofld" style="width:55px;">OFLD</li>
+              <li class="svc" style="width:60px;">SVC <br />Report</li>
+              <li class="rmk" style="width:100px;">RMK</li>
+              <li class="cac-type" style="width: 60px;" entityAttribute="Flight.AircraftType">Cargo<br>A/C <br />Type
+              </li>
+              <li class="status" style="width: 60px;" entityAttribute="Flight.ArrDepStatus">Status</li>
+              <li style="width:95px;" entityAttribute="Flight.SendFBR">Send<br>FBR</li>
+              <li class="fbl-rcvd" style="width: 45px;" entityAttribute="Flight.FBLReceived">FBL<br>Rcv.</li>
+              <li class="wh-level" style="width: 45px;" entityAttribute="Flight.WarehouseLevel">Ware<br>house<br>Level
+              </li>
+              <li class="bu-bd" style="width: 60px;" entityAttribute="Flight.BuBdOffice">
+                <!-- BU/BD<br />Office</li> -->
+                <div entityAttribute="Flight.BuBdOffice">
+                  <ngc-display value="CBU/CBD Office"></ngc-display>
+                </div>
+              </li>
+              <li class="gate" style="width: 45px;" entityAttribute="Flight.Gate">Gate</li>
+              <li class="last-upd" style="width: 60px;" entityAttribute="Flight.StaffIDAndDate">
+                Last<br>Updated<br>Staff
+              </li>
+              <li style="width:60px;" entityAttribute="Flight.WarehouseLevel">Edit</li>
+            </ul>
+            <ul class="main-list" formArrayName="flights">
+              <li class="parent-list"
+                *ngFor="let item of outgoingFightsSearchFormGroup.get('flights').controls; let index=index"
+                [formGroupName]="index">
+                <ng-container *ngIf="item.controls.pinned.value">
+                  <ul class="highlightOne" [ngClass]="{'redtext': item.controls.delayFlag.value == true, 'greentext': item.controls.remark.value == 'RESTORED', 'silvertext':
+                  item.controls.remark.value == 'CANCELED'}">
+                    <li style="width:34px;">
+                      <ngc-checkbox accessEnableOn="r" formControlName="selectFlg" (click)="setFocusCheckBox();">
+                      </ngc-checkbox>
+                    </li>
+                    <li style="width:40px;">
+                      <ngc-label label={{index+1}}></ngc-label>
+                    </li>
+                    <li class="flight" style="width:85px;">
+                      <ngc-display formControlName="flight"></ngc-display>
+                    </li>
+                    <li class="date" style="width:93px;">
+                      <ngc-display formControlName="std" [onlyDate]="true"></ngc-display>
+                    </li>
+                    <li class="sta" style="width:65px;">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="std"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="std" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="eta" style="width:65px;">
+                      <div *ngIf="item.controls.showDateFlag.value">
+                        <ngc-display [onlyDate]="true" formControlName="etd"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="etd" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="ata" style="width:65px;">
+                      <div *ngIf="item.controls.showDateFlag.value">
+                        <ngc-display [onlyDate]="true" formControlName="atd"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="atd" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="customsFlightNumber" style="width:56px;"
+                      entityAttribute="Flight.CustomsExportFlightDate">
+                      <div>
+                        <ngc-display formControlName="customsFlightNumber"></ngc-display>
+                      </div>
+                      <!-- <ngc-display formControlName="customsFlightNumber" [onlyTime]="true"></ngc-display>-->
+                    </li>
+                    <li class="customsFlightDate" style="width:90px;" entityAttribute="Flight.CustomsExportFlightDate">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="customsFlightDate"></ngc-display>
+                      </div>
+                      <!--<ngc-display formControlName="customsFlightDate" [onlyTime]="true"></ngc-display>-->
+                    </li>
+                    <li class="ac-type" style="width:56px;">
+                      <ngc-display formControlName="aircraft"></ngc-display>
+                    </li>
+                    <li class="ac-reg" style="width:55px;">
+                      <ngc-display formControlName="aircraftRegistration"></ngc-display>
+                    </li>
+                    <li class="bay" style="width:48px;">
+                      <ngc-display formControlName="bay"></ngc-display>
+                    </li>
+                    <li class="routing" style="width:95px;">
+                      <ngc-display formControlName="routing"></ngc-display>
+                    </li>
+                    <li class="dls-precision" style="width:80px;">
+                      <div>
+                        <ngc-display formControlName="dlsPrecisionTime"></ngc-display>
+                      </div>
+                    </li>
+                    <li style="width:80px; background:red" *ngIf="item.controls.releaseDlsRemark.value ==null">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="dls"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="dls" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li style="width:80px;" *ngIf="item.controls.releaseDlsRemark.value !=null"
+                      [ngClass]="{'sta-red' : item.controls.dlsDelayed.value == true, 'sta' : item.controls.dlsDelayed.value == false}">
+                      <ngc-display formControlName="releaseDlsRemark"></ngc-display>
+                    </li>
+                    <li class="man" style="width:80px; background: red"
+                      *ngIf="item.controls.releaseManifestRemark.value ==null">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="man"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="man" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="man" style="width:80px;" *ngIf="item.controls.releaseManifestRemark.value !=null">
+                      <ngc-display formControlName="releaseManifestRemark"></ngc-display>
+                    </li>
+                    <li class="flight-precision" style="width:80px;">
+                      <div>
+                        <ngc-display formControlName="flightClosePrecisionTime"></ngc-display>
+                      </div>
+                    </li>
+                    <li class="dep" style="width:54px;">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="dep"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="dep" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="ofld" style="width:55px;">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="ofld"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="ofld" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="svc" style="width:60px;">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="outwardServiceReportFinalized"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="outwardServiceReportFinalized" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="rmk" style="width:100px;">
+                      <ngc-display formControlName="remark"></ngc-display>
+                    </li>
+                    <li class="cac-type" style="width:60px;" entityAttribute="Flight.AircraftType">
+                      <ngc-display formControlName="flightType"></ngc-display>
+                    </li>
+                    <li class="status" entityAttribute="Flight.ArrDepStatus" style="width:60px;">
+                      <ngc-display formControlName="arrDepStatus"></ngc-display>
+                    </li>
+                    <li style="width:95px;" entityAttribute="Flight.SendFBR">
+                      <ngc-button value="flight.send.fbr" (click)="sendFBR($event)"></ngc-button>
+                    </li>
+                    <li class="fbl-rcvd" style="width:45px;" entityAttribute="Flight.FBLReceived">
+                      <ngc-display formControlName="fblreceived"></ngc-display>
+                    </li>
+                    <li class="wh-level" entityAttribute="Flight.WarehouseLevel" style="width:45px;">
+                      <ngc-display formControlName="warehouseLevel"></ngc-display>
+                    </li>
+                    <li class="bu-bd" entityAttribute="Flight.BuBdOffice" style="width:60px;">
+                      <ngc-display formControlName="buBdOffice"></ngc-display>
+                    </li>
+                    <li class="gate" entityAttribute="Flight.Gate" style="width:45px;">
+                      <ngc-display formControlName="gate"></ngc-display>
+                    </li>
+                    <li class="last-upd" entityAttribute="Flight.StaffIDAndDate" style="width:60px;">
+                      <ngc-display formControlName="staffIDAndDate"></ngc-display>
+                    </li>
+                    <li style="width:60px;" entityAttribute="Flight.SendFBR">
+                      <ngc-link (linkClick)="onLinkClick(index)">
+                        <ngc-icon type="edit" value="true" true-color="grey"></ngc-icon>
+                      </ngc-link>
+                    </li>
+                  </ul>
+                </ng-container>
+              </li>
+            </ul>
+            <ul class="main-list-nonfreezable" formArrayName="flights"
+              [ngStyle]="{height: getHeight(), width: getWidth()}">
+              <li class="parent-list"
+                *ngFor="let item of outgoingFightsSearchFormGroup.get('flights').controls; let index=index"
+                [formGroupName]="index">
+                <ng-container *ngIf="!item.controls.pinned.value">
+                  <ul
+                    [ngClass]="{'redtext': item.controls.remark.value == 'DELAYED', 'greentext': item.controls.remark.value == 'RESTORED', 'silvertext': item.controls.remark.value == 'CANCELLED'}">
+                    <li style="width:34px;">
+                      <ngc-checkbox accessEnableOn="r" formControlName="selectFlg" (click)="setFocusCheckBox();">
+                      </ngc-checkbox>
+                    </li>
+                    <li style="width:40px;">
+                      <ngc-label label={{index+1}} [i18n]="false"></ngc-label>
+                    </li>
+                    <li class="flight" style="width:85px;">
+                      <ngc-display formControlName="flight"></ngc-display>
+                    </li>
+                    <li class="date" style="width:93px;">
+                      <ngc-display formControlName="std" [onlyDate]="true"></ngc-display>
+                    </li>
+                    <li class="sta" style="width:65px;">
+                      <ngc-display formControlName="std" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li style="width:65px;"
+                      [ngClass]="{'etd-red' : item.controls.etdDiff.value == 'RED', 'eta' : item.controls.etdDiff.value == 'NORMAL', 'etd-bold' : item.controls.etdDiff.value == 'BOLD' }">
+                      <div *ngIf="item.controls.showDateFlag.value">
+                        <ngc-display *ngIf="item.controls.etdDiff.value == 'BOLD'; else notBold" emphasis="md"
+                          [onlyDate]="true" formControlName="etd">
+                        </ngc-display>
+                        <ng-template #notBold>
+                          <ngc-display [onlyDate]="true" formControlName="etd">
+                          </ngc-display>
+                        </ng-template>
+                      </div>
+                      <ngc-display *ngIf="item.controls.etdDiff.value == 'BOLD'; else notBoldTime" emphasis="md"
+                        formControlName="etd" [onlyTime]="true">
+                      </ngc-display>
+                      <ng-template #notBoldTime>
+                        <ngc-display [onlyTime]="true" formControlName="etd">
+                        </ngc-display>
+                      </ng-template>
+                    </li>
+                    <li class="ata" style="width:65px;">
+                      <div *ngIf="item.controls.showDateFlag.value">
+                        <ngc-display [onlyDate]="true" formControlName="atd"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="atd" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="customsFlightNumber" style="width:56px;"
+                      entityAttribute="Flight.CustomsExportFlightDate">
+                      <div>
+                        <ngc-display formControlName="customsFlightNumber"></ngc-display>
+                      </div>
+                    </li>
+                    <li class="customsFlightDate" style="width:90px;" entityAttribute="Flight.CustomsExportFlightDate">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="customsFlightDate"></ngc-display>
+                      </div>
+                    </li>
+                    <li class="ac-type" style="width:56px;">
+                      <ngc-display formControlName="aircraft"></ngc-display>
+                    </li>
+                    <li class="ac-reg" style="width:55px;">
+                      <ngc-display formControlName="aircraftRegistration"></ngc-display>
+                    </li>
+                    <li class="bay" style="width:48px;">
+                      <ngc-display formControlName="bay"></ngc-display>
+                    </li>
+                    <li class="routing" style="width:95px;">
+                      <ngc-display formControlName="routing"></ngc-display>
+                    </li>
+                    <li style="width:80px;" *ngIf="item.controls.releaseDlsRemark.value ==null"
+                      [ngClass]="{'sta-red' : item.controls.dlsDelayed.value == true, 'sta' : item.controls.dlsDelayed.value == false}">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="dls"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="dls" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="dls" style="width:80px;" *ngIf="item.controls.releaseDlsRemark.value !=null">
+                      <ngc-display formControlName="releaseDlsRemark"></ngc-display>
+                    </li>
+                    <li class="dls-precision" style="width:80px;">
+                      <div>
+                        <ngc-display formControlName="dlsPrecisionTime"></ngc-display>
+                      </div>
+                    </li>
+                    <li class="man" style="width:80px;" *ngIf="item.controls.releaseManifestRemark.value ==null">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="man"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="man" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="man" style="width:80px;" *ngIf="item.controls.releaseManifestRemark.value !=null">
+                      <ngc-display formControlName="releaseManifestRemark"></ngc-display>
+                    </li>
+                    <li class="flight-precision" style="width:80px;">
+                      <div>
+                        <ngc-display formControlName="flightClosePrecisionTime"></ngc-display>
+                      </div>
+                    </li>
+                    <li class="dep" style="width:54px;" *ngIf="item.controls.autoCompleteRemark.value == null">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="dep"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="dep" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="dep" style="width:54px;" *ngIf="item.controls.autoCompleteRemark.value != null">
+                      <div>
+                        <ngc-display formControlName="autoCompleteRemark" color="red"></ngc-display>
+                      </div>
+                    </li>
+                    <li class="ofld" style="width:55px;">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="ofld"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="ofld" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="svc" style="width:60px;">
+                      <div>
+                        <ngc-display [onlyDate]="true" formControlName="outwardServiceReportFinalized"></ngc-display>
+                      </div>
+                      <ngc-display formControlName="outwardServiceReportFinalized" [onlyTime]="true"></ngc-display>
+                    </li>
+                    <li class="rmk" style="width:100px;">
+                      <ngc-display formControlName="remark"></ngc-display>
+                    </li>
+                    <li class="cac-type" style="width:60px;" entityAttribute="Flight.AircraftType">
+                      <ngc-display formControlName="flightType"></ngc-display>
+                    </li>
+                    <li class="status" entityAttribute="Flight.ArrDepStatus" style="width:60px;">
+                      <ngc-display formControlName="arrDepStatus"></ngc-display>
+                    </li>
+                    <li style="width:95px;" entityAttribute="Flight.SendFBR">
+                      <ngc-button value="flight.send.fbr" (click)="sendFBR($event)"></ngc-button>
+                    </li>
+                    <li class="fbl-rcvd" style="width:45px;" entityAttribute="Flight.FBLReceived">
+                      <ngc-display formControlName="fblreceived"></ngc-display>
+                    </li>
+                    <li class="wh-level" entityAttribute="Flight.WarehouseLevel" style="width:45px;">
+                      <ngc-display formControlName="warehouseLevel"></ngc-display>
+                    </li>
+                    <li class="bu-bd" entityAttribute="Flight.BuBdOffice" style="width:60px;">
+                      <ngc-display formControlName="buBdOffice"></ngc-display>
+                    </li>
+                    <li class="gate" style="width:45px;" entityAttribute="Flight.Gate">
+                      <ngc-display formControlName="gate"></ngc-display>
+                    </li>
+                    <li class="last-upd" style="width:60px;" entityAttribute="Flight.StaffIDAndDate">
+                      <ngc-display formControlName="staffIDAndDate"></ngc-display>
+                    </li>
+                    <li style="width:60px;" entityAttribute="Flight.SendFBR">
+                      <ngc-link (linkClick)="onLinkClick(index)">
+                        <ngc-icon type="edit" value="true" true-color="grey"></ngc-icon>
+                      </ngc-link>
+                    </li>
+                  </ul>
+                </ng-container>
+              </li>
+            </ul>
+          </div>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #Report title="g.report"  reportId='Display_Outgoing_Flight'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #ReportWithPrecision title="g.report"  reportId='Display_Outgoing_Flight_With_Precision'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #ReportEnquire title="g.report"  reportId='EnquireFlightReport'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-footer>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-row>
+            <ngc-column column="12" align="left" *ngIf="searchFlg">
+              <div>
+                <ngc-button accessEnableOn="r" value="expbu.workingList" (click)="navigateToWorkingList()"
+                  #WorkingListButton></ngc-button>
+                <ngc-button accessEnableOn="r" value="expbu.assignUldToTrolly" (click)="navigateToAssignUldToTrolly()"
+                  #AssignULDTrolleyButton></ngc-button>
+                <ngc-button accessEnableOn="r" value="expbu.displayManifest" (click)="navigateToDisplayManifest()"
+                  #DisplayManifestButton>
+                </ngc-button>
+                <ngc-button accessEnableOn="r" value="expbu.displayDls" (click)="navigateToDisplayDls()"
+                  #DisplayDLSButton></ngc-button>
+                <ngc-button accessEnableOn="r" value="expbu.flightComplete" (click)="navigateToFlightComplete()"
+                  #FlightCompleteButton>
+                </ngc-button>
+                <ngc-button accessEnableOn="r" value="expbu.offloadUld" (click)="navigateToOffloadUld()" #OffloadButton>
+                </ngc-button>
+                <ngc-button accessEnableOn="r" style="float: right;" value="expbu.daily.flight.report.pdf"
+                  (click)='onPrintEnquire("pdf")' entityAttribute="Flight.Gate"></ngc-button>
+                <ngc-button accessEnableOn="r" style="float: right;" value="expbu.daily.flight.report.xls"
+                  (click)='onPrintEnquire("xls")' entityAttribute="Flight.Gate"></ngc-button>
+                <ngc-button accessEnableOn="r" style="float: right;" value="expbu.exportToPdf" (click)='onPrint("pdf")'>
+                </ngc-button>
+                <ngc-button accessEnableOn="r" style="float: right;" value="expbu.exportToXls" (click)='onPrint("xls")'
+                  #ExportToXls>
+                </ngc-button>
+                <ngc-button accessEnableOn="r" value="ougoingFlight.display.telex" (click)="displayTelex()"
+                  entityAttribute="Flight.CustomsExportFlightDate">
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-footer>
+
+  <ngc-window #telexWindow title="Display Attached Telex" [showCloseButton]="true" (close)="onClose()" [width]="1000"
+    [height]='500'>
+    <ngc-container type="tab">
+      <ngc-row>
+
+        <ngc-column column="2">
+          <ngc-label label='g.flight'></ngc-label>
+          <div>
+            <ngc-display accessEnableOn="r" formControlName="flightNumberTelex" [width]="160"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label label="flight.flightDate"></ngc-label>
+          <div>
+            <ngc-display accessEnableOn="r" [onlyDate]="true" formControlName="flightDateTelex" [width]="160">
+            </ngc-display>
+          </div>
+        </ngc-column>
+
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="messaging.message.content"></ngc-label>
+          <div>
+            <!--<ngc-textarea formControlName="message" height="400px" width="1200px" required></ngc-textarea>-->
+            <ngc-codeeditor formControlName="telexMessages" [height]="400" [width]="900" required></ngc-codeeditor>
+          </div>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

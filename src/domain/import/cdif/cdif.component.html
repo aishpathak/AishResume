@@ -1,0 +1,485 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='cus.cdif' (print)='print()' (cancel)="onBack($event)" [disablePrint]="printFlag==false">
+  </ngc-titlebar>
+  <ngc-container type="section" [formGroup]="search">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label='srf.no'></ngc-label>
+        <div>
+          <ngc-input [noTrim]="false" formControlName="srfNo" required="true" required accessEnableOn="r">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='cdif.number'></ngc-label>
+        <div>
+          <ngc-input formControlName="cdifNo" accessEnableOn="r"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" label="display.search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button [disabled]="this.postSRF" (click)=" opencreateUdateCDIF(-1)" label="cdif.create"
+            accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="5">
+
+      </ngc-column>
+
+    </ngc-row>
+
+
+  </ngc-container>
+  <ngc-container type="box" *ngIf="form.get('details').value.length>0">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="sys.SNO"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="srf.no"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="cdif.number"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.awb"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.setup.check.list.flight.date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flight.ata"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="status"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.edit"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="cdif.Cancel"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="details">
+            <tr *ngFor="let item of form.get('details').controls; let index=index" [formGroupName]="index">
+              <td>
+                {{index+1}}
+              </td>
+              <td>
+                <ngc-display formControlName="srfNo"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="cdifNo"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="awb"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightNoDate"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="ata"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="status"></ngc-display>
+              </td>
+
+              <td>
+                <ngc-button [disabled]="form.get('details').value[index].cdifNo==null ||
+                form.get('details').value[index].status=='CANCELLED'||
+                form.get('details').value[index].status=='COMPLETED'" (click)="opencreateUdateCDIF(index)"
+                  iconType="edit" accessEnableOn="r"></ngc-button>
+              </td>
+              <td>
+                <ngc-button [disabled]="form.get('details').value[index].cdifNo==null ||
+                form.get('details').value[index].status=='CANCELLED'||
+                form.get('details').value[index].status=='COMPLETED'" (click)="OpenCancleCDIF(index)" iconType="edit"
+                  accessEnableOn="r"></ngc-button>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+
+
+
+
+  <ngc-window #createUdateCDIF [width]="1200" [height]="500" title='g.create.update' formGroupName="srfObject"
+    (close)="closePopUP()">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="1.5">
+          <ngc-label label='srf.no'></ngc-label>
+          <div>
+            <ngc-display formControlName="srfNo" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='cdif.number'></ngc-label>
+          <div>
+            <ngc-display formControlName="cdifNo" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.awb'></ngc-label>
+          <div>
+            <ngc-display formControlName="awb" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.flight'></ngc-label>
+          <div>
+            <ngc-display formControlName="flightNoDate" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='flight.ata'></ngc-label>
+          <div>
+            <ngc-display formControlName="ata" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='import.HousePcsWt'></ngc-label>
+          <div>
+            <ngc-display formControlName="pcsWt" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.cdif.printer'></ngc-label>
+          <div>
+            <ngc-input formControlName="cdifPrinter" required="true" accessEnableOn="r" [width]="110">
+            </ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.utl.printer'></ngc-label>
+          <div>
+            <ngc-input formControlName="utlPrinter" accessEnableOn="r" [width]="80"></ngc-input>
+          </div>
+        </ngc-column>
+
+
+
+
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column [column]="1.5">
+          <ngc-label label='CDIF PCS'></ngc-label>
+          <div>
+            <ngc-piecesinput required formControlName="cdifPcs" [width]="110">
+            </ngc-piecesinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.cdif.wt'></ngc-label>
+          <div>
+            <ngc-weightinput required formControlName="cdifWt" [width]="110">
+            </ngc-weightinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.reason'></ngc-label>
+          <div>
+            <ngc-dropdownlist required formControlName="reason" [width]="100" sourceId="CDIFReason$CDIFReasonValues">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label=''></ngc-label>
+          <div>
+            <ngc-button [disabled]="form.get('srfObject.cdifNo').value==null" (click)="onSendNotification()"
+              label="Send Notification" accessEnableOn="r"></ngc-button>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="8">
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.hawb"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.cdif.pcs"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.cdif.wt"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.reason"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="g.delete"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="house">
+              <tr *ngFor="let item of form.get('srfObject.house').controls; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-input formControlName="hawb"></ngc-input>
+                </td>
+                <td>
+                  <ngc-piecesinput formControlName="cdifPcs"></ngc-piecesinput>
+                </td>
+                <td>
+                  <ngc-weightinput formControlName="cdifWt"></ngc-weightinput>
+                </td>
+                <td>
+                  <ngc-dropdownlist formControlName="cdifReason" [width]="100" sourceId="CDIFReason$CDIFReasonValues">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-button (click)="deleteHouse(index)" label="Delete" accessEnableOn="r"></ngc-button>
+                </td>
+
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+        <ngc-column [column]="3">
+
+        </ngc-column>
+        <ngc-column [column]="1" [align]="right">
+          <ngc-label label=''></ngc-label>
+          <div>
+            <ngc-button (click)="addHouse()" label="reject.addRow" accessEnableOn="r"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="12">
+          <ngc-table *ngIf="form.get('srfObject.storage').value.length>0">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="sys.SNO"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.loc"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.whs.loc.report"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="import.whs.dest"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.accpt.locPcs"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.accpt.locWgt"></ngc-label>
+                </th>
+                <th *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-label label="g.cdif.pcs"></ngc-label>
+                </th>
+                <th *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-label label="g.cdif.wt"></ngc-label>
+                </th>
+                <th *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-label label="g.cdif.loc"></ngc-label>
+                </th>
+                <th *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-label label="awb.whs.loc.report"></ngc-label>
+                </th>
+                <th *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-label label="import.whs.dest"></ngc-label>
+                </th>
+
+              </tr>
+            </thead>
+            <tbody formArrayName="storage">
+              <tr *ngFor="let item of form.get('srfObject.storage').controls; let index=index" [formGroupName]="index">
+                <td>
+                  {{index+1}}
+                </td>
+                <td>
+                  <ngc-display formControlName="location"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="warehouseLoc"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="warehouseDes"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="locPieces"></ngc-display>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="locWeight"></ngc-weightdisplay>
+                </td>
+                <td *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-piecesinput formControlName="cdifPcs" (ngModelChange)="CalculatePiecesWT($event,index)">
+                  </ngc-piecesinput>
+                </td>
+                <td *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-weightinput formControlName="cdifWt" (ngModelChange)="CalculatePiecesWT($event,index)">
+                  </ngc-weightinput>
+                </td>
+                <td *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-movable-storage-location upperCase="true" [shipmentNumber]="this.form.get('srfObject.awb').value"
+                    [maxlength]="12" [minlength]="3" [width]="130" formControlName="cdifLoc">
+                  </ngc-movable-storage-location>
+                </td>
+                <td *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-locations-list formControlName="irrgwarehouseLoc" [width]="200" [locationTypeList]="['STORAGE']"
+                    [sectorId]="sectorId">
+                  </ngc-locations-list>
+                </td>
+                <td *ngIf="form.get('srfObject.cdifNo').value==null">
+                  <ngc-locations-list entityAttribute="Gen.WareHouseDestination" formControlName="irrgwarehouseDes"
+                    [noTerminal]="terminalRequired" [width]="200" [locationTypeList]="['STORAGE']"
+                    (select)="onLocationChange($event , index)">
+                  </ngc-locations-list>
+                </td>
+
+
+
+              </tr>
+
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+        <ngc-column [column]="12">
+          <ngc-label label='g.remarks'></ngc-label>
+          <div>
+            <ngc-input formControlName="remarks" accessEnableOn="r" [width]="1000">
+            </ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="11">
+        </ngc-column>
+        <ngc-column [column]="1" [align]="right">
+          <ngc-label label=''></ngc-label>
+          <div>
+            <ngc-button (click)="saveUpdate()" label="cus.save" accessEnableOn="r"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+
+  <ngc-window #cancleCDIF [width]="600" [height]="200" title='Cancel CDIF' formGroupName="srfObject"
+    (close)="closePopUP()">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="3">
+          <ngc-label label='srf.no'></ngc-label>
+          <div>
+            <ngc-display formControlName="srfNo" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label='cdif.number'></ngc-label>
+          <div>
+            <ngc-display formControlName="cdifNo" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label='g.awb'></ngc-label>
+          <div>
+            <ngc-display formControlName="awb" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.cdif.pcs'></ngc-label>
+          <div>
+            <ngc-display formControlName="cdifPcs" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='g.cdif.wt'></ngc-label>
+          <div>
+            <ngc-display formControlName="cdifWt" [width]="110">
+            </ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="10">
+          <ngc-label label='g.reason'></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="cancelReason" [width]="100" sourceId="CDIFReason$CDIFReasonValues">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="9">
+
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button (click)="saveUpdate()" label="cus.save" accessEnableOn="r"></ngc-button>
+
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button (click)="closePopUP()" label="fwb.close" accessEnableOn="r"></ngc-button>
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+  <ngc-window #sendCDIF [width]="600" [height]="200" title='Send Notification ' formGroupName="srfObject"
+    (close)="closePopUP()">
+    <ngc-container type="section">
+
+      <ngc-row>
+        <ngc-column [column]="10">
+          <ngc-label label='Email'></ngc-label>
+          <div>
+            <ngc-taginput regex="/^[a-zA-Z0-9.!#$%&’*+/=?^_`{|}~-]+@[a-zA-Z0-9-]+(?:\.[a-zA-Z0-9-]+)*$/"
+              formControlName="mailIds" width='200'></ngc-taginput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="9">
+
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button (click)="sendMail()" label="common.send" accessEnableOn="r"></ngc-button>
+
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-button (click)="closePopUP()" label="g.close" accessEnableOn="r"></ngc-button>
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+
+
+</form>

@@ -1,0 +1,115 @@
+<ngc-titlebar title="flight.title.maintain.weather" (save)="onSave($event)" (clear)="onClear($event)"
+  [disableSave]="saveFlag==false"></ngc-titlebar>
+<form [formGroup]='maintainWeatherForm'>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='flight.flightType'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="flightType" sourceId="Flight$FlightProcessType"
+            [width]="100" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.carrierCode'></ngc-label>
+        <div>
+          <ngc-lov [width]="50" accessEnableOn="r" formControlName="carrier" sourceId="SATS_CARRIERCODE"
+            title="g.carrier.list" dataField="code">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.carrier.short.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flightNumber"></ngc-label>
+        <div>
+          <ngc-flightkeyinput  [width]="100" [noCarrier]="true" upperCase="true" formControlName="flightNumber"  accessEnableOn="r">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.fromDate" [width]="40"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" showCalendarButton="true" [showTimeButton]="true"
+            formControlName="fromDate" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.toDate" [width]="40"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" showCalendarButton="true" [showTimeButton]="true"
+            formControlName="toDate" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="11" align='right'>
+        <ngc-label value="g.weather"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="weather" sourceId="Flight$WeatherCondition"
+            [width]="80">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="flightList" [showToolbar]="false" [width]="50">
+          <ngc-data-column text="g.select" dataField="select" type="check" cellsAlign="left" [width]="2.5">
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" dataField="sNo" [width]="2.5">
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightNumber" dataField="flightKey" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="g.sch.date" dataField="scheduledDate" [width]="5" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightLeg" dataField="flightLeg" [width]="5"></ngc-data-column>
+          <ngc-data-column text="flight.sta" dataField="dateSta" [width]="5" cellsAlign="left" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="flight.eta" dataField="dateEta" [width]="5" cellsAlign="left" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="flight.std" dataField="dateStd" [width]="5" cellsAlign="left" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="flight.etd" dataField="dateEtd" [width]="5" cellsAlign="left" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="g.weather" dataField="weather" [width]="5" cellsAlign="left">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="weather"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report format='pdf' #reportwindow  reportId='Maintain_Weather_report'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #ReportExcel title="g.report" format='xls'  reportId='Maintain_Weather_report_Excel'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-row>
+          <ngc-column column="12" align="left" *ngIf="searchFlag">
+            <div>
+              <ngc-button style="float: right;" label="expbu.exportToPdf" (click)="onPrint('pdf')"></ngc-button>
+              <ngc-button style="float: right;" label="expbu.exportToXls" (click)="onPrint('xls')"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-footer>

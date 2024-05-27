@@ -1,0 +1,270 @@
+<ngc-titlebar title="CANCEL_BOOK_SHIPMENT" (clear)="onClear()" (cancel)="onCancel()"></ngc-titlebar>
+<form [formGroup]="form">
+    <ngc-container type='section' type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label='flight.Flight'></ngc-label>
+                <div>
+                    <ngc-flightkeyinput accessEnableOn="r" (ngModelChange)="refreshthesegmentForSearchFlight($event)"
+                        [width]="100" formControlName="flightKey" upperCase="true" required></ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='flight.date'></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" (ngModelChange)="fetchSegmentForSearchFlight($event)" required
+                        width='110px' formControlName="flightDate"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="flight.segment"></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" required sourceId="FLIGHTSEGMENT" [width]='70'
+                        formControlName='segment' [noCache]="true"
+                        [sourceParameters]="sourceIdSegmentDropdownForSearchFlight" valueMember="desc"
+                        sourceType="query" [noBlank]="true" [autoSelect]="true"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column align='left' column=8>
+                <br>
+                <ngc-button value='g.search' accessEnableOn="r" (click)="searchBookingList()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf='searchButtonClicked' type="tab">
+        <ngc-row>
+            <ngc-column align='right'>
+                <ngc-label></ngc-label>
+                <div>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf='searchButtonClicked' type="tab">
+        <ngc-row>
+
+            <ngc-column>
+                <ngc-datatable formArrayName="flightShipmentList" [groups]="['offPointGroup']"
+                    [groupsRenderer]="groupsRenderer" [pageable]="false" (linkClick)="onLinkClick($event)"
+                    (itemSelect)="changeButtonFlag($event)" [showToolbar]="false" (select)="onSelectAll()"
+                    (select)="unSelectAll()">
+                    <ngc-data-column text="g.sNo" [width]='10' dataField="sno" align="left" cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.select" [width]='10' dataField="cancelationCheckBox" type="check"
+                        align="left" cellsAlign="left" [cellsStyleRenderer]="checkBoxCellStyleRender"></ngc-data-column>
+                    <ngc-data-column text="svc" [width]='15' [hidden]="true" dataField="serviceFlag" type="icon"
+                        iconType="yesno" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="awbnumber" height='30' dataField="shipmentNumber" [width]="50" align="center"
+                        cellsAlign="left" [cellsRenderer]="awbNumberCellsRenderer"></ngc-data-column>
+                    <ngc-data-column text="awb.part.suffix" [width]='10' [hidden]="true" dataField="partSuffix"
+                        align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="awb.part.suffix" [width]='10' dataField="partSuffixToShowInUi" align="center"
+                        cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="export.sts" [width]='10' dataField="bookingStatusCode" align="center"
+                        cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="org" [width]='10' dataField="origin" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="des" [width]='10' dataField="destination" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.book.pieces" [width]='10' dataField="bookingPieces"
+                        type="displayPieces" align="center" cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text="export.book.weight" [width]='10' dataField="bookingWeight"
+                        type="displayWeight" align="center" cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text="offPointGroup" [width]='20' [hidden]="true" dataField="offPointGroup"
+                        align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="offPoint" [width]='20' [hidden]="true" dataField="offPoint" align="center"
+                        cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="g.totalpieces" [width]='20' [hidden]="true" dataField="totalPieces"
+                        type="totalPieces" align="center" cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shc" [width]='20' align="left" cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.book.natureofgoods" [width]='30' dataField="natureOfGoodsDescription"
+                        cellsFormat="d2" align="center" cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="export.book.densitygroup" [width]='25' [hidden]="true"
+                        dataField="densityGroupCode" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="export.book.volume" dataField="volumeWeight" [width]='25' [hidden]="true"
+                        align="centrighter" cellsAlign="centrighter"></ngc-data-column>
+                    <ngc-data-column text="export.book.shipper" dataField="shipperName" [hidden]="true" [width]='30'
+                        align="left" cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="export.book.bookingcancelled" [width]='30' [hidden]="true" type="icon"
+                        iconType="yesno" dataField="bookingCancellationFlag" align="center" cellsAlign="center"
+                        [cellsStyleRenderer]="trolleyCellsStyleRenderer"></ngc-data-column>
+                    <ngc-data-column text="export.book.messagerejected" [width]='30' [hidden]="true" type="icon"
+                        cellsAlign="center" iconType="yesno" dataField="messageRejected" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.book.fbl" [width]='10' [hidden]="true" type="icon" cellsAlign="center"
+                        iconType="yesno" dataField="fbl" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="manual" type="icon" [width]='25' [hidden]="true" cellsAlign="center"
+                        iconType="yesno" dataField="manual" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="export.book.dimensionandremark" [width]='35' [hidden]="true"
+                        dataField="dimension" type="link" [cellsStyleRenderer]="trolleyCellsStyleRenderer"
+                        iconType="edit" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="g.edit" dataField="edit" [width]='20' [hidden]="true" type="link"
+                        iconType="edit" align="center" [cellsStyleRenderer]="trolleyCellsStyleRenderer"
+                        cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="Location Info" [width]='18' dataField="locationInfo" cellsFormat="d2"
+                        align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="Target Cancel Shipments" [width]='30' dataField="targetCancelShipments"
+                        cellsFormat="d2" align="center" cellsAlign="left"></ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf='searchButtonClicked' type="tab">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button value="SELECT_ALL" [hidden]="" (click)="onSelectAll()"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column column="5">
+                <ngc-label label='reasonofcancellation'></ngc-label>
+                <div>
+                    <ngc-dropdownlist sourceType='query' sourceId='KEY_BOOKING_CANCELLATION_REMARKS'
+                        [filterable]="false" formControlName="bookingCancellationReason" [width]="400">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column column="6"></ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-window #routingInfoWindow title="flight.routing" [showCloseButton]="true" [width]="800" [height]="500">
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="export.booking.update.label"></ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-edittable formArrayName="flightShipmentListWithMatchingRoute" [pageable]="false">
+                        <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+                            cellsAlign="center"></ngc-data-column>
+                        <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center"
+                            [width]="5">
+                        </ngc-data-column>
+                        <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+                        </ngc-data-column>
+                        <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center"
+                            dataField="partSuffix">
+                        </ngc-data-column>
+                        <ngc-data-column text="awb.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+                            cellsAlign="left">
+                        </ngc-data-column>
+
+                    </ngc-edittable>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="export.booking.routing.mismatch.label"></ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="export.booking.flight"></ngc-label>
+                    <ngc-display formControlName='flightAndSegmentForPopup'></ngc-display>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-edittable formArrayName="flightShipmentListWithNonMatchingRoute" [pageable]="false">
+                        <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+                            cellsAlign="center"></ngc-data-column>
+                        <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center"
+                            [width]="5">
+                        </ngc-data-column>
+                        <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+                        </ngc-data-column>
+                        <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center"
+                            dataField="partSuffix">
+                        </ngc-data-column>
+                        <ngc-data-column text="awb.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+                            cellsAlign="left">
+                        </ngc-data-column>
+
+                    </ngc-edittable>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column align="center">
+                    <ngc-label label='export.booking.proceed.label'>
+                    </ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column align="center">
+                    <ngc-button value="g.yes" (click)="rebookShipment()" align="left"></ngc-button>
+                    <ngc-button value="g.no" (click)="closeRoutingInfoWindow()" align="right"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>
+
+<form [formGroup]="reBookForm">
+    <ngc-container *ngIf='searchButtonClicked' type="tab">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label='flight.Flight'></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="flight.date"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label='flight.segment'></ngc-label>
+            </ngc-column>
+            <ngc-column column="1">
+            </ngc-column>
+            <ngc-column column="8">
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-flightkeyinput (ngModelChange)="refreshthesegment($event)" [width]="93" upperCase="true"
+                    [maxlength]="8" formControlName="flightKey"></ngc-flightkeyinput>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-datetimeinput (ngModelChange)="fetchSegment($event)" [width]="93" upperCase="true"
+                    formControlName="date">
+                </ngc-datetimeinput>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-dropdownlist sourceId="FLIGHTSEGMENT" [width]='70' formControlName='flightSegmentId'
+                    [noCache]="true"
+                    [sourceParameters]="{ 'parameter1': this.reBookForm.get('flightKey').value, 'parameter2': this.reBookForm.get('date').value }"
+                    valueMember="desc" sourceType="query" [noBlank]="true" [autoSelect]="true"></ngc-dropdownlist>
+            </ngc-column>
+
+            <ngc-column column="2">
+                <!-- bug-318 fix -->
+                <!-- bug-349 fix -->
+                <ngc-button label="shp.target" [disabled]='cancelRebookButton' (click)="targetToCancel()"
+                    accessSectionId="TARGET_CANCEL"></ngc-button>
+            </ngc-column>
+            <!-- Changes done for JV01-214 -->
+            <ngc-column column=" 2">
+                <!-- bug-318 fix -->
+                <!-- bug-349 fix -->
+                <ngc-button label="shp.rebook" [disabled]='cancelRebookButton' (click)="validateRoute()"
+                    accessSectionId="REBOOK_SHIPMENT"></ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-button label="can.book" [disabled]='cancelRebookButton' (click)="cancelSelectedShipmentRecords()"
+                    accessSectionId="CANCEL_BOOKING">
+                    <!-- bug-349 fix END -->
+                    <!-- bug-318 fix END -->
+                </ngc-button>
+                <!-- Changes End Here -->
+            </ngc-column>
+            <ngc-column column="8">
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+</form>

@@ -1,0 +1,154 @@
+<form [formGroup]="displayScheduleform">
+  <ngc-titlebar title="flight.displayFlightSchedule.title" (clear)="clearFormData()"
+    (print)="printDisplayScheduleFlightReport('pdf')" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov formControlName='carrierCode' dataField='code' displayMember="code" [width]='50' upperCase='true'
+            sourceId='CARRIER_OPT' title='flight.carrierType' accessEnableOn="r">
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]='100' formControlName="fromDate" required [onlyDate]="true" accessEnableOn="r">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.toDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]='100' [min]="displayScheduleform.controls.fromDate.value" formControlName="toDate"
+            [onlyDate]="true" accessEnableOn="r"></ngc-datetimeinput>
+
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='g.origin'></ngc-label>
+        <div>
+          <ngc-lov formControlName='fromLocation' accessEnableOn="r" [width]='50' upperCase='true'
+            sourceId='FINAL_DESTINATION' title='g.origin' dataField='code' displayMember="code"
+            entityAttribute="Flight.FromSector">
+            <ngc-data-column text='flight.airport_cityCode' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='g.destination'></ngc-label>
+        <div>
+          <ngc-lov formControlName='toLocation' accessEnableOn="r" [width]='50' upperCase='true'
+            sourceId='FINAL_DESTINATION' title='g.destination' dataField="code" displayMember="code"
+            entityAttribute="Flight.ToSector">
+            <ngc-data-column text='flight.airport_cityCode' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="displayService">
+        <ngc-label label="flight.flightNumber"></ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="100" [noCarrier]="true" upperCase="true" formControlName="flightNo"
+            accessEnableOn="r">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column entityAttribute="Flight.Aircraft">
+        <ngc-label label="flight.aircraft"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" formControlName="aircraftType" [width]="55" sourceId='AIR' title='flight.aircraft'
+            dataField='code' displayMember="code" maxlength='3'>
+            <ngc-data-column text="flight.aircraftType" dataField="code" [width]="100">
+            </ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column entityAttribute="Flight.AircraftType">
+        <ngc-label label="flight.cargo.ac.type"></ngc-label>
+        <ngc-dropdownlist accessEnableOn="r" formControlName="flightType" sourceId="Events$AirCraftType" [width]="100">
+        </ngc-dropdownlist>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onClick()" value="g.search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="emptyColumn"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable *ngIf="dataDisplay" formArrayName="resultList" height="500" width="1350"
+          (linkClick)="onLinkClick($event)" [showToolbar]="false">
+          <ngc-data-column text="g.flight" dataField="flight" [width]="100" align="center" type='link'
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="flight.aircraft" dataField="aircraftType" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.boarding" dataField="boarding" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.offPoint" dataField="offloading" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.departureTime" dataField="departureTime" [width]="125" cellsAlign="center"
+            type="displayTime"></ngc-data-column>
+          <ngc-data-column text="flight.arrivalTime" dataField="arrivalTime" [width]="120" cellsAlign="center"
+            type="displayTime"></ngc-data-column>
+          <ngc-data-column text="flight.fromDate" dataField="dateFrom" [width]="100" cellsAlign="center"
+            type="displayDate"></ngc-data-column>
+          <ngc-data-column text="flight.toDate" dataField="dateTo" [width]="100" cellsAlign="center" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text="flight.frequency" dataField="frequency" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.JointFlightFrequency" dataField="jointFrequency" [width]="160"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column *ngIf="!displayService" text="flight.serviceType" dataField="svc" [width]="110"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Flight.AircraftType" text="flight.cargo.ac.type"
+            dataField="svcTenantSpecific" [width]="140" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.stops" dataField="stops" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="flight.dayChange" dataField="dayChange" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.apron" dataField="apron" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column *ngIf="showStaffId" text="val.staff.id" dataField="staffId" [width]="150" cellsAlign="center"
+            align="center">
+
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Flight.PortOfCall" text="flight.port.of.call" dataField="portOfCall"
+            [width]="200" cellsAlign="center" align="center">
+
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow4 title="g.report"  reportId='DisplayFlightSchedule'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow1 title="g.report"  reportId='DisplayFSC'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow2 title="g.report"  reportId='DisplayFST'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow3 title="g.report"  reportId='DisplayFS_allparam'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer entityAttribute="Flight.aircraftType">
+  <ngc-row>
+    <ngc-column *ngIf="dataDisplay">
+      <ngc-button style="float: right;" accessEnableOn="r" (click)='printDisplayScheduleFlightReport("xls")'
+        value="export.excel">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

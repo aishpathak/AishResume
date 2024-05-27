@@ -1,0 +1,543 @@
+<!-- Search Form with FormGroup searchForm -->
+
+<ngc-titlebar title='title.hawbrecord' (save)="onSave()" (cancel)="onCancel($event)" *ngIf=!showAsPopup>
+</ngc-titlebar>
+<ngc-error *ngIf=showAsPopup></ngc-error>
+<ngc-row *ngIf=showAsPopup>
+    <ngc-column align="right">
+        <ngc-button label="save" (click)="onSave($event)"> </ngc-button>
+    </ngc-column>
+    <ngc-column [column]="1">
+        <ngc-label label=""></ngc-label>
+    </ngc-column>
+</ngc-row>
+<form [formGroup]="searchForm">
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label value="Type"></ngc-label>
+                </div>
+                <ngc-dropdownlist [width]="80" [dropDownWidth]="110" [dropDownHeight]="200"
+                    sourceId="Shpmgmt$Shp_Type_Web" formControlName="type" accessEnableOn="r" required>
+                </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label value=""></ngc-label>
+                </div>
+                <ngc-awbinput formControlName="awbNumber" [width]='120' accessEnableOn="r" required
+                    (ngModelChange)="onAWBChange($event)"></ngc-awbinput>
+            </ngc-column>
+            <!--Daxing Code Added-->
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="g.hawb.number"></ngc-label>
+                </div>
+                <ngc-lov [validOnly]="true" formControlName="hawbNumber" title='HAWB Number' upperCase='true'
+                    accessEnableOn="r" sourceType='query' [width]="150" sourceId='HWBNUMBER' [noCache]="true"
+                     dataField='code' [sourceParameters]="{'parameter1': searchForm.get('awbNumber').value}"
+                    valueMember="code" (select)="setAWBNumber($event)" required>
+                    <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                    <!-- <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column> -->
+                </ngc-lov>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label=''></ngc-label>
+                <div>
+                    <ngc-button (click)="onSearch()" value="search" iconType="search" accessEnableOn="r"></ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<form [formGroup]="form" *ngIf="showData">
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="g.awbNumber"></ngc-label>
+                </div>
+                <ngc-display formControlName="awbNumber">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.origin"></ngc-label>
+                </div>
+                <ngc-display formControlName="origin">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.destination"></ngc-label>
+                </div>
+                <ngc-display formControlName="destination">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="awb.awb.pieces"></ngc-label>
+                </div>
+                <ngc-display formControlName="pieces">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="awb.awb.weight"></ngc-label>
+                </div>
+                <ngc-weightdisplay formControlName="weight">
+                </ngc-weightdisplay>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.chargeableWeight"></ngc-label>
+                </div>
+                <ngc-chargeableweightdisplay formControlName="chargeableWeight">
+                </ngc-chargeableweightdisplay>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="shp.natureofgoods"></ngc-label>
+                <div>
+                    <ngc-display formControlName="natureOfGoods"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="Appointed Agent"></ngc-label>
+                </div>
+                <ngc-display formControlName="appointedAgentCode">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.shc"></ngc-label>
+                </div>
+                <ngc-display formControlName="shc">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.domint"></ngc-label>
+                </div>
+                <ngc-display formControlName="intDom" entityAttribute="Awb.DomesticInternationalHandling">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.HandledBy"></ngc-label>
+                </div>
+                <ngc-display formControlName="handledByHouse" feature="Imp.Bd.HAWBHandling">
+                </ngc-display>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container formGroupName="houseModel" type="tab">
+        <ngc-row>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="g.hawb.number"></ngc-label>
+                </div>
+                <ngc-display formControlName="hawbNumber">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.origin"></ngc-label>
+                </div>
+                <ngc-lov formControlName="origin" [width]="45" title='ORIGIN' upperCase="true" dataField="code"
+                    displayMember="code" sourceId="APT" required>
+                    <ngc-data-column text="code" dataField="code" [width]="100"></ngc-data-column>
+                    <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.destination"></ngc-label>
+                </div>
+                <ngc-lov formControlName="destination" [width]="45" title='DESTINATION' upperCase="true"
+                    dataField="code" displayMember="code" sourceId="APT" required>
+                    <ngc-data-column text="code" dataField="code" [width]="100"></ngc-data-column>
+                    <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="customs.hawb.pieces"></ngc-label>
+                </div>
+                <ngc-piecesinput formControlName="pieces" required>
+                </ngc-piecesinput>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="customs.hawb.weight"></ngc-label>
+                </div>
+                <ngc-weightinput formControlName="weight" required>
+                </ngc-weightinput>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.chargeableWeight"></ngc-label>
+                </div>
+                <ngc-chargeableweightinput formControlName="chargeableWeight" required>
+                </ngc-chargeableweightinput>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.weightCode"></ngc-label>
+                </div>
+                <ngc-dropdownlist sourceId='EXPORT$Weight_Code' [width]="70" formControlName="weightUnitCode" required>
+                </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="g.natureOfGoods"></ngc-label>
+                </div>
+                <ngc-input [width]="150" formControlName="natureOfGoods" required>
+                </ngc-input>
+            </ngc-column>
+            <ngc-column>
+                <div>
+                    <ngc-label label="g.shc"></ngc-label>
+                </div>
+                <ngc-shcinput [softDelete]="true" formArrayName="shc" dataField="code">
+                </ngc-shcinput>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container formGroupName="houseModel">
+        <ngc-row>
+            <ngc-column>
+                <ngc-container formGroupName="consignee" title="awb.consignee" type="rectangle">
+                    <ngc-row>
+
+
+                        <ngc-column [column]="2">
+                            <div>
+                                <ngc-label label='hawb.consignee.code' shortcutFor="code"></ngc-label>
+                            </div>
+                            <ngc-lov formControlName="code" [width]="75" maxlength="8" upperCase="true"
+                                [dropDownWidth]="200" [noValidation]="true" sourceId="KEY_AWB_CONSIGNEE_DATA_REVAMP"
+                                title="g.name" displayMember="code" dataField="code"
+                                (select)="onSelectConsigneeName($event)">
+                                <ngc-data-column text="g.code" dataField="code" [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.name" dataField="desc" [width]="120">
+                                </ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+
+
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="awbConsigneeName" shortcutFor="name"></ngc-label>
+                            </div>
+                            <ngc-lov formControlName="name" [width]="350" maxlength="65" upperCase="true"
+                                [dropDownWidth]="200" [noValidation]="true" sourceId="KEY_AWB_CONSIGNEE_DATA_REVAMP"
+                                title="Consignee Information" displayMember="desc" dataField="code"
+                                (select)="onSelectConsigneeName($event)" required>
+                                <ngc-data-column text="g.code" dataField="code" [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.name" dataField="desc" [width]="120">
+                                </ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column column="8" formGroupName="address">
+                            <div>
+                                <ngc-label label="Address"></ngc-label>
+                            </div>
+                            <ngc-input [width]="350" formControlName="streetAddress" maxlength="65" required>
+                            </ngc-input>
+                        </ngc-column>
+                        <ngc-column formGroupName="address">
+                            <div>
+                                <ngc-label label="g.place"></ngc-label>
+                            </div>
+                            <ngc-input formControlName="place" required></ngc-input>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row formGroupName="address">
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.postalCode"></ngc-label>
+                            </div>
+                            <ngc-input formControlName="postal"></ngc-input>
+                        </ngc-column>
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.country"></ngc-label>
+                            </div>
+                            <ngc-lov required formControlName="country" sourceId="COUNTRY"
+                                (ngModelChange)="getCountryCode($event)" title="g.country" dataField="code"
+                                [dropDownWidth]="200">
+                                <ngc-data-column text="g.country" dataField="code" [width]="30"></ngc-data-column>
+                                <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.state"></ngc-label>
+                            </div>
+                            <ngc-lov formControlName="state" sourceId="STATE_PARAM"
+                                [sourceParameters]="{'parameter1': form.get('houseModel').get('consignee').get('address').get('country').value}"
+                                title="g.state" dataField="code" [dropDownWidth]="200" [noValidation]="true">
+                                <ngc-data-column text="g.state" dataField="code" [width]="100"></ngc-data-column>
+                                <ngc-data-column text="g.description" [width]="300" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column column="right">
+                            <ngc-label label='agent.appointed.agent' shortcutFor="appointedAgentCode"></ngc-label>
+                            <div>
+                                <ngc-lov #appointedAgent formControlName="appointedAgentCode" [width]="120"
+                                    [dropDownWidth]="300" [validOnly]="true"
+                                    sourceId="AWB_RELEASE_APPOINTED_AGENT_DATA_WITHOUT_PARAMETER" sourceType="query"
+                                    title="Appointed Agent" displayMember="desc" dataField="code"
+                                    (onClose)="closeAppointedAgent($event)"
+                                    (select)="onSelectAppointedAgentCodeCne($event)">
+                                    <ngc-data-column text="Code" dataField="code" [width]="100"></ngc-data-column>
+                                    <ngc-data-column text="Name" dataField="desc" [width]="150"></ngc-data-column>
+                                    <ngc-data-column text="Contract Terms" dataField="param2" [width]="300">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column>
+                <ngc-container formGroupName="shipper" title="awb.shipper" type="rectangle">
+                    <ngc-row>
+                        <ngc-column [column]="2">
+                            <div>
+                                <ngc-label label='g.code'></ngc-label>
+
+                            </div>
+                            <ngc-lov formControlName="code" [width]="75" maxlength="8" upperCase="true"
+                                [dropDownWidth]="200" [noValidation]="true" sourceId="KEY_AWB_CONSIGNEE_DATA_REVAMP"
+                                title="g.name" displayMember="code" dataField="code"
+                                (select)="onSelectShipperName($event)">
+                                <ngc-data-column text="g.code" dataField="code" [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.name" dataField="desc" [width]="120">
+                                </ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.name"></ngc-label>
+                            </div>
+                            <ngc-lov formControlName="name" [width]="350" maxlength="65" upperCase="true"
+                                [dropDownWidth]="200" [noValidation]="true" sourceId="SHIPPER_DATA"
+                                title="SHIPPER INFORMATION" displayMember="desc" dataField="desc"
+                                (select)="onSelectShipperName($event)">
+                                <ngc-data-column text="g.code" dataField="code" [width]="150">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.name" dataField="desc" [width]="150">
+                                </ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column column="8" formGroupName="address">
+                            <div>
+                                <ngc-label label="g.address"></ngc-label>
+                            </div>
+                            <ngc-input [width]="350" formControlName="streetAddress" maxlength="65"></ngc-input>
+                        </ngc-column>
+                        <ngc-column formGroupName="address">
+                            <div>
+                                <ngc-label label="g.place"></ngc-label>
+                            </div>
+                            <ngc-input formControlName="place"></ngc-input>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row formGroupName="address">
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.postalCode"></ngc-label>
+                            </div>
+                            <ngc-input formControlName="postal"></ngc-input>
+                        </ngc-column>
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.country"></ngc-label>
+                            </div>
+                            <ngc-lov formControlName="country" sourceId="COUNTRY"
+                                (ngModelChange)="getCountryCode($event)" title="g.country" dataField="code"
+                                [dropDownWidth]="200">
+                                <ngc-data-column text="g.country" dataField="code" [width]="30"></ngc-data-column>
+                                <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                        <ngc-column>
+                            <div>
+                                <ngc-label label="g.state"></ngc-label>
+                            </div>
+                            <ngc-lov formControlName="state" sourceId="STATE_PARAM"
+                                [sourceParameters]="{'parameter1': form.get('houseModel').get('shipper').get('address').get('country').value}"
+                                title="g.state" dataField="code" [dropDownWidth]="200" [noValidation]="true">
+                                <ngc-data-column text="g.state" dataField="code" [width]="100"></ngc-data-column>
+                                <ngc-data-column text="g.description" [width]="300" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+<ngc-footer [height]="40">
+    <ngc-container *ngIf="showData">
+        <ngc-row>
+            <ngc-column>
+                <ngc-button value="HAWBRecord.HAWB.List" (click)="openHwbList()" accessEnableOn="r"></ngc-button>
+                <ngc-button value="HAWBRecord.HAWB.Remarks" (click)="openHwbRemarks()" accessEnableOn="r"></ngc-button>
+                <ngc-button value="HAWBRecord.inbound.breakdown" (click)="openInboundBreakdown()" accessEnableOn="r">
+                </ngc-button>
+                <ngc-button value="HAWBRecord.hold.HAWB" (click)="openHoldHwb()" accessEnableOn="r"></ngc-button>
+                <ngc-button value="HAWBRecord.HAWB.info" (click)="openHwnInfo()" accessEnableOn="r"></ngc-button>
+                <ngc-button value="HAWBRecord.collect.charges" (click)="openCollectCharges()" accessEnableOn="r">
+                </ngc-button>
+                <ngc-button accessEnableOn="r" (click)="onLinkClick()" value="HAWBRecord.dimension" iconType="add"
+                    accessEnableOn="r">
+                </ngc-button>
+                <!-- <ngc-button value="Dimension" (click)="openDimension()"></ngc-button> -->
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</ngc-footer>
+<form [formGroup]="HousewayDimentionForm">
+    <ngc-window #dimensionWindow title="awb.dimension" [showCloseButton]="true" [width]="780" [height]='500'>
+
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <div>
+                        <ngc-label label="export.book.muc"></ngc-label>
+                    </div>
+                    <ngc-dropdownlist [source]='mesurementData' [autoSelect]="true" [noBlank]="true"
+                        formControlName="unitCode" (select)="eventCall($event)" width='80px'></ngc-dropdownlist>
+                </ngc-column>
+                <ngc-column column="5">
+                    <ngc-label label='export.book.volumecode'></ngc-label>
+                    <div>
+                        <ngc-dropdownlist sourceId='EXPORT$Volume_Code' formControlName="volumeUnitCode" width='100px'
+                            (select)="eventCall($event)"></ngc-dropdownlist>
+                    </div>
+                </ngc-column>
+                <ngc-column>
+                    <div>
+                        <ngc-label label='export.book.volume'></ngc-label>
+                    </div>
+                    <!-- <ngc-numberinput negativeSymbol=" " [digits]="7" formControlName="volumeWeight" decimalDigits="2" width='100px'></ngc-numberinput> -->
+                    <ngc-display formControlName="volumeWeight" decimalDigits="2"></ngc-display>
+                </ngc-column>
+
+
+            </ngc-row>
+
+
+            <ngc-row>
+                <!--  *ngFor="let record of MultipleShipmentForm.controls.MultipleShipmentFlightBookingDetails.controls; let index=index" [formGroupName]="index" -->
+                <ngc-column>
+                    <ngc-table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <ngc-label label=""></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="export.book.pieces"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="awb.length"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="awb.width"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="awb.height"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="awb.volume"></ngc-label>
+                                </th>
+                            </tr>
+                        </thead>
+
+                        <tbody formArrayName="dimensionList">
+                            <tr *ngFor="let record of HousewayDimentionForm.get('dimensionList').controls; let index=index"
+                                [formGroupName]="index">
+                                <td>
+                                    <ngc-checkbox formControlName="checkBoxFlag"></ngc-checkbox>
+                                </td>
+                                <td>
+                                    <ngc-digitinput [width]='80' [maxlength]="5" formControlName="pieces"
+                                        (ngModelChange)="changeModel($event,0,record,index)" groupSize="0">
+                                    </ngc-digitinput>
+                                </td>
+                                <td>
+                                    <ngc-digitinput [width]='80' [maxlength]="5"
+                                        (ngModelChange)="changeModel($event,1,record,index)" formControlName="length">
+                                    </ngc-digitinput>
+                                </td>
+                                <td>
+                                    <ngc-digitinput [width]='80' [maxlength]="5"
+                                        (ngModelChange)="changeModel($event,2,record,index)" formControlName="width">
+                                    </ngc-digitinput>
+                                </td>
+                                <td>
+                                    <ngc-input [width]='80' [maxlength]="5"
+                                        (ngModelChange)="changeModel($event,3,record,index)" formControlName="height">
+                                    </ngc-input>
+                                </td>
+                                <td>
+                                    <ngc-display [width]='80' formControlName="volume" decimalDigits="2"></ngc-display>
+                                </td>
+
+                            </tr>
+                        </tbody>
+                    </ngc-table>
+                </ngc-column>
+
+            </ngc-row>
+
+
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label value="export.booking.total"></ngc-label>
+                    <ngc-piecesdisplay [width]='40' formControlName="totalDimpieces"></ngc-piecesdisplay>
+                </ngc-column>
+                <ngc-column>
+
+                </ngc-column>
+                <ngc-column align="right">
+                    <ngc-label value="export.booking.total.volume"></ngc-label>
+                    <ngc-display [width]='40' formControlName="volumeWeight" decimalDigits="2"></ngc-display>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-label value="export.booking.total.volumetric.weight"></ngc-label>
+                    <ngc-weightdisplay [width]='40' formControlName="volumetricWeight"></ngc-weightdisplay>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column align="right">
+
+                        <ngc-button label="export.book.adddimension" (click)='addDimensionRow()'></ngc-button>
+                        <ngc-button label="g.save" (click)="saveHouseDimension()"></ngc-button>
+                        <ngc-button label="g.delete" (click)="deleteHouseDimension()"></ngc-button>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+</form>

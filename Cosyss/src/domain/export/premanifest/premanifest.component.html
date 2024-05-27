@@ -1,0 +1,609 @@
+<ngc-titlebar title="export.maintain.premanifest" (cancel)="onCancel()" (onClear)="OnClear($event)">
+</ngc-titlebar>
+<form [formGroup]="preManifestForm">
+    <ngc-container type="box">
+        <ngc-row>
+            <ngc-column [column]="1.5">
+                <ngc-label label='flight.Flight'></ngc-label>
+                <div>
+                    <ngc-flightkeyinput accessEnableOn="r" [autoFocus]="true" [width]="110" formControlName="flightKey"
+                        upperCase="true" required="true">
+                    </ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.5">
+                <ngc-label label='flight.date'></ngc-label>
+                <div>
+                    <ngc-dateinput accessEnableOn="r" formControlName="flightDate" required="true" [width]="100">
+                    </ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1">
+                <ngc-label label=''></ngc-label>
+                <div>
+                    <ngc-button value="g.search" iconType="search" (click)="onSearch()" accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <br />
+    <ngc-container type="section" *ngIf="searchFlag"></ngc-container>
+    <ngc-container type="box" *ngIf="searchFlag">
+        <ngc-row>
+            <ngc-column [column]="1" align="left">
+                <ngc-label label='flight.Flight'></ngc-label>&nbsp;&nbsp;
+                <ngc-display formControlName='flightKey'></ngc-display>
+            </ngc-column>
+            <ngc-column [column]="1" align="left">
+                <ngc-label label='flight.date'></ngc-label>&nbsp;&nbsp;
+                <ngc-display formControlName='flightDate' [onlyDate]="true"></ngc-display>
+            </ngc-column>
+            <ngc-column [column]="1" align="center">
+                <ngc-label value='flight.std'></ngc-label>&nbsp;&nbsp;
+                <ngc-display formControlName='std' [onlyTime]="true"></ngc-display>
+            </ngc-column>
+            <ngc-column [column]="2" align="left">
+                <ngc-label value='flight.segment'></ngc-label>&nbsp;&nbsp;
+                <ngc-display formControlName='routingInfo' color="blue"></ngc-display>
+            </ngc-column>
+            <ngc-column [column]="3" align="right"></ngc-column>
+            <ngc-column [column]="2" align="right">
+                <ngc-button label="export.premanifest.by.awb" (click)="pmanAwb()" accessEnableOn="r">
+                </ngc-button>
+            </ngc-column>
+            <ngc-column [column]="2" align="right">
+                <ngc-button label="export.premanifest.by.uld" (click)="pmanUld()" accessEnableOn="r">
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <br />
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+
+                <ngc-datatable formArrayName="shipmentList" [groups]="['acceptanceType']" [showAggregates]="true"
+                    [pageable]="true" (groupSelect)="onClickHandler($event)" [height]="500" [columnsHeight]="40"
+                    [groupsRenderer]="mainGroupsRenderer" (itemSelect)="onSelectMainCheckBox($event)"
+                    [showToolbar]="true" [enablePageSizeHeight]="false">
+
+                    <!-- [height]="500" [columnsHeight]="40"-->
+                    <ngc-data-column text="g.sNo" [width]='30' dataField="sno" align="left" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column type="check" text="g.sel" dataField="select" [width]="30" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="left" [width]="80">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.uld" dataField="uldNumber" cellsAlign="left" [width]="120" [hidden]="true">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.acceptancetype" dataField="acceptanceType" cellsAlign="left"
+                        [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.org" dataField="origin" [width]="40" cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.dest" dataField="destination" [width]="40" cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.premanifest.fbl.pieces" dataField="fblPieces" [width]="70"
+                        cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.premanifest.fbl.weight" dataField="fblWeight" cellsAlign="left"
+                        [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.natureofgoods" dataField="natureOfGoods" cellsAlign="left" [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="specialHandlingCode" cellsAlign="center"></ngc-data-column>
+                    <!--<ngc-data-column text="volume" dataField="volume" cellsAlign="left" [width]="120">
+                    </ngc-data-column>-->
+                    <ngc-data-column text="export.premanifest.pieces" dataField="pmanPieces" cellsAlign="left"
+                        [width]="80">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.premanifest.weight" dataField="pmanWeight" cellsAlign="left"
+                        [width]="80">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.non.premanifest.pieces" dataField="nonPmanPieces" cellsAlign="left"
+                        [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.non.premanifest.weight" dataField="nonPmanWeight" cellsAlign="left"
+                        [width]="100">
+                    </ngc-data-column>
+                    <!-- <ngc-data-column text="PI for ELI/ELM " dataField="eliElm" [width]="70" cellsAlign="left"></ngc-data-column>-->
+                    <ngc-data-column text="export.booking.manifest.remark" dataField="mnfstRmk" cellsAlign="left"
+                        [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="fbl.buInstruction" dataField="buildupInstr" cellsAlign="left" [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="awbPcs" dataField="awbPieces" cellsAlign="left" [width]="100"
+                        [hidden]="true">
+                    </ngc-data-column>
+                    <ngc-data-column text="awbWgt" dataField="awbWeight" cellsAlign="left" [width]="100"
+                        [hidden]="true">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.premanifest.unloading.point" dataField="unloadPoint" cellsAlign="left"
+                        [width]="100" [hidden]="true">
+                    </ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <!--Premanifest By AWB-->
+    <ngc-window *ngIf="searchFlag" #PmanAwb width="1600" height="700" title="export.premanifest.by.awb"
+        (close)="closeAwbPopup()">
+        <ngc-container *ngIf="isBulk">
+            <ngc-row>
+                <ngc-column [column]="2" align="left">
+                    <ngc-label label='g.awbNumber'></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="8" align="right">
+                    <ngc-button label="g.save" (click)="savePmanAwb()" accessEnableOn="r">
+                    </ngc-button>
+                </ngc-column>
+                <ngc-column [column]="2" align="right">
+                    <ngc-button label="export.premanifest.delete.premanifest" (click)="dltPmanAwb()" accessEnableOn="r">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column [column]="8" [align]="left">
+                    <ngc-awbtaginput accessEnableOn="r" formControlName="shipmentNumbers" [width]="150"
+                        [splitOnPaste]="true" splitChar="," [maxItems]="10"></ngc-awbtaginput>
+                </ngc-column>
+                <ngc-column [column]="1" [align]="left">
+                    <ngc-button value="g.search" iconType="search" (click)="searchAwbDtls()" accessEnableOn="r">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <br />
+        <!--BULK Section-->
+        <ngc-accordion [multiple]="true">
+            <ngc-accordion-card [title]="BULK" [selected]="true">
+                <ngc-accordion-titlebar>
+                    <ngc-container *ngIf="isBulk" title="g.bulk">
+                    </ngc-container>
+                </ngc-accordion-titlebar>
+                <!--Bulk non premanifested section-->
+                <ngc-container *ngIf="isBulk" title="export.non.premanifest">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-edittable formArrayName="nonPmanBulkList" [pageable]="false">
+                                <ngc-data-column text="g.sNo" dataField="slno" [width]="30" cellsAlign="center">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="left"
+                                    [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.dest" dataField="destination" [width]="70" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="import.AwbPiecsWeight" dataField="pieces" [width]="70"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-piecesdisplay formControlName="awbPieces"></ngc-piecesdisplay>/
+                                            <ngc-weightdisplay formControlName="awbWeight"></ngc-weightdisplay>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="g.shc" dataField="specialHandlingCode" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <!--<ngc-data-column text="pi for eli/eu" dataField="specialHandlingCode" [width]="80" cellsAlign="left">
+                        </ngc-data-column>-->
+                                <ngc-data-column text="export.non.premanifest.pieces" dataField="nonPmanPieces"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.non.premanifest.weight" dataField="nonPmanWeight"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.unloading.point" dataField="" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-dropdownlist formControlName="unloadPoint"
+                                                sourceId="LOADSHIPMENT_SEGMENT" required sourceType="query"
+                                                [sourceParameters]="{ 'parameter1': preManifestForm.get('flightKey').value, 'parameter2': preManifestForm.get('flightDate').value }"
+                                                [required]="preManifestForm.get('flightKey').value != null && preManifestForm.get('flightDate').value != null"
+                                                [autoSelectOnSingle]="true" [width]="90" [dropDownWidth]="80">
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.pieces" dataField="pmanPieces" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-piecesinput formControlName="pmanPieces" required="true">
+                                            </ngc-piecesinput>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.weight" dataField="pmanWeight" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-weightinput formControlName="pmanWeight" required="true">
+                                            </ngc-weightinput>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="fbl.buInstruction" dataField="buildupInstr" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="buildupInstr"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.booking.manifest.remark" dataField="mnfstRmk" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="mnfstRmk"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                            </ngc-edittable>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+                <!--Bulk premanifested Section-->
+                <ngc-container *ngIf="isBulk" title="export.premanifest">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-edittable formArrayName="pmanBulkList" [pageable]="false">
+                                <ngc-data-column type="check" text="g.sel" dataField="select" [width]="30"
+                                    cellsAlign="center">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.sNo" dataField="slno" [width]="30" cellsAlign="center">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="left"
+                                    [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.dest" dataField="destination" [width]="70" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="import.AwbPiecsWeight" dataField="pieces" [width]="70"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-piecesdisplay formControlName="awbPieces"></ngc-piecesdisplay>/
+                                            <ngc-weightdisplay formControlName="awbWeight"></ngc-weightdisplay>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="g.shc" dataField="specialHandlingCode" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <!--<ngc-data-column text="pi for eli/eu" dataField="specialHandlingCode" [width]="80" cellsAlign="left">
+                                </ngc-data-column>-->
+                                <ngc-data-column text="export.non.premanifest.pieces" dataField="nonPmanPieces"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.non.premanifest.weight" dataField="nonPmanWeight"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.unloading.point" dataField="" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-dropdownlist [disabled]="true" formControlName="unloadPoint"
+                                                sourceId="LOADSHIPMENT_SEGMENT" required sourceType="query"
+                                                [sourceParameters]="{ 'parameter1': preManifestForm.get('flightKey').value, 'parameter2': preManifestForm.get('flightDate').value }"
+                                                [required]="preManifestForm.get('flightKey').value != null && preManifestForm.get('flightDate').value != null"
+                                                [autoSelectOnSingle]="true" [width]="90" [dropDownWidth]="80">
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.pieces" dataField="pmanPieces" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.weight" dataField="pmanWeight" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="fbl.buInstruction" dataField="buildupInstr" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="buildupInstr"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.booking.manifest.remark" dataField="mnfstRmk" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="mnfstRmk"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                            </ngc-edittable>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-accordion-card>
+        </ngc-accordion>
+        <br />
+        <!--ULD Section-->
+        <ngc-accordion [multiple]="true">
+            <ngc-accordion-card [title]="ULD" [selected]="true">
+                <ngc-accordion-titlebar>
+                    <ngc-container *ngIf="isUld" title="g.uld">
+                    </ngc-container>
+                </ngc-accordion-titlebar>
+                <!--Uld non premanifestted section-->
+                <ngc-container *ngIf="isUld" title="export.non.premanifest">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-edittable formArrayName="nonPmanUldList" [pageable]="false">
+                                <ngc-data-column text="g.sNo" dataField="slno" [width]="30" cellsAlign="center">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="left"
+                                    [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.dest" dataField="destination" [width]="70" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="import.AwbPiecsWeight" dataField="pieces" [width]="70"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-piecesdisplay formControlName="awbPieces"></ngc-piecesdisplay>/
+                                            <ngc-weightdisplay formControlName="awbWeight"></ngc-weightdisplay>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="g.shc" dataField="specialHandlingCode" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <!--<ngc-data-column text="pi for eli/eu" dataField="specialHandlingCode" [width]="80" cellsAlign="left">
+                                </ngc-data-column>-->
+                                <ngc-data-column text="g.uld" dataField="uldNumber" [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.non.premanifest.pieces" dataField="nonPmanPieces"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.non.premanifest.weight" dataField="nonPmanWeight"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.unloading.point" dataField="" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-dropdownlist formControlName="unloadPoint"
+                                                sourceId="LOADSHIPMENT_SEGMENT" required sourceType="query"
+                                                [sourceParameters]="{ 'parameter1': preManifestForm.get('flightKey').value, 'parameter2': preManifestForm.get('flightDate').value }"
+                                                [required]="preManifestForm.get('flightKey').value != null && preManifestForm.get('flightDate').value != null"
+                                                [autoSelectOnSingle]="true" [width]="90" [dropDownWidth]="80">
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.pieces" dataField="pmanPieces" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-piecesinput formControlName="pmanPieces" required="true">
+                                            </ngc-piecesinput>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.weight" dataField="pmanWeight" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-weightinput formControlName="pmanWeight" required="true">
+                                            </ngc-weightinput>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="fbl.buInstruction" dataField="buildupInstr" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="buildupInstr"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.booking.manifest.remark" dataField="mnfstRmk" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="mnfstRmk"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                            </ngc-edittable>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+                <!--Uld premanifested Section-->
+                <ngc-container *ngIf="isUld" title="export.premanifest">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-edittable formArrayName="pmanUldList" [pageable]="false">
+                                <ngc-data-column type="check" text="g.sel" dataField="select" [width]="30"
+                                    cellsAlign="center">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.sNo" dataField="slno" [width]="30" cellsAlign="center">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="left"
+                                    [width]="120">
+                                </ngc-data-column>
+                                <ngc-data-column text="g.dest" dataField="destination" [width]="70" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="import.AwbPiecsWeight" dataField="pieces" [width]="70"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-piecesdisplay formControlName="awbPieces"></ngc-piecesdisplay>/
+                                            <ngc-weightdisplay formControlName="awbWeight"></ngc-weightdisplay>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="g.shc" dataField="specialHandlingCode" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <!--<ngc-data-column text="pi for eli/eu" dataField="specialHandlingCode" [width]="80" cellsAlign="left">
+                                        </ngc-data-column>-->
+                                <ngc-data-column text="g.uld" dataField="uldNumber" [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.non.premanifest.pieces" dataField="nonPmanPieces"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.non.premanifest.weight" dataField="nonPmanWeight"
+                                    [width]="80" cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.unloading.point" dataField="" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-dropdownlist [disabled]="true" formControlName="unloadPoint"
+                                                sourceId="LOADSHIPMENT_SEGMENT" required sourceType="query"
+                                                [sourceParameters]="{ 'parameter1': preManifestForm.get('flightKey').value, 'parameter2': preManifestForm.get('flightDate').value }"
+                                                [required]="preManifestForm.get('flightKey').value != null && preManifestForm.get('flightDate').value != null"
+                                                [autoSelectOnSingle]="true" [width]="90" [dropDownWidth]="80">
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.pieces" dataField="pmanPieces" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="export.premanifest.weight" dataField="pmanWeight" [width]="80"
+                                    cellsAlign="left">
+                                </ngc-data-column>
+                                <ngc-data-column text="fbl.buInstruction" dataField="buildupInstr" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="buildupInstr"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                                <ngc-data-column text="export.booking.manifest.remark" dataField="mnfstRmk" [width]="80"
+                                    cellsAlign="left">
+                                    <ng-template let-name="name" let-group="group">
+                                        <ng-container [formGroupName]="group">
+                                            <ngc-input align="center" cellsAlign="center" formControlName="mnfstRmk"
+                                                [width]="250">
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-template>
+                                </ngc-data-column>
+                            </ngc-edittable>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-accordion-card>
+        </ngc-accordion>
+    </ngc-window>
+
+    <!--Premanifest By ULD-->
+    <ngc-window *ngIf="searchFlag" #PmanUld width="1600" height="600" title="export.premanifest.by.uld"
+        (close)="closeUldPopup()">
+        <ngc-container *ngIf="isMixPpk">
+            <ngc-row>
+
+                <ngc-column [column]="2" align="left">
+                    <ngc-label label="g.uld"></ngc-label>&nbsp;&nbsp;
+                    <ngc-input required formControlName="uldNumber" [maxlength]="10">
+                    </ngc-input>
+                </ngc-column>
+                <ngc-column [column]="2" align="right">
+                    <ngc-button value="g.search" iconType="search" (click)="searchUldDtls()" accessEnableOn="r">
+                    </ngc-button>
+                </ngc-column>
+
+                <ngc-column [column]="6" align="right">
+                    <ngc-button label="g.save" (click)="savePmanUld()" accessEnableOn="r">
+                    </ngc-button>
+                </ngc-column>
+                <ngc-column [column]="2" align="right">
+                    <ngc-button label="export.premanifest.delete.premanifest" (click)="dltPmanUld()" accessEnableOn="r">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <br />
+        <ngc-container *ngIf="isMixPpk">
+            <ngc-row>
+                <ngc-column [column]="2" align="left">
+                    <ngc-label label='accessorybyflight.report.uld'></ngc-label>&nbsp;&nbsp;
+                    <ngc-display formControlName='uldNumber'></ngc-display>
+                </ngc-column>
+                <ngc-column [column]="2" align="left">
+                    <ngc-label label='export.premanifest.uld.contr.code'></ngc-label>&nbsp;&nbsp;
+                    <ngc-display formControlName='contrCode'></ngc-display>
+                </ngc-column>
+                <ngc-column [column]="2" align="left">
+                    <ngc-label value='export.dest'></ngc-label>&nbsp;&nbsp;
+                    <ngc-display formControlName='destination'></ngc-display>
+                </ngc-column>
+                <!-- <ngc-column [column]="2" align="left">
+                        <ngc-label label="pman Status"></ngc-label>&nbsp;&nbsp;
+                        <ngc-display formControlName='pmanSts'></ngc-display>
+                    </ngc-column>-->
+                <ngc-column [column]="6" align="left"></ngc-column>
+            </ngc-row>
+            <br />
+            <ngc-row>
+                <ngc-column [column]="1.5">
+                    <ngc-label label='fbl.buInstruction'></ngc-label>&nbsp;&nbsp;
+                    <ngc-input align="center" cellsAlign="center" formControlName="buildupInstr" [width]="250">
+                    </ngc-input>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row></ngc-row>
+            <ngc-row>
+                <ngc-column [column]="1.5">
+                    <ngc-label label='export.booking.manifest.remark'></ngc-label>&nbsp;&nbsp;
+                    <ngc-input align="center" cellsAlign="center" formControlName="mnfstRmk" [width]="250">
+                    </ngc-input>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container *ngIf="isMixPpk">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-datatable formArrayName="mixPpkAwbList" [height]="200" [pageable]="false"
+                        [enablePageSizeHeight]="false" [columnsHeight]="40" [showToolbar]="false">
+                        <ngc-data-column text="g.sNo" dataField="slno" [width]="30" cellsAlign="center">
+                        </ngc-data-column>
+                        <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="left" [width]="120">
+                        </ngc-data-column>
+                        <ngc-data-column text="g.dest" dataField="destination" [width]="70" cellsAlign="left">
+                        </ngc-data-column>
+                        <ngc-data-column text="warehouse.pcs" dataField="pieces" [width]="70" cellsAlign="left">
+                        </ngc-data-column>
+                        <ngc-data-column text="warehouse.wgt" dataField="netWeight" [width]="70" cellsAlign="left">
+                        </ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="specialHandlingCode" [width]="80" cellsAlign="left">
+                        </ngc-data-column>
+                        <!--<ngc-data-column text="Buildup Instr" dataField="buildupInstr" cellsAlign="left" [width]="120">
+                        </ngc-data-column>
+                        <ngc-data-column text="Manf Rem" dataField="mnfstRmk" cellsAlign="left" [width]="120">
+                        </ngc-data-column>-->
+                        <!-- <ngc-data-column text="PI for ELI/ELM " dataField="eliElm" [width]="70" cellsAlign="left">
+                        </ngc-data-column>-->
+                    </ngc-datatable>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>

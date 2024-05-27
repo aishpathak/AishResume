@@ -1,0 +1,164 @@
+<form [formGroup]='airlinePlasticForm'>
+  <ngc-titlebar title='master.airline'></ngc-titlebar>
+  <ngc-container type='header'>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label value='uldType.carrier'></ngc-label>
+        <div>
+          <ngc-lov formControlName='carrierCode' accessEnableOn="r" [width]='50' upperCase='true' dataField="code"  
+            displayMember="code" displayMember="code" sourceId='CARRIER_OPT' title='flight.carrierType'>
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='uldType.uldtype'></ngc-label>
+        <div>
+          <ngc-lov formControlName="uldType" accessEnableOn="r" sourceId='ULDTYPE' title='uld.uldtype' dataField='code'
+            [width]="50" (select)="onSelectUldType($event)" uppercase='true'>
+            <ngc-data-column text="masters.uldType" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='uldType.contourIndicator'></ngc-label>
+        <div>
+          <ngc-lov formControlName="contourIndicator" accessEnableOn="r" sourceId='CONTOURINDICATOR'
+            title='uld.contour.type' dataField='code' [width]="50" (select)="onSelectContour($event)" uppercase='true'>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch($event)" accessEnableOn="r" value="g.search" iconType="search"
+            [disabled]="false">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="onEditAddLink($event)" value="g.addRow" type="link"></ngc-button>
+        <ngc-button (click)="deleteData($event)" value="g.delete"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="showTableData">
+    <ngc-row>
+      <ngc-column>
+        <!-- <ngc-datatable formArrayName="airlineSheetsList" (linkClick)="onEditAddLink($event)" *ngIf="showList"> -->
+        <ngc-datatable formArrayName="airlineSheetsList" (linkClick)="onEditAddLink($event)" [pageable]="true"
+          [pageSize]="15" [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.select" dataField="scInd" [width]="50" type="check" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.carrier" dataField="carrierCode" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uldtype" dataField="uldType" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="uldType.contourIndicator" dataField="contourIndicator" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="master.plastic.sheet.qty" dataField="containerCount" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="uld.contour.default" dataField="defualtType" [width]="100" type="icon" iconType="yesno"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column feature="ULD.AccessoryType" text="accessory.type" dataField="accessoryType" [width]="100" align="center" 
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="edit" [width]="100" type="link" iconType="edit" align="left"
+            cellsAlign="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #window (close)="closeWindow($event)" [width]="500" [height]="500" title="master.airline.master">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='uldType.carrier'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='uldType.uldtype'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='uldType.contourIndicator'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display *ngIf="updateForm" formControlName="carrierCodeDetails" uppercase='true'></ngc-display>
+          <ngc-lov *ngIf="saveForm && !updateForm" formControlName="carrierCodeDetails" sourceId='CARRIER_OPT'
+            title='flight.carrierType' dataField='code' [width]="50" (select)="onSelectCarrier($event)" uppercase='true'
+            required>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column>
+          <ngc-display *ngIf="updateForm" formControlName="uldTypeDetails" uppercase='true'></ngc-display>
+          <ngc-lov *ngIf="saveForm && !updateForm" formControlName="uldTypeDetails" sourceId='ULDTYPE' title='uldType.uldtype'
+            dataField='code' [width]="50" (select)="onSelectUldType($event)" uppercase='true' required>
+            <ngc-data-column text="UldType" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column>
+          <ngc-display *ngIf="updateForm" formControlName="contourIndicators" uppercase='true'></ngc-display>
+          <ngc-lov *ngIf="saveForm && !updateForm" formControlName="contourIndicators" sourceId='CONTOURINDICATOR'
+            title='uld.contour.type' dataField='code' [width]="50" (select)="onSelectContour($event)" uppercase='true'
+            required>
+            <ngc-data-column text="uldType.contourIndicator" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="5">
+          <ngc-label label="uldType.plasticSheetQuantity "></ngc-label>
+          <br>
+        </ngc-column>
+        <ngc-column feature="ULD.AccessoryType">
+          <ngc-label label="accessory.type"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="5">
+          <ngc-numberinput [width]="100" digits="2" decimalDigits="0" formControlName="containerCountDetails"
+            uppercase='true' required></ngc-numberinput>
+        </ngc-column>
+        <ngc-column feature="ULD.AccessoryType">
+          <ngc-lov formControlName='accessoryTypeDetails' upperCase='true' sourceId='KEY_ACCESSORY_TYPE'
+                  title='accessory.type' dataField='parameter1' 
+                  accessEnableOn="r" required>
+                  <ngc-data-column text='Accessory Code' dataField='parameter1' [width]='150'></ngc-data-column>
+                  <ngc-data-column text='Accessory Description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>>
+        <ngc-column>
+          <ngc-label></ngc-label>
+          <div>
+            <ngc-checkbox formControlName="defualtType">
+              <ngc-label value='uld.contour.default'></ngc-label>
+            </ngc-checkbox>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button *ngIf="updateForm" (click)="onUpdate($event)" value="g.save"></ngc-button>
+            <ngc-button *ngIf="saveForm && !updateForm" (click)="onSave($event)" value="g.save"></ngc-button>
+            <ngc-button (click)="cancelWindowButton($event)" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

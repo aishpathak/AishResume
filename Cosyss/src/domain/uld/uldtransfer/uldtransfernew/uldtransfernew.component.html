@@ -1,0 +1,263 @@
+<form [formGroup]="uldTansferNewForm">
+  <ngc-titlebar title="uld.uldTransferNew" (save)="onSave()" [disableSave]="hasReadPermission"></ngc-titlebar>
+  <!-- <ngc-titlebar *ngIf='createdflag' title="uld.uldTransferEdit" (save)="onSave()"></ngc-titlebar> -->
+  <ngc-container type='section'>
+
+    <ngc-row *ngIf="(uldTansferNewForm.get('transferId').value != null)">
+      <ngc-column>
+        <ngc-label value='uld.luctransactionnumber'></ngc-label>
+        <div>
+          <ngc-display formControlName="transferId"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='4'>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column='8'>
+              <ngc-label value='uld.transferingcarrier'></ngc-label>
+            </ngc-column>
+          </ngc-row>
+
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='uld.carrier'></ngc-label>
+              <div>
+                <ngc-lov formControlName='transferCarrier' width='40px' upperCase='true' sourceId='CARRIER'
+                  title='uld.carrier.type' dataField='code' (select)='onSelect($event)' displayMember="code"
+                  [dropDownWidth]='60' required='true' [minLength]='2' [maxLength]='3' [disabled]="CarrierDiasbleFlag">
+                  <ngc-data-column text='uld.carrier' dataField='code' [width]='100'></ngc-data-column>
+                  <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column='9'>
+              <ngc-label value='uld.name' *ngIf='displayTransferCarrierName'></ngc-label>
+              <div>
+                <ngc-display ngc-form-control formControlName="transferCarrierName"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+
+      <ngc-column column='4'>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column='8'>
+              <ngc-label value='uld.recievingcarrier'></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='uld.carrier'></ngc-label>
+              <div>
+                <ngc-lov formControlName='receivingCarrier' width='40px' upperCase='true' sourceId='CARRIER'
+                  title='uld.carrier.type' dataField='code' (select)='onSelectRecievecarrier($event)'
+                  displayMember="code" [dropDownWidth]='60' required='true' [minLength]='2' [maxLength]='3'
+                  [disabled]="CarrierDiasbleFlag">
+                  <ngc-data-column text='uld.carrier' dataField='code' [width]='100'></ngc-data-column>
+                  <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column='9'>
+              <ngc-label value='uld.name' *ngIf='displayRecievingCarrierName'></ngc-label>
+              <div>
+                <ngc-display ngc-form-control formControlName="receivCarrierName"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column='8'>
+              <ngc-label value=''></ngc-label>
+            </ngc-column>
+          </ngc-row>
+
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value='uld.transferairport'></ngc-label>
+              <div>
+                <ngc-lov [disabled]="hasReadPermission" formControlName='transferAirport' [width]='50' upperCase='true'
+                  sourceId='FINAL_DESTINATION' title='uld.airportcodes' [dropDownWidth]='80' dataField='code' required>
+                  <ngc-data-column text='uld.airport.code' dataField='code' [width]='100'></ngc-data-column>
+                  <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+                <!-- <ngc-input formControlName="transferAirport" [width]='50' upperCase="true"></ngc-input> -->
+              </div>
+            </ngc-column>
+            <ngc-column align='left'>
+              <ngc-label value='uld.issuedatetime'></ngc-label>
+              <!--<div>
+                                <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='issueDateTime'></ngc-datetimeinput>
+                            </div>-->
+              <div>
+                <ngc-display formControlName='issueDateTime'></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="uld.recieptnumber"></ngc-label>
+        <div>
+          <ngc-input [width]="100" [disabled]="true" formControlName="lucReceiptNum" [disabled]="true"></ngc-input>
+        </div>
+        <ngc-label value="uld.lastrecieptnumber" *ngIf="generateRecieptFlag"></ngc-label>
+        <div *ngIf="uldTansferNewForm.controls.lastReceiptNum || generateRecieptFlag">
+          <ngc-display formControlName="lastReceiptNum"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <br>
+        <ngc-button [width]="250" [disabled]='hasReadPermission || createdflag' (click)="generateReceipt()"
+          value="uld.generateReceiptNumber" #generaterecieptnumber></ngc-button>
+      </ngc-column>
+
+      <ngc-column column='8' align="right">
+        <br>
+        <ngc-button [disabled]="hasReadPermission" [width]="90" (click)="Finalize()" value="uld.finalize"
+          #finalizebutton></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value="uld.uldnumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.usedby"></ngc-label>
+              </th>
+              <th colspan="3">
+                <ngc-label value="uld.recieptno"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.conditiontype"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.destination"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.remarks"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.delete"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="ULdtransferList">
+            <tr *ngFor="let item of uldTansferNewForm.controls.ULdtransferList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-input [disabled]="hasReadPermission" [width]="110" [minLength]='8' [maxLength]='11'
+                  formControlName="uldNum" upperCase="true" required='true' displayMember="code"
+                  (blur)="getHandlingCarrierCode($event,index)"></ngc-input>
+              </td>
+              <td>
+                <ngc-input [width]="50" [disabled]='true' formControlName="usedBy" upperCase="true"></ngc-input>
+              </td>
+              <td>
+                <ngc-numberinput [width]="70" [disabled]="hasReadPermission || generateRecieptFlag"
+                  formControlName="awbPrefix" required='true' decimalDigits="0" digits="3"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-numberinput [width]="50" [disabled]="hasReadPermission || generateRecieptFlag"
+                  formControlName="lucSerialNo" required='true' decimalDigits="0" digits="5"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-numberinput [width]="120" [disabled]="hasReadPermission || generateRecieptFlag"
+                  formControlName="lucReceiptNum" required='true' decimalDigits="0" digits="7"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-dropdownlist [disabled]="hasReadPermission" [width]="150" sourceId='ULD$ULD_TRANSFER_CONDITION_TYP'
+                  formControlName="conditionType" required='true'></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-lov [disabled]="hasReadPermission" formControlName='destination' [width]='60' upperCase='true'
+                  sourceId='FINAL_DESTINATION' title='uld.airportcodes' dataField='code' required [maxLength]="3">
+                  <ngc-data-column text='uld.airport.code' dataField='code' [width]='100'></ngc-data-column>
+                  <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-input [disabled]="hasReadPermission" [width]="650" formControlName="remarks" [maxLength]="99">
+                </ngc-input>
+              </td>
+              <td>
+                <ngc-link [disabled]="hasReadPermission" (linkClick)="onDelete(index)" iconType="delete"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button [disabled]="hasReadPermission" (click)='addRow()' label='g.add' iconType="add"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>
+
+
+<form [formGroup]="formUldTransferOsi">
+  <ngc-container type="tab" [width]='650'>
+    <ngc-row>
+      <ngc-column [column]="7">
+      </ngc-column>
+      <ngc-column>
+        <ngc-button [disabled]="hasReadPermission" value="uld.addosi" align="right" (click)="addRow1()"></ngc-button>
+      </ngc-column>
+      <ngc-column [column]="3">
+      </ngc-column>
+    </ngc-row>
+    <ngc-row formGroupName="osiRemarkFormGp">
+      <ngc-column [column]="10">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="uld.luc.osi"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+          <tbody formArrayName="uldRemarks">
+            <tr
+              *ngFor="let item of formUldTransferOsi.controls.osiRemarkFormGp.controls.uldRemarks.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-input [disabled]="hasReadPermission" [width]='650' maxLength="64" formControlName='uldRemark'>
+                </ngc-input>
+                <!--<ngc-button *ngIf="item.get('uldRemark').value != null" iconType="delete" align="right" (click)="delRow(item, index)"></ngc-button>-->
+                <ngc-button [disabled]="hasReadPermission" iconType="delete" align="right"
+                  (click)="delRow(item, index)"></ngc-button>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

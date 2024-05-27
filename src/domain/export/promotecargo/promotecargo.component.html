@@ -1,0 +1,202 @@
+<ngc-titlebar title="export.title.promote.cargo" (cancel)="onCancel($event)"></ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="awb.awbnumber"></ngc-label>
+        <div>
+          <ngc-awbinput formControlName="shipmentNumber" required [width]='120'></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button value="g.search" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="showAllControls">
+        <ngc-label value="export.promote.cargo.pieces"></ngc-label>
+        <ngc-piecesdisplay formControlName="totalPieces"></ngc-piecesdisplay>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="showAllControls">
+        <ngc-label value="export.promote.cargo.weight"></ngc-label>
+        <ngc-weightdisplay formControlName="totalWeight">
+        </ngc-weightdisplay>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="showPromoteButton">
+        <ngc-button value="export.promote.cargo" (click)="onPromote()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showAllControls">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs [width]="800" [height]="200">
+          <ngc-tab-card title="export.promote.cargo.booking.details" formArrayName="promoteCargoFlightList">
+            <ngc-container type="box"
+              *ngFor="let item of form.controls.promoteCargoFlightList.controls; let index=index"
+              [formGroupName]="index">
+              <ng-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-checkbox [disabled]="true" *ngIf="item.get('totalLoadedPieces').value"
+                      formControlName="selectToPromote"></ngc-checkbox>
+                    <ngc-checkbox (click)="checkToPromote(item, 'flight')" [disabled]="false"
+                      *ngIf="!item.get('totalLoadedPieces').value" formControlName="selectToPromote"></ngc-checkbox>
+                    <ngc-label value="export.select.to.promote"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label value="export.promote.cargo.booking.flt"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="flightKey"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label value="flight.date"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="dateSTD"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label value="flight.std"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="stdTime"></ngc-display>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <div></div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label value="flight.destination"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="destination"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label value="g.status"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="bookingStatusCode"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label value="export.promote.cargo.booking.pcs.weight"></ngc-label>
+                    <div>
+                      <ngc-piecesinput formControlName="bookingPieces"></ngc-piecesinput>
+                      <ngc-weightinput formControlName="bookingWeight"></ngc-weightinput>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="3">
+                    <ngc-label value="export.promote.cargo.assigned.uld.bt"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="allAssignedUldTrolleyNumber"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="3">
+                    <div></div>
+                    <ngc-label value="export.loaded.pieces.weight"></ngc-label>
+                    <div>
+                      <ngc-piecesdisplay formControlName="totalLoadedPieces"></ngc-piecesdisplay>/
+                      <ngc-weightdisplay formControlName="totalLoadedWeight"></ngc-weightdisplay>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ng-container>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="export.location">
+            <ngc-container type="box" formArrayName="promoteCargoInventoryList">
+              <ng-container *ngFor="let item of form.controls.promoteCargoInventoryList.controls; let index=index"
+                [formGroupName]="index">
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-checkbox (click)="checkToPromote(item, 'inventory')" formControlName="selectToPromote">
+                    </ngc-checkbox>
+                    <ngc-label value="export.select.to.promote"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <div></div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label value="export.location"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="shipmentLocation"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label value="export.promote.cargo.whs.location"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="wareHouseLocation"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label value="awb.pieces.weight"></ngc-label>
+                    <div>
+                      <ngc-piecesinput formControlName="inventoryPieces"></ngc-piecesinput>
+                      <ngc-weightinput formControlName="inventoryWeight"></ngc-weightinput>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <div></div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label value="g.shc"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="shcs"></ngc-display>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="1">
+                    <ngc-label value=""></ngc-label>
+                    <div>
+                      <ngc-display></ngc-display>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label value="export.promote.cargo.pieces.to.move"></ngc-label>
+                    <ngc-piecesinput formControlName="bookingPieces"></ngc-piecesinput>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="1">
+                    <ngc-label value=""></ngc-label>
+                    <div>
+                      <ngc-display></ngc-display>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <ngc-label value="export.promote.cargo.weight.to.move"></ngc-label>
+                    <ngc-weightinput formControlName="bookingWeight"></ngc-weightinput>
+                  </ngc-column>
+                </ngc-row>
+              </ng-container>
+
+
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>

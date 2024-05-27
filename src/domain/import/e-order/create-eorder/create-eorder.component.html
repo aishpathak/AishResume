@@ -1,0 +1,205 @@
+<ngc-titlebar title="import.create-eorder" (cancel)="onCancel($event)" (clear)="onClear()">
+</ngc-titlebar>
+<!-- Search Container to fetch all the records for creation/ display of E order -->
+<form [formGroup]="searchForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="warehouse.process"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="processType" (ngModelChange)='onClickCategory($event)'
+            [width]="200" sourceId="Import$createeorder" [dropDownWidth]="200" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="customs.flight.number"></ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="100" upperCase="true" formControlName="flightNo" required accessEnableOn="r">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="g.FlightDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" [width]="150" formControlName="flightDate" required>
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1 + (this.searchForm.get('uldTransferNos').value && this.searchForm.get('uldTransferNos').value.length > 0 ? this.searchForm.get('uldTransferNos').value.length :
+        1)" *ngIf="this.searchForm.get('processType').value==='Other ULD Transfer'">
+        <ngc-label label="import.uld.transfer">
+        </ngc-label>
+        <div>
+          <ngc-taginput accessEnableOn="r" formControlName="uldTransferNos" maxChars="14" required>
+          </ngc-taginput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer' 
+        || this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="import.whse.destination"></ngc-label>
+        <div>
+          <ngc-locations-list formControlName="warehouseDestination" [width]="120">
+          </ngc-locations-list>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="this.searchForm.get('processType').value != 'Miscellaneous Order'">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" value="g.search" iconType="search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Result Form to create the Eorder -->
+<form [formGroup]="eOrderForm">
+  <ngc-container type="tab" *ngIf="showUldHandlingDetails">
+    <ngc-row *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'">
+      <ngc-column formArrayName="uldTransferDetails">
+        <ngc-label label="Uld Transfer Number"></ngc-label>
+        <div class="form-inline">
+          <ng-container *ngFor="let item of eOrderForm.get('uldTransferDetails').controls; let index=index"
+            [formGroupName]="index">
+            <ngc-display formControlName="uldTransferNo"></ngc-display>/
+            <ngc-display formControlName="createdOn"></ngc-display>
+            <ng-container *ngIf="eOrderForm.get('uldTransferDetails').controls.length > (index+1)">
+              <ngc-display value=""></ngc-display>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            </ng-container>
+          </ng-container>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2" *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="Flight No"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNo"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="Flight Date"></ngc-label>
+        <div>
+          <ngc-display [onlyDate]="true" formControlName="flightDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="ata"></ngc-label>
+        <div>
+          <ngc-display [onlyTime]="true" formControlName="ata"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="import.assign.to"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" [validOnly]="true" sourceId="EORDER_STAFFNO"  title="import.assign.to"
+            formControlName="assignTo"  dataField="code" (select)='onStaffLogin($event)' required>
+            <ngc-data-column text="g.code" dataField="code"  [width]="20"></ngc-data-column>
+            <ngc-data-column text="g.desc" dataField="desc" [width]="20"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.priority"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="priority" [width]="150"
+            sourceId="Import$Eorder_Priority" [dropDownWidth]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="this.searchForm.get('processType').value != 'Miscellaneous Order'">
+        <ngc-label label="flight.warehouse.level"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="warehouseLevel" sourceId='Flight$WarehouseLevel'  [width]="150"
+             [dropDownWidth]="150" entityAttribute="Flight.WarehouseLevel">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column=4>
+        <ngc-label label="import.instruction"></ngc-label>
+        <div>
+          <ngc-input [width]="600" formControlName="instruction" [maxlength]="200"></ngc-input>
+        </div>
+      </ngc-column>tion
+      <ngc-column align="right">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button value="(C)reate E-Order" (click)="CreateEOrder()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="this.searchForm.get('processType').value === 'Miscellaneous Order'">
+      <ngc-column column="10">
+        <ngc-label label="import.msg"></ngc-label>
+        <div>
+          <ngc-codeeditor formControlName="message" required></ngc-codeeditor>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf="this.searchForm.get('processType').value != 'Miscellaneous Order'">
+      <ngc-column>
+        <ngc-edittable formArrayName="orderDetails" [pageSize]="10">
+          <ngc-data-column text='&nbsp;' type="check" dataField="select" checkAll="true" [width]="5" align="centre"
+            cellsalign="centre">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="select"
+                  *ngIf="!eOrderForm.get(['orderDetails', group, 'detailsId']).value">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='5' align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-label label="{{group + 1}}"></ngc-label>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'"
+            text="import.uld.lsp" dataField="uldKey" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'"
+            text="import.uld.transfer" dataField="uldTransferNo" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'" text="uld.uld.no"
+            dataField="uldKey" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'"
+            text="import.whse.dest" dataField="warehouseDestination" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'"
+            text="import.whse.destination" dataField="warehouseDestination" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column text="documentview.location" dataField="actualLocation" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'" text="awb.remarks"
+            dataField="remarks" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'"
+            text="import.time.check" dataType="date" dataField="timeOfCheckIn" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'" text="admin.staff"
+            dataField="staff" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'"
+            text="import.uld.to" dataField="uldTo" align="centre" cellsalign="centre">
+          </ngc-data-column>
+          <ngc-data-column *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'"
+            text="acceptance.handling.type" dataField="type" align="centre" cellsalign="centre">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

@@ -1,0 +1,849 @@
+<ngc-titlebar title="DG.SpecialCargoMonitoringList" (onClear)="clear(event)" (onCancel)="cancel(event)"></ngc-titlebar>
+<form [formGroup]="monitoringListForm">
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='import.shcgroup'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="shcGroup" sourceType='query' sourceId='GROUP_COLLECTION_CODE' [width]="50"
+            required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='DG.ByReq/Hand'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="byRequestHandOver" sourceId='EXP_DGD$By_Req_Hand' [width]="50"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='g.flight.fromdate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true" formControlName='fromDate' align="left" [width]="150" align="left"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.flight.todate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true" [min]='monitoringListForm.controls.fromDate.value' formControlName='toDate'
+            align="left" [width]="150" [min]="dateTo" align="left"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='import.carrierGroup'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA" sourceType="query"
+            [width]="50" (select)="getCarrierCodeByCarrierGroup($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='shp.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="requestTerminal" sourceId="WAREHOUSE_TERMINAL" [width]="50" sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="dls.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='dls.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" formControlName='flightDate' align="left" [width]="150" [min]="dateTo" align="left"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awb"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="shipmentNumber" (paste)="removeHypen($event)" [width]="150">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='DG.DLSMismatch'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="dlsMismatchYesNo" sourceId='EXP_DGD$Mismatch_YesNoAll' [autoSelect]="true"
+            [width]="50"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='DG.NotocMismatch'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="notocMismatchYesNo" sourceId='EXP_DGD$Mismatch_YesNoAll' [autoSelect]="true"
+            [width]="50"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="search" iconType="search"></ngc-button>
+        </div>
+        <div>
+          <ngc-button (click)="onGenExcel()" value="g.export.to.excel"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+  <!-- This container contains the fields of DG Report -->
+  <ngc-container type="section" *ngIf="searchtab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <ngc-tab-card title="DG.MismatchSection">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead class='text-center'>
+                      <tr>
+                        <th class='text-center;' rowspan='2'>
+                          <ngc-label value='billingverification.flightnumberdt'></ngc-label>
+                        </th>
+                        <th class='text-center;' rowspan='2'>
+                          <ngc-label value='dls.date'></ngc-label>
+                        </th>
+                        <th class='text-center;' rowspan='2'>
+                          <ngc-label value='DG.ATD/ETD/STD'></ngc-label>
+                        </th>
+                        <th class='text-center' rowspan='2'>
+                          <ngc-label value='DG.Seg'></ngc-label>
+                        </th>
+                        <th class='text-center' rowspan='2'>
+                          <ngc-label value='awbNo'></ngc-label>
+                        </th>
+                        <th class='text-center' rowspan='2'>
+                          <ngc-label value='DG.ORG/DST'></ngc-label>
+                        </th>
+                        <th class='text-center' rowspan='2'>
+                          <ngc-label value='DG.Bkg Pc'></ngc-label>
+                        </th>
+                        <th class='text-center' rowspan='2'>
+                          <ngc-label value='DG.Bkg Wgt'></ngc-label>
+                        </th>
+                        <th class='text-center' rowspan='2'>
+                          <ngc-label value='DG.AWBSHC'></ngc-label>
+                        </th>
+                        <th class='text-center' colspan="2">
+                          <ngc-label value='DG.HOvsDLS'></ngc-label>
+                        </th>
+                        <th class='text-center' colspan="2">
+                          <ngc-label value='DG.HOvsUldTag'></ngc-label>
+                        </th>
+                        <th class='text-center' colspan='2'>
+                          <ngc-label value='DG.HOvsLoad'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HOvsNotoc'></ngc-label>
+                        </th>
+                      </tr>
+                      <tr>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD/SHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD/SHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD/SHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.MissingULD'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <ng-container formArrayName='specialCargoMoniteringFlight'>
+                      <ng-container *ngFor="let item of monitoringListForm.controls.specialCargoMoniteringFlight.controls; let index=index" [formGroupName]="index">
+                        <tr>
+                          <td>
+                            <ngc-display formControlName='flightKey'>
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightDate' [onlyDate]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='atdEtdStdMonitering' [onlyTime]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightOffPoint'>
+                            </ngc-display>
+                          </td>
+                        </tr>
+
+                        <ng-container formArrayName="specialCargoMoniteringShipmentList">
+                          <ng-container *ngFor="let missmatchItem of item.get(['specialCargoMoniteringShipmentList']).controls; let subindex=index"
+                            [formGroupName]="subindex">
+                            <tr>
+                              <td colspan="4"></td>
+                              <td *ngIf="missmatchItem.get('partSuffixToShow').value ">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>(
+                                <ngc-display formControlName='partSuffix'>
+                                </ngc-display>)
+                              </td>
+                              <td *ngIf="!missmatchItem.get('partSuffixToShow').value">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='segment'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='flightBookedPieces'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-weightdisplay formControlName="flightBookedWeight"></ngc-weightdisplay>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='awbSHC'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingDLSUldListForDisplay').value != null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingDLSUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingDLSUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingDLSUldListForDisplay').value== null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingDLSUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingDLSUldShcListForDisplay').value != null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingDLSUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingDLSUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingDLSUldShcListForDisplay').value== null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingDLSUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingPrintTagUldListForDisplay').value != null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingPrintTagUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingPrintTagUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingPrintTagUldListForDisplay').value==null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingPrintTagUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingPrintTagUldShcListForDisplay').value != null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingPrintTagUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingPrintTagUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingPrintTagUldShcListForDisplay').value== null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingPrintTagUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingLoadedUldListForDisplay').value != null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingLoadedUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingLoadedUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingLoadedUldListForDisplay').value==null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingLoadedUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingLoadedUldShcListForDisplay').value!=null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingLoadedUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingLoadedUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingLoadedUldShcListForDisplay').value==null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingLoadedUldShcListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingNotocUldListForDisplay').value!=null" style="background-color: rgb(241, 63, 63)">
+                                <ngc-display style="color: white" formControlName='missingNotocUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingNotocUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                              <td *ngIf="missmatchItem.get('missingNotocUldListForDisplay').value==null && !missmatchItem.get('missmatchSectionGreen').value">
+                                <ngc-display formControlName='missingNotocUldListForDisplay'>
+                                </ngc-display>
+                              </td>
+                            </tr>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </ng-container>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="DG.RequestSection">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead class='text-center'>
+                      <tr>
+                        <th class='text-center;'>
+                          <ngc-label value='billingverification.flightnumberdt'></ngc-label>
+                        </th>
+                        <th class='text-center;'>
+                          <ngc-label value='dls.date'></ngc-label>
+                        </th>
+                        <th class='text-center;'>
+                          <ngc-label value='DG.ATD/ETD/STD'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Seg'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='awbNo'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.ORG/DST'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Bkg Pc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Bkg Wgt'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.AWBSHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='shp.shpLocation'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.LocPc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.ReqPc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.RequestBy'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HOLoc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='uld.Date/Time'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <ng-container formArrayName='specialCargoMoniteringFlight'>
+                      <ng-container *ngFor="let item of monitoringListForm.controls.specialCargoMoniteringFlight.controls; let index=index" [formGroupName]="index">
+                        <tr>
+                          <td>
+                            <ngc-display formControlName='flightKey'>
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightDate' [onlyDate]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='atdEtdStdMonitering' [onlyTime]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightOffPoint'>
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+
+                        <ng-container formArrayName="specialCargoMoniteringShipmentList">
+                          <ng-container *ngFor="let awbItem of item.get(['specialCargoMoniteringShipmentList']).controls; let subindex=index" [formGroupName]="subindex">
+                            <tr>
+                              <td colspan="4"></td>
+                              <td *ngIf="awbItem.get('partSuffixToShow').value ">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>(
+                                <ngc-display formControlName='partSuffix'>
+                                </ngc-display>)
+                              </td>
+                              <td *ngIf="!awbItem.get('partSuffixToShow').value">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='segment'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='flightBookedPieces'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-weightdisplay formControlName="flightBookedWeight"></ngc-weightdisplay>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='awbSHC'>
+                                </ngc-display>
+                              </td>
+
+
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                            <ng-container formArrayName="inventoryList">
+                              <ng-container *ngFor="let requestSubItem of awbItem.get(['inventoryList']).controls; let requestIndex=index" [formGroupName]="requestIndex">
+                                <tr>
+                                  <td colspan="9"></td>
+                                  <td *ngIf="requestSubItem.get('handoverFlag').value===true">
+                                    *
+                                    <ngc-display formControlName='shipmentInventoryShipmentLocation'>
+                                    </ngc-display>
+                                  </td>
+                                  <td *ngIf="requestSubItem.get('handoverFlag').value!==true">
+                                    <ngc-display formControlName='shipmentInventoryShipmentLocation'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='shipmentInventoryPieces'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='requestPieces'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='requestBy'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handOverLocForReq'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='requestDateTime'>
+                                    </ngc-display>
+                                  </td>
+                                </tr>
+                              </ng-container>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </ng-container>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="DG.Handover&Confirm Section">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead class='text-center'>
+                      <tr>
+                        <th class='text-center;'>
+                          <ngc-label value='billingverification.flightnumberdt'></ngc-label>
+                        </th>
+                        <th class='text-center;'>
+                          <ngc-label value='dls.date'></ngc-label>
+                        </th>
+                        <th class='text-center;'>
+                          <ngc-label value='DG.ATD/ETD/STD'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Seg'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='awbNo'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.ORG/DST'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Bkg Pc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Bkg Wgt'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.AWBSHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.FromLoc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.ReqPc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.RequestBy'></ngc-label>
+                        </th>
+
+                        <th class='text-center'>
+                          <ngc-label value='DG.ReqTime'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HOLoc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HoPc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HoSHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HoBy'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HoTo(LgnID)'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.HoTo(StaffID)'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='uld.Date/Time'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <ng-container formArrayName='specialCargoMoniteringFlight'>
+                      <ng-container *ngFor="let item of monitoringListForm.controls.specialCargoMoniteringFlight.controls; let index=index" [formGroupName]="index">
+                        <tr>
+                          <td>
+                            <ngc-display formControlName='flightKey'>
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightDate' [onlyDate]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='atdEtdStdMonitering' [onlyTime]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightOffPoint'>
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+
+                        <ng-container formArrayName="specialCargoMoniteringShipmentList">
+                          <ng-container *ngFor="let awbItem of item.get(['specialCargoMoniteringShipmentList']).controls; let subindex=index" [formGroupName]="subindex">
+                            <tr>
+                              <td colspan="4"></td>
+                              <td *ngIf="awbItem.get('partSuffixToShow').value ">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>(
+                                <ngc-display formControlName='partSuffix'>
+                                </ngc-display>)
+                              </td>
+                              <td *ngIf="!awbItem.get('partSuffixToShow').value">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='segment'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='flightBookedPieces'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-weightdisplay formControlName="flightBookedWeight"></ngc-weightdisplay>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='awbSHC'>
+                                </ngc-display>
+                              </td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                            <ng-container formArrayName="specialCargoMoniteringHandoverSection">
+                              <ng-container *ngFor="let handoverSubItem of awbItem.get(['specialCargoMoniteringHandoverSection']).controls; let handoverIndex=index"
+                                [formGroupName]="handoverIndex">
+                                <tr>
+                                  <td colspan="9"></td>
+                                  <td>
+                                    <ngc-display formControlName='fromLoc'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='reqPc'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='reqBy'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='reqTime'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handoverLocation'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handoverPieces'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handOverShcForDisplay'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handoverBy'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handoverToLoginId'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handoverToStaffId'>
+                                    </ngc-display>
+                                  </td>
+                                  <td>
+                                    <ngc-display formControlName='handoverDateTime'>
+                                    </ngc-display>
+                                  </td>
+                                </tr>
+                              </ng-container>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </ng-container>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+
+          <ngc-tab-card title="DG.Image&Section">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead class='text-center'>
+                      <tr>
+                        <th class='text-center;'>
+                          <ngc-label value='billingverification.flightnumberdt'></ngc-label>
+                        </th>
+                        <th class='text-center;'>
+                          <ngc-label value='dls.date'></ngc-label>
+                        </th>
+                        <th class='text-center;'>
+                          <ngc-label value='DG.ATD/ETD/STD'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Seg'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='awbNo'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.ORG/DST'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Bkg Pc'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.Bkg Wgt'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='DG.AWBSHC'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='cdh.location'></ngc-label>
+                        </th>
+                        <th class='text-center'>
+                          <ngc-label value='billing.fileName'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <ng-container formArrayName='specialCargoMoniteringFlight'>
+                      <ng-container *ngFor="let item of monitoringListForm.controls.specialCargoMoniteringFlight.controls; let index=index" [formGroupName]="index">
+                        <tr>
+                          <td>
+                            <ngc-display formControlName='flightKey'>
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightDate' [onlyDate]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='atdEtdStdMonitering' [onlyTime]="true">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName='flightOffPoint'>
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                          <td></td>
+                        </tr>
+
+                        <ng-container formArrayName="specialCargoMoniteringShipmentList">
+                          <ng-container *ngFor="let awbItem of item.get(['specialCargoMoniteringShipmentList']).controls; let subindex=index" [formGroupName]="subindex">
+                            <tr>
+                              <td colspan="4"></td>
+                              <td *ngIf="awbItem.get('partSuffixToShow').value ">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>(
+                                <ngc-display formControlName='partSuffix'>
+                                </ngc-display>)
+                              </td>
+                              <td *ngIf="!awbItem.get('partSuffixToShow').value">
+                                <ngc-display formControlName='shipmentNumber'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='segment'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='flightBookedPieces'>
+                                </ngc-display>
+                              </td>
+                              <td>
+                                <ngc-weightdisplay formControlName="flightBookedWeight"></ngc-weightdisplay>
+                              </td>
+                              <td>
+                                <ngc-display formControlName='awbSHC'>
+                                </ngc-display>
+                              </td>
+                              <td></td>
+                              <td></td>
+                            </tr>
+                            <ng-container formArrayName="specialCargoMoniteringHandoverSection">
+                              <ng-container *ngFor="let handoverSubItem of awbItem.get(['specialCargoMoniteringHandoverSection']).controls; let handoverIndex=index"
+                                [formGroupName]="handoverIndex">
+                                <tr>
+                                  <td colspan="9"></td>
+                                  <td>
+                                    <ngc-display formControlName='handoverLocation'>
+                                    </ngc-display>
+                                  </td>
+                                  <td></td>
+                                </tr>
+                                <ng-container formArrayName="imageSection">
+                                  <ng-container *ngFor="let imageItem of handoverSubItem.get(['imageSection']).controls; let imageIndex=index" [formGroupName]="imageIndex">
+                                    <tr>
+                                      <td colspan="10"></td>
+                                      <td>
+                                        <ngc-link (click)="onClickOfLink(imageItem.get('uploadedDocId').value)">
+                                          <ngc-display formControlName='documentName'>
+                                          </ngc-display>
+                                        </ngc-link>
+
+                                      </td>
+                                    </tr>
+                                  </ng-container>
+                                </ng-container>
+                              </ng-container>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </ng-container>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #openUploadPhotoPopup title="DG.ViewPhoto" [width]="900" [height]="600" style="top:170px !important;" [showCloseButton]="true">
+    <form [formGroup]="imageViewForm">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <div>
+              <ngc-image formControlName="document" [width]="800" [height]="500"></ngc-image>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+  </ngc-window>
+  <ngc-report format='xlsx' #reportWindow title="Report" reportId='SpecialCargoMonitoringReport'  [reportParameters]='reportParameters'></ngc-report>
+</form>

@@ -1,0 +1,277 @@
+<!--form control to get the  input Data-->
+<form [formGroup]="dgregulationform">
+  <!-- Title Bar -->
+  <ngc-titlebar title='export.dg.regulations.title' (save)="onSave($event)" (clear)="onClear($event)"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label value="export.dg.unid.number"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="unid" required (select)="getPsn($event)" sourceId="UNID_PSN"
+            title="export.unid" dataField="code" [width]="160" [displayAllInSuggestion]="true"
+            [selectionByRowId]="true">
+            <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.proper.shipping.name" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="export.dg.tech" dataField="parameter5" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="g.shc" dataField="param3" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.dg.erg" dataField="param4" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.dg.pg" dataField="param6" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.dg.sbr1" dataField="param7" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.dg.imp1" dataField="parameter3" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.dg.sbr2" dataField="parameter2" [width]="50"></ngc-data-column>
+            <ngc-data-column text="export.dg.imp2" dataField="parameter4" [width]="50"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label value="export.dg.psn"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="psnn" [width]="350"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getDgdDetails($event)" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showTable" align="right">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button (click)="addPsn($event)" value="export.dg.add.psn" iconType="add"></ngc-button>
+          <ngc-button (click)="onDelete($event)" value="export.dg.delete.detail" iconType="delete"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column formArrayName="unidDetails">
+        <ngc-accordion *ngFor="let item of dgregulationform.controls.unidDetails.controls let index=index"
+          [formGroupName]="index">
+          <ngc-accordion-card>
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="g.select"></ngc-label>
+                    <div>
+                      <ngc-checkbox (click)="checkAll($event, index)" formControlName="select" [width]="20">
+                      </ngc-checkbox>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="3">
+                    <ngc-label value="export.dg.psn"></ngc-label>
+                    <div>
+                      <ngc-input required upperCase="true" formControlName="psn" [width]="300"></ngc-input>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.tech.name"></ngc-label>
+                    <div>
+                      <ngc-checkbox required formControlName="tech"></ngc-checkbox>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.class"></ngc-label>
+                    <div>
+                      <ngc-lov (select)="onClassChange($event, index)" required formControlName="classCode"
+                        sourceId="DGD_SHC" title="export.dg.class" dataField="code" [width]="60">
+                        <ngc-data-column text="export.dg.class" dataField="code" [width]="80"></ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="deckFlag" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.imp"></ngc-label>
+                    <div>
+                      <ngc-lov (select)="onSHCChange($event, index)" required formControlName="shc" sourceId="DGD_SHC"
+                        title="g.shc" dataField="desc" [width]="60">
+                        <ngc-data-column text="export.dg.class" dataField="code" [width]="80"></ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="deckFlag" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.erg"></ngc-label>
+                    <div>
+                      <ngc-input required upperCase="true" formControlName="erg" [width]="100"></ngc-input>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.sbr1"></ngc-label>
+                    <div>
+                      <ngc-lov (select)="onSbr1ClassChange($event, index)" formControlName="sbr1" sourceId="DGD_SUBRISK"
+                        title="CLASS" dataField="code" [width]="60">
+                        <ngc-data-column text="export.dg.class" dataField="code" [width]="80"></ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="deckFlag" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.imp1"></ngc-label>
+                    <div>
+                      <ngc-lov (select)="onSbr1Change($event, index)" formControlName="imp1" sourceId="DGD_SUBRISK"
+                        title="SHC" dataField="desc" [width]="60">
+                        <ngc-data-column text="export.dg.class" dataField="code" [width]="80"></ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="deckFlag" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.sbr2"></ngc-label>
+                    <div>
+                      <ngc-lov (select)="onSbr2ClassChange($event, index)" formControlName="sbr2" sourceId="DGD_SUBRISK"
+                        title="CLASS" dataField="code" [width]="60">
+                        <ngc-data-column text="export.dg.class" dataField="code" [width]="80"></ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="deckFlag" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value="export.dg.imp2"></ngc-label>
+                    <div>
+                      <ngc-lov (select)="onSbr2Change($event, index)" formControlName="imp2" sourceId="DGD_SUBRISK"
+                        title="SHC" dataField="desc" [width]="60">
+                        <ngc-data-column text="export.dg.class" dataField="code" [width]="80"></ngc-data-column>
+                        <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="deckFlag" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="12" align="right">
+                  <ngc-button (click)="addRow($event, index)" value="export.dg.add.pg" iconType="add"></ngc-button>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-table *ngIf="item.controls.dgDetails.length">
+                    <thead align="center">
+                      <tr>
+                        <th [width]="30" rowspan="2">
+                          <ngc-label value="g.select"></ngc-label>
+                        </th>
+                        <th [width]="90" rowspan="2">
+                          <ngc-label value="export.dg.pg"></ngc-label>
+                        </th>
+                        <th [width]="80" rowspan="2">
+                          <ngc-label value="export.dg.fbd"></ngc-label>
+                        </th>
+                        <th [width]="70" colspan="3">
+                          <ngc-label value="export.dg.mlq"></ngc-label>
+                        </th>
+                        <th [width]="70" colspan="3">
+                          <ngc-label value="export.dg.mpc"></ngc-label>
+                        </th>
+                        <th [width]="70" colspan="3">
+                          <ngc-label value="export.dg.mco"></ngc-label>
+                        </th>
+                        <th [width]="200" rowspan="2">
+                          <ngc-label value="g.remarks"></ngc-label>
+                        </th>
+                      </tr>
+                      <tr>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.quantity"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.quantity"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.unit"></ngc-label>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.quantity"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.quantity"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.unit"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.quantity"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.quantity"></ngc-label>
+                        </th>
+                        <th [width]="130">
+                          <ngc-label value="export.dg.unit"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody align="center" formArrayName="dgDetails">
+                      <tr [formGroupName]="subIndex"
+                        *ngFor="let dgItem of item.controls.dgDetails.controls; let subIndex=index">
+                        <td [width]="40">
+                          <ngc-checkbox (click)="checkOneRecord($event, index, subIndex)" formControlName="select"
+                            value="g.select" [width]="30"></ngc-checkbox>
+                        </td>
+                        <td *ngIf="dgItem['controls']['pg'].value != ''" [width]="90">
+                          <ngc-display formControlName="pg"></ngc-display>
+                        </td>
+                        <td *ngIf="dgItem['controls']['pg'].value == ''" [width]="90">
+                          <ngc-dropdownlist required [disabled]="dgItem['pg']==''" formControlName="pg" [width]="70"
+                            sourceId="EXP_DGD$DGD_PG"></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist required formControlName="fbd" [width]="80" sourceId="EXP_DGD$DGD_FBD">
+                          </ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="mlqPInfo" [width]="80"></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-numberinput decimalDigits="1" [width]="80" formControlName="mlqQuantity">
+                          </ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist required formControlName="mlqUnit" [width]="80" sourceId="EXP_DGD$DGD_UNIT">
+                          </ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="mpcPInfo" [width]="80"></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-numberinput decimalDigits="1" [width]="80" formControlName="mpcQuantity">
+                          </ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist required formControlName="mpcUnit" [width]="80" sourceId="EXP_DGD$DGD_UNIT">
+                          </ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input required formControlName="mcoPInfo" [width]="80"></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-numberinput decimalDigits="1" [width]="80" formControlName="mcoQuantity">
+                          </ngc-numberinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist required formControlName="mcoUnit" [width]="80" sourceId="EXP_DGD$DGD_UNIT">
+                          </ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="remarks" [width]="250"></ngc-input>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

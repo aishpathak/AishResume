@@ -1,0 +1,253 @@
+<form [formGroup]="searchForm">
+  <ngc-titlebar title='globalUld' (clear)="onClear($event)">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1">
+        <ngc-label value='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov formControlName='carrierCode' (select)='onClickCarrierCode($event)' [width]='50' upperCase='true'
+            dataField="code" displayMember="code" sourceId='CARRIER' title='flight.carrierType' maxlength='3'
+            accessEnableOn="r">
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="exp.carrier.group"></ngc-label>
+        <div>
+          <ngc-lov formControlName="carrierGroupDesc" sourceId="CARRIER_GROUP" (select)='onClickCarrierGroup($event)'
+            title='g.airline' displayMember="desc" dataField='desc' [width]="80" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value='tracing.station'></ngc-label>
+        <div>
+          <ngc-lov formControlName='station' [width]='50' upperCase='true' sourceId='FINAL_DESTINATION'
+            title='uld.airportcodes' [dropDownWidth]='80' dataField='code'>
+            <ngc-data-column text='uld.airport.code' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='imp.uld.grp'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldGroup" sourceId='ULDGROUP' title='imp.uld.grp'
+            dataField='code' width='50px' upperCase='true' displayMember="code"  [dropDownWidth]='60'
+            (select)="onSelectUldGroup($event)">
+            <ngc-data-column text="imp.uld.grp" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="uld.uld.type"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldType" displayMember="code" upperCase="true"
+            [dropDownWidth]='60' sourceId="ULDTYPE_FOR_ULDGROUP"
+            [sourceParameters]="{ 'param1': searchForm.get('uldGroupId').value }" title="uld.uld.type" dataField="code"
+            [width]="50">
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch($event)" value="g.search" iconType="search" accessEnableOn="r"></ngc-button>
+          <ngc-button [width]="70" accessEnableOn="r" (click)="onAdd($event)" value="g.add" accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="form" *ngIf="searchFlag">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="uldCharacteristicsGroup" [pageable]="true">
+          <ngc-data-column text="g.carrier" dataField="carrierCode" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="tracing.station" dataField="station" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uld.type" dataField="uldType" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="uld.stdLimit" dataField="stdLimit" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="uld.minAllow" dataField="minAllow" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="uld.maxAllow" dataField="maxAllow" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="g.edit" [width]='15' cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onEdit(group)" iconType="edit"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Delete" align="center" cellsAlign="center" [width]="10">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group" cellsAlign="center">
+                <ngc-link (linkClick)="onDelete(group)" iconType="delete" [width]="50">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-window #addWindow [height]="370" [width]="700" title="Add/Edit Uld Characteristics" [showCloseButton]="true"
+  (close)="closeAddWindow()">
+  <ngc-container *ngIf="windowFlag" [formGroup]="windowForm">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="2">
+              <ngc-label label="g.carrier"></ngc-label>
+            </ngc-column>
+            <ngc-column *ngIf="addFormData">
+              <div>
+                <ngc-lov formControlName='carrierCode' [width]='80' upperCase='true' dataField="code"  
+                  displayMember="code" displayMember="code" sourceId='CARRIER' title='flight.carrierType' maxlength='3'
+                  accessEnableOn="r" required='true'>
+                  <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+                  <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="updateEditFormData">
+              <ngc-display [width]="100" formControlName="carrierCode">
+              </ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="2">
+              <ngc-label label="tracing.station"></ngc-label>
+            </ngc-column>
+            <ngc-column *ngIf="addFormData">
+              <div>
+                <ngc-lov formControlName='station' [width]='80' upperCase='true' sourceId='FINAL_DESTINATION'
+                  title='uld.airportcodes' [dropDownWidth]='80' dataField='code' required='true'>
+                  <ngc-data-column text='uld.airport.code' dataField='code' [width]='100'></ngc-data-column>
+                  <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="updateEditFormData">
+              <ngc-display [width]="100" formControlName="station">
+              </ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="2">
+              <ngc-label label="uld.uld.type"></ngc-label>
+            </ngc-column>
+            <ngc-column *ngIf="addFormData">
+              <div>
+                <ngc-lov accessEnableOn="r" formControlName="uldType" displayMember="code" upperCase="true"
+                  [dropDownWidth]='60' sourceId="ULDTYPE_FOR_ULDGROUP"
+                  [sourceParameters]="{ 'param1': searchForm.get('uldGroupId').value }" title="uld.uld.type"
+                  dataField="code" [width]="80" required='true'>
+                  <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="updateEditFormData">
+              <ngc-display [width]="100" formControlName="uldType">
+              </ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="2">
+              <ngc-label label="uld.stdLimit"></ngc-label>
+            </ngc-column>
+            <ngc-column *ngIf="addFormData">
+              <ngc-numberinput required [width]="100" decimalDigits="0" digits="5" formControlName="stdLimit">
+              </ngc-numberinput>
+            </ngc-column>
+            <ngc-column *ngIf="updateEditFormData">
+              <ngc-display [width]="100" formControlName="stdLimit">
+              </ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="2">
+              <ngc-label label="uld.min"></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-numberinput [min]="0" required [width]="100" formControlName="minAllow"
+                (ngModelChange)="minMaxValue('min', 'windowForm', $event)" decimalDigits="0" digits="5">
+              </ngc-numberinput>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="2">
+              <ngc-label label="uld.max"></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-numberinput required [width]="100" formControlName="maxAllow" decimalDigits="0" digits="5"
+                (ngModelChange)="minMaxValue('max', 'windowForm', $event)">
+              </ngc-numberinput>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-label value=''></ngc-label>
+              <ngc-button *ngIf="addFormData" [disabled]='disabledFlag' value="uld.Save" (click)="onSave()">
+              </ngc-button>
+              <ngc-button *ngIf="updateEditFormData" [disabled]='disabledFlag' value="uld.Save" (click)="onEditSave()">
+              </ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-window>

@@ -1,0 +1,352 @@
+<ngc-titlebar title='maintain.muld.assignment' (save)="onSave()" (cancel)="onCancel($event)" (clear)="onClear($event)"
+  [disableSave]="disableSaveFlag" *ngIf=!showAsPopup>
+</ngc-titlebar>
+<form [formGroup]="maintainEquipmentRequestByUldDetails">
+  <ngc-container formArrayName="uldListRecord">
+    <ngc-row *ngFor="let item of maintainEquipmentRequestByUldDetails.controls.uldListRecord.controls; let index=index;"
+      [formGroupName]="index">
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-container type="section">
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="g.carrier" [hidden]="index > 0"></ngc-label>
+                    <div *ngIf="(this.editViewSplitWindowObject == 'Edit')">
+                      <ngc-lov formControlName="carrierCode" required [width]="60" upperCase="true" noCache="true"
+                        *ngIf="(this.editViewSplitWindowObject == 'Edit')" sourceId='CARRIER_OPT'
+                        title='flight.carrierType' dataField="code" displayMember="code" accessEnableOn="r">
+                        <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                        </ngc-data-column>
+                        <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                        </ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                    <div>
+                      <ngc-display formControlName="carrierCode" [hidden]="index > 0" *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                        (this.editViewSplitWindowObject == 'View')">
+                      </ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'Edit')||
+                        (this.editViewSplitWindowObject == 'View')">
+                    <ngc-label label="reqd.by.carr"></ngc-label>
+                    <div>
+                      <ngc-checkbox formControlName="requiredByCarrier"
+                        *ngIf="(this.editViewSplitWindowObject == 'Edit')"
+                        (modelChange)="disableAgentName($event, index)">
+                      </ngc-checkbox>
+                      <ngc-icon type="yesno" formControlName="requiredByCarrier"
+                        *ngIf="(this.editViewSplitWindowObject == 'View')">
+                      </ngc-icon>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'Edit')||
+                        (this.editViewSplitWindowObject == 'View')">
+                    <ngc-label label="flight.flight.no"></ngc-label>
+                    <div>
+                      <ngc-flightkeyinput [width]="90" formControlName="flightKey" upperCase="true"
+                        *ngIf="(this.editViewSplitWindowObject == 'Edit')">
+                      </ngc-flightkeyinput>
+                      <ngc-display formControlName="flightKey" *ngIf="(this.editViewSplitWindowObject == 'View')">
+                      </ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'Edit')||
+                        (this.editViewSplitWindowObject == 'View')">
+                    <ngc-label label="g.FlightDate"></ngc-label>
+                    <div>
+                      <ngc-dateinput [width]="100" formControlName="flightDate" accessEnableOn="r"
+                        *ngIf="(this.editViewSplitWindowObject == 'Edit')">
+                      </ngc-dateinput>
+                      <ngc-display formControlName="flightDate" *ngIf="(this.editViewSplitWindowObject == 'View')">
+                      </ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="this.editViewSplitWindowObject == 'splitEIR'">
+                    <ngc-label label='parent.eir.number' [hidden]="index > 0"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="eirNumber" *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                        (this.editViewSplitWindowObject == 'View')">
+                      </ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="g.agentName" [hidden]="index > 0"></ngc-label>
+                    <div *ngIf="(this.editViewSplitWindowObject == 'Edit')">
+                      <ngc-lov accessEnableOn="r" formControlName="customerCode" [width]="350"
+                        sourceId="EQUIPMENT_AGENT" title="equipment.agent" dataField='code' displayField='desc'
+                        valueMember="desc" (select)="getCustomerIdName($event, index)"
+                        [disabled]="maintainEquipmentRequestByUldDetails.get(['uldListRecord', index, 'requiredByCarrier']).value">
+                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+
+                    </div>
+                    <div *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                        (this.editViewSplitWindowObject == 'View')" [hidden]="index > 0">
+                      <ngc-display formControlName="customerName"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'splitEIR')">
+                    <ngc-label label="requested.uld" [hidden]="index > 0"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="uldType"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'splitEIR')">
+                    <ngc-label label="requested.accessory" [hidden]="index > 0"></ngc-label>
+                    <div>
+                      <ngc-display formControlName="accessoryType"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'Edit')||
+                        (this.editViewSplitWindowObject == 'View')">
+                    <ngc-label label="g.truck.number"></ngc-label>
+                    <div>
+                      <ngc-input formControlName="truckNumber" [width]="120"
+                        *ngIf="(this.editViewSplitWindowObject == 'Edit')">
+                      </ngc-input>
+                      <ngc-display formControlName="truckNumber" *ngIf="(this.editViewSplitWindowObject == 'View')">
+                      </ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column *ngIf="(this.editViewSplitWindowObject == 'Edit')||
+                        (this.editViewSplitWindowObject == 'View')">
+                    <ngc-label label="schedule.date.time"></ngc-label>
+                    <div>
+                      <ngc-datetimeinput formControlName="scheduledDateTime" [width]="150"
+                        *ngIf="(this.editViewSplitWindowObject == 'Edit')"></ngc-datetimeinput>
+                      <ngc-display formControlName="scheduledDateTime"
+                        *ngIf="(this.editViewSplitWindowObject == 'View')" dataType="date"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column [hidden]="true">
+                    <ngc-label label="">
+                      <div>
+                        <ngc-display formControlName="equipmentRequestId"></ngc-display>
+                      </div>
+                    </ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <ngc-container type="tab">
+                <ngc-row>
+                  <ngc-column *ngIf="this.editViewSplitWindowObject == 'splitEIR'">
+                    <ngc-label label="authorized.agent">
+                    </ngc-label>
+                    <div>
+                      <ngc-lov accessEnableOn="r" required formControlName="customerCode" [width]="350"
+                        sourceId="EQUIPMENT_AGENT" title="equipment.agent" dataField='code' displayField='desc'
+                        valueMember="desc" (select)="getCustomerIdNameSplit($event,index)">
+                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <ngc-container type="tab">
+                <ngc-row>
+                  <ngc-column column="6">
+                    <ngc-container>
+                      <!-- Add row button for ULD Type/Group table -->
+                      <ngc-row>
+                        <ngc-column align="right" *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                         (this.editViewSplitWindowObject == 'Edit') ">
+                          <ngc-button value="add.row.uld" iconType="add" (click)="onAdd(index,'reqContainers')">
+                          </ngc-button>
+                        </ngc-column>
+                      </ngc-row>
+                      <!-- ULD Type/Group Table -->
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-edittable formArrayName="reqContainers" [pageable]="false">
+                            <ngc-data-column text="eq.uld.typ.grp" dataField="uldType">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-lov accessEnableOn="r" [readonly]="(this.editViewSplitWindowObject == 'View')"
+                                    formControlName="uldType" sourceId='GETULDTYPEGROUPINFO' title='uld.uld.type'
+                                    dataField='code' width='150px' upperCase='true' displayMember="code"
+                                     [dropDownWidth]='60'>
+                                    <ngc-data-column text="uld.uld.type" dataField="code" [width]="100">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150">
+                                    </ngc-data-column>
+                                  </ngc-lov>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.quantity" dataField="qty">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-input patternName="digit" formControlName="qty"
+                                    [readonly]="(this.editViewSplitWindowObject == 'View')">
+                                  </ngc-input>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.delete" [width]="50" [useNotOnDemand]="true" *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                         (this.editViewSplitWindowObject == 'Edit') " cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-link (click)="onDeleteUldTypeGroup($event,group,index)" iconType="delete">
+                                  </ngc-link>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                          </ngc-edittable>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label label=""></ngc-label>
+                          <div></div>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label label="g.remarks"></ngc-label>
+                          <div>
+                            <ngc-input formControlName="specialinstruction"
+                              [readonly]="(this.editViewSplitWindowObject == 'View')" width="500"></ngc-input>
+                          </div>
+                        </ngc-column>
+
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+                  <ngc-column column="6">
+                    <ngc-container>
+                      <!-- Add row button for Accessory Type table -->
+                      <ngc-row>
+                        <ngc-column align="right" *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                         (this.editViewSplitWindowObject == 'Edit') ">
+                          <ngc-button value="add" iconType="add" (click)="onAdd(index,'reqAccessory')"></ngc-button>
+                        </ngc-column>
+                      </ngc-row>
+                      <!-- ACCESSORY Type Table -->
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-edittable formArrayName="reqAccessory" [pageable]="false">
+                            <ngc-data-column text="accessory.type" dataField="accessoryType">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-lov accessEnableOn="r" formControlName="accessoryType"
+                                    [readonly]="(this.editViewSplitWindowObject == 'View')"
+                                    sourceId="KEY_ACCESSORY_TYPE" title="Accessory Type" dataField="parameter1"
+                                    width="150px" upperCase="true" displayMember="desc" [dropDownWidth]="60">
+                                    <ngc-data-column text='Accessory Code' dataField='parameter1' [width]='150'>
+                                    </ngc-data-column>
+                                    <ngc-data-column text='Accessory Description' dataField='desc' [width]='150'>
+                                    </ngc-data-column>
+                                  </ngc-lov>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.quantity" dataField="qty">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-input patternName="digit" formControlName="qty"
+                                    [readonly]="(this.editViewSplitWindowObject == 'View')">
+                                  </ngc-input>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.delete" *ngIf="(this.editViewSplitWindowObject == 'splitEIR')||
+                             (this.editViewSplitWindowObject == 'Edit') " [width]="50" [useNotOnDemand]="true"
+                              cellsAlign="center">
+                              <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                  <ngc-link (click)="onDeleteAccessoryType($event,group,index)" iconType="delete">
+                                  </ngc-link>
+                                </ng-container>
+                              </ng-template>
+                            </ngc-data-column>
+                          </ngc-edittable>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label label=""></ngc-label>
+                          <div></div>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column align="right">
+                          <ngc-label label=""></ngc-label>
+                          <div>
+                            <ngc-button value="g.delete" *ngIf="index > 0" iconType="delete"
+                              (click)="deleteSection(index)">
+                            </ngc-button>
+                            <ngc-button value="update.button" (click)="onEdit($event)"
+                              *ngIf="this.editViewSplitWindowObject == 'Edit'">
+                            </ngc-button>
+                          </div>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value="add.more.agent" iconType="add" (click)="addMoreAgent(index)"
+          *ngIf="this.editViewSplitWindowObject == 'splitEIR'"></ngc-button>
+        <ngc-button value="save.button" (click)="onSave(index)" *ngIf="this.editViewSplitWindowObject == 'splitEIR'">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Form that contain the EIR Number generated after saving the data -->
+<form [formGroup]="windowForm">
+  <ngc-window #transactionNumberPopUpWindow title='eq.eir.nos.title' [showCloseButton]="true" (close)="onCloseWindow()">
+    <ngc-container *ngIf=" windowFlag">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead align="center">
+              <tr>
+                <th>
+                  <ngc-label value="eir.number"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="flight.carrier"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="arrayOfTransactionNumber">
+              <tr *ngFor="let item of windowForm.controls.arrayOfTransactionNumber.controls; let index=index;"
+                [formGroupName]="index">
+                <td>
+                  <ngc-label formControlName="transactionNumber"></ngc-label>
+                </td>
+                <td>
+                  <ngc-label formControlName="carrierCode"></ngc-label>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button value="equipment.close" (click)="onClose()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

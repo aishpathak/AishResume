@@ -1,0 +1,169 @@
+<form novalidate [formGroup]="maintainAirlineForm">
+  <ngc-titlebar title="masters.uldTareWeight" (save)="onSave($event)">
+  </ngc-titlebar>
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="g.carrierCode"></ngc-label>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="uld.uld.type"></ngc-label>
+      </ngc-column>
+      <ngc-column column="10"></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-lov formControlName="carrierCodeDetails" sourceId='CARRIER' title='flight.carrierType' [width]="60"
+          dataField='code' (select)="onSelect($event)" accessEnableOn="r">
+          <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-lov formControlName="uldTypeDetails" sourceId='ULDTYPE' title='uld.uld.type' dataField='code' [width]="60"
+          (select)="onSelect($event)" accessEnableOn="r">
+          <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-button (click)="onSearchAirline($event)" value="g.search" iconType="search" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column column="6"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="onEditAddLink($event)" value="g.add" type="link" iconType="add"></ngc-button>
+        <ngc-button (click)="onDeleteButtonClick($event)" value="g.delete" type="link" iconType="delete"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <!-- DataTable start here -->
+        <ngc-datatable formArrayName="aircraftList" [width]="1330" (linkClick)="onEditAddLink($event)"
+          [enablePageSizeHeight]="false" [pageSize]="15">
+          <ngc-data-column text="g.select" dataField="scInd" type="check" [width]="100" align="left"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.carrier" dataField="uldCarrierCode" [width]="100" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uld.type" dataField="uldtype" [width]="100" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="g.from" dataField="uldSeriesNumberFrom" [width]="120" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="g.to" dataField="uldSeriesNumberTo" [width]="120" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="masters.tareWeight" dataField="uldSeriesTareWeight" [width]="120" cellsAlign="right"
+            type="displayWeight"></ngc-data-column>
+          <ngc-data-column entityAttribute="masters.operation.code" text="masters.operation.code"
+            dataField="operationCode" [width]="120" cellsAlign="left">
+          </ngc-data-column>
+          <!--<ngc-data-column text="Transaction SequenceNo" dataField="transactionSequenceNo" [width]="100" cellsAlign="center"></ngc-data-column>-->
+          <ngc-data-column text="edit" dataField="edit" [width]="100" iconType="edit" type="link" align="left">
+          </ngc-data-column>
+        </ngc-datatable>
+        <!-- DataTable end here -->
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- Add and edit window start from here -->
+  <ngc-window #window [width]="800" [height]="500" title="uld.uld.tare.weight">
+    <ngc-container type="block">
+      <ngc-row *ngIf="addFormData">
+        <ngc-column [column]="4">
+          <ngc-label label="g.carrier"></ngc-label>
+          <div>
+            <ngc-lov formControlName="uldCarrierCode" sourceId='CARRIER' title='flight.carrierType' dataField='code'
+              (select)="onSelect($event)" [width]="100" required>
+              <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+              <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label="uld.uld.type"></ngc-label>
+          <div>
+            <ngc-lov formControlName="uldtype" sourceId='ULDTYPE' title='uld.uld.type' dataField='code'
+              (select)="onSelect($event)" [width]="100" required>
+              <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+              <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4" entityAttribute="masters.operation.code">
+          <ngc-label label="masters.operation.code"></ngc-label>
+          <div>
+            <ngc-input [width]="100" formControlName="operationCode" maxlength="30">
+            </ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row *ngIf="updateFormData">
+        <ngc-column [column]="4">
+          <ngc-label label="g.carrier"></ngc-label>
+          <div>
+            <ngc-lov formControlName="uldCarrierCode" sourceId='CARRIER' title='flight.carrierType' dataField='code'
+              (select)="onSelect($event)" [width]="100" required>
+              <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+              <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label="uld.uld.type"></ngc-label>
+          <div>
+            <ngc-display formControlName="uldtype"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4" entityAttribute="masters.operation.code">
+          <ngc-label label="masters.operation.code"></ngc-label>
+          <div>
+            <ngc-input [width]="100" formControlName="operationCode" maxlength="30">
+            </ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.from"></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="g.to"></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="masters.Tareweightkg"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="0" formControlName="uldSeriesNumberFrom" required maxlength="5"
+            minlength="4">
+          </ngc-numberinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-numberinput [width]="100" decimalDigits="0" formControlName="uldSeriesNumberTo" required maxlength="5"
+            minlength="4">
+          </ngc-numberinput>
+        </ngc-column>
+        <ngc-column>
+          <!-- <ngc-input [width]="100" formControlName="uldSeriesTareWeight" required></ngc-input> -->
+          <ngc-weightinput formControlName="uldSeriesTareWeight" required></ngc-weightinput>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onSubmitData($event)" label="g.save"></ngc-button>
+            <ngc-button (click)="onCancelButton($event)" label="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <!-- Add and edit window end here -->
+</form>

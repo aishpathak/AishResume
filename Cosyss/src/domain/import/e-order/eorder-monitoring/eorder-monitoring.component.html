@@ -1,0 +1,774 @@
+<ngc-titlebar title="Eorder Monitoring" (save)="Onsave($event)" (cancel)="onCancel($event)" (clear)="onClear()">
+</ngc-titlebar>
+<!-- Search Container to fetch all the records for creation/ display of E order monitoring -->
+<form [formGroup]="searchForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="billing.process"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="processType" (select)='onClickCategory($event)'
+            [width]="200" sourceId="Import$createeorder" [dropDownWidth]="200" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="flight.cargo.ac.type.label"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="cargoAcType" [width]="200"
+            sourceId="Events$AirCraftType" [dropDownWidth]="200">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" showTimeButton="true"
+            formControlName="flightFromDate" (ngModelChange)='onFromDate($event)' required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" showTimeButton="true"
+            formControlName="flightToDate" [min]="this.searchForm.get(['flightFromDate']).value" [max]="maxDate"
+            required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+        <ngc-label label="flight Number"></ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="100" upperCase="true" formControlName="flightNo" accessEnableOn="r">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch($event)" value="g.search" iconType="search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom" [column]="1" align="right">
+        <ngc-label label="val.auto.refresh"></ngc-label>
+        <div>
+          <ngc-switchbutton formControlName="auto" (ngModelChange)="onChangeData($event)" onLabel="AutoRefresh">
+          </ngc-switchbutton>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Result Form to create the EOrderMonitoringForm -->
+<form [formGroup]="form" *ngIf="showEOrderMonitoringDetails">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button (click)="onCancel()" value="cancel" accessEnableOn="r"></ngc-button>
+          <ngc-button (click)="onAcknowledge()" value="ware.acknowledged" accessEnableOn="r"></ngc-button>
+          <ngc-button (click)="onComplete()" value="ware.complete" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="this.searchForm.get('processType').value === 'Import ULD Handling'">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable #mainTable formArrayName="summaryDetails" [pageSize]="15"
+          [hierarchy]="[['maintainJobOrderList']]">
+          <ngc-data-column text="" dataField="select" [width]="10" type="check" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-checkbox
+                  *ngIf="this.form.get(['summaryDetails', indexes['root'], 'jobOrder']).value && this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value > 0"
+                  [formControlName]="name"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='5' align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ng-container>
+                  <ngc-label label="{{indexes['root'] + 1}}"></ngc-label>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.flight.no.date" dataField="flightNoDate" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [value]="this.form.get(['summaryDetails', indexes['root'], 'flightNo']).value">
+                </ngc-display>/<ngc-display
+                  [value]="this.form.get(['summaryDetails', indexes['root'], 'flightDate']).value" [onlyDate]="true">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.sta" dataType="date" dataField="sta" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name" [onlyTime]="true"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.ata" dataType="date" dataField="ata" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name" [onlyTime]="true"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="warehouse.allot" dataField="allotRamp" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="mb.checkin" dataField="checkIn" cellsAlign="center" align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <div [ngStyle]="{ 'background-color': 
+                                              this.form.get(['summaryDetails',indexes['root'],'checkInColor']).value == 'GREEN'? '#62BD69': 
+                                              this.form.get(['summaryDetails',indexes['root'],'checkInColor']).value == 'RED'? '#f94449': 
+                                              this.form.get(['summaryDetails',indexes['root'],'checkInColor']).value == 'YELLOW'? '#ffE900': null,
+                                              'padding-left': '-2px', 
+                                              'padding-right': '-2px',
+                                              'padding-top': '8px'}">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="os.checkIn" dataField="osCheckIn" cellsAlign="center" align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <div [ngStyle]="{ 'background-color':
+                                          this.form.get(['summaryDetails',indexes['root'],'osCheckInColor']).value == 'RED'? '#f94449': null,
+                                          'padding-left': '-2px', 
+                                          'padding-right': '-2px',
+                                          'padding-top': '8px'}">
+                  <ngc-display [formControlName]="name">
+                  </ngc-display>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.trf" dataField="uldTrf" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="ware.order.acknowledged" dataField="orderAcknowledged" cellsAlign="center"
+            align="center" [width]="30">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [value]="this.form.get(['summaryDetails', indexes['root'], 'jobOrderAcknowledged']).value">
+                </ngc-display>/
+                <ngc-display [value]="this.form.get(['summaryDetails', indexes['root'], 'jobOrder']).value">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Job Order Details" name="jobOrderDetails" align="center" cellsAlign="center">
+            <ngc-data-column text="Job Order Code" dataField="jobOrderCode" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="message.log.sent.to" dataField="sentTo" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="ware.order.time" dataField="orderTime" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="pick.up.time" dataField="pickUpTime" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="eps.time" dataField="epsTime" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="job.comp.time" dataField="jobCompletionTime" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="job.comp.eps.time" dataField="elapsedTimeForJobComp" cellsAlign="center"
+              align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="flg.pick.up.stf" dataField="acknowledgedBy" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="custauth.lastupdated" dataType="date" dataField="lastUpdatedDateTime"
+              cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="order.ack.status" dataField="orderAckStatus" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <div [ngStyle]="{ 'background-color': 
+                                                    this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'GREEN'? '#62BD69': 
+                                                    this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'RED'? '#f94449': 
+                                                    this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'YELLOW'? '#ffE900': null,
+                                                    'padding-left': '-2px', 
+                                                    'padding-right': '-2px',
+                                                    'padding-top': '8px'}">
+                          <ngc-display [formControlName]="name"></ngc-display>
+                        </div>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.priority" cellsAlign="center" dataField="priority" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-dropdownlist [formControlName]="name" [width]="20" sourceId="Import$Eorder_Priority"
+                          [dropDownWidth]="30" *ngIf="this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value && 
+                          this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value > 0 "
+                          [disabled]="this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'status']).value !== 'Acknowledged'">
+                        </ngc-dropdownlist>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- Other Uld transfer  -->
+  <ngc-container type="tab" *ngIf="this.searchForm.get('processType').value === 'Other ULD Transfer'">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable #mainTable formArrayName="summaryDetails" [pageSize]="15"
+          [hierarchy]="[['maintainJobOrderList']]">
+          <ngc-data-column text="" dataField="select" [width]="10" type="check" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-checkbox
+                  *ngIf="this.form.get(['summaryDetails', indexes['root'], 'jobOrder']).value && this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value > 0"
+                  [formControlName]="name"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='5' align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ng-container>
+                  <ngc-label label="{{indexes['root'] + 1}}"></ngc-label>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.trans.no" dataField="uldtransferNo" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name" [width]="50"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="create.time" dataType="date" dataField="createdOn" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.uld.to" dataField="uldTo" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="acceptance.handling.type" dataField="type" align="center" cellsAlign="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="warehouse.allot" dataField="allotUldNo" align="center" cellsAlign="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="ware.order.acknowledged" dataField="orderAcknowledged" cellsAlign="center"
+            align="center" [width]="30">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [value]="this.form.get(['summaryDetails', indexes['root'], 'jobOrderAcknowledged']).value">
+                </ngc-display>/
+                <ngc-display [value]="this.form.get(['summaryDetails', indexes['root'], 'jobOrder']).value">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="ULD Transferred" dataField="uldTransferred" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <div [ngStyle]="{ 'background-color': 
+                                            this.form.get(['summaryDetails',indexes['root'],'uldTransferColor']).value == 'GREEN'? '#62BD69': 
+                                            this.form.get(['summaryDetails',indexes['root'],'uldTransferColor']).value == 'RED'? '#f94449': 
+                                            this.form.get(['summaryDetails',indexes['root'],'uldTransferColor']).value == 'YELLOW'? '#ffE900': null,
+                                            'padding-left': '-2px', 
+                                            'padding-right': '-2px',
+                                            'padding-top': '8px'}">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="ULD Assigned" dataField="uldAssignedNo" align="center" cellsAlign="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <div [ngStyle]="{ 'background-color': 
+                                            this.form.get(['summaryDetails',indexes['root'],'uldAssignedColor']).value == 'GREEN'? '#62BD69': 
+                                            this.form.get(['summaryDetails',indexes['root'],'uldAssignedColor']).value == 'RED'? '#f94449': 
+                                            this.form.get(['summaryDetails',indexes['root'],'uldAssignedColor']).value == 'YELLOW'? '#ffE900': null,
+                                            'padding-left': '-2px', 
+                                            'padding-right': '-2px',
+                                            'padding-top': '8px'}">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="Job Order Details" name="jobOrderDetails" align="center" cellsAlign="center">
+            <ngc-data-column text="Job Order Code" dataField="jobOrderCode" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="message.log.sent.to" dataField="sentTo" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="ware.order.time" dataField="orderTime" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="pick.up.time" dataField="pickUpTime" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="eps.time" dataField="epsTime" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="job.comp.time" dataField="jobCompletionTime" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="job.comp.eps.time" dataField="elapsedTimeForJobComp" cellsAlign="center"
+              align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="order.ack.status" dataField="orderAckStatus" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <div [ngStyle]="{ 'background-color': 
+                                                        this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'GREEN'? '#62BD69': 
+                                                        this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'RED'? '#f94449': 
+                                                        this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'YELLOW'? '#ffE900': null,
+                                                        'padding-left': '-2px', 
+                                                        'padding-right': '-2px',
+                                                        'padding-top': '8px'}">
+
+                          <ngc-display [formControlName]="name"></ngc-display>
+                        </div>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.priority" cellsAlign="center" dataField="priority" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-dropdownlist [formControlName]="name" [width]="20" sourceId="Import$Eorder_Priority"
+                          [dropDownWidth]="30" *ngIf="this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value && 
+                                      this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value > 0 "
+                          [disabled]="this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'status']).value !== 'Acknowledged'">
+                        </ngc-dropdownlist>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!--Misscellaneous Order -->
+  <ngc-container type="tab" *ngIf="this.searchForm.get('processType').value === 'Miscellaneous Order'">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable #mainTable formArrayName="summaryDetails" [pageSize]="15"
+          [hierarchy]="[['maintainJobOrderList']]">
+          <ngc-data-column text="" dataField="select" [width]="10" type="check" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-checkbox
+                  *ngIf="this.form.get(['summaryDetails', indexes['root'], 'jobOrder']).value && this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value > 0"
+                  [formControlName]="name"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='5' align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ng-container>
+                  <ngc-label label="{{indexes['root'] + 1}}"></ngc-label>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.instruction" dataField="instruction" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['maintainJobOrderList'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name" [width]="50"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="ware.job.order.Details" name="jobOrderDetails" align="center" cellsAlign="center">
+            <ngc-data-column text="ware.job.order.code" dataField="jobOrderCode" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="message.log.sent.to" dataField="sentTo" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="ware.order.time" dataField="orderTime" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="pick.up.time" dataField="pickUpTime" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="eps.time" dataField="epsTime" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="job.comp.time" dataField="jobCompletionTime" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="job.comp.eps.time" dataField="elapsedTimeForJobComp" cellsAlign="center"
+              align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="order.ack.status" dataField="orderAckStatus" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <div [ngStyle]="{ 'background-color': 
+                                                      this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'GREEN'? '#62BD69': 
+                                                      this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'RED'? '#f94449': 
+                                                      this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'orderAckStatusColor']).value == 'YELLOW'? '#ffE900': null,
+                                                      'padding-left': '-2px', 
+                                                      'padding-right': '-2px',
+                                                      'padding-top': '8px'}">
+                          <ngc-display [formControlName]="name"></ngc-display>
+                        </div>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.priority" cellsAlign="center" dataField="priority" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['maintainJobOrderList'] >= 0">
+                    <ng-container formArrayName="maintainJobOrderList">
+                      <ng-container [formGroupName]="indexes['maintainJobOrderList']">
+                        <ngc-dropdownlist [formControlName]="name" [width]="20" sourceId="Import$Eorder_Priority"
+                          [dropDownWidth]="30" *ngIf="this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value && 
+                          this.form.get(['summaryDetails',indexes['root'],'jobOrder']).value > 0 "
+                          [disabled]="this.form.get(['summaryDetails',indexes['root'],'maintainJobOrderList',indexes['maintainJobOrderList'],'status']).value !== 'Acknowledged'">
+                        </ngc-dropdownlist>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

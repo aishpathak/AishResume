@@ -1,0 +1,228 @@
+<form [formGroup]="form">
+    <!-- {{parentConstraintName}} {{parentConstraintId}} -->
+    <div class="mainContent">
+        <ngc-container class="mainContent" type="box">
+            <ngc-row>
+                <ngc-column [column]="4">
+                    <!-- <ngc-display></ngc-display> -->
+                    <ngc-label label="warehouse.filter.location"></ngc-label>
+                    <div>
+                        <ngc-dropdownlist [width]="160" formControlName="selectedLocationType"
+                            [sourceId]="sourceLocationsType" (select)="onChangeLocationType($event)" valueMember="code"
+                            displayMember="desc">
+                        </ngc-dropdownlist>
+                    </div>
+                    <!-- <ngc-locations-list [displayOnlyLocation]="true" [locationTypeList]="['STORAGE']"></ngc-locations-list> -->
+                </ngc-column>
+                <ngc-column [column]="3">
+                    <ngc-label label=""></ngc-label>
+                    <div>
+                        <ngc-link (linkClick)="onPreviousNext('previous')" [disabled]="fromSlice == 0">
+                            <ngc-label label="<<< Previous " emphasis="md"></ngc-label>
+                        </ngc-link>
+                        &nbsp;
+                        <ngc-label
+                            label="Rows: {{fromSlice + 1}} to {{toSlice}} of {{form.get(['finalLocationsList']).value.length }}"
+                            emphasis="md">
+                        </ngc-label>
+                        &nbsp;
+                        <ngc-link [disabled]="toSlice >= form.get(['finalLocationsList']).value.length"
+                            (linkClick)="onPreviousNext('next')">
+                            <ngc-label label=" Next >>>" emphasis="md"></ngc-label>
+                        </ngc-link>
+                    </div>
+                </ngc-column>
+                <ngc-column align="right">
+                    <ngc-label label=""></ngc-label>
+                    <div>
+                        <ngc-button label="warehouse.delete.location" (click)="onDeleteLocations()"></ngc-button>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <!-- {{this.form.getRawValue() | json}} -->
+                    <table class="mainContent">
+                        <tbody formArrayName="finalLocationsList">
+                            <tr *ngFor="let eachRow of form.controls.finalLocationsList.controls | slice: fromSlice : toSlice; let index = index"
+                                [formGroupName]="index">
+                                <td align="center" verticalAlign="middle">
+                                    {{retrieveCharacter('A', fromSlice + index )}}
+                                </td>
+                                <ng-container formArrayName="innerList">
+                                    <ng-container
+                                        *ngFor="let eachColumn of eachRow.controls.innerList.controls; let sindex = index"
+                                        [formGroupName]="sindex">
+                                        <td [ngClass]="{ 'wh-loc-selected': eachColumn.get('select').value,
+                                                    'added-to-zone-list': eachColumn.get('whZone').value && eachColumn.get('whZone').value === form.get('whZone').value
+                                             }"
+                                            (click)="eachColumn.get('select').setValue(!eachColumn.get('select').value)"
+                                            align="center" verticalAlign="middle">
+                                            <div class="table-container">
+                                                <div class="table-row">
+                                                    <ngc-icon [type]="returnIconTypeLock(eachColumn)"
+                                                        trueColor="#FF851B" value="Y" iconSize="2x"></ngc-icon>
+                                                    <ngc-icon [type]="returnIconTypeAvailable(eachColumn)"
+                                                        trueColor="#FF851B" value="Y" iconSize="2x"></ngc-icon>
+                                                    <!-- <span class="location-desc">...</span> -->
+                                                </div>
+                                                <div class="table-row">
+                                                    <!-- <ngc-display formControlName="whColumn"></ngc-display> -->
+                                                    {{((eachColumn.get('whColumn').value||'')+eachColumn.get('whRow').value)
+                                                    |
+                                                    slice:0:12}}
+                                                    <!-- <ngc-display formControlName="whRow"></ngc-display> -->
+                                                </div>
+                                                <div class="table-row">
+                                                    <ngc-icon [type]="returnIconTypeOccupied(eachColumn)"
+                                                        trueColor="#FF851B" value="Y" iconSize="1x"></ngc-icon>
+                                                </div>
+                                                <div class="table-row temperature-range">{{
+                                                    this.temperatureRangeHash[eachColumn.get('temperatureRange').value]
+                                                    }}
+                                                </div>
+                                                <div class="table-row">
+                                                    <ng-container
+                                                        *ngIf="this.form.get(['finalLocationsList', index, 'innerList', sindex, 'devicePresentPrinter']).value">
+                                                        <ngc-icon (click)="onAddDevicesIcon(index, sindex)" type="print"
+                                                            trueColor="#FF851B" value="Y" iconSize="1x"></ngc-icon>
+                                                    </ng-container>
+                                                    <ng-container
+                                                        *ngIf="this.form.get(['finalLocationsList', index, 'innerList', sindex, 'devicePresentVolumetric']).value">
+                                                        <ngc-icon (click)="onAddDevicesIcon(index, sindex)"
+                                                            type="volumetricscanner" trueColor="#FF851B" value="Y"
+                                                            iconSize="1x"></ngc-icon>
+                                                    </ng-container>
+                                                    <ng-container
+                                                        *ngIf="this.form.get(['finalLocationsList', index, 'innerList', sindex, 'devicePresentWeighingScale']).value">
+                                                        <ngc-icon (click)="onAddDevicesIcon(index, sindex)" type="scale"
+                                                            trueColor="#FF851B" value="Y" iconSize="1x"></ngc-icon>
+                                                    </ng-container>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    </ng-container>
+                                </ng-container>
+                            </tr>
+                            <tr>
+                                <td class="columnNumber"
+                                    *ngFor="let eachColumn of arrayOne(this.noOfColumns); let index = index">
+                                    {{index}}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column [column]="2"></ngc-column>
+                <ngc-column>
+                    <ngc-dropdownlist formControlName="whZone" [width]="110" sourceId='WH_ZONECODE' sourceType='query'
+                        [sourceParameters]="{'parameter1': ''+this.parentConstraintId}">
+                    </ngc-dropdownlist>
+                    <ngc-button label="warehouse.add.tozone" (click)="addToZone()"></ngc-button>
+                </ngc-column>
+                <ngc-column>
+                    <ngc-dropdownlist [width]="140" formControlName="temperatureRange"
+                        sourceId='Admin$TemperatureRange'></ngc-dropdownlist>
+                    <ngc-button label="warehouse.set.temperaturerange" (click)="setTemperatureRange()"></ngc-button>
+                </ngc-column>
+                <ngc-column [column]="2"></ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column></ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column></ngc-column>
+            </ngc-row>
+            <ngc-row class="button-row">
+                <!-- <ngc-column column="1">
+                </ngc-column> -->
+                <ngc-column column="2">
+                    <ngc-button label="warehouse.lock" (click)="onLock()" iconType="lock"></ngc-button>
+                    <ngc-button label="warehouse.unlock" (click)="onUnlock()" iconType="unlock"></ngc-button>
+                </ngc-column>
+                <ngc-column column="3">
+                    <ngc-button label="warehouse.mark.available" (click)="onSetUpDateRange('markAvailable', 1)"
+                        iconType="yesno">
+                    </ngc-button>
+                    <ngc-button label="warehouse.mark.unavailable" (click)="onSetUpDateRange('markUnavailable', 0)"
+                        iconType="close"></ngc-button>
+                </ngc-column>
+                <ngc-column column="3">
+                    <ngc-button label="warehouse.allocateagent.totruckdock" accessEnableOn="r"
+                        [disabled]="!truckDockPresent" (click)="onAllocateAgentToTruckDock()" iconType="truck">
+                    </ngc-button>
+                </ngc-column>
+                <ngc-column column="3">
+                    <ngc-button label="warehouse.allocateworkstation.toairside" accessEnableOn="r"
+                        (click)="onAllocateWorkStationToAirside()">
+                    </ngc-button>
+                </ngc-column>
+                <ngc-column column="1">
+                    <ngc-button label="warehouse.add.device" (click)="onAddDevices()" iconType="storage"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </div>
+</form>
+<ngc-window #windowDate [width]="100" [height]="100" title="warehouse.select.datefrom.dateto">
+    <ngc-container>
+        <ngc-row>
+            <ngc-column>
+                <ngc-datetimeinput></ngc-datetimeinput>
+                <ngc-datetimeinput></ngc-datetimeinput>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-button label="warehouse.confirm" [width]="140" (click)="onConfirmMarkingAvailability()">
+                </ngc-button>
+                <ngc-button label="g.cancel" [width]="140" (click)="onCancel()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</ngc-window>
+<ngc-window #windowAllocateAgent [width]="1366" [height]="500" title="warehouse.allocateagent.totruckdock"
+    [showCloseButton]="true">
+    <ngc-allocate-truck-dock [parentConstraintId]="parentConstraintId"
+        *ngIf="popUpWindowConfig.allocateAgentToTruckDock"></ngc-allocate-truck-dock>
+</ngc-window>
+<ngc-window #windowAllocateWorkStation [width]="1366" [height]="500" title="warehouse.allocateworkstation.toairside"
+    [showCloseButton]="true">
+    <ngc-allocate-workstation-airside *ngIf="popUpWindowConfig.allocateWorkStationToAirside">
+    </ngc-allocate-workstation-airside>
+</ngc-window>
+<ngc-window #windowAddDevice [width]="1366" [height]="500" title="warehouse.add.device" [showCloseButton]="true">
+    <ngc-setup-devices *ngIf="popUpWindowConfig.addDevices"></ngc-setup-devices>
+</ngc-window>
+<ngc-window #windowSetAvailabilityDate [width]="130" [height]="200" title="warehouse.setdate.range"
+    [showCloseButton]="true">
+    <!-- <ngc-setup-devices *ngIf="popUpWindowConfig.setUpDates"></ngc-setup-devices> -->
+    <ngc-container>
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label="warehouse.fromdate"></ngc-label>
+                <div>
+                    <ngc-dateinput #fromDate required></ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="warehouse.todate"></ngc-label>
+                <div>
+                    <ngc-dateinput #toDate></ngc-dateinput>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button label="warehouse.confirm" [width]="80"
+                        (click)="onConfirmDateRange(fromDate.value, toDate.value)">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</ngc-window>

@@ -1,0 +1,223 @@
+<form [formGroup]="mssDashboardForm">
+  <ngc-titlebar title="eHub Dashboard" (cancel)="onBack($event)">
+  </ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="sats" groupName='sel' checked="true">
+            <ngc-label label="import.breakdown.tenant" inline="true"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="dnata" groupName='sel'>
+            <ngc-label label="mail.dnata" inline="true"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" required showCalendarButton="true" midnight="true" showTimeButton="true"
+            formControlName="fromDate" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" required showCalendarButton="true" midnight="true" showTimeButton="true"
+            formControlName="toDate" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="demo.search" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label='val.auto.refresh'></ngc-label>
+        <ngc-switchbutton accessEnableOn="r" formControlName="auto" (ngModelChange)="onSwitchChange($event)" [width]="200">
+        </ngc-switchbutton>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="mssDashboardFormResponse">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="showForSats">
+        <ngc-tabs [width]="800" [height]="200" formArrayName="FlightDetailsFormArray"
+          [activeIndex]="mssDashboardFormResponse.getList('FlightDetailsFormArray').length -1"
+          (select)="releaseEvent($event)" (close)="onCloseSats($event)">
+          <ng-container
+            *ngFor="let item of mssDashboardFormResponse.controls.FlightDetailsFormArray.controls; let i=index">
+            <ngc-tab-card *ngIf="i == 0" title="dashboard.dashboard" [formGroupName]="i">
+              <ngc-datatable #MssDashboadViewTable [pageable]="true" [pageSize]="10"
+                formArrayName="responseForSATSMssDashboard" [showToolbar]="false" [showPrint]="false" [showXLS]="false"
+                [showPDF]="false" [showCSV]="false" (linkClick)="onLinkClick($event, i)">
+                <ngc-data-column text="g.flight" dataField="flightKey" [width]="100" type="link" align="center"
+                  cellsAlign="center" value="true"></ngc-data-column>
+
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" type="displayDate"
+                  cellsAlign="center" value="true"></ngc-data-column>
+                <ngc-data-column text="flight.std" dataField="dateATD" align="center" type="displayTime" [width]="100"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="dashboard.allocation" dataField="allocation" align="center" [width]="80"
+                  type="icon" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                <ngc-data-column text="dashboard.scan" [width]="200" align="center" cellsAlign="center">
+                  <ngc-data-column text="dashboard.truck.doc" align="center" dataField="truckDocColorCode" [width]="80"
+                    type="icon" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                  <ngc-data-column text="dashboard.in.feed" align="center" dataField="infeedColorCode" dataType="text"
+                    [width]="80" type="icon" cellsAlign="center" [cellsRenderer]="cellsRenderer">
+                  </ngc-data-column>
+                </ngc-data-column>
+                <ngc-data-column text="exp.manifest" align="center" dataField="manfColorCode" [width]="80" type="icon"
+                  cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                <ngc-data-column text="dashboard.ramp" align="center" dataField="hndColorCode" [width]="80" type="icon"
+                  cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                <ngc-data-column text="dasboard.offload" align="center" dataField="ofdColorCode" [width]="80"
+                  type="icon" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-tab-card>
+            <ngc-tab-card *ngIf="i > 0" [title]="item.get('title').value" [formGroupName]="i" [closable]='true'>
+              <ng-container>
+                <ngc-datatable formArrayName="flightDetailArray" [pageSize]="10" #releasedtable [showToolbar]="false"
+                  [showPrint]="false" [showXLS]="false" [showPDF]="false" [showCSV]="false" [attr.id]="i">
+                  <ngc-data-column text="mailbag.dispatch" dataField="dispatch" [width]="90" type="text"
+                    cellsAlign="center" align="center" value="true" true-color="grey"></ngc-data-column>
+                  <ngc-data-column text="g.origin" dataField="ori" [width]="90" type="text" cellsAlign="center"
+                    value="true" align="center"></ngc-data-column>
+                  <ngc-data-column text="g.destination" dataField="destination" [width]="90" type="displayDate"
+                    cellsAlign="center" value="true" align="center"></ngc-data-column>
+                  <ngc-data-column text="g.pieces" dataField="Piece" type="piece" [width]="90" align="left"
+                    cellsAlign="right"></ngc-data-column>
+                  <ngc-data-column text="g.weight" dataField="Weight" type="weight" [width]="90" align="left"
+                    cellsAlign="right"></ngc-data-column>
+
+                  <ngc-data-column text="mailbag.mail.type" dataField="type" [width]="80" align="center"
+                    cellsAlign="center">
+                  </ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.ipsaa" dataField="ipsAA" [width]="80" type="icon" align="center"
+                    cellsAlign="center"></ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.rfdtaa" dataField="rfdtAA" dataType="text" [width]="80"
+                    type="icon" align="center" cellsAlign="center"></ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.ha" dataField="ha" [width]="80" type="icon" align="center"
+                    cellsAlign="center">
+                  </ngc-data-column>
+                  <ngc-data-column text="dasboard.offload" dataField="offload" [width]="80" type="icon" align="center"
+                    cellsAlign="center"></ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.haFlight" dataField="haFlight" [width]="80" type="icon"
+                    align="center" cellsAlign="center"></ngc-data-column>
+                  <ngc-data-row-childs>
+                    <ngc-data-row-child *ngFor="let sitem of item.controls.flightDetailArray.controls; let index=index"
+                      [formGroupName]="index" [row]="index">
+                      <ngc-datatable formArrayName="mailBagDetails" [showToolbar]="false" [showPrint]="false"
+                        [showXLS]="false" [showPDF]="false" [showCSV]="false" [pageable]="true" [pageSize]="10">
+                        <ngc-data-column text="mailbag.rsn" dataField="receptableNumber" [width]="50" type="text"
+                          cellsAlign="center" value="true" align="center"></ngc-data-column>
+                        <ngc-data-column text="mailbag.mail.tag" dataField="mailBagNumber" [width]="150"
+                          type="displayDate" cellsAlign="center" value="true" align="center"></ngc-data-column>
+                        <ngc-data-column text="mss.dashboard.ipsaa" dataField="ipsColor" [width]="80" type="icon"
+                          align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                        <ngc-data-column text="mss.dashboard.rfdtaa" dataField="rfdtColor" dataType="text" [width]="80"
+                          type="icon" align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer">
+                        </ngc-data-column>
+                        <ngc-data-column text="mss.dashboard.ha" dataField="haColor" [width]="80" type="icon"
+                          align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                        <ngc-data-column text="dasboard.offload" dataField="offloadColor" [width]="80" type="icon"
+                          align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                      </ngc-datatable>
+                    </ngc-data-row-child>
+                  </ngc-data-row-childs>
+                </ngc-datatable>
+              </ng-container>
+            </ngc-tab-card>
+          </ng-container>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="showForDnata">
+        <ngc-tabs [width]="800" [height]="200" formArrayName="FlightDetailsDnataFormArray"
+          [activeIndex]="mssDashboardFormResponse.getList('FlightDetailsDnataFormArray').length - 1"
+          (select)="releaseEvent($event)" (close)="onCloseDnata($event)">
+          <ng-container
+            *ngFor="let item of mssDashboardFormResponse.controls.FlightDetailsDnataFormArray.controls; let i=index">
+            <ngc-tab-card *ngIf="i == 0" title="dashboard.dashboard" [formGroupName]="i">
+              <ngc-datatable #MssDashboadViewTable [pageable]="true" [pageSize]="10"
+                formArrayName="responseForDNATAMssDashboard" [showToolbar]="false" [showPrint]="false" [showXLS]="false"
+                [showPDF]="false" [showCSV]="false" (linkClick)="onLinkClickDnata($event, i)">
+                <ngc-data-column text="g.flight" align="center" dataField="flightKey" [width]="100" type="link"
+                  cellsAlign="center">
+                </ngc-data-column>
+                <ngc-data-column text="g.date" align="center" dataField="flightDate" type="displayDate" [width]="100"
+                  cellsAlign="center">
+                </ngc-data-column>
+                <ngc-data-column text="flight.std" align="center" dataField="dateATD" type="displayTime" [width]="100"
+                  cellsAlign="center">
+                </ngc-data-column>
+                <ngc-data-column text="dashboard.truck.doc" dataField="truckDocColorCode" [width]="80" type="icon"
+                  align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                <ngc-data-column text="dashboard.in.feed" dataField="infeedColorCode" dataType="text" [width]="80"
+                  type="icon" align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                <ngc-data-column text="dashboard.released.dnata" dataField="releaseToDnata" [width]="80" type="icon"
+                  align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-tab-card>
+            <ngc-tab-card *ngIf="i > 0" [title]="item.get('title').value" [formGroupName]="i" [closable]='true'>
+              <ng-container>
+                <ngc-datatable formArrayName="flightDetailDNATAArray" [pageSize]="10" #releasedtable [attr.id]="i"
+                  [showToolbar]="false" [showPrint]="false" [showXLS]="false" [showPDF]="false" [showCSV]="false">
+                  <ngc-data-column text="mailbag.dispatch" dataField="dispatch" [width]="100" type="text"
+                    cellsAlign="center" value="true" true-color="grey" align="center"></ngc-data-column>
+                  <ngc-data-column text="g.origin" dataField="ori" [width]="100" type="text" cellsAlign="center"
+                    value="true" align="center"></ngc-data-column>
+                  <ngc-data-column text="g.destination" dataField="destination" [width]="100" type="displayDate"
+                    cellsAlign="center" value="true" align="center"></ngc-data-column>
+                  <ngc-data-column text="g.pieces" dataField="Piece" type="displayPieces" [width]="100" align="center"
+                    cellsAlign="right"></ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.ipsaa" dataField="ipsAA" [width]="80" type="icon" align="center"
+                    cellsAlign="center"></ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.rfdtaa" dataField="rfdtAA" dataType="text" [width]="80"
+                    type="icon" align="center" cellsAlign="center"></ngc-data-column>
+                  <ngc-data-column text="mss.dashboard.ta" dataField="ta" dataType="text" [width]="80" type="icon"
+                    align="center" cellsAlign="center"></ngc-data-column>
+                  <ngc-data-row-childs>
+                    <ngc-data-row-child
+                      *ngFor="let sitem of item.controls.flightDetailDNATAArray.controls; let index=index"
+                      [formGroupName]="index" [row]="index">
+                      <ngc-datatable formArrayName="mailBagDetails" [pageable]="true" [pageSize]="10">
+                        <ngc-data-column text="mailbag.rsn" dataField="receptableNumber" [width]="100" type="text"
+                          cellsAlign="center" value="true" align="center"></ngc-data-column>
+                        <ngc-data-column text="mailbag.mail.tag" dataField="mailBagNumber" [width]="100"
+                          type="displayDate" cellsAlign="center" value="true" align="center"></ngc-data-column>
+                        <ngc-data-column text="mss.dashboard.ipsaa" dataField="ipsColor" [width]="80" type="icon"
+                          align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+                        <ngc-data-column text="mss.dashboard.rfdtaa" dataField="rfdtColor" dataType="text" [width]="80"
+                          type="icon" align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer">
+                        </ngc-data-column>
+                        <ngc-data-column text="mss.dashboard.ta" dataField="taColor" dataType="text" [width]="80"
+                          type="icon" align="center" cellsAlign="center" [cellsRenderer]="cellsRenderer">
+                        </ngc-data-column>
+                      </ngc-datatable>
+                    </ngc-data-row-child>
+                  </ngc-data-row-childs>
+                </ngc-datatable>
+              </ng-container>
+            </ngc-tab-card>
+          </ng-container>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>

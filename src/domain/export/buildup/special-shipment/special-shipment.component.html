@@ -1,0 +1,218 @@
+<ngc-titlebar type="header" title="export.display.special.shipment.list.title" (print)="onPrint()">
+</ngc-titlebar>
+<form [formGroup]="specialShipmentSearchFormGroup">
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column column="2.5" [grid24]="true">
+        <ngc-label label='shp.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminalPoint" sourceId="WAREHOUSE_TERMINAL"
+            [width]="80" sourceType='query'></ngc-dropdownlist>
+
+        </div>
+      </ngc-column>
+      <ngc-column column="4" [grid24]="true">
+        <ngc-label value="export.flight.datetimefrom" [width]="40"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required formControlName="from" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="4" [grid24]="true">
+        <ngc-label value="export.flight.datetimeto" [width]="40"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required formControlName="to" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="4" [grid24]="true" entityAttribute="Flight.DomesticInternationalHandling">
+        <ngc-label label='dropdown.International.domestic'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="domIntl" sourceId="DomIntl$DomIntlDrop"
+            [autoSelect]="true" [width]="150"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label="coolport.carriergroup"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="CARRIER_GROUP" [noCache]="true"
+            sourceType="query" [width]="80"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" [grid24]="true">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrier" sourceId='CARRIER' title='export.airline'
+            displayMember="code" dataField='code' [width]="50" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="120"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label='export.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="80" maxlength="70" formControlName="flight"
+            [noCarrier]="true"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label='flight.segment'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="80" maxlength="3" formControlName="segment"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2.5" [grid24]="true">
+        <ngc-label value="val.shpType"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="80" formControlName="shipmentType"
+            sourceId="Shpmgmt$Special_Shipment_Type" [multiSelect]="true" [autoSelect]="true"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label value="export.excludeShc"></ngc-label>
+        <div>
+          <ngc-shcinput accessEnableOn="r" formControlName="excludeShc" [width]="70"></ngc-shcinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label value="exp.shc"></ngc-label>
+        <div>
+          <ngc-shcinput accessEnableOn="r" formControlName="shc" [width]="70"></ngc-shcinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2.5" [grid24]="true">
+        <ngc-label label="export.shc.group"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="shcGroup" sourceType='query'
+            sourceId='WH_SHC_HANDLING_GP' [width]="100" [dropDownWidth]='90'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" [grid24]="true">
+        <ngc-label label="export.transfer.types"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='SPECIALSHIPMENTTRANSFERTYPES' sourceType='query'
+            formControlName="transferType" [width]="140" [noCache]="true" [multiSelect]="true"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" [grid24]="true">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column *ngIf="searchFlag">
+        <ngc-edittable formArrayName="shipment" [pageSize]="10"
+          (linkClick)="openMaintainHAWBList($event,houseWayBillList)">
+          <ngc-data-column [disabled]="false" type="check" text="Sel" dataField="select" align="left" cellsAlign="left" [width]="7">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox accessEnableOn="r" [formControlName]='name'></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" dataField="sno" [width]="10" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="10"></ngc-data-column>
+          <ngc-data-column text="import.handling.mode.br" [width]="1" feature="Imp.Bd.HAWBHandling">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display
+                  *ngIf="this.specialShipmentSearchFormGroup.getRawValue().shipment[group].handlingMode ==='M'"
+                  formControlName="handlingMode" style="margin-left: 7px"></ngc-display> 
+                <ngc-link *ngIf="this.specialShipmentSearchFormGroup.getRawValue().shipment[group].handlingMode ==='H'"
+                  formControlName="handlingMode"
+                  (linkClick)="openMaintainHAWBList(this.specialShipmentSearchFormGroup.getRawValue().shipment[group],houseWayBillList)">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="special.shipment.part.suffix" dataField="partSuffix" [width]="15" cellsAlign="center"
+            align="center" feature="Exp.PartSuffix">
+          </ngc-data-column>
+          <ngc-data-column text="org" dataField="origin" [width]="65"></ngc-data-column>
+          <ngc-data-column text="des" dataField="destination" [width]="65"></ngc-data-column>
+          <ngc-data-column text="g.pieces" dataField="awbPieces" [width]="65" cellsAlign="right" type="displayPieces">
+          </ngc-data-column>
+          <ngc-data-column text="shp.weight" dataField="awbWeight" [width]="90" cellsAlign="right" type="displayWeight">
+          </ngc-data-column>
+          <ngc-data-column text="export.shc" dataField="shipmentShc" [width]='250'></ngc-data-column>
+          <ngc-data-column text="awb.natureofgoods" dataField="natureOfGoodsDescription" [width]="175"
+            cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="special.shipment.location.info" dataField="locationInfo" [width]="150"
+            cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="special.shipment.loaded" dataField="loaded" [width]="50" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="special.shipment.incoming" align="center" name="1" [width]="420">
+            <ngc-data-column text="export.flight" dataField="flight" [width]="90"></ngc-data-column>
+            <ngc-data-column text="special.shipment.sta.eta.br.ata" dataField="sta" [width]="120">
+            </ngc-data-column>
+            <ngc-data-column text="shp.pieces" dataField="pieces" [width]="60" cellsAlign="right"></ngc-data-column>
+            <ngc-data-column text="g.weight" dataField="weight" [width]="80" type="displayWeight" cellsAlign="right">
+            </ngc-data-column>
+            <ngc-data-column text="special.shipment.seg" dataField="incomingSegment" [width]="60" cellsAlign="right">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="export.outgoing" align="center" name="2" [width]="420">
+            <ngc-data-column text="export.flight" dataField="outgoingFlight" [width]="80"></ngc-data-column>
+            <ngc-data-column text="special.shipment.atd.etd.br.std" dataField="std" [width]="120"></ngc-data-column>
+            <ngc-data-column text="special.shipment.booking.status" dataField="bookingStatusCode" [width]="60">
+            </ngc-data-column>
+            <ngc-data-column text="shp.pieces" dataField="outgoingPieces" [width]="60" cellsAlign="right"
+              type="displayPieces"></ngc-data-column>
+            <ngc-data-column text="g.weight" dataField="outgoingWeight" [width]="80" cellsAlign="right"
+              type="displayWeight"></ngc-data-column>
+            <ngc-data-column text="special.shipment.seg" dataField="outgoingSegment" [width]="60" cellsAlign="right">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="special.readyToLoad" dataField="readyToLoad" [width]="50" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="special.transferTpe" dataField="transferType" [width]="60"></ngc-data-column>
+          <ngc-data-column text="special.dwellTime" dataField="dwellTime" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.rfid" dataField="rfid"></ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report format='xls' #reportWindow title="g.report"  reportId='display_special_shipment_list_CR'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+</form>
+
+<ng-template #houseWayBillList>
+  <ngc-container *ngIf="!isClosePopupScreen">
+    <ngc-row>
+      <ngc-column>
+        <maintain-house-way-bill-list [shipmentNumberData]="shipmentNumberData"
+          (autoSearchShipmentInfo)="autoSearchShipmentInfo()" [showAsPopup]="true">
+        </maintain-house-way-bill-list>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+<!-- Parent Window -->
+<ngc-window #parentWindow [title]="title" [width]="popUpWidth" [height]="popUpHeight" (close)="closePopScreen()">
+  <ng-container *ngTemplateOutlet="templateRef;"></ng-container>
+</ngc-window>
+
+
+<ngc-footer>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-row>
+          <ngc-column align="left">
+            <ngc-button accessEnableOn="r" value="1shipmentInformation.tracing" (click)="openShipmentInfoPage($event)"></ngc-button>
+          </ngc-column>
+          <ngc-column [column]="1">
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-footer>

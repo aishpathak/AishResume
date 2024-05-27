@@ -1,0 +1,126 @@
+<form [formGroup]='form'>
+  <ngc-titlebar title='admin.title.maintain.sub.user.profile.list' (save)='onSave($event)' (cancel)="onBack($event)"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="2">
+
+        <ngc-label label="agent.companyCode"></ngc-label>
+        <div>
+          <ngc-lov formControlName="customerCode" (select)='onCompanyLOVSelect($event)' sourceId="COMPANY_DEREGISTER"
+            title="agent.companyCode" [width]="120" dataField="code" valueMember="code" required accessEnableOn="r">
+            <ngc-data-column text="g.companyCode" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.companyName" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="5">
+
+        <ngc-label label="agent.comapanyName"></ngc-label>
+        <div>
+          <!--<ngc-input formControlName="customerShortName" [width]="500" upperCase="true"></ngc-input>-->
+          <ngc-lov formControlName="customerShortName" (select)='onCompanyNameLOVSelect($event)'
+            sourceId="COMPANY_DEREGISTER_NAME" title="agent.companyCode" [width]="500" dataField='desc'
+            valueMember='desc' accessEnableOn="r">
+            <ngc-data-column text="g.companyName" dataField="desc" [width]="150"></ngc-data-column>
+            <ngc-data-column text="g.companyCode" dataField="code" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button label="g.search" iconType="search" (click)='searchSubUserProfile($event)' accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="profileListFlag">
+    <!--<ngc-container type="tab">-->
+    <ngc-row>
+      <ngc-column>
+
+        <ngc-edittable #mainTable formArrayName="profileListArray" [pageSize]="10">
+          <ngc-data-column text="admin.loginid" dataField="userLoginCode" [width]="30" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="user.userName" dataField="userShortName" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <!--<ngc-data-column text="g.companyCode" dataField="customerCode" [width]="50" align="center" cellsAlign="center"></ngc-data-column>-->
+          <ngc-data-column text="admin.suspended" dataField="suspendFlag" cellsAlign="center" align="center" [width]="20"
+            type="icon" iconType="yesno"></ngc-data-column>
+          <ngc-data-column text="admin.suspend.reason" dataField="reason" [width]="50" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="admin.user.pwd.create.change" type="displayDate" dataField="userPasswordChangeDate"
+            [width]="30" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="admin.admin.user" dataField="adminFlag" cellsAlign="center" align="center" [width]="20"
+            type="icon" iconType="yesno"></ngc-data-column>
+
+          <ngc-data-row>
+            <ng-template let-parentgroup>
+              <ng-container [formGroupName]="parentgroup" title="">
+                <ng-container>
+                  <ngc-edittable formArrayName="moduleList" [pageable]="false" [widthInPixels]="true">
+                    <ngc-data-column text="admin.module" dataField="moduleCodeDescription" cellsAlign="center" align="center"
+                      [width]="210"></ngc-data-column>
+
+                    <ngc-data-column text="admin.read" dataField="screenDisplayFlag" cellsAlign="center" align="center"
+                      [width]="230" type="icon" iconType="yesno"></ngc-data-column>
+                    <ngc-data-column text="admim.write" dataField="screenUpdateFlag" cellsAlign="center" align="center"
+                      [width]="260" type="icon" iconType="yesno"></ngc-data-column>
+                    <ngc-data-row>
+                      <ng-template let-childGroup>
+                        <ng-container [formGroupName]="childGroup" title="">
+                          <ng-container>
+                            <ngc-edittable formArrayName="screenList" height="70" [pageable]="false"
+                              [widthInPixels]="true">
+                              <ngc-data-column text="admin.screen.assigned" dataField="screenDescription" cellsAlign="center"
+                                align="center" [width]="215"></ngc-data-column>
+                              <ngc-data-column text="read" dataField="displayFlag" cellsAlign="center" align="center"
+                                [width]="230" type="icon" iconType="yesno"></ngc-data-column>
+
+                              <ngc-data-column text="write" dataField="updateFlag" [width]="10" cellsAlign="center">
+                                <ng-template let-name="name" let-group="group">
+                                  <ng-container [formGroupName]="group">
+
+                                    <ngc-icon
+                                      *ngIf="this.form.get(['profileListArray',parentgroup,'moduleList',childGroup,'screenUpdateFlag']).value === '1'"
+                                      formControlName="updateFlag" [width]="30" type="yesno">
+                                    </ngc-icon>
+                                    <ngc-icon
+                                      *ngIf="this.form.get(['profileListArray',parentgroup,'moduleList',childGroup,'screenUpdateFlag']).value === '0'"
+                                      [value]='false' [width]="30" type="yesno">
+                                    </ngc-icon>
+                                  </ng-container>
+                                </ng-template>
+                              </ngc-data-column>
+                            </ngc-edittable>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-row>
+                  </ngc-edittable>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-row>
+        </ngc-edittable>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="profileListFlag">
+    <!--<ngc-container type="tab">-->
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button label="g.export.to.excel" (click)='printsubuser($event)'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report format='xls' #reportWindow dataSource='transactional'  title="g.report"  reportId='Subuserprofile_cosys'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>

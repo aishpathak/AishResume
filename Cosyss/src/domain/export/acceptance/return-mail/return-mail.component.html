@@ -1,0 +1,426 @@
+<ngc-titlebar title='ReturnMail' (cancel)="onBack($event)" (save)="onSave()"></ngc-titlebar>
+<form [formGroup]="returnMailForm">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column="3" [grid36]="true">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrierCode" required sourceId="CARRIER" title="flight.carrier"
+            displayMember="code" dataField="code" [width]="60" [maxlength]="2">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="30"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" [grid36]="true">
+        <ngc-label label="shp.flight"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="flightNumber" [width]="100" [maxlength]="5"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" [grid36]="true">
+        <ngc-label label="flight.fromDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="fromDate" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" [grid36]="true">
+        <ngc-label label="flight.toDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="toDate" [min]='returnMailForm.controls.fromDate.value'
+            required>
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.reason"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="reason" sourceId="DROPDOWN_BKNG_CNCL_ALL_REASON"
+            sourceType='query' [width]="150"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="req.reason"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="returnReason" (select)="getDesc($event)"
+            sourceId="DROPDOWN_BKNG_CNCL_REASON_WITH_CODE" sourceType='query' [width]="200" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="shp.remarks"></ngc-label>
+        <div>
+          <ngc-input formControlName="remarks" [width]="500" [maxlength]="65"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs [width]="800" [height]="200">
+          <ngc-tab-card title="mb.mbname">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="0.5">
+                  <ngc-label label="export.bup"></ngc-label>
+                  <div>
+                    <ngc-checkbox formControlName="bup" cellsAlign="center" [width]="38"></ngc-checkbox>
+                  </div>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-label label="outhouse.bagnumber"></ngc-label>
+                  <ngc-input formControlName="houseNumber" upperCase="true" [width]="300" [maxlength]="29" required>
+                  </ngc-input>
+                </ngc-column>
+                <ngc-column column="2">
+                  <ngc-label label=""></ngc-label>
+                  <div>
+                    <ngc-button value="return.addMailBag" (click)="onAdd($event,index)" iconType="add"></ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="airmail.MailBagDetails">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="1">
+                  <div>
+                    <ngc-label label="export.bup"></ngc-label>
+                  </div>
+                  <ngc-checkbox formControlName="detailsBUP" (click)="changeRSNtoPieces()"></ngc-checkbox>
+                </ngc-column>
+                <ngc-column column="2">
+                  <ngc-label label="outhouse.originoe" verticalAlign="bottom"></ngc-label>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column column="3">
+                        <ngc-input formControlName="originOe1" upperCase="true" [width]="50"></ngc-input>
+                      </ngc-column>
+                      <ngc-column column="4">
+                        <ngc-lov formControlName="originOe2" (select)="getCountryCodeOrigin($event)" required
+                          sourceId="COUNTRY_AND_CITY" title="Origin" dataField="code" [width]="47" [maxlength]="3">
+                          <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column column="1"></ngc-column>
+                      <ngc-column column="2">
+                        <ngc-input formControlName="originOe3" required upperCase="true" [width]="50"></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column column="2">
+                  <ngc-label label="outhouse.destinationoe"></ngc-label>
+                  <div>
+                    <ngc-container>
+                      <ngc-row>
+                        <ngc-column column="3">
+                          <div>
+                            <ngc-input formControlName="destinationOe1" upperCase="true" [width]="50"></ngc-input>
+                          </div>
+                        </ngc-column>
+                        <ngc-column column="4">
+                          <div>
+                            <ngc-lov formControlName="destinationOe2" required
+                              (select)="getCountryCodeDestination($event)" sourceId="COUNTRY_AND_CITY"
+                              title="Destination" dataField="code" [width]="47" [maxlength]="3">
+                              <ngc-data-column text="flight.airportCode" dataField="code" [width]="30">
+                              </ngc-data-column>
+                            </ngc-lov>
+                          </div>
+                        </ngc-column>
+                        <ngc-column column="1"></ngc-column>
+                        <ngc-column column="2">
+                          <div>
+                            <ngc-input formControlName="destinationOe3" required upperCase="true" [width]="50">
+                            </ngc-input>
+                          </div>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </div>
+                </ngc-column>
+                <ngc-column column="7">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-label label="export.category"></ngc-label>
+                        <ngc-dropdownlist sourceId='Mail$MailCategory' [width]="80" formControlName="category">
+                        </ngc-dropdownlist>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="outhouse.mailtype"></ngc-label>
+                        <ngc-dropdownlist sourceId='MAIL_SUBTYPE' [width]="80" sourceType='query'
+                          formControlName="mailType"></ngc-dropdownlist>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="outhouse.year"></ngc-label>
+                        <div>
+                          <ngc-dropdownlist sourceId='MAIL_YEARS' [width]="80" sourceType='query'
+                            formControlName="year"></ngc-dropdownlist>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="outhouse.dsn"></ngc-label>
+                        <div>
+                          <ngc-maskedinput formControlName="dsn" (ngModelChange)="appendDispatchNumber()"
+                            upperCase="true" [width]="80" mask="####" required></ngc-maskedinput>
+                        </div>
+                      </ngc-column>
+                      <ngc-column *ngIf="!bupCheck">
+                        <ngc-label label="airmail.RSN"></ngc-label>
+                        <div>
+                          <ngc-maskedinput formControlName="rsn" (ngModelChange)="appendReceptacleNumber()"
+                            upperCase="true" [width]="80" mask="###" required></ngc-maskedinput>
+                        </div>
+                      </ngc-column>
+                      <ngc-column *ngIf="bupCheck">
+                        <ngc-label label="awb.pieces"></ngc-label>
+                        <div>
+                          <ngc-piecesinput formControlName="pieces" upperCase="true" [width]="80" mask="###" required>
+                          </ngc-piecesinput>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="outhouse.lastbag"></ngc-label>
+                        <div>
+                          <ngc-dropdownlist sourceId='Mail$MailLastBag' (select)="onLastBag($event)" [width]="80"
+                            formControlName="lastBag"></ngc-dropdownlist>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="outhouse.registermail"></ngc-label>
+                        <div>
+                          <ngc-dropdownlist sourceId='Mail$MailRegistered' (select)="onRegisteredBag($event)"
+                            [width]="80" formControlName="registerMail"></ngc-dropdownlist>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="shp.weight"></ngc-label>
+                        <div>
+                          <ngc-weightinput formControlName="weight" required></ngc-weightinput>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="11"></ngc-column>
+                <ngc-column column="1">
+                  <ngc-button value="return.addMailBagDetails" (click)="onMailbagAdd($event)" iconType="add">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTabs" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <ngc-tab-card title="airmail.ConfirmReturn">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label=""></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="sys.SNO"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="mb.dispatchno"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="outhouse.receptaclenumber"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="flight.origin"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="flight.destination"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="outhouse.mailtype"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="airmail.MailWeight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="airmail.ReturnReason"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="shp.remarks"></ngc-label>
+                        </th>
+                        <th *ngIf="false">
+                          <ngc-label label="MailBag"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="confirmReturnArray">
+                      <tr *ngFor="let item of returnMailForm.controls.confirmReturnArray.controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-display [width]="10" *ngIf="item.get('flagCRUD').value=='R'"></ngc-display>
+                          <ngc-checkbox formControlName="flagSave" *ngIf="item.get('flagCRUD').value=='C'">
+                          </ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-display value={{index+1}}></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="dispatchNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="receptacleNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="origin"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="destination"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="mailType"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="mailWeight"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="returnReason" displayMember="desc"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="remarks" [noWrap]='false'></ngc-display>
+                        </td>
+                        <td *ngIf="false">
+                          <ngc-display formControlName="mailBag" [noWrap]='true'></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-button value="return.print" (click)="onPrint()"></ngc-button>
+                </ngc-column>
+                <ngc-column align="right">
+                  <ngc-button value="return.delete" (click)="onDelete()"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="airmail.Pending">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button value="inward.finalize" [disabled]="addbutton" (click)="finalize($event)" iconType="add">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="&nbsp;"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="sys.SNO"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="mb.dispatchno"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="outhouse.receptaclenumber"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="flight.origin"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="flight.destination"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="outhouse.mailtype"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="airmail.MailWeight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="airmail.ReturnReason"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="shp.remarks"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="pendingReturnArray">
+                      <tr *ngFor="let item of returnMailForm.controls.pendingReturnArray.controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-checkbox formControlName="check"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-display value={{index+1}}></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="dispatchNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="receptacleNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="origin"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="destination"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="mailType"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="mailWeight"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <div>
+                            <ngc-dropdownlist formControlName="pendingReason"
+                              sourceId="DROPDOWN_BKNG_CNCL_REASON_WITH_CODE" [width]="100" sourceType='query' required>
+                            </ngc-dropdownlist>
+                          </div>
+                        </td>
+                        <td>
+                          <ngc-remarksinput [height]="25" [width]="600" formControlName="remarks" [maxlength]="65">
+                          </ngc-remarksinput>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='ReturnMail'  [reportParameters]='reportParameters'></ngc-report>
+</form>

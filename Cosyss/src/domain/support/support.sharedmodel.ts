@@ -1,0 +1,1 @@
+import { BaseRequest, BaseResponseData, BaseBO } from 'ngc-framework';

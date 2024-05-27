@@ -1,0 +1,503 @@
+<form [formGroup]="uldEnquireForm">
+  <!-- Title Bar -->
+  <ngc-titlebar *ngIf="!popup" (cancel)="onCancel($event)" title='uldbt'></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+
+      <ngc-column column="2">
+        <ngc-label value="uld.uld/trolley"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" (select)="uldTrolleySelect($event)" [source]="uldAndTrolley"
+            formControlName="uldTrolley" [noBlank]="true" [all]="false" [selectedIndex]="0" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="trolleyFlag">
+        <ngc-label value="uld.Trolley"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="trolley" (ngModelChange)="autoAppendZeros(item)" required>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="uldFlag">
+        <ngc-label value="uld.uld"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="uldTrolleyNumber" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1" *ngIf="releaseBtAfterFlightComplete">
+        <ngc-label value="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button formControlName="releaseBtButton" accessSectionId="Release BT" value="release.bt"
+            (click)="releaseBT()"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1" *ngIf="showData">
+        <ngc-label value="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="capture.in.out.movement" (click)="transferToCaptureInOutMvmnt()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row *ngIf="showData">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]="10">
+                <ngc-label value="uld.uld/trolley.number"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="warehouse.warehouse.location.br"></ngc-label>
+              </th>
+              <!--Warehouse Destination-->
+              <th feature="Uld.DisplayUldBt.WarehouseDestination">
+                <ngc-label value="uld.wh_Dest"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.shc"></ngc-label>
+              </th>
+              <!--Temperature-->
+              <th feature="Uld.DisplayUldBt.Temperature">
+                <ngc-label value="si.temp"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.airport.position.br"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.used.by"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.condition.type.br"></ngc-label>
+              </th>
+              <!--Surplus to Damaged remark-->
+              <th feature="Uld.DisplayUldBt.Surplus">
+                <ngc-label value="export.uld.details.surplus">
+                </ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.Status">
+                <ngc-label value="uld.status"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.Reserved">
+                <ngc-label value="uld.reserved"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.MaintainEic">
+                <ngc-label value="uld.eic"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.EirNumber">
+                <ngc-label value="EIR Number"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.AgentName">
+                <ngc-label value="g.agentName"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.GrossWeight">
+                <ngc-label value="gross_Wgt"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.MhsWeight">
+                <ngc-label value="mhs.weight.br"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.GeneralRemarks">
+                <ngc-label value="awb.generalremarks"></ngc-label>
+              </th>
+              <th feature="Uld.DisplayUldBt.DamagedRemarks">
+                <ngc-label value="import.damage.remark.ramp">
+                </ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.available.to.use"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.photo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="uld.history"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td *ngIf="trolleyFlag">
+                <ngc-display formControlName="trolley"></ngc-display>
+                <ngc-display formControlName="uldTrolleyNumber" [hidden]="true"></ngc-display>
+              </td>
+              <td *ngIf="uldFlag">
+                <ngc-display formControlName="uldTrolleyNumber"></ngc-display>
+                <ngc-photopreview entityType="ULD" [entityKey]="this.uldEnquireForm.get('uldTrolleyNumber').value"
+                  [showOnEmpty]="false" stage="INBOUND_RAMP_CHECK_IN">
+                </ngc-photopreview>
+              </td>
+              <td>
+                <ngc-display formControlName="wareHouseLocation"></ngc-display>
+              </td>
+              <!--Warehouse Destination - Table data-->
+              <td align="center" feature="Uld.DisplayUldBt.WarehouseDestination">
+                <ngc-display formControlName="warehouseDestination"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="shc"></ngc-display>
+              </td>
+              <!--Temp - Table data -->
+              <td align="center" feature="Uld.DisplayUldBt.Temperature">
+                <ngc-display formControlName="temperature"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="airportPosition"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="usedBy"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="conditionType"></ngc-display>
+              </td>
+              <!--Surplus to Damaged remark - Table data -->
+              <td align="center" feature="Uld.DisplayUldBt.Surplus">
+                <ngc-display formControlName="surplus"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.Status">
+                <ngc-display formControlName="confirmed"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.Reserved">
+                <ngc-display formControlName="reserved"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.MaintainEic">
+                <ngc-link formControlName="eic" (linkClick)="maintainEic()"></ngc-link>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.EirNumber">
+                <ngc-link formControlName="equipmentRequestNumber" (linkClick)="viewEir()"></ngc-link>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.AgentName">
+                <ngc-display formControlName="agentName"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.GrossWeight">
+                <ngc-display formControlName="uldGrossWeight"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.MhsWeight">
+                <ngc-display formControlName="mhsWeight"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.GeneralRemarks">
+                <ngc-display formControlName="generalRemarks"></ngc-display>
+              </td>
+              <td align="center" feature="Uld.DisplayUldBt.DamagedRemarks">
+                <ngc-display formControlName="damageRemarks"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="availableToUse"></ngc-display>
+              </td>
+              <td>
+                <div class='text-center'>
+                  <ngc-shape formControlName="photo" type="circle" textColor="white" bgColor="gray" [width]="22"
+                    [height]="22" (click)="openPhotoPopUp()">
+                  </ngc-shape>
+                </div>
+              </td>
+              <td>
+                <ngc-link (linkClick)="goToAuditTrail($event)" iconType="edit"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="tab" type="sectiontop" *ngIf="showData">
+          <ngc-row>
+            <ngc-column column="5">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label value="uld.flight.details"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row formGroupName="assignedFlight">
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label value="g.flight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="g.date"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.status"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.std"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.Segment"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.content.type"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ngc-display formControlName="flightKey"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightStatus"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" [onlyTime]="true"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="segment"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="contactType"></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+            <ngc-column column="1"></ngc-column>
+            <ngc-column column="6">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label value="uld.loaded/stored.shipment"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row formGroupName="loadedShipment">
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label value="uld.shipment/dn"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.total.pieces"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.total.weight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.maximum.weight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label value="uld.available.weight"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ngc-display formControlName="totalShipment"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-piecesdisplay formControlName="totalPieces"></ngc-piecesdisplay>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="totalWeight"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="maximumWeight"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="availableWeight"></ngc-weightdisplay>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="tab" type="sectiontop" *ngIf="showData">
+          <ngc-row>
+            <ngc-column>
+              <ngc-display value="&nbsp;"></ngc-display>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="5">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label value="uld.list.Of.shipment/dn.loaded"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="shipmentList" [height]="200">
+                    <ngc-data-column text="" [width]="10" dataField="check">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox text="" [width]="10"  formControlName="check"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='awb.awbnumber' dataField="shipmentNumber" [width]="80"></ngc-data-column>
+                    <ngc-data-column text='uld.origin' dataField="origin" [width]="30"></ngc-data-column>
+                    <ngc-data-column text='uld.destination' dataField="destination" [width]="30"></ngc-data-column>
+                    <ngc-data-column text='uld.pieces' dataField="pieces" [width]="30" type="displayPieces"
+                      cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text='uld.weight' dataField="weight" [width]="30" type="displayWeight"
+                      cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text='g.date' dataField="date" [width]="30" type="displayDate"></ngc-data-column>
+                    <ngc-data-column text='uld.shc' dataField="loadedShc" [width]="30"></ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+            <ngc-column column="1"></ngc-column>
+            <ngc-column column="6">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label value="uld.list.Of.shipment/dn.stored"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="storedShipmentList" [height]="200">
+                    <ngc-data-column text="" [width]="10" dataField="check">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox text="" [width]="10"  formControlName="check"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='awb.awbnumber' dataField="shipmentNumber" [width]="80"></ngc-data-column>
+                    <ngc-data-column feature="Imp.Bd.HAWBHandling" text='g.hawb.number' dataField="hawbNumber"
+                      [width]="80"></ngc-data-column>
+                    <ngc-data-column text='uld.origin' dataField="origin" [width]="30"></ngc-data-column>
+                    <ngc-data-column text='uld.destination' dataField="destination" [width]="30"></ngc-data-column>
+                    <ngc-data-column text='uld.pieces' dataField="pieces" [width]="30" type="displayPieces"
+                      cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text='uld.weight' dataField="weight" [width]="30" type="displayWeight"
+                      cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text='g.date' dataField="date" [width]="30" type="displayDate"></ngc-data-column>
+                    <ngc-data-column text='uld.shc' dataField="loadedShc" [width]="30"></ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showMovementData" type="tab" feature="Uld.DisplayUldBt.MovementHistorySection">
+    <ngc-row>
+      <ngc-column>
+        <ngc-display value="&nbsp;"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="uld.movements"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="movements" [pageable]=false [showToolbar]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text='g.date' dataField="movementDateTime" [width]="30" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text='uld.movementl.type' dataField="movementType" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.movement.description' dataField="movementDescription" [width]="70">
+          </ngc-data-column>
+          <ngc-data-column text='g.flight' dataField="flightKey" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.flightdate' dataField="flightDate" [width]="30" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text='uld.segments' dataField="segments" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.agent' dataField="agent" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.condition.type' dataField="conditionType" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.content.code.br' dataField="contentCode" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.airport.position.br' dataField="airportPosition" [width]="50"></ngc-data-column>
+          <ngc-data-column text='uld.used.by' dataField="usedBy" [width]="30"></ngc-data-column>
+          <ngc-data-column text='uld.remarks' dataField="remarks" [width]="90"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-footer [height]='50' *ngIf="!popup">
+  <ngc-row>
+    <ngc-column>
+      <ngc-button accessEnableOn="r" *ngIf="transferShipmentLocation" value="shp.loc"
+        (click)="transferToShipmentLocation()"></ngc-button>
+      <ngc-button accessEnableOn="r" *ngIf="transferAssignUld" value="assign.uld" (click)="transferToAssignUld()">
+      </ngc-button>
+      <!-- Button to open ULD Movement History -->
+      <ngc-button accessEnableOn="r" *ngIf="showData" feature="Uld.DisplayUldBt.MovementHistoryButton"
+        value="movement.history" (click)="movementHistory()">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>
+
+<ngc-window #openUploadPhotoPopup title="DG.ViewPhoto" [width]="900" [height]="600" style="top:170px !important;"
+  [showCloseButton]="true">
+  <form [formGroup]="imageViewForm">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-image formControlName="documentName" style="align-self: center;" [width]="800" [height]="500">
+            </ngc-image>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </form>
+</ngc-window>
+
+<!-- Parent Window -->
+<ngc-window #parentWindow *ngIf="uldFlag" [width]="popUpWidth" [height]="popUpHeight" (close)="closePopScreen()">
+  <ng-container *ngTemplateOutlet="templateRef;"></ng-container>
+</ngc-window>
+
+<!--Movement History Pop up -->
+<ngc-window #movementHistoryPopUp [width]="1500" [height]="500" title="uld.movement.history"
+  (close)="closeWindow($event)">
+  <ng-container *ngIf="showWindow && uldMovementHistoryObject">
+    <app-uld-movement-history [uldMovementHistoryObject]="uldMovementHistoryObject" [showAsPopup]="true"
+      (responseObject)="closeWindow($event)">
+    </app-uld-movement-history>
+  </ng-container>
+</ngc-window>
+
+<!--Maintain EIC -->
+<ngc-window #mainatainEicPopUp [width]="1500" [height]="500" title="Maintain.EIC" (close)="maintainEicResponse($event)">
+  <app-maintain-eic [showAsPopup]="true" *ngIf="showWindow">
+  </app-maintain-eic>
+</ngc-window>
+
+<!--EIR Pop Up-->
+<ngc-window #eirWindow [width]="1500" [height]="500" title="EIR">
+  <app-maintain-equipment-request-by-uld-details [editViewSplitWindowObject]="editViewSplitWindowObject"
+    [showAsPopup]="true" [inputData]="inputData" (autoSearchAccessoryInfo)="autoSearchAccessoryInfo()"
+    *ngIf="showWindow">
+  </app-maintain-equipment-request-by-uld-details>
+</ngc-window>
+
+<ngc-window #capturePhoto [width]="1500" [height]="500"
+  *ngIf="photoCaptured && this.uldEnquireForm.get('uldTrolleyNumber').value && showData">
+  <capturephoto [shipmentNumberData]="this.uldEnquireForm.get('uldTrolleyNumber').value" shipmentTypeData="ULD"
+    [showAsPopup]="true">
+  </capturephoto>
+</ngc-window>

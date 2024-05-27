@@ -1,0 +1,282 @@
+<form [formGroup]="maintainTruck">
+  <ngc-titlebar *ngIf="!popup" title="tcs.maintainDockAllocationAndTruckActivity" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ng-container formGroupName="search">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="1">
+          <ngc-label label="tcs.vehicleNo"></ngc-label>
+          <div>
+            <ngc-input [disabled]="(callerScreen == 'Tenant')" formControlName="vehicleNo" patternName="alphanum"
+              sourceCategory="dropdown" sourceType="query" sourceId="TCS_VEHICLES" [width]="100">
+            </ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column *ngIf="!(callerScreen == 'Tenant')" verticalAlign="bottom">
+          <ngc-button label="search" (click)="onSearch()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+  <ng-container *ngIf="searched" formGroupName="vehicleInfo">
+    <ngc-container title="tcs.vehicleInfo" type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="tcs.vehicleNo"></ngc-label>
+          <div>
+            <ngc-display formControlName="vehicleNo"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="tcs.companyName"></ngc-label>
+          <div>
+            <ngc-display formControlName="companyName">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="tcs.purpose"></ngc-label>
+          <div>
+            <ngc-display formControlName="purpose"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="tcs.dockNo"></ngc-label>
+          <div>
+            <ngc-display formControlName="dockNo"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="3">
+          <ngc-label label="tcs.banned"></ngc-label>
+          <div>
+            <ngc-icon type="yesno" [negative]="true" formControlName="banStatus"></ngc-icon>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label="tcs.outstandingAmount"></ngc-label>
+          <div>
+            <ngc-currencydisplay formControlName="outstandingAmount"></ngc-currencydisplay>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+
+  <ngc-container *ngIf="searched" type="tab" title="tcs.events">
+    <ngc-row>
+      <ngc-column [column]="10">
+        <ngc-datatable formArrayName="events" [pageable]="false">
+          <ngc-data-column text="tcs.eventTime" dataField="eventTime" type="displayDateTime" [width]="25"
+            accessEnableOn="r">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.eventName" dataField="eventName" [width]="40" accessEnableOn="r">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.eventInfo" dataField="eventInfo" [width]="60" accessEnableOn="r">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.source" dataField="source" [width]="25" accessEnableOn="r">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.staffId" dataField="staffId" [width]="25" accessEnableOn="r">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+  <ngc-window #createWindow title="tcs.createBanRecord" [width]="900" [height]="400">
+    <app-create-ban #createRecordScreen>
+    </app-create-ban>
+    <ngc-window-footer>
+      <ngc-container>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onCreateRecord(createRecordScreen, createWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(createWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <!-- Window -->
+
+  <ngc-window #assignWindow title="tcs.assignDock" [width]="800" [height]="400">
+    <app-assign-truck-dock #assignDockScreen [dockNo]="maintainTruck.get('vehicleInfo.dockNo').value"
+      [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value">
+    </app-assign-truck-dock>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onAssignDock(assignDockScreen, assignWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(assignWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #reserveWindow title="tcs.reserveDock" [width]="800" [height]="400">
+    <app-reserve-truck-dock-save #reserveDockScreen [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value">
+    </app-reserve-truck-dock-save>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onReserveDock(reserveDockScreen, reserveWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(reserveWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #connectingWindow title="tcs.connectingTruck" [width]="800" [height]="450">
+    <app-connecting-truck #connectingTruckScreen [dockNo]="maintainTruck.get('vehicleInfo.dockNo').value">
+    </app-connecting-truck>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onConnectTruck(connectingTruckScreen, connectingWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(connectingWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #activityLogWindow title="tcs.activityLog" [width]="1600" [height]="550"
+    (open)="onActivityOpen(activityHistoryScreen)">
+    <app-truck-activity #activityHistoryScreen [vehicleNo]="maintainTruck.get('search.vehicleNo').value">
+    </app-truck-activity>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.cancel" (click)="cancel(activityLogWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #updatePurposeWindow title="tcs.updatePurpose" [width]="800" [height]="370">
+    <app-add-queue #updatePurposeScreen [updatePurpose]="true"
+      [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value">
+    </app-add-queue>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onUpdatePurpose(updatePurposeScreen, updatePurposeWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(updatePurposeWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #addQueueWindow title="tcs.addVehicleToQueue" [width]="800" [height]="370">
+    <app-add-queue #addQueueScreen [updatePurpose]="false"
+      [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value">
+    </app-add-queue>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onAddToQueue(addQueueScreen, addQueueWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(addQueueWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #releaseWindow title="tcs.releaseDock" [width]="800" [height]="400">
+    <app-release-truck-dock #releaseDockScreen [dockNo]="maintainTruck.get('vehicleInfo.dockNo').value">
+    </app-release-truck-dock>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onReleaseDock(releaseDockScreen, releaseWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(releaseWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #banTruckWindow title="tcs.banTruck" [width]="800" [height]="400">
+    <app-create-ban #createRecordScreen [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value"></app-create-ban>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onCreateRecord(createRecordScreen,banTruckWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(banTruckWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #releaseBanWindow title="tcs.releaseBanRecord" [width]="600" [height]="300">
+    <app-release-ban #releaseRecordScreen [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value">
+    </app-release-ban>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onReleaseRecord(releaseRecordScreen, releaseBanWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="cancel(releaseBanWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #banHistoryWindow title="tcs.banHistory" [width]="1350" [height]="600">
+    <app-ban-history #historyScreen [vehicleNo]="maintainTruck.get('vehicleInfo.vehicleNo').value"
+      [companyId]="maintainTruck.get('vehicleInfo.companyName').value"
+      [outstandingAmount]="maintainTruck.get('vehicleInfo.outstandingAmount').value">
+    </app-ban-history>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.cancel" (click)="cancel(banHistoryWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-footer>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-button accessEnableOn="r" value="0.updatePurpose" *ngIf="searched" (click)="open(updatePurposeWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="1.addVehicleToQueue" *ngIf="searched"
+            [disabled]="(callerScreen == 'Tenant')" (click)="open(addQueueWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="2.assignDock" [disabled]="(callerScreen == 'Tenant')"
+            (click)="open(assignWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="3.releaseDock" [disabled]="(callerScreen == 'Tenant')"
+            (click)="open(releaseWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="4.connectingTruck" [disabled]="(callerScreen == 'Tenant')"
+            (click)="open(connectingWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="5.reserveDock" [disabled]="(callerScreen == 'Tenant')"
+            (click)="open(reserveWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="6.banTruck" (click)="open(banTruckWindow)"></ngc-button>
+          <ngc-button label="tcs.releaseBanTruck" *ngIf="searched && banned" (click)="open(releaseBanWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="7.banHistory" *ngIf="searched" (click)="open(banHistoryWindow)">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" value="8.activityLog" *ngIf="searched" (click)="open(activityLogWindow)">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-footer>
+</form>

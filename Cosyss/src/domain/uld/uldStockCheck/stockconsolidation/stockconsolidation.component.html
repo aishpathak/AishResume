@@ -1,0 +1,475 @@
+<form [formGroup]="uldstockconsolidationform">
+  <ngc-titlebar title="uld.stock.check.reconciliation" (save)="onSave()" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="uld.carrier"></ngc-label>
+        <div>
+          <ngc-lov required accessEnableOn="r" formControlName="carrierCode" upperCase="true" displayMember="code"
+             [dropDownWidth]='60' dataField="code" [width]="75" sourceId="CARRIER" (select)="onSelectCarrier($event)">
+            <ngc-data-column text="uld.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='uld.heldby'></ngc-label>
+        <div>
+          <ngc-dropdownlist
+            *ngIf="uldstockconsolidationform.get('carrierCode').value == 'SQ' && stockCheckForSQ == true"
+            accessEnableOn="r" sourceId="Uld_Location" [width]="100" [dropDownWidth]="100"
+            formControlName="apronCargoLocation" (select)="getHeldBy($event)" required></ngc-dropdownlist>
+
+          <ngc-dropdownlist
+            *ngIf="uldstockconsolidationform.get('carrierCode').value == 'SQ' && stockCheckForSQ == false"
+            accessEnableOn="r" sourceId="Uld_Areas$Uld_Location" [width]="100" [dropDownWidth]="100"
+            formControlName="apronCargoLocation" (select)="getHeldBy($event)" required></ngc-dropdownlist>
+
+          <ngc-dropdownlist *ngIf="uldstockconsolidationform.get('carrierCode').value != 'SQ'" accessEnableOn="r"
+            sourceId="Uld_Areas$Uld_Location" [width]="100" [dropDownWidth]="100" formControlName="apronCargoLocation"
+            (select)="getHeldBy($event)" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='uld.uld'></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName="uldKey"></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="uld.uld.type"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldType" displayMember="code" upperCase="true"
+            [dropDownWidth]='60' sourceId="ULDTYPE" title="uld.uld.type" dataField="code" [width]="50"
+            (select)="onSelectUldType($event)">
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch($event)" value="g.search" iconType="search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="6">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="buttonDisplay">
+        <ngc-label label="uld.reconcil"></ngc-label>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="4">
+              <ngc-button value="uld.stock.consolidation.button.cargo" [disabled]="isreconcileCargo"
+                (click)="reconcilCargo()"></ngc-button>
+              <div>
+                <ngc-display formControlName="reconcileCargoDateFC"></ngc-display>
+                <ngc-display [value]="reconcileCargoDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="reconcileCargoUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-button value="uld.stock.consolidation.button.apron" [disabled]="isreconcileApron"
+                (click)="reconcilApron()"></ngc-button>
+              <div>
+                <ngc-display formControlName="reconcileApronDateFC"></ngc-display>
+                <ngc-display [value]="reconcileApronDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="reconcileApronUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column *ngIf="buttonDisplay">
+        <ngc-label label="uld.complete"></ngc-label>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="4">
+              <ngc-button [disabled]="!isCompleteCargo || !isreconcileCargo"
+                value="uld.stock.consolidation.button.cargo3" (click)="completeCargo()">
+              </ngc-button>
+              <div>
+                <ngc-display formControlName="completeCargoDateFC"></ngc-display>
+                <ngc-display [value]="completeCargoDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="completeCargoUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-button [disabled]="!isCompleteApron || !isreconcileApron"
+                value="uld.stock.consolidation.button.apron4" (click)="completeApron()">
+              </ngc-button>
+              <div>
+                <ngc-display formControlName="completeApronDateFC"></ngc-display>
+                <ngc-display [value]="completeApronDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="completeApronUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column *ngIf="buttonDisplay">
+        <ngc-label label="uld.send.scm"></ngc-label>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column *ngIf="uldstockconsolidationform.get('carrierCode').value == 'SQ' && stockCheckForSQ == true">
+              <ngc-button [disabled]="!isCargo" value="uld.stock.consolidation.button.cargo5" (click)="scmCargo()">
+              </ngc-button>
+              <div>
+                <ngc-display formControlName="scmsendCargoDateFC"></ngc-display>
+                <ngc-display [value]="scmSendCargoDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="scmsendCargoUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="uldstockconsolidationform.get('carrierCode').value == 'SQ' && stockCheckForSQ == true">
+              <ngc-button [disabled]="!isApron" value="uld.stock.consolidation.button.apron6" (click)="scmApron()">
+              </ngc-button>
+              <div>
+                <ngc-display formControlName="scmsendApronDateFC"></ngc-display>
+                <ngc-display [value]="scmSendApronDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="scmsendApronUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+
+            <ngc-column *ngIf="uldstockconsolidationform.get('carrierCode').value == 'SQ' && stockCheckForSQ == false">
+
+              <ngc-button [disabled]="!isBothAvb" value="uld.stock.consolidation.button.both"
+                (click)="scmCargoApronBoth()">
+              </ngc-button>
+
+              <div>
+                <ngc-display formControlName="scmsendApronBothDateFC"></ngc-display>
+                <ngc-display [value]="scmSendApronDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="scmsendBothApronUserCode"></ngc-display>
+              </div>
+
+
+            </ngc-column>
+          </ngc-row>
+
+          <ngc-row>
+            <ngc-column *ngIf="uldstockconsolidationform.get('carrierCode').value != 'SQ'">
+              <ngc-button [disabled]="!isBothAvb" value="uld.stock.consolidation.button.both"
+                (click)="scmCargoApronBoth()"></ngc-button>
+              <div>
+                <ngc-display formControlName="scmsendApronBothDateFC"></ngc-display>
+                <ngc-display [value]="scmSendApronDate"></ngc-display>
+              </div>
+              <div>
+                <ngc-display [value]="scmsendBothApronUserCode"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column *ngIf="buttonDisplay">
+        <div>
+          <label value=""></label>
+        </div>
+        <ngc-button value="uld.restart.cycle" (click)="restartSCMCycle()"></ngc-button>
+      </ngc-column>
+      <ngc-column column="4" *ngIf="dataDisplay">
+        <ngc-container type="square">
+          <ngc-row>
+            <ngc-column align="center">
+              <strong>Total ULD</strong>
+            </ngc-column>
+            <ngc-column align="center">
+              <strong>Sighted</strong>
+            </ngc-column>
+            <ngc-column align="center">
+              <strong>Unsighted</strong>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="center">
+              <ngc-display [value]="noOfUlds"></ngc-display>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-display [value]="noOfSighted"></ngc-display>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-display [value]="noOfUnSighted"></ngc-display>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="dataDisplay" type="tab">
+    <ngc-row>
+      <ngc-column [column]="12">
+        <ngc-tabs (select)='onSelection($event)'>
+          <div ngc-tab-card title="uld.title.sighted" leftIconType="storage">
+            <ngc-container type="tab">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-edittable *ngIf="dataDisplay" formArrayName="sightedUldsList">
+                          <ngc-data-column text="uld.uldnumber" dataField="uldKey" [width]="100" align="left"
+                            cellsAlign="left"></ngc-data-column>
+                          <ngc-data-column text="uld.usedby" dataField="handlingCarrierCode" [width]="150" align="left"
+                            cellsAlign="left"></ngc-data-column>
+                          <ngc-data-column text="uld.stockcheckSource" dataField="stockCheckSource" [width]="100"
+                            align="left" cellsAlign="left"></ngc-data-column>
+                          <ngc-data-column text="uld.stockarea" dataField="stockCheckAreaCode" [width]="100"
+                            align="left" cellsAlign="left"></ngc-data-column>
+                          <ngc-data-column text="uld.conditiontype" dataField="conditionType" [width]="100" align="left"
+                            cellsAlign="left"></ngc-data-column>
+                          <ngc-data-column text="uld.damagedetails" [width]="150" align="left" cellsAlign="center">
+                            <ng-template let-data let-name="name" let-group="group">
+                              <ng-container [formGroupName]="group">
+                                <ngc-link (linkClick)="onLinkClick(group)" iconType="edit"></ngc-link>
+                              </ng-container>
+                            </ng-template>
+                          </ngc-data-column>
+                          <ngc-data-column text="uld.lastmovementtype" dataField="uldLastMovementType" [width]="200"
+                            align="left" cellsAlign="left"></ngc-data-column>
+                          <ngc-data-column text="uld.movementdetails" dataField="lastUpdatedDateTime" [width]="200"
+                            align="left" cellsAlign="left" type="displayDateTime"></ngc-data-column>
+                          <ngc-data-column text="uld.sightedon" dataField="sightedDate" [width]="150" align="center"
+                            cellsAlign="center" type="displayDateTime"></ngc-data-column>
+                        </ngc-edittable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title="uld.ics" *ngIf="iscDisplay">
+            <ngc-container type="tab">
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button value="uld.mark.as.sighted" (click)='markUldSight()'>
+                  </ngc-button>
+                  <ngc-button value="uld.import.ics.uld" [disabled]="isIcsList" (click)='fetchULDListFromICS($event)'>
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable *ngIf="isIcsList" formArrayName="icsUldsList">
+                    <ngc-data-column text="uld.select" [width]="70" type="check" align="center" cellsAlign="center">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="selectFlagIcs"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="uld.uldnumber" [width]="100" align="left" cellsAlign="left">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display formControlName="uldKey"></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="uld.stockcheckSource" dataField="stockCheckSource" [width]="100" align="left"
+                      cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="uld.condition" [width]="100" align="left" cellsAlign="left">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-dropdownlist sourceId="ULD$ULD_TRANSFER_CONDITION_TYP" [width]="103"
+                            [dropDownWidth]="103" formControlName="uldConditionType"></ngc-dropdownlist>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="uld.heldby" [width]="100" align="left" cellsAlign="left">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display formControlName="apronCargoLocation1"></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="uld.stockarea" [width]="100" align="left" cellsAlign="left">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-column
+                            *ngIf="uldstockconsolidationform.get(['icsUldsList', group, 'apronCargoLocation1']).value=='Cargo'">
+                            <ngc-dropdownlist [width]="100 " sourceId="Uld_Location$Cargo " [dropDownWidth]="98"
+                              formControlName="stockCheckAreaCode1"></ngc-dropdownlist>
+                          </ngc-column>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="uld.damagedetails" [width]="150 " align="left" cellsAlign="center">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-link (linkClick)="onLinkClick1(group)" iconType="edit"></ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="uld.lastmovementtype" dataField="uldStatus" [width]="200 " align="left"
+                      cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="uld.movementdetails" dataField="lastUpdatedDateTime" [width]="200"
+                      align="left" cellsAlign="left" type="displayDateTime">
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <!-- <div ngc-tab-card title="uld.oci" *ngIf="osiDisplay">
+            <ngc-container type="tab">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-osi></ngc-osi>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div> -->
+          <div ngc-tab-card title="uld.oci" *ngIf="osiDisplay">
+            <ngc-row>
+              <ngc-column>
+                <ngc-button value="g.add" (click)="onAddRow()" align="right"></ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label label=""></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="uld.remarks"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label=""></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="uldStockCheckOsiRemarks">
+                    <tr
+                      *ngFor="let subItem of uldstockconsolidationform.controls.uldStockCheckOsiRemarks.controls; let subIndex=index"
+                      [formGroupName]="subIndex">
+                      <td *ngIf="false">
+                        <ngc-display *ngIf="false" formControlName="transactionSeqNo"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-remarksinput formControlName="osiRemark" [width]="855" upperCase="true" [maxlength]="65">
+                        </ngc-remarksinput>
+                      </td>
+                      <td>
+                        <ngc-button value="uld.delete" (click)="onDeleteRow(subIndex)"></ngc-button>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </div>
+        </ngc-tabs>
+      </ngc-column>
+      <ngc-column>
+        <ngc-button [disabled]="true" *ngIf="selectTab===1" value="uld.markassighted">
+        </ngc-button>
+        <ngc-button [disabled]="true" *ngIf="selectTab===1" value="uld.importicsuld">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="uldstockconsolidationaddrowform ">
+  <ngc-window #insertionWindow [width]="1200" title="uld.add.sighted.uld" [showCloseButton]="true">
+    <ngc-container type="tab ">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="uld.uldnumber"></ngc-label>
+          <div>
+            <ngc-input sourceId="ULD_ULDKEY" displayMember="code" [width]="103 " minlength="9" maxlength="11"
+              upperCase="true" formControlName="uldnumber" required></ngc-input>
+          </div>
+        </ngc-column>
+
+        <ngc-column>
+          <ngc-label label="uld.heldby"></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="Uld_Location" [width]="100" (select)="getHeldByForConfirm($event)"
+              [dropDownWidth]="100" formControlName="heldByForSight" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column *ngIf="cargoFlagConfirm">
+          <ngc-label label='uld.stockarea'></ngc-label>
+          <div>
+            <ngc-dropdownlist [width]="100" sourceId="Uld_Location$Apron" [dropDownWidth]="98"
+              formControlName="stockArea" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column *ngIf="apronFlagConfirm">
+          <ngc-label label='uld.stockarea'></ngc-label>
+          <div>
+            <ngc-dropdownlist [width]="100" sourceId="Uld_Location$Cargo" [dropDownWidth]="98"
+              formControlName="stockArea" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+        <ngc-column *ngIf="!cargoFlagConfirm && !apronFlagConfirm">
+          <ngc-label label='uld.stockarea'></ngc-label>
+          <div>
+            <ngc-dropdownlist [width]="100" [dropDownWidth]="98"></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="uld.condition"></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="ULD$ULD_TRANSFER_CONDITION_TYP" [width]="103" [dropDownWidth]="103"
+              formControlName="condition" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="uld.lastmovementtype"></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="ULD$MOV_STS" [width]="110" [dropDownWidth]='110'
+              formControlName="lastmovementtype" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="uld.movementdetails"></ngc-label>
+          <div>
+            <ngc-datetimeinput required [showTimeButton]="true" formControlName="movementdetails"
+              [showCalendarButton]="true" required></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="uld.sightedon"></ngc-label>
+          <div>
+            <ngc-datetimeinput required [showTimeButton]="true" formControlName="sightedon" [showCalendarButton]="true"
+              required></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-label label=" "></ngc-label>
+          <div>
+            <ngc-button value="uld.save" iconType="save" (click)="saveSightedAddRow()"></ngc-button>
+            <ngc-button value="uld.cancel" (click)="cancelWindow() "></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

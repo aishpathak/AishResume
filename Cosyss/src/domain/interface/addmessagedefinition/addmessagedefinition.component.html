@@ -1,0 +1,504 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='set.up.message.defintion.add.title' (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)="onCancel()"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="1" *ngIf="carrierData">
+        <ngc-label label='g.carrier'></ngc-label>
+        <div>
+          {{carrierData}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="countryData">
+        <ngc-label label='g.country'></ngc-label>
+        <div>
+          {{countryData}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="sectorData">
+        <ngc-label label="g.sector"></ngc-label>
+        <div>
+          {{sectorData}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="flightKeyData">
+        <ngc-label label="flight.Flight"></ngc-label>
+        <div>
+          {{flightKeyData}}
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label='messaging.interface.system.name'></ngc-label>
+        <div>
+          <ngc-dropdownlist required formControlName="interfacingSystemId" sourceId="SELECT_INTERFACE_TYPES"
+            sourceType="query" (select)='setDesc($event)'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.message.type'></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="true" required formControlName='messageType' [width]='140' upperCase='true'
+            sourceId='KEY_MESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.message.type' dataField='desc'
+            displayMember="desc" (select)="onSelectMessageType($event)">
+            <ngc-data-column text='g.message.type' dataField='desc' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.sub.message.type' dataField='code' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='g.sub.message.type'></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="true" formControlName='subMessageType'
+            [filter]="{ 'messageTypeId': form.get('messageType').value }" [width]='140' upperCase='true'
+            sourceId='KEY_SUBMESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.sub.message.type' dataField='code'
+            valueMember='code' (select)="onSelectSubMessageType($event)">
+            <ngc-data-column text='g.sub.message.type' dataField='code' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.message.format'></ngc-label>
+        <div>
+          <ngc-dropdownlist required formControlName="messageFormat" (select)="onSelectMessageFormat($event)"
+            sourceId="Interface$Message.Format"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.message.header.format'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="messageHeaderFormat" sourceId="Interface$Header.Format"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.can.resend'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="canMessageBeReSent"></ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.version'></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="true" formControlName='messageVersion' [filter]="{'parameter3': messageTypeId }"
+            [width]='140' upperCase='true' sourceId='KEY_VERSIONS_FOR_CARGO_MESSAGING' title='messaging.message.version'
+            dataField='code' valueMember='code' required>
+            <ngc-data-column text='messaging.message.version' dataField='code' [width]='150' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='g.priority'></ngc-label>
+        <div>
+          <ngc-dropdownlist required formControlName="messagePriority" sourceId="Interface$Message.Priority"
+            displayMember="code"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="6">
+        <ngc-label label='messaging.event.type' width='30'></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="true" formControlName='eventType' required [width]='500' upperCase='true'
+            sourceId='KEY_EVENT_TYPES_FOR_CARGO_MESSAGING' title='messaging.event.type' dataField='code'
+            displayField='desc'>
+            <ngc-data-column text='g.code' dataField='code' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.fna.support'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="sendFNA"></ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.fma.support'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="sendFMA"></ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.channel.type' width='20'></ngc-label>
+        <div>
+          <ngc-input formControlName="channelType"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showMessageBySegment" column="3">
+        <ngc-label label='messaging.message.by.segment' width='20'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="sendMessageBySegment"></ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.sender.address' width='20'></ngc-label>
+        <div>
+          <ngc-input required formControlName="senderOriginatorAddress">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.double.signature' width='20'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="requiredDoubleSignature"></ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.message.order'></ngc-label>
+        <div>
+          <ngc-numberinput decimalDigits="0" digits="4" max="9999" groupSize="0" formControlName="messageOrder">
+          </ngc-numberinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.message.delay'></ngc-label>
+        <div>
+          <ngc-numberinput decimalDigits="0" digits="6" max="999999" groupSize="0" formControlName="messageDelay">
+          </ngc-numberinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='messaging.aircraft.body.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="aircraftBodyType" sourceId="Master$Mst_AircraftType"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3"
+        *ngIf="form.get('messageType').value === 'FSU' && form.get('subMessageType').value === 'DIS'">
+        <ngc-label label='messaging.irregularity.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="irregularityType" sourceId='KEY_CARGO_IRREGULARITIES_TYPE'
+            sourceType="query" [multiSelect]="true"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='g.effective.start.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput required formControlName="effectiveStartDate" showCalendarButton="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='g.effective.end.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="effectiveEndDate" showCalendarButton="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <div ngc-tab-card title='messaging.schedule.day.of.week'>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="8" align="right">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)="onAddSchedules()" value="g._add"></ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="8">
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="1"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="2"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="3"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="4"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="5"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="6"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="7"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.time"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.delete"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="scheduleDayOfWeek">
+                      <tr *ngFor="let item of form.controls.scheduleDayOfWeek.controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek1"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek2"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek3"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek4"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek5"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek6"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="dayOfWeek7"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-datetimeinput formControlName="scheduledTriggerTime" [showCalendarButton]="false"
+                            [showTimeButton]="true"></ngc-datetimeinput>
+                        </td>
+                        <td>
+                          <ngc-link iconType="delete" (click)="onDeleteSchedules(index)" [width]='20'></ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+
+          <div ngc-tab-card title='messaging.communication.type'>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="6" align="right">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)="onAddCommunication()" value="g._add"></ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="6">
+                  <ngc-table>
+                    <thead align="left">
+                      <tr>
+                        <th>
+                          <ngc-label label='g.type' [width]='20'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.email'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.delete'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="communicationAddress">
+                      <tr *ngFor="let item of form.controls.communicationAddress.controls let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-display value="g.mail" [i18n]="true"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-taginput required formControlName="address" [width]='400'></ngc-taginput>
+                        </td>
+                        <td>
+                          <ngc-link iconType="delete" (click)="onDeleteCommunication(index)" [width]='20'></ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+
+          <div ngc-tab-card title='messaging.telex.address'>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="4">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-label></ngc-label>
+                        <div>
+                          <ngc-button (click)="onAddTelexAddress()" value="g._add"></ngc-button>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <th>
+                              <ngc-label label='messaging.telex.address'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='messaging.blacklisted'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='g.delete'></ngc-label>
+                            </th>
+                          </thead>
+                          <tbody formArrayName="telexAddress">
+                            <tr *ngFor="let item of form.controls.telexAddress.controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-input required formControlName='address'></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-checkbox formControlName='blackListed'></ngc-checkbox>
+                              </td>
+                              <td>
+                                <ngc-link iconType="delete" (click)="onDeleteTelex(index)"></ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+
+          <div ngc-tab-card title='messaging.telex.address.group'>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="4">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-label></ngc-label>
+                        <div>
+                          <ngc-button (click)="onAddTelexAddressGroup()" value="g._add"></ngc-button>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <th>
+                              <ngc-label label='messaging.telex.address.group'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label=''></ngc-label>
+                            </th>
+                          </thead>
+                          <tbody formArrayName="telexAddressGroup">
+                            <tr *ngFor="let item of form.controls.telexAddressGroup.controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-dropdownlist required formControlName="telexAddressGroupId"
+                                  sourceId="KEY_SELECT_TELEX_ADDRESS" sourceType="query"></ngc-dropdownlist>
+                              </td>
+                              <td>
+                                <ngc-link iconType="delete" (click)="onDeleteTelexGroup(index)"></ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+
+          <div ngc-tab-card title='messaging.processing.parameters'>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="8">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-label></ngc-label>
+                        <div>
+                          <ngc-button (click)="onAddProcessingParameters()" value="g._add"></ngc-button>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <th>
+                              <ngc-label label='g.name'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='g.description'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='g.type'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='g.value'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='g.delete'></ngc-label>
+                            </th>
+                          </thead>
+                          <tbody formArrayName="processingParameters">
+                            <tr *ngFor="let item of form.controls.processingParameters.controls; let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-lov required [validOnly]="true" formControlName='name' [width]='140'
+                                  [filter]="{'parameter3': messageTypeId }" upperCase='true'
+                                  sourceId='KEY_PARAMETERS_FOR_CARGO_MESSAGING' title='messaging.processing.parameters'
+                                  dataField='code' (select)="onSelectName($event, index)" valueMember='code'>
+                                  <ngc-data-column text='g.code' dataField='code' [width]='150'></ngc-data-column>
+                                  <ngc-data-column text='g.description' dataField='desc' [width]='150'>
+                                  </ngc-data-column>
+                                </ngc-lov>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="description"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="type"></ngc-display>
+                              </td>
+                              <td>
+                                <ng-container
+                                  *ngIf="form.get(['processingParameters', index, 'type']).value === 'Text'">
+                                  <ngc-input formControlName="value"></ngc-input>
+                                </ng-container>
+                                <ng-container
+                                  *ngIf="form.get(['processingParameters', index, 'type']).value=== 'Boolean'">
+                                  <ngc-checkbox formControlName="valueType"
+                                    (ngModelChange)="onSelectValue($event , index)"></ngc-checkbox>
+                                </ng-container>
+                                <ng-container
+                                  *ngIf="form.get(['processingParameters', index, 'type']).value === 'Number'">
+                                  <ngc-numberinput decimalDigits="0" formControlName="value"></ngc-numberinput>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-link type="delete" iconType="delete" (click)="onDeleteParameters(index)">
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

@@ -1,0 +1,137 @@
+<ngc-titlebar title='title.billing.pd.account.ledger' (clear)="onClear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="pdAccountTransactionListForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="g.customerCode"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [noCache]="true" [width]='150' formControlName="agentCode"
+            sourceId="COMPANY_DEREGISTER" (select)="getCustomerIdByCode($event)" title="g.customer.list"
+            dataField='code' valueMember="code" [validOnly]='true' [width]="50">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="customerbilling.customername"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [noCache]="true" [width]='200' formControlName="agentName"
+            sourceId="CUSTOMER_LIST" (select)="getCustomerId($event)" title="g.customer.list" dataField='desc'
+            valueMember="desc" [validOnly]='true' [width]="50">
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="billing.pdAccount"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="paymentAccountNumber" [width]="150" sourceType="query"
+            sourceId="PD_ACCOUNT_BY_AGENT" [sourceParameters]="pdAccountParams">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="fromDate" [width]='150' [showCalendarButton]="true"
+            [showTimeButton]="true" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.toDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="toDate"
+            [min]="pdAccountTransactionListForm.controls.fromDate.value" [width]='150' [showCalendarButton]="true"
+            [showTimeButton]="true" required></ngc-datetimeinput>
+
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="billing.transaction.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="transactionType" [width]="150" sourceId="Billing$TransactionType">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <ngc-button accessEnableOn="r" style="float: right;" (click)="onPrint('xls')" value="export.excel"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="resultFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="pdAccountTransactionList" [pageSize]="20" width="1350" [showToolbar]="false"
+          [enablePageSizeHeight]="false" [columnsHeight]="60">
+          <ngc-data-column text="val.SNo" dataField="sNo" cellsAlign="left" align="center" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="billing.br.document.type" dataField="documentType" [width]="150" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.br.document.number" dataField="documentNumber" [width]="190"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.br.customer.code" dataField="customerCode" [width]="140" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.br.transaction.date" dataField="transactionDate" [width]="150"
+            type="displayDateTime" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.pdAccount" dataField="paymentAccountNumber" [width]="170" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="customer.transaction.type" dataField="transactionType" [width]="160"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remarks" [width]="190" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentNumber" dataField="shipmentNumber" [width]="230" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.hawb.number" dataField="houseNumber" [width]="195" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.freight.in.flight" dataField="flightKey" [width]="150" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.freight.in.date" dataField="flightDate" [width]="150" type="displayDateTime"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="customer.opening.balance" dataField="openingBalance" type="displayCurrency"
+            [width]="180" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.credit.debit.amount.without.tax" dataField="cdAmountWithOutTax"
+            type="displayCurrency" [width]="180" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Billing.TaxComp1" dataField="taxComp1" type="displayCurrency" [width]="160"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Billing.TaxComp2" dataField="taxComp2" type="displayCurrency" [width]="160"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Billing.TaxComp3" dataField="taxComp3" type="displayCurrency" [width]="160"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.credit.debit.amount.with.tax" dataField="cdAmountWithTax"
+            type="displayCurrency" [width]="180" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="customer.closing.balance" dataField="closingBalance" type="displayCurrency"
+            [width]="180" cellsAlign="center" align="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-report #reportWindow1 title="g.report" reportId='PdAccountLedger' [reportParameters]='reportParameters'>
+</ngc-report>

@@ -1,0 +1,235 @@
+<ngc-titlebar title='export.embargo.mail.title' (cancel)="onBack($event)" (save)="onSave($event)"></ngc-titlebar>
+
+<form [formGroup]='embargoMailForm'>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="5">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="mailbag.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="carriercode" sourceId='CARRIER' title='AIRLINE' dataField='code' [width]="80"
+                uppercase='true'>
+                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.dnNumber"></ngc-label>
+            <div>
+              <ngc-input accessEnableOn="r" [width]="120" formControlName="dnNumber" [maxlength]="4" [minlength]="4"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.origin"></ngc-label>
+            <div>
+              <ngc-input accessEnableOn="r" [width]="120" formControlName="origin"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.destination"></ngc-label>
+            <div>
+              <ngc-input accessEnableOn="r" [width]="120" formControlName="destination"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.bypass"></ngc-label>
+            <div>
+              <ngc-dropdownlist accessEnableOn="r" sourceId='Mail$MailLastBag' [width]="80" formControlName="byPass">
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+
+      <ngc-column column="7">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isTable" type="tab">
+    <ngc-row>
+      <ngc-column align="left">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="export.embargo.mail.bypass.all"></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="1">
+            <div>
+              <ngc-label label="mailbag.bypass"></ngc-label>
+            </div>
+            <ngc-checkbox formControlName="bypassAll" (click)="byPassAllSelectedBags()"></ngc-checkbox>
+          </ngc-column>
+          <ngc-column column="4">
+            <div>
+              <ngc-label label="mailbag.reason"></ngc-label>
+            </div>
+            <ngc-combobox [width]="250" formControlName="reasonForAll" sourceId='REASON_FOR_EMBARGO'  sourceType='query'
+              valueMember="desc" [maxlength]="65"></ngc-combobox>
+          </ngc-column>
+          <ngc-column column="3">
+            <div>
+              <ngc-label label="mailbag.remarks"></ngc-label>
+            </div>
+            <ngc-input formControlName="remarksForAll"></ngc-input>
+          </ngc-column>
+
+        </ngc-row>
+       
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button value="embargo.setup" (click)="onEmbargoSetup()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-accordion [height]="400" formArrayName="embargoMailFormArray">
+          <ngc-accordion-card
+            *ngFor="let item of embargoMailForm.controls.embargoMailFormArray.controls let index=index"
+            [formGroupName]="index" accessEnableOn="r">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column column="1">
+                    <ngc-label label=""></ngc-label>
+                    <ngc-checkbox formControlName="checkAll" (click)="checkUncheckAllBox(item,index)"></ngc-checkbox>
+                  </ngc-column>
+                  <ngc-column column="3">
+                    <ngc-label label="export.embargo.mail.dispatch.series"></ngc-label>
+                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label label="export.embargo.mail.incoming.carrier"></ngc-label>
+                    <ngc-display formControlName="carriercode"></ngc-display>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label label="export.embargo.mail.total.pieces"></ngc-label>
+                    <ngc-piecesdisplay formControlName="totalPieces"></ngc-piecesdisplay>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <ngc-label label="export.embargo.mail.weight"></ngc-label>
+                    <ngc-weightdisplay formControlName="totalWeight"></ngc-weightdisplay>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+
+            </ngc-accordion-titlebar>
+            <ngc-container type="tab">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label=''></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.bag.number'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.next.destination'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.dn.number'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.receptacle.number'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.origin'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.destination'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.bypass'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.reason'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.registered'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.damaged'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.remarks'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="responseEmabargoMailDetail">
+                      <tr *ngFor="let subItem of item.controls.responseEmabargoMailDetail.controls let subIndex = index"
+                        [formGroupName]="subIndex">
+                        <td>
+                          <ngc-checkbox formControlName="checkIndivisual" [width]="250"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="mailBagNumber" [width]="250"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="nextDestination"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="dispatch"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="receptacleNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="origin"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="destination"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                        </td>
+                        <td align="center">
+                          <ngc-icon type="complete" *ngIf="subItem.get('bypass').value" formControlName="bypass">
+                          </ngc-icon>
+                          <ngc-checkbox *ngIf="!subItem.get('bypass').value" formControlName="bypass"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-combobox [width]="250" formControlName="reasonForUplift" sourceId='REASON_FOR_EMBARGO'
+                             sourceType='query' valueMember="desc" required [maxlength]="65"></ngc-combobox>
+                          <!--<ngc-input formControlName="reasonForUplift" required></ngc-input>-->
+                        </td>
+                        <td>
+                          <ngc-display formControlName="registered"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-icon type="complete" formControlName="damaged"></ngc-icon>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="remarks" [maxlength]="65"></ngc-input>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

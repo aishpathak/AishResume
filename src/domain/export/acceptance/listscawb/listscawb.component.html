@@ -1,0 +1,178 @@
+<ngc-titlebar title="exp.scAwbList" (save)="onSave($event)" (clear)="onClear($event)"></ngc-titlebar>
+
+<form [formGroup]='scAwbForm'>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [grid72]="true" [column]="6">
+        <ngc-label label="g.terminal"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="85" [dropDownWidth]="80" sourceType='query'
+            sourceId="HANDLINGAREA" formControlName="terminal"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [grid72]="true" [column]="8">
+        <ngc-label label="awb.awbnumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid72]="true" [column]="10">
+        <ngc-label label="display.dateFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="dateFrom" [width]='160' [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid72]="true" [column]="10">
+        <ngc-label label="display.dateTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="dateTo" [width]='160' [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)='onSearch()' label='g.search' iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="this.scAwbForm.get('scAwbList').length>0" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="scAwbList" (linkClick)="onRemark($event)">
+          <ngc-data-column text='select' align="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container *ngIf="!this.scAwbForm.get(['scAwbList',group,'scRemarks']).value" [formGroupName]="group">
+                <ngc-checkbox formControlName="selectFlag"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="awb.destination" dataField="destination" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" dataField="pieces" cellsAlign="right" type="displayPieces">
+          </ngc-data-column>
+          <ngc-data-column text="g.weight" cellsAlign="right">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="agent.agent" dataField="agent" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="scawb.screening.indicator" dataField="scIndicator" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="scawb.outbound.flight" cellsAlign="right">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <div>
+                  <ngc-display formControlName="flightKey"></ngc-display>
+                </div>
+                <div>
+                  <ngc-display formControlName="flightDate"></ngc-display>
+                </div>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.failed" dataField="screeningFailed" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="status" align="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container *ngIf="!this.scAwbForm.get(['scAwbList',group,'scRemarks']).value" [formGroupName]="group">
+                <ngc-dropdownlist [width]="85" [dropDownWidth]="80" sourceId="EXPORT$SC_AWB_STATUS"
+                  formControlName="status" required></ngc-dropdownlist>
+              </ng-container>
+              <ng-container *ngIf="this.scAwbForm.get(['scAwbList',group,'scRemarks']).value" [formGroupName]="group">
+                <ngc-display formControlName="status"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.officer.name" cellsAlign="right">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="scOfficerName"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.screening.airport.pass" cellsAlign="right">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [noWrap]="true" formControlName="scOfficerAirportPass"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="updatedDateTime" dataField="scCheckDateTime" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-textarea [width]="300" [disabled]="true" [height]="150" formControlName="scRemarks"></ngc-textarea>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="scawb.screening.inspection.remark">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link formcontrolName="remark" (linkClick)="onRemark($event,name, group, i)" iconType="open-link"
+                  [hideValue]="true"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="this.scAwbForm.get('scAwbList').length>0" header="export.screening.cleared.by" type="section">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+        <div>
+          <ngc-textarea [width]="200" [height]="50" formControlName="scOfficerName" patternName='alphanumspace'
+            entityAttribute="Customer.AuthorisedPersonName" required></ngc-textarea>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="export.screening.airport.pass.number"></ngc-label>
+        <div>
+          <ngc-alphanuminput [width]="200" formControlName="scOfficerAirportPass" required
+            entityAttribute="Customer.PersonalIdentificationNumberSearch">
+          </ngc-alphanuminput>
+          <!-- <ngc-input [width]="150" formControlName="scOfficerAirportPass" required [minlength]='5' [maxlength]='5'>
+          </ngc-input> -->
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="export.dateTime"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="scCheckDateTime" [showCalendarButton]="true" [showTimeButton]="true"
+            [width]='150' required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.remarks"></ngc-label>
+        <div>
+          <ngc-textarea [width]="500" [height]="110" formControlName="scRemarks" required></ngc-textarea>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #updateWindow [width]='400' title="export.inspection.remarks" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable [pageable]="false" formArrayName="inspectionRemarks" (linkClick)="onRemark($event)">
+            <ngc-data-column text="export.sno" dataField="" [width]="50" cellsAlign="center" align="left"
+              [cellsRenderer]="cellsRenderer"></ngc-data-column>
+            <ngc-data-column text="g.indicator" [width]="50" cellsAlign="center" align="left" dataField="scIndicator">
+            </ngc-data-column>
+            <ngc-data-column text="g.remarks" [width]="100" dataField="scRemarks"></ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

@@ -1,0 +1,387 @@
+<form [formGroup]="customOrderExaminationForm">
+  <ngc-titlebar title='import.pick.order.exam' (save)="onSave($event)" (clear)=onClear($event) (cancel)=onCancel($event)
+    (print)="onPrint()" [disablePrint]="reportFlag==false">
+  </ngc-titlebar>
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="2.5">
+        <ngc-label value="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType="{{shipmentType1}}" [width]="200" [noDN]="true" [noCBN]="true" required
+            formControlName="shipmentNumber" (modelChange)="onShipmentSelect($event)" accessEnableOn="r">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="handledByMasterHouse" [column]="1.5">
+        <ngc-label label="g.hawbNumber"></ngc-label>
+        <div>
+          <ngc-lov formControlName="hawbNumber" [noCache]="true" title="g.hawbNumber" dataField='code'
+            sourceType='query' sourceId="HWBNUMBER" [width]="100" [noValidation]="true"
+            [sourceParameters]="{'parameter1': customOrderExaminationForm.get(['shipmentNumber']).value,r:variable}"
+            maxlength="16">
+            <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="import.inspection.no"></ngc-label>
+        <div>
+          <ngc-lov formControlName="inspectionNumber" [noCache]="true" title="Inspection Number" dataField='code'
+            sourceType='query' sourceId="INSPECTIONNUMBER" [width]="100" [noValidation]="true"
+            [sourceParameters]="{'parameter1': customOrderExaminationForm.get(['shipmentNumber']).value,'parameter2': customOrderExaminationForm.get(['hawbNumber']).value,r:variable}"
+            maxlength="16">
+            <ngc-data-column text="import.inspection.no" dataField="code" [width]="100">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search" [disabled]="searchFlag"
+            #searchbutton></ngc-button>
+          <ngc-button label='import.create.inspection' accessEnableOn="r" (click)="onCreate($event)" iconType="create"
+            [disabled]="searchFlag" #searchbutton></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='poIssue.svc'></ngc-label>
+        <div>
+          <ngc-display formControlName="svc"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='bil.chargeCode'></ngc-label>
+        <div>
+          <ngc-display formControlName="chargeCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.origin'></ngc-label>/
+        <ngc-label label='g.destination'></ngc-label>
+        <div>
+          <ngc-display formControlName="origin"></ngc-display>/
+          <ngc-display formControlName="destination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='agent.pieces'></ngc-label>/
+        <ngc-label label='g.weight'></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>/
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='export.NAWB.chargeable.weight'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="chargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.natureOfGoods'></ngc-label>
+        <div>
+          <ngc-display formControlName="natureOfGoodsDescription"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.shc'></ngc-label>
+        <div>
+          <ngc-display formControlName="shc"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='consignee.name'></ngc-label>
+        <div>
+          <ngc-display formControlName="consigneeName" [width]="30"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='customer.appointed.agent'></ngc-label>
+        <div>
+          <ngc-input [hidden]="true" formControlName="customerId"></ngc-input>
+          <ngc-display formControlName="appointedAgent" [width]="30"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='poIssue.black'></ngc-label>
+        <div>
+          <ngc-display formControlName="blackListed" [width]="30"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="7.5">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" formGroupName="hawbInfo" *ngIf="showTable && handledByMasterHouse">
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.hawbNumber'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.origin'></ngc-label>/
+        <ngc-label label='g.destination'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbOrigin"></ngc-display>/
+          <ngc-display formControlName="hawbDestination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='agent.pieces'></ngc-label>/
+        <ngc-label label='import.weight'></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="hawbPieces"></ngc-piecesdisplay>/
+          <ngc-weightdisplay formControlName="hawbWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='export.NAWB.chargeable.weight'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="hawbChargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.natureOfGoods'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbNatureOfGoodsDescription"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.shc'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbShc"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='consignee.name'></ngc-label>
+        <div>
+          <ngc-display formControlName="consigneeName" [width]="30"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='customer.appointed.agent'></ngc-label>
+        <div>
+          <!--<ngc-input [hidden]="true" formControlName="customerId"></ngc-input>-->
+          <ngc-display formControlName="appointedAgent" [width]="30"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title="import.custom.details" type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2">
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label value="import.freight.in.flight"></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label value="poIssue.freightDate"></ngc-label>
+              </th>
+              <th rowspan="2" entityAttribute="Flight.CustomsImportFlightNumber">
+                <ngc-label value="imp.igm" entityAttribute="Flight.CustomsImportFlightNumber"></ngc-label>
+              </th>
+              <th rowspan="2" entityAttribute="Import.CustomsDocumentRequiredForDelivery">
+                <ngc-label value="g.boe" entityAttribute="Import.CustomsDocumentRequiredForDelivery"></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label value="import.rfe.date" entityAttribute="Import.InspectionRequestedOnDt"></ngc-label>
+              </th>
+              <th rowspan="2" entityAttribute="Import.MovedToInspectionDt">
+                <ngc-label value="import.ffe.date" entityAttribute="Import.MovedToInspectionDt"></ngc-label>
+              </th>
+              <th colspan="5">
+                <ngc-label value="import.location.details"></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <ngc-label label='poIssue.shipmentLoc'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='undelivered.warehouseLocation'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='agent.pieces'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.weight'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.NAWB.chargeable.weight'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="customDetailsInfo">
+            <ng-container
+              *ngFor="let item of customOrderExaminationForm.controls.customDetailsInfo.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-checkbox formControlName="check" [disabled]="disablePiecesFlag">
+                  </ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightKey"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+                </td>
+                <td entityAttribute="Flight.CustomsImportFlightNumber">
+                  <ngc-display formControlName="customsImportFlightNumber"></ngc-display>
+                </td>
+                <td entityAttribute="Import.CustomsDocumentRequiredForDelivery">
+                  <ngc-display formControlName="customsImportDocumentNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-datetimeinput formControlName="inspectionRequestedOnDt" showCalendarButton="true"
+                    showTimeButton="true" required
+                    *ngIf="customOrderExaminationForm.get(['customDetailsInfo',index,'rfeNullCheckFlag']).value == true">
+                  </ngc-datetimeinput>
+                  <ngc-display formControlName="inspectionRequestedOnDt"
+                    *ngIf="customOrderExaminationForm.get(['customDetailsInfo',index,'rfeNullCheckFlag']).value == false">
+                  </ngc-display>
+                </td>
+                <td entityAttribute="Import.MovedToInspectionDt">
+                  <ngc-datetimeinput formControlName="movedToInspectionDt" showCalendarButton="true"
+                    [showTimeButton]="true" required
+                    *ngIf="customOrderExaminationForm.get(['customDetailsInfo',index,'ffeNullCheckFlag']).value == true">
+                  </ngc-datetimeinput>
+                  <ngc-display formControlName="movedToInspectionDt"
+                    *ngIf="customOrderExaminationForm.get(['customDetailsInfo',index,'ffeNullCheckFlag']).value == false">
+                  </ngc-display>
+                </td>
+                <!-- -->
+                <ng-container formArrayName="locationDetailsInfo">
+                  <ng-container *ngIf="item.get('locationDetailsInfo').controls.length > 0">
+                    <ng-container
+                      *ngFor="let sitem of item.get('locationDetailsInfo').controls | first; let sindex=index"
+                      [formGroupName]="sindex">
+                      <td>
+                        <ngc-display formControlName="shipmentLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="warehouseLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight" uppercase='true'>
+                        </ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-chargeableweightdisplay formControlName="chargebleWeight" uppercase='true'>
+                        </ngc-chargeableweightdisplay>
+                      </td>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </tr>
+              <ng-container formArrayName="locationDetailsInfo">
+                <ng-container *ngIf="item.get('locationDetailsInfo').controls.length > 1">
+                  <tr *ngFor="let sitem of item.get('locationDetailsInfo').controls | onward :1; let sindex=index"
+                    [formGroupName]="sindex + 1">
+                    <td *ngIf="sindex == 0" [attr.colspan]="7"
+                      [attr.rowspan]="item.get('locationDetailsInfo').length - 1"></td>
+                    <td>
+                      <ngc-display formControlName="shipmentLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="warehouseLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                    </td>
+                    <td>
+                      <ngc-weightdisplay formControlName="weight" uppercase='true'>
+                      </ngc-weightdisplay>
+                    </td>
+                    <td>
+                      <ngc-weightdisplay formControlName="chargebleWeight" uppercase='true'>
+                      </ngc-weightdisplay>
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" title='import.exam'>
+    <ngc-row>
+      <ngc-column [column]="5">
+        <ngc-container type="rectangle">
+          <ngc-row style="padding-top: 10px">
+            <ngc-column>
+              <ngc-label label='import.pieces.of.exam'></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-piecesinput formControlName="inspectionRequestPieces" required [width]="180"
+                [disabled]="disablePiecesFlag">
+              </ngc-piecesinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row style="padding-top: 10px; padding-bottom: 10px">
+            <ngc-column>
+              <ngc-label label='g.remarks'></ngc-label>
+            </ngc-column>
+            <ngc-column>
+              <ngc-remarksinput formControlName="remarks" [width]="300" required [disabled]="disablePiecesFlag">
+              </ngc-remarksinput>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column align="right" verticalAlign="bottom">
+        <ngc-button label='1awb' (click)="onAwbDocument()" iconType="search"></ngc-button>
+        <ngc-button *ngIf="handledByMasterHouse" label='import.poissue.shipment.info.1' (click)="onHAWBInformation()">
+        </ngc-button>
+        <ngc-button *ngIf="!handledByMasterHouse" label='import.poissue.shipment.info.1'
+          (click)="onShipmentInformation()"></ngc-button>
+        <ngc-button label='import.poissue.billing-collect.payment.2' (click)="onPayment()"></ngc-button>
+        <ngc-button label='import.poissue.remarks.3' (click)="onRemarks()"></ngc-button>
+        <ngc-button label='5billservice' (click)="onAddService()"></ngc-button>
+        <ngc-button label='import.poissue.hold.5' (click)="onHoldShipment()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--pepopepopepopepopepopepopepooeoeoeoeoeoeoeoeoeoeoeoeoeoeoeoeoeoe-->
+  <ngc-report #reportWindow title="g.report"  reportId='custom_Inspection'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

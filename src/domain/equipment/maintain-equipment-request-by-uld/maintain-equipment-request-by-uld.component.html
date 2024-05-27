@@ -1,0 +1,240 @@
+<ngc-titlebar title='maintain.muld.assignment' (save)="onSave()" (cancel)="onCancel($event)" (clear)="onClear($event)"
+  [disableSave]="true">
+</ngc-titlebar>
+<form [formGroup]="maintainEquipmentRequestByULDformSearch">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]='2'>
+        <ngc-label label='uld.carrier'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrierCode"
+            [disabled]="this.maintainEquipmentRequestByULDformSearch.get('checkBox').value" sourceId='CARRIER'
+            title='uld.carrier.type' dataField='code' width='70px' upperCase='true' displayMember="code"
+             [dropDownWidth]='60'>
+            <ngc-data-column text="uld.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label="exp.carrier.group"></ngc-label>
+        <div>
+          <ngc-lov formControlName="carrierGroup" sourceId="CARRIER_GROUP"
+            [disabled]="!this.maintainEquipmentRequestByULDformSearch.get('checkBox').value" title='g.airline'
+            displayMember="code" dataField='code' [width]="80" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+          &nbsp;
+          <ngc-checkbox formControlName="checkBox" (ngModelChange)='selectCheckBoxForCarrier($event)' [width]="30">
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label='g.fromDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="muldFromDate" (ngModelChange)="fromAndToDateChanges(this.maintainEquipmentRequestByULDformSearch.get('muldFromDate').value, 
+            this.maintainEquipmentRequestByULDformSearch.get('muldToDate').value)" [showCalendarButton]=" true"
+            [showTimeButton]="true" [width]="50" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label='g.toDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="muldToDate" [showCalendarButton]="true"
+            [showTimeButton]="true" [width]="50" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='4'>
+        <ngc-label label="g.agentName">
+        </ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="customerName" [width]="400" sourceId="EQUIPMENT_AGENT"
+            title="equipment.agent" dataField="desc" maxlength='65'>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]='2'>
+        <div>
+          <ngc-label label="truck.company"></ngc-label>
+        </div>
+        <ngc-lov dataField='code' [width]="110" valueMember='code' maxlength='65' formControlName='truckCompany'
+          upperCase='true' sourceId='KEY_TRUCKER_COMPANY' title='import.truck.Dock.no' accessEnableOn="r"
+          [dropDownWidth]='60'>
+          <ngc-data-column text='g.companyName' dataField='desc' [width]='150'></ngc-data-column>
+          <ngc-data-column text='g.companyCode' dataField='code' [width]='150'></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label="exp.iata.name"></ngc-label>
+        <div>
+          <ngc-lov dataField='code' [width]="70" valueMember='code' maxlength='7' formControlName='iataAgentCode'
+            [width]='180' upperCase='true' sourceId='IATACODE' title='g.iatacode' accessEnableOn="r"
+            [dropDownWidth]='50'>
+            <ngc-data-column text='g.iatacode' dataField='code' [width]='70'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label="reference.number"></ngc-label>
+        <div>
+          <ngc-input [width]="150" formControlName="referenceNumber" maxlength='12' patternName="digit"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <div>
+          <ngc-label label="g.truck.number"></ngc-label>
+        </div>
+        <ngc-input [width]="150" formControlName="truckNumber" maxlength='8'></ngc-input>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label="agent.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="400" formControlName="requestStatus" [multiSelect]="true" accessEnableOn="r"
+            sourceId="Equipment$EquipStatus" [dropDownWidth]="110" accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" label="g.search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="maintainEquipmentRequestByULDform">
+  <ngc-container *ngIf="showDownSection">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="bookTimeSlot()" label="equipment.book.time.slot.button"></ngc-button>
+          <ngc-button (click)="onCancelled()" label="cancel.button" [disabled]="disableFlag" [width]="120"></ngc-button>
+          <ngc-button (click)="onApprove()" label="approve.button" [disabled]="approveFlag" [width]="100"></ngc-button>
+          <ngc-button (click)="onSplit()" label="split.button" [width]="120" [disabled]="splitFlag"></ngc-button>
+          <ngc-button (click)="onRelease()" label="release.button" [width]="120" [disabled]="releaseFlag"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="showDownSection">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="maintainUldList" [pageable]="true">
+          <ngc-data-column text="val.select" [width]="20" align="center" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="selectedCheckBox" (ngModelChange)="onSelectCheckBox($event ,group)">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]="20" align="center" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-label label={{group+1}}></ngc-label>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.carrier" align="center" dataField="carrierCode" [width]="20">
+          </ngc-data-column>
+          <br>
+          <ngc-data-column text="uldtype.br.group" align="center" dataField="uldType" [width]="60">
+          </ngc-data-column>
+          <br>
+          <ngc-data-column text="accessorytype.br.group" align="center" dataField="accessoryType">
+          </ngc-data-column>
+          <ngc-data-column text="agent.agentName" align="center" dataField="customerName">
+          </ngc-data-column>
+          <ngc-data-column text="eirnumber.br.parenteirnumber" [width]="40" align="center" dataField="eirNumber">
+          </ngc-data-column>
+          <ngc-data-column text="g.truck.number" align="center" dataField="truckNumber">
+          </ngc-data-column>
+          <ngc-data-column text="schedule.date.br.time" align="center" dataField="scheduledDateTime"
+            type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="reference.br.number" [width]="40" align="center" dataField="referenceNumber">
+          </ngc-data-column>
+          <ngc-data-column text="creation.date" align="center" dataField="createdOn" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="" dataField="equipmentRequestId" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="uld.Remark" align="center" [width]="200">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input formControlName="specialinstruction" [width]="350" *ngIf="maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'status']).value == 'PENDING'
+					       && (maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'selectedCheckBox']).value == true )">
+                </ngc-input>
+                <ngc-display formControlName="specialinstruction" [hidden]="maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'status']).value == 'PENDING'
+					       && (maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'selectedCheckBox']).value == true )">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="agent.status" [width]="60" align="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="status"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="edit.view" align="center" [width]="40" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link iconType="edit" (linkClick)="onEdit(group)"
+                  *ngIf="maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'status']).value == 'PENDING'">
+                </ngc-link>
+                <ngc-link iconType="view" (linkClick)="onView(group)"
+                  *ngIf="maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'status']).value != 'PENDING'">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.delete" align="center" [width]="30" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link iconType='delete' (linkClick)="onDelete(group)"
+                  *ngIf="maintainEquipmentRequestByULDform.get(['maintainUldList', group, 'status']).value == 'PENDING'">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="showDownSection">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='total.uldtype'></ngc-label>&nbsp;
+        <ngc-display formControlName="uldTypeQuantityInfo"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='total.accessorytype'></ngc-label>&nbsp;
+        <ngc-display formControlName="accessoryTypeQuantityInfo"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Edit/View/Split Details -->
+<ngc-window #editViewSplitDetails [title]="title" [width]="1300" [height]="500">
+  <app-maintain-equipment-request-by-uld-details [editViewSplitWindowObject]="editViewSplitWindowObject"
+    [showAsPopup]="true" [inputData]="inputData" (autoSearchAccessoryInfo)="autoSearchAccessoryInfo()"
+    *ngIf="showWindow">
+  </app-maintain-equipment-request-by-uld-details>
+</ngc-window>
+
+<!-- Release EIR -->
+<ngc-window #releaseEirWindow [title]="title" [width]="1100" [height]="700">
+  <app-release-eir-maintain-equipment-request-by-uld [releaseEirWindowObject]="releaseEirWindowObject"
+    [inputData]="inputData" (autoSearchReleaseInfo)="autoSearchReleaseInfo()" (closeWindow)="closeWindow()"
+    *ngIf="showReleaseWindow">
+  </app-release-eir-maintain-equipment-request-by-uld>
+</ngc-window>

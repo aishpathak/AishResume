@@ -1,0 +1,452 @@
+<form [formGroup]="maintainRemarkFormGroup">
+  <ngc-titlebar type="header" title="title.shipment.remarks" (save)="onSave()" (cancel)=" onCancel($event)"
+    *ngIf=!showAsPopup [disableSave]="saveFlag == false">
+  </ngc-titlebar>
+  <ngc-error *ngIf=showAsPopup></ngc-error>
+  <ngc-row *ngIf=showAsPopup>
+    <ngc-column align="right">
+      <ngc-button label="savehold" (click)="onSave($event)"> </ngc-button>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label=""></ngc-label>
+    </ngc-column>
+  </ngc-row>
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <div>
+          <ngc-label value="g.shipmentType"></ngc-label>
+        </div>
+        <ngc-dropdownlist accessEnableOn="r" [width]="120" [dropDownWidth]="110"
+          sourceId="MntnRmrk$mntnrmk_shipment_type" formControlName="shipmentType" (select)="selectShipmentType($event)"
+          [autoSelect]="true" [disabled]=showAsPopup></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='agent.awb'></ngc-label>
+        <div>
+          <!-- <ngc-input [width]="120" maxlength="65" required formControlName="shipmentNumber" [maxlength]="11"></ngc-input> -->
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" required [width]='120'
+            [disabled]=showAsPopup (ngModelChange)="onTabOutCheckHandledBy()"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf=handledbyHouse>
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="150" sourceId='HWBNUMBER'
+            [validOnly]="true" dataField='code' valueMember='code' [noCache]="true" title="g.hawb.number"
+            [sourceParameters]="{'parameter1': this.maintainRemarkFormGroup.get('shipmentNumber').value}">
+            <ngc-data-column text='g.hawb.number' [width]='80' dataField='code'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='awb.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="140" formControlName="flightKey" accessEnableOn="r"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='awb.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="120" formControlName="flightDate" [showCalendarButton]="true"
+            [showTimeButton]="false"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" value="search" iconType="search" accessEnableOn="r" [disabled]=showAsPopup>
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1.5">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="addAwbRemark()" value="awb.add.remark" accessEnableOn="r" *ngIf="addRemarkFlag">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button value="awb.delete.a" (click)="onConfirm()" *ngIf="remarksExists"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-row ngc-column="2"></ngc-row>
+    </ngc-row>'/'
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="isSearchSuccessfull">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="shpHold.origin"></ngc-label>
+        <div>
+          <ngc-display formControlName="origin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="shp.destination"></ngc-label>
+        <div>
+          <ngc-display formControlName="destination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="awb.awb.pieces"></ngc-label>
+        <div>
+          <ngc-display formControlName="pieces"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="awb.awb.weight"></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shp.natureofgoods"></ngc-label>
+        <div>
+          <ngc-display formControlName="natureOfGoods"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shpHold.SHC"></ngc-label>
+        <div>
+          <ngc-display formControlName="awbshcs"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="flagShowHWBData">
+    <ngc-row>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.hawb.number"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbNumber">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.origin"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbOrigin">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.destination"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbDestination">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="customs.hawb.pieces"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbPieces">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="customs.hawb.weight"></ngc-label>
+        </div>
+        <ngc-weightdisplay formControlName="hwbWeight">
+        </ngc-weightdisplay>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="shp.natureofgoods"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbNatureOfGoods"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.shc"></ngc-label>
+        </div>
+        <ngc-display formControlName="hawbshcs">
+        </ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <br>
+
+
+  <ngc-container *ngIf="showAddRemark" type="tab">
+
+    <!-- <ngc-row>
+      <ngc-column column="11"></ngc-column>
+      <ngc-column>
+        <ngc-button value="Delete(A)" (click)="onConfirm()"></ngc-button>
+      </ngc-column>
+    </ngc-row> -->
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.flight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.shipmentType"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.remarkType"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="awb.remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="addRowArray">
+            <tr *ngFor="let item of maintainRemarkFormGroup.controls.addRowArray.controls let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="checkBox" (click)="enableButton($event,index)"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-flightkeyinput [width]="140" formControlName="flightKey">
+                </ngc-flightkeyinput>
+              </td>
+              <td>
+                <ngc-datetimeinput formControlName="flightDate" [showCalendarButton]="true"></ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-dropdownlist [width]="120" required [dropDownWidth]="110" sourceId="MntnRmrk$mntnrmk_shipment_type"
+                  formControlName="shipmentType" [disabled]="disableFlag"></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist [dropDownWidth]="100" sourceId="Shpmgmt$ShpRemark" formControlName="remarkType">
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-input [maxLength]="65" [width]="600" formControlName="shipmentRemarks" required upperCase="true">
+                </ngc-input>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column column="11"></ngc-column>
+      <ngc-column *ngIf="flagShowAddRow">
+        <ngc-button value="Add row(B)" (click)="clickAddRow()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="flagShowNoFlightBasedData">
+        <strong style="color:black;">
+          {{maintainRemarkFormGroup.get(['shipmentType']).value}}
+          <ngc-label label="g.remarks"></ngc-label>
+        </strong>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="maintainRemarkFormGroupShow">
+  <ngc-container type="tab" *ngIf="flagShowNoFlightBasedData">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="noFlightRemarkShow" (itemSelect)="enableDeleteButton($event)"
+          [enablePageSizeHeight]="false" [showToolbar]="false">
+          <ngc-data-column text=" " type="check" [width]="20" align="center" cellsAlign="center" dataField="check">
+          </ngc-data-column>
+          <ngc-data-column text="awb.serialnumber" [width]="30" align="center" cellsAlign="center" dataField="serialNo">
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentType" [width]="100" align="center" cellsAlign="center"
+            dataField="shipmentType">
+          </ngc-data-column>
+          <ngc-data-column text="awb.remark.type" [width]="100" align="center" cellsAlign="center"
+            dataField="remarkType">
+          </ngc-data-column>
+          <ngc-data-column text="awb.remarks" [width]="300" align="center" cellsAlign="center"
+            dataField="shipmentRemarks">
+          </ngc-data-column>
+          <ngc-data-column text="awb.addedby" [width]="50" align="center" cellsAlign="center" dataField="createdBy">
+          </ngc-data-column>
+          <ngc-data-column text="awb.datetime" [width]="50" align="center" cellsAlign="left" dataField="createdOn"
+            type="displayDateTime"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="flagShowHWBData && flagShowNoFlightHAWBRemarksData && !flagFlight">
+        <strong style="color:black;">
+          <ngc-label label="hwb.remarks"></ngc-label>
+        </strong>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="flagShowHWBData && flagShowNoFlightHAWBRemarksData && !flagFlight">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="hwbRemarkShow" (itemSelect)="enableDeleteButton($event)"
+          [enablePageSizeHeight]="false" [showToolbar]="false">
+          <ngc-data-column text=" " type="check" [width]="20" align="center" cellsAlign="center" dataField="check">
+          </ngc-data-column>
+          <ngc-data-column text="awb.serialnumber" [width]="30" align="center" cellsAlign="center" dataField="serialNo">
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentType" [width]="100" align="center" cellsAlign="center"
+            dataField="shipmentType">
+          </ngc-data-column>
+          <ngc-data-column text="awb.remark.type" [width]="100" align="center" cellsAlign="center"
+            dataField="remarkType">
+          </ngc-data-column>
+          <ngc-data-column text="awb.remarks" [width]="300" align="center" cellsAlign="center"
+            dataField="shipmentRemarks">
+          </ngc-data-column>
+          <ngc-data-column text="awb.addedby" [width]="50" align="center" cellsAlign="center" dataField="createdBy">
+          </ngc-data-column>
+          <ngc-data-column text="awb.datetime" [width]="50" align="center" cellsAlign="left" dataField="createdOn"
+            type="displayDateTime"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <div *ngIf="flagFlight && flagShowNoFlightHAWBRemarksData">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column *ngIf="flagShowAddRow">
+          <strong style="color:black;">
+            <ngc-label label="hwb.remarks"></ngc-label>
+          </strong>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+  <div *ngIf="flagFlight && flagShowNoFlightHAWBRemarksData">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-accordion [height]="350" formArrayName="hwbRemarkShow">
+            <ngc-accordion-card
+              *ngFor="let item of maintainRemarkFormGroupShow.controls.hwbRemarkShow.controls let index=index"
+              [formGroupName]="index" [selected]="expandaccordian">
+              <ngc-accordion-titlebar>
+                <ngc-display formControlName="flightKey"></ngc-display>
+                <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display> -
+                <ngc-display formControlName="segments"></ngc-display>
+              </ngc-accordion-titlebar>
+              <ngc-datatable formArrayName="remarks" (itemSelect)="enableDeleteButton($event)"
+                [enablePageSizeHeight]="false" [showToolbar]="false">
+                <ngc-data-column text=" " type="check" [width]="20" align="center" cellsAlign="center"
+                  dataField="check">
+                </ngc-data-column>
+                <ngc-data-column text="awb.serialnumber" [width]="20" align="center" cellsAlign="center"
+                  dataField="serialNo"></ngc-data-column>
+                <ngc-data-column text="g.shipmentType" [width]="100" align="center" cellsAlign="center"
+                  dataField="shipmentType"></ngc-data-column>
+                <ngc-data-column text="awb.remark.type" [width]="100" align="center" cellsAlign="center"
+                  dataField="remarkType">
+                </ngc-data-column>
+                <ngc-data-column text="awb.remarks" [width]="300" align="center" cellsAlign="center"
+                  dataField="shipmentRemarks"></ngc-data-column>
+                <ngc-data-column text="awb.addedby" [width]="50" align="center" cellsAlign="center" dataField="createdBy">
+                </ngc-data-column>
+                <ngc-data-column text="awb.datetime" [width]="50" align="center" cellsAlign="center" dataField="createdOn"
+                  type="displayDateTime"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-accordion-card>
+          </ngc-accordion>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+
+  <div *ngIf="flagShowFlightBasedData">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column *ngIf="flagShowAddRow">
+          <strong style="color:black;">
+            <ngc-label label="awb.shipment.remarks"></ngc-label>
+          </strong>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+  <div *ngIf="flagShowFlightBasedData">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-accordion [height]="350" formArrayName="flightRemarkShow">
+            <ngc-accordion-card
+              *ngFor="let item of maintainRemarkFormGroupShow.controls.flightRemarkShow.controls let index=index"
+              [formGroupName]="index" [selected]="expandaccordian">
+              <ngc-accordion-titlebar>
+                <ngc-display formControlName="flightKey"></ngc-display>
+                <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display> -
+                <ngc-display formControlName="segments"></ngc-display>
+              </ngc-accordion-titlebar>
+              <ngc-datatable formArrayName="remarks" (itemSelect)="enableDeleteButton($event)"
+                [enablePageSizeHeight]="false" [showToolbar]="false">
+                <ngc-data-column text=" " type="check" [width]="20" align="center" cellsAlign="center"
+                  dataField="check">
+                </ngc-data-column>
+                <ngc-data-column text="awb.serialnumber" [width]="20" align="center" cellsAlign="center"
+                  dataField="serialNo"></ngc-data-column>
+                <ngc-data-column text="g.shipmentType" [width]="100" align="center" cellsAlign="center"
+                  dataField="shipmentType"></ngc-data-column>
+                <ngc-data-column text="awb.remark.type" [width]="100" align="center" cellsAlign="center"
+                  dataField="remarkType">
+                </ngc-data-column>
+                <ngc-data-column text="awb.remarks" [width]="300" align="center" cellsAlign="center"
+                  dataField="shipmentRemarks"></ngc-data-column>
+                <ngc-data-column text="awb.addedby" [width]="50" align="center" cellsAlign="center" dataField="createdBy">
+                </ngc-data-column>
+                <ngc-data-column text="awb.datetime" [width]="50" align="center" cellsAlign="center" dataField="createdOn"
+                  type="displayDateTime"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-accordion-card>
+          </ngc-accordion>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+
+
+
+</form>

@@ -1,0 +1,210 @@
+<ngc-titlebar title='title.billing.list.of.invoices' (clear)="onClear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]=" invoicesListForm">
+  <ngc-container type="section">
+    <ngc-row formGroupName="fetchInvoiceData">
+      <ngc-column>
+        <ngc-label value="billingverification.dateandtimefrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]='175' formControlName="fromDate" showCalendarButton="true" showTimeButton="true"
+            midnight="true" [onlyDate]="true" accessEnableOn="r">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="billingverification.dateandtimeto"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="toDate" [width]='175'
+            [min]="this.invoicesListForm.get(['fetchInvoiceData','fromDate']).value" showCalendarButton="true"
+            showTimeButton="true" midnight="true" [onlyDate]="true" accessEnableOn="r">
+          </ngc-datetimeinput>
+
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='billingverification.customername'></ngc-label>
+        <div>
+          <ngc-lov displayField='deckFlag' [validOnly]='true' upperCase="false" [noCache]="true" [width]="175"
+            formControlName="customerName" sourceId="CUSTOMER_BILL" title="billing.customer" dataField='deckFlag'
+            valueMember="deckFlag" accessEnableOn="r">
+            <ngc-data-column text="g.customerCode" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="deckFlag" [width]="250"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='g.shipmentType'></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType='AWB' formControlName='shipmentNumber' [width]="175" accessEnableOn="r"
+            (ngModelChange)="onTabOutCheckHandledBy($event)">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="handledbyHouseFlag">
+        <ngc-label label="billing.hawbsbNumber"></ngc-label>
+        <div>
+          <ngc-lov formControlName="houseNumber" [noCache]="true" title='billing.hawbsbNumber' upperCase='true'
+            accessEnableOn="r" sourceType='query' sourceId='KEY_BILL_HWBNUMBER' dataField='code' [width]="175"
+            [sourceParameters]="{'parameter1': invoicesListForm.get(['fetchInvoiceData','shipmentNumber']).value}">
+            <ngc-data-column text="billing.hawbsbNumber" dataField="code"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="sap.invoice"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="receiptNumber" (ngModelChange)="onTabOutinvoiceNumber($event)">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="billing.irn.received"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" (select)='irnInformation($event)' formControlName="irnReceived"
+            sourceId="General$YesNoFlag">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf = "invoicesListForm.get(['fetchInvoiceData','irnReceived']).value === 'N'">
+        <ngc-label label="billing.salestaxsys.posting.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" formControlName="salesTaxSysPostingStatus" sourceId="Billing$ListOfInvoices.SalesTaxSysPostingStatus">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getListOfInvoices()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="resultFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="invoicesList" [pageSize]="10" (linkClick)="onLinkClick($event)">
+          <ngc-data-column text="g.select" dataField="select" type="check" cellsAlign="left" align="center"
+            [width]="85">
+          </ngc-data-column>
+          <ngc-data-column text="sap.invoice" dataField="receiptNumber" type='link' [width]="210" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.invoice.date" type="displayDateTime" dataField="receiptDate" [width]="235"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.counter" dataField="counterNumber" [width]="145" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.shipmentNumber" dataField="shipmentNumber" [width]="245" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.hawbsbNumber" dataField="houseNumber" [width]="250" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.shpcne" dataField="consigneeShipperCode" [width]="135" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.agentCode" dataField="agentCode" [width]="157" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="report.billing.payee" dataField="payee" [width]="120" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.code" dataField="payeeCode" [width]="120" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.name" dataField="payeeName" [width]="370" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.pure.agent" dataField="pureAgent" [width]="153" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.report.paymentMode" dataField="paymentMode" [width]="202" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.pdAccount" dataField="paymentAccountNumber" [width]="155" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.amount" dataField="documentAmount" type="displayCurrency" [width]="152"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.collected.by" dataField="collectedBy" [width]="170" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.irn.number" dataField="irnstatus" [width]="165"
+            cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column align="center">
+                        <ngc-display formControlName="irnstatus"></ngc-display> 
+                      </ngc-column>
+                    </ngc-row>
+                    <ngc-row *ngIf="invoicesListForm.get(['invoicesList', group, 'irnstatus']).value == 'NO'">
+                      <ngc-column align="center">
+                        (<ngc-link  [tooltip]="invoicesListForm.get(['invoicesList', group, 'salesTaxSysPostingErrorDesc']).value">
+                          <ngc-display formControlName="salesTaxSysPostingStatus"></ngc-display>
+                        </ngc-link>)
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="customs.ack.code" dataField="ackNumber" [width]="165" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="customs.ack.date" type="displayDateTime" dataField="ackDate" [width]="165"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.credit.debit.note" [width]="5" cellsAlign="center"
+            dataField="creditDebitNumber" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-container>
+                    <ngc-row formArrayName="creditDebitNumber">
+                      <ngc-column
+                        *ngFor="let item of invoicesListForm.get(['invoicesList', group, 'creditDebitNumber']).value; let index=index"
+                        [formGroupName]="index">
+                        <ngc-link (linkClick)="onCreditDebitNote(group,index)">
+                          <ngc-display [value]="item"></ngc-display>
+                        </ngc-link>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-report #reportWindow1 title="g.report"  reportId='ListofInvoices'  [reportParameters]='reportParameters'>
+</ngc-report>
+<ngc-report #reportWindow title="billing.reprint.invoice" reportId='E_INVOICE' [reportParameters]='reportParameters'>
+</ngc-report>
+
+<!-- <ngc-window #collectPaymentPopUpWindow [width]="1400" [height]="700">
+  <app-enquireCharges [invoicesObject]='invoicesObject'></app-enquireCharges>
+</ngc-window> -->
+<ngc-footer *ngIf="resultFlag">
+  <ngc-row>
+    <ngc-column align='left'>
+      <ngc-button accessEnableOn="r" (click)="onSendIRN($event)" value="billing.send.to.irn">
+      </ngc-button>
+      <ngc-button accessEnableOn="r" (click)="onReprintInvoice()" value="billing.reprint.invoice">
+      </ngc-button>
+      <ngc-button accessEnableOn="r" (click)="onCreditDebitNoteList($event)" value="title.credit.debit.note.list">
+      </ngc-button>
+    </ngc-column>
+    <ngc-column>
+      <ngc-button accessEnableOn="r" (click)='onPrint("xls")' style="float:right;" value="export.excel">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

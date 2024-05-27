@@ -1,0 +1,246 @@
+<form [formGroup]="outhouseHandoverForm">
+  <ngc-titlebar title='airmail.outhouse.handover' (clear)="onClear($event)" (save)="onSave($event)" (cancel)="onBack($event)">
+  </ngc-titlebar>
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="awb.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrierCode" required sourceId="DNATA_CARRIERCODE" title="flight.carrier"
+            displayMember="code" dataField="code" [width]="150" [maxlength]="2">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="30"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="fromDate" upperCase="true" [width]="190" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="toDate" upperCase="true" [width]="190" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.dispatch.number"></ngc-label>
+        <ngc-input accessEnableOn="r" formControlName="dispatchNumber" (ngModelChange)="appendDsn()" upperCase="true" [width]="190" [maxlength]="4" ></ngc-input>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="airmail.dnata.search" (click)="onSearch($event,index)" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTabs" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs [width]="800" [height]="200">
+          <ngc-tab-card title="airmail.outhouse.acceptancelist">
+            <ngc-container type="tab" *ngIf="showList">
+              <ngc-row>
+                <ngc-column [column]="5">
+                  <ngc-datatable formArrayName="outhouseAcceptance" [height]=320 [pageable]='true'
+                    (itemSelect)="validateLastBag($event)" [enablePageSizeHeight]="false">
+                    <ngc-data-column text='g.select' dataField="select" type="check" cellsAlign="center" [width]="50"
+                      align="left"></ngc-data-column>
+                    <!-- <ngc-data-column text='Select' [width]="50" dataField="select" cellsAlign="center" align="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="select" (click)="validateLastBag(group)"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column> -->
+                    <ngc-data-column text="export.dispatch.series" dataField="dnNumber" cellsAlign="center" [width]="180"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="totalPieces" [width]="100" cellsAlign="center"
+                      align="center" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="totalWeight" [width]="100" cellsAlign="center"
+                      align="center" type="displayWeight"></ngc-data-column>
+                    <ngc-data-row-childs>
+                      <ngc-data-row-child
+                        *ngFor="let item of outhouseHandoverForm.controls.outhouseAcceptance.controls; let index=index"
+                        [formGroupName]="index" [row]="index">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-datatable [pageable]="false" formArrayName="acceptedMailDispatchDetails"
+                                [widthInPixels]="true" [height]="300" [enablePageSizeHeight]="false">
+                                <ngc-data-column text="airmail.outhouse.rsn" dataField="receptacleNumber" cellsAlign="center"
+                                  align="center" [width]="210"></ngc-data-column>
+                                <ngc-data-column text="export.outbound.flight" dataField="flightKey" cellsAlign="center"
+                                  align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="g.weight" dataField="weight" cellsAlign="right" align="center"
+                                  [width]="100" type="displayWeight"></ngc-data-column>
+                                <ngc-data-column text="mailbag.store.location" dataField="storeLocation" cellsAlign="center"
+                                  align="center" [width]="120"></ngc-data-column>
+                                <ngc-data-column text="airmail.rn.remarks" dataField="rnRemarks" cellsAlign="center"
+                                  align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="airmail.final.bag" dataField="lastBagIndicator" cellsAlign="center"
+                                  type="icon" iconType="yesno" align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="awb.cpe.status" dataField="status" cellsAlign="center" [width]="220"
+                                  align="center"></ngc-data-column>
+                              </ngc-datatable>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-data-row-child>
+                    </ngc-data-row-childs>
+                  </ngc-datatable>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label value=""></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="1" verticalAlign="middle" [grid72]="true">
+                  <ngc-row>
+                    <ngc-column [column]="12" verticalAlign="middle" [grid72]="true">
+                      <ngc-button value=">>" (click)="onTransferMailbag($event)"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+
+                    <ngc-column [column]="12" verticalAlign="middle" [grid72]="true">
+                      <ngc-button value="<<" (click)="onTransferBackMailbag($event)"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label value=""></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="4">
+                  <ngc-datatable formArrayName="tempArray" [height]=320 [pageable]='true'
+                    [enablePageSizeHeight]="false">
+                    <ngc-data-column text='flight.select' dataField="select" type="check" onclick="deleteId"
+                      cellsAlign="center" [width]="50" align="left"></ngc-data-column>
+                    <ngc-data-column text="export.dispatch.series" dataField="dnNumber" cellsAlign="center" [width]="180"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="totalPieces" [width]="100" cellsAlign="center"
+                      align="center" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="totalWeight" [width]="100" cellsAlign="center"
+                      align="center" type="displayWeight"></ngc-data-column>
+                    <ngc-data-row-childs>
+                      <ngc-data-row-child
+                        *ngFor="let item of outhouseHandoverForm.controls.tempArray.controls; let index=index"
+                        [formGroupName]="index" [row]="index">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-datatable [pageable]="false" formArrayName="acceptedMailDispatchDetails"
+                                [widthInPixels]="true" [height]="300" [enablePageSizeHeight]="false">
+                                <ngc-data-column text="airmail.outhouse.rsn" dataField="receptacleNumber" cellsAlign="center"
+                                  align="center" [width]="210"></ngc-data-column>
+                                <ngc-data-column text="export.outbound.flight" dataField="flightKey" cellsAlign="center"
+                                  align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="g.weight" dataField="weight" cellsAlign="right" align="center"
+                                  [width]="100" type="displayWeight"></ngc-data-column>
+                                <ngc-data-column text="mailbag.store.location" dataField="storeLocation" cellsAlign="center"
+                                  align="center" [width]="120"></ngc-data-column>
+                                <ngc-data-column text="airmail.rn.remarks" dataField="rnRemarks" cellsAlign="center"
+                                  align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="airmail.final.bag" dataField="lastBagIndicator" cellsAlign="center"
+                                  type="icon" iconType="yesno" align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="awb.cpe.status" dataField="status" cellsAlign="center" [width]="220"
+                                  align="center"></ngc-data-column>
+                              </ngc-datatable>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-data-row-child>
+                    </ngc-data-row-childs>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+
+            <!-- <ngc-container type="tab" *ngIf="showList">
+              <ngc-row>
+
+              </ngc-row>
+            </ngc-container> -->
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="12" align="right">
+                  <ngc-button value="airmail.dnata.handover" (click)="handover($event)" iconType="add"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="airmail.handover.list">
+            <ngc-container type="tab" *ngIf="showHandover">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-datatable formArrayName="outhouseHandover" [pageable]='true' [enablePageSizeHeight]="false">
+                    <ngc-data-column text="customs.donumber" dataField="doNumber" cellsAlign="center" [width]="180"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="export.dispatch.series" dataField="dnNumber" cellsAlign="center" [width]="180"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="totalPieces" [width]="100" cellsAlign="center"
+                      align="center" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="totalWeight" [width]="100" cellsAlign="center"
+                      align="center" type="displayWeight"></ngc-data-column>
+                    <ngc-data-row-childs>
+                      <ngc-data-row-child
+                        *ngFor="let item of outhouseHandoverForm.controls.outhouseHandover.controls; let index=index"
+                        [formGroupName]="index" [row]="index">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column column="12">
+                              <ngc-datatable [pageable]="false" formArrayName="acceptedMailDispatchDetails"
+                                [widthInPixels]="true" [height]="300" [enablePageSizeHeight]="false">
+                                <ngc-data-column text="airmail.outhouse.rsn" dataField="receptacleNumber" cellsAlign="center"
+                                  align="center" [width]="210"></ngc-data-column>
+                                <ngc-data-column text="airmail.out.flight" dataField="flightKey" cellsAlign="center"
+                                  align="center" [width]="100"></ngc-data-column>
+                                <ngc-data-column text="g.pieces" dataField="pieces" cellsAlign="right" align="center"
+                                  [width]="100" type="displayPieces"></ngc-data-column>
+                                <ngc-data-column text="g.weight" dataField="weight" cellsAlign="right" align="center"
+                                  [width]="120" type="displayWeight"></ngc-data-column>
+                                <ngc-data-column text="airmail.rn.remarks" dataField="rnRemarks" cellsAlign="center"
+                                  align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="awb.cpe.status" dataField="status" cellsAlign="center" [width]="220"
+                                  align="center"></ngc-data-column>
+                                <ngc-data-column text="customs.donumber" dataField="generatedDoNumber" cellsAlign="center"
+                                  align="center" [width]="150"></ngc-data-column>
+                                <ngc-data-column text="airmail.do.date" type="displayDateTime" dataField="doDate"
+                                  cellsAlign="center" align="center" [width]="150"></ngc-data-column>
+                              </ngc-datatable>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-data-row-child>
+                    </ngc-data-row-childs>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [grid36]='true' column="10">
+
+                </ngc-column>
+                <ngc-column [grid36]='true' column="8">
+                  <ngc-button value="airmail.outhouse.handover" (click)="exportToExcelhandover($event)"></ngc-button>
+                </ngc-column>
+                <ngc-column [grid36]='true' column="8">
+                  <ngc-button value="airmail.dnata.history" (click)="exportToExcelhandoverhistory($event)">
+                  </ngc-button>
+                </ngc-column>
+                <!--<ngc-column [grid36]='true' column="8">
+                  <ngc-button value="Dnata Handover Receipt" (click)="emailTrigger($event,index)"></ngc-button>
+                </ngc-column>-->
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report format='xls' #reportWindow1 title="g.report"  reportId='dnatahandovermodified'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='xls' #reportWindow2 title="g.report"  reportId='DNATAHandoverHistory'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>

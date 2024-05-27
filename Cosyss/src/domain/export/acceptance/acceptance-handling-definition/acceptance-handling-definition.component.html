@@ -1,0 +1,221 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="title.acceptance.handling.definition" (save)="onSave($event)" (clear)="onClear($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type='tab'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="acceptance.handling.type"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="acceptance.handling.description"></ngc-label>
+              </th> 
+              <th>
+                <ngc-label label="acceptance.handling.document.list"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="acceptance.handling.cutoftime"></ngc-label>
+              </th>            
+              <th>
+                <ngc-label label="acceptance.handling.charges.applicable"></ngc-label>
+              </th>     
+              <th>
+                <ngc-label label="acceptance.handling.carrier.specific"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="acceptance.handling.shc.specific"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="HandlingDefAccpt">
+            <tr *ngFor="let item of form.controls.HandlingDefAccpt.controls; let index=index" [formGroupName]="index">
+              <td>
+                <ngc-display value={{index+1}}></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="acceptancetype"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="acceptanceDescription"></ngc-display>
+              </td>
+              <ng-container formArrayName="handlingDefinition">
+                <ng-container *ngFor="let sitem of item.controls.handlingDefinition.controls | slice:0:1; let sindex=index" [formGroupName]="sindex">                 
+                  <td>
+                    <ngc-input *ngIf="true" formControlName="requireddocumentlistforprelodging" [width]="250"></ngc-input>
+                  </td>
+                  <td>
+                     <ngc-digitinput [width]="90" formControlName="cutoftimeforprelodgemins" digits="4" decimalDigits="0" [maxlength]="4">
+                    </ngc-digitinput>        
+                  </td>
+                  <td>
+                    <ngc-dropdownlist sourceId="Cargo_Handling$Cargo_Handling" *ngIf="true" [width]="100" [dropDownWidth]="100" formControlName="chargesapplicable"
+                      required></ngc-dropdownlist>
+                  </td>                                                  
+                </ng-container>
+              </ng-container>
+              <td align="center">
+                <ngc-button *ngIf="index !== 0" label="g._add" iconType="add" (click)="onCarrierSpecific(index)"></ngc-button>
+              </td>
+              <td align="center">
+                <ngc-button *ngIf="true" label="g._add" iconType="add" (click)="onShcSpecific(index)"></ngc-button>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!--// WINDOW POP UP FOR EDITING AS PER AIRLINE //-->
+  <ngc-window #carrierWindow width="1200" height="500" [title]="acceptanceTypeTitle" [cancelButton]="true">
+    <ngc-window-header>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.addRow" (click)="onAirlineAcceptanceHandlingDefinition()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-header>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                </th>
+                <th>
+                  <ngc-label label="g.sNo"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.airline"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="acceptance.handling.document.list"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="acceptance.handling.cutoftime"></ngc-label>
+                </th>                
+              </tr>
+            </thead>
+            <tbody formArrayName="carrierArray">
+              <ng-container *ngFor="let item of form.controls.carrierArray.controls; let index=index" [formGroupName]="index">
+                <tr>              
+                  <td>
+                    <ngc-checkbox *ngIf="true" formControlName="select"></ngc-checkbox>
+                  </td>
+                  <td>
+                    <ngc-display *ngIf="true" value={{index+1}}></ngc-display>
+                  </td>
+                  <td formGroupName="handlingDefinitionByAirline">
+                    <ngc-lov formControlName="carrierCode" sourceId='CARRIER' title='export.airline' *ngIf="true" dataField='code' [width]="50" uppercase='true'
+                      required>
+                      <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                      <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                    </ngc-lov>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="requireddocumentlistforprelodging" *ngIf="true"></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-digitinput [width]="90" formControlName="cutoftimeforprelodgemins" digits="4" decimalDigits="0" [maxlength]="4" *ngIf="true">
+                    </ngc-digitinput>
+                  </td>                 
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onSaveAirline()"></ngc-button>
+            <ngc-button label="g.delete" (click)="onDeleteAirline(index)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <!--// WINDOW POP UP FOR EDITING AS PER SHC //-->
+  <ngc-window #shcWindow width="1200" height="500" [title]="acceptanceTypeTitle" [cancelButton]="true">
+    <ngc-window-header>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.addRow" (click)="onShcAcceptanceHandlingDefinition()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-header>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                </th>
+                <th>
+                  <ngc-label label="g.sNo"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="acceptance.handling.shc.group"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="acceptance.handling.document.list"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="acceptance.handling.cutoftime"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="shcArray">
+              <ng-container *ngFor="let item of form.controls.shcArray.controls; let index=index" [formGroupName]="index">
+                <tr>
+                  <td>
+                    <ngc-checkbox *ngIf="true" formControlName="select">
+                    </ngc-checkbox>
+                  </td>
+                  <td>
+                    <ngc-display *ngIf="true" value={{index+1}}></ngc-display>
+                  </td>
+                  <td formGroupName="handlingDefinitionBySHC">
+                    <ngc-dropdownlist *ngIf="true" [width]="300" formControlName="shcgroup" sourceId='SHC_HANDLING_LOADED' [dropDownWidth]="300" [placeHolder]="'select'"  valueMember="code" displayMember="code"
+                      sourceType='query' [filterable]="false" [displayMember]="desc" [valueMember]="code" required></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="requireddocumentlistforprelodging" *ngIf="true"></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-digitinput [width]="90" formControlName="cutoftimeforprelodgemins" digits="4" decimalDigits="0" [maxlength]="4" *ngIf="true">
+                    </ngc-digitinput>                    
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save" (click)="onSaveShc()"></ngc-button>
+            <ngc-button label="g.delete" (click)="onDeleteShc($event)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

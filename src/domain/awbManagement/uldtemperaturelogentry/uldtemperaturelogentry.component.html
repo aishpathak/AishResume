@@ -1,0 +1,188 @@
+<ngc-titlebar title='uld.temp.log.entry' (print)="onPrint()" [disablePrint]="printFlag==false" (clear)="onClear($event)"
+  (cancel)="onCancel($event)">
+</ngc-titlebar>
+<!-- Form containing search parameters -->
+<form [formGroup]="uldTemperatureSearch">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="imp.uld.no"></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName="uldKey" required></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="flight.date.from.colon"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]='175' formControlName="dateFrom" showCalendarButton="true" accessEnableOn="r">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="flight.date.to.colon"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]='175' formControlName="dateTo" showCalendarButton="true" accessEnableOn="r">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" [width]="120" value="g.search" iconType="search" (click)="onSearch()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button value="g.add" iconType="add" (click)="onAdd()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Form containing whole screen information -->
+<form [formGroup]="uldTemperatureData">
+  <ngc-container *ngIf="showData">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="uldTempLogEntryData">
+          <ngc-data-column text="imp.uld.no" dataField="uldKey">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="uldKey"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="volt.batt" dataField="temperatureType">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="temperatureType"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.temperatureType" dataField="temperatureTypeValue">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="temperatureTypeValue" decimalDigits="2"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.event" dataField="uldEvent">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="uldEvent"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="si.temp" dataField="temperature">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="temperature" decimalDigits="1"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.capture.dt.time" dataField="temperatureCaptureDt" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="import.temp.remarks.locn" dataField="remarks">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="remarks"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.delete" dataField="delete">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onDelete(group)" iconType="delete"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- Pop up window for Add button -->
+  <ngc-window #uldTemperatureRecordWindow [width]="1500" [height]="500" title='add.uld.temp.log'
+    [showCloseButton]="true" (close)="onCloseWindow()">
+    <ngc-container *ngIf="windowFlag">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="onAddPopUp()" value="g.add" iconType="add"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="windowFlag">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="addUldTemperature">
+            <ngc-data-column text="imp.uld.no" dataField="uldKey">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-uldinput formControlName="uldKey" required></ngc-uldinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="volt.batt" dataField="temperatureType">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dropdownlist formControlName="temperatureType" sourceId="volt_batt$volt_batt" groupSize="0">
+                  </ngc-dropdownlist>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="uld.temperatureType" dataField="temperatureTypeValue">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-numberinput decimalDigits="2" formControlName="temperatureTypeValue"></ngc-numberinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.event" dataField="uldEvent">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dropdownlist formControlName="uldEvent" sourceId="TEMPLOGENTRY" sourceType="query"
+                    [noCache]="true" required></ngc-dropdownlist>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="si.temp" dataField="temperature">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-numberinput decimalDigits="1" formControlName="temperature" allowNegative="true" required>
+                  </ngc-numberinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.capture.dt.time" dataField="temperatureCaptureDt" type="displayDateTime">
+            </ngc-data-column>
+            <ngc-data-column text="import.temp.remarks.locn" dataField="remarks">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input formControlName="remarks"></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.delete" dataField="delete">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (linkClick)="onDeletePopUp(group)" iconType="delete"></ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="windowFlag">
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button (click)="onSavePopUp($event)" value="g.save" iconType="save"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!-- Report -->
+  <ngc-report #reportWindow reportId='ULDTempReport' [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

@@ -1,0 +1,501 @@
+<form [formGroup]='displayffmForm'>
+  <ngc-titlebar title='import.displayffm' (print)='onPrint()' (save)="onSaveFFM($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type='header'>
+    <ngc-row formGroupName="searchDisplayffm">
+      <ngc-column [column]="2">
+        <ngc-label label='import.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput formControlName="flight" accessEnableOn="r" required="true"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='import.date'></ngc-label>
+        <div>
+          <ngc-dateinput showCalendarButton="true" accessEnableOn="r" formControlName="date" required="true">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='import.segment'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="segment" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query" [sourceParameters]="sourceIdSegmentDropdown"
+            [width]="120" [dropDownWidth]='110' (select)="onSegmentChange($event )" accessEnableOn="r">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='2' *ngIf="!PreArrivalManifestRptInDisplayFFMEnabled">
+        <ngc-label label='import.reportType'>
+        </ngc-label>
+        <div>
+          <ngc-dropdownlist [placeHolder]="" [width]='130' [dropDownWidth]='120' sourceId='ffm$typeofreport' required formControlName='typeReport'
+            accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onPrint()" iconType="print"></ngc-button>
+        </div>
+      </ngc-column> -->
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row formGroupName="flightData" *ngIf="isFlightInformation">
+      <ngc-column [column]="1">
+        <ngc-label label='import.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.sta'></ngc-label>
+        <div>
+          <ngc-display formControlName="sta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.eta'></ngc-label>
+        <div>
+          <ngc-display formControlName="eta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.ata'></ngc-label>
+        <div>
+          <ngc-display formControlName="ata"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='g.segments'></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='import.aircraftReg'></ngc-label>
+        <div>
+          <ngc-display formControlName="aircraftRegCode"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2" feature="Imp.Bd.ReplaceFFMUponCustomSubmission">
+        <ngc-label label='ffm.aircraftReg'></ngc-label>
+        <div *ngIf="!aircraftRegCodeFlag">
+          <ngc-display formControlName="ffmAircraftRegCode"></ngc-display>
+        </div>
+        <div *ngIf="aircraftRegCodeFlag">
+          <strong style="color:orangered;">
+            <ngc-display formControlName="ffmAircraftRegCode" emphasis="md"></ngc-display>
+          </strong>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column *ngIf="isFFMReceived" [column]="6">
+        <ngc-table formArrayName="ffmReceivedDetails">
+          <thead>
+            <tr>
+              <th [width]="150">
+                <ngc-label label='g.segments'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.copy'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let contact of displayffmForm.get('ffmReceivedDetails').controls; let index = index" [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="segmentReceived" emphasis="md" [width]="150"></ngc-display>
+              </td>
+              <td>
+                <span formArrayName="ffmVersionDetails">
+              <td *ngFor="let version of contact.get('ffmVersionDetails').controls; let index=index"
+                [formGroupName]="index">
+                <ngc-link formControlName="segmentId" (linkClick)="getFFMreceived($event,index,version)"
+                  [hideValue]="true">
+                  <span *ngIf="version.get('messageStatus').value ==='PROCESSED'">
+                    <strong style="color:green;">
+                      <ngc-display formControlName="messageVersionWithCopy" [width]="20" emphasis="lg">
+                      </ngc-display>
+                    </strong>
+                  </span>
+                  <span *ngIf="version.get('messageStatus').value ==='UNPROCESSED'">
+                    <strong style="color:orangered;">
+                      <ngc-display formControlName="messageVersionWithCopy" [width]="20" emphasis="lg">
+                      </ngc-display>
+                    </strong>
+                  </span>
+                </ngc-link>
+                <span *ngIf="version.get('messageStatus').value ===null">
+                  <strong style="color:RED;">
+                    <ngc-display formControlName="messageVersionWithCopy" [width]="20" emphasis="lg">
+                    </ngc-display>
+                  </strong>
+                </span>
+
+              </td>
+              </span>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+      <ngc-column *ngIf="isFFMReceived" [column]="0.5">
+        <span>
+        </span>
+      </ngc-column>
+      <ngc-column *ngIf="isFFMRejected" [column]="3" align="left">
+        <ngc-table formArrayName="ffmRejectedDetails">
+          <thead>
+            <tr>
+              <th [width]="100">
+                <ngc-label label='import.ffm.rejected'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let contact of displayffmForm.get('ffmRejectedDetails').controls; let index = index" [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="segmentRejected" emphasis="md" [width]="150"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+      <ngc-column *ngIf="isFFMReceived" align="right">
+        <ngc-button (click)='onMerge($event)' value="import.merge.ffm" [disabled]="false"></ngc-button>
+        <ngc-button (click)='onReplaceAllFFM($event)' value="import.replace.ffm" [disabled]="false"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="isFFMReceived">
+      <ngc-column *ngIf="!isnilCargo">
+        <ngc-datatable (linkClick)="onAdditionalInformationPopUp($event)" formArrayName="uldResultList" [groups]="['index', 'uldNumber']"
+          [groupsRenderer]="groupsRenderer" [pageable]="false" pinned="true" [showToolbar]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text='' dataField="index" [width]="80" hidden="true" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='' dataField="flightSegmentOrder" [width]="80" hidden="true" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='' dataField="boardingPoint" [width]="80" hidden="true" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.select" [width]="10" dataField="select" type="check" align="center" cellsAlign="center" [checkAll]="true"></ngc-data-column>
+          <ngc-data-column text='' dataField="uldNumber" [width]="80" hidden="true" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.awbNumber' dataField="shipmentNumber" [width]="95" align="center" cellsAlign="center" [cellsStyleRenderer]="cellsStyleRendererColorProcessed"></ngc-data-column>
+          <ngc-data-column text='import.org' dataField="origin" [width]="40" type="displayDate" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.dest' dataField="destination" [width]="60" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.shipmentUnit' dataField="shipmentDescriptionCode" [width]="40" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.pieces' dataField="piece" [width]="40" type="displayPieces" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.weight' dataField="weight" [width]="40" type="displayWeight" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.kl' dataField="weightUnitCode" [width]="40" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.totalPieces' dataField="totalPieces" [width]="40" type="displayPieces" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.natureOf' dataField="natureOfGoodsDescription" [width]="90" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.shc' dataField="shcCode" [width]="60" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.shc' dataField="shc" [width]="40" align="left" hidden="true" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.onwardmovement' dataField="onwardMovement" [width]="150" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.onwardmovement' dataField="movementInfo" [width]="110" hidden="true" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text='import.ffm.shipment.reject' dataField="rejectReason" [width]="110" align="center" cellsAlign="center"
+            [cellsStyleRenderer]="cellsStyleRendererColor"></ngc-data-column>
+          <ngc-data-column text='import.additionalInfo' dataField="additionalInfo" [width]="60" type="link" iconType="edit" align="center"
+            cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+      <ngc-column align='center' *ngIf="isnilCargo">
+        <br>
+        <br>
+        <h4>{{ffmTimeStamp}} : NIL CARGO</h4>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="isShipmentInformation" formGroupName="flightLevelCount">
+      <ngc-column [column]="1">
+        <ngc-label label='g.grand.total'></ngc-label>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.uld.dash'></ngc-label>
+        <ngc-display formControlName="flightULDCount"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='import.loose.shipments.dash'></ngc-label>
+        <ngc-display formControlName="flightLooseCargoCount"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='import.uld.shipments.dash'></ngc-label>
+        <ngc-display formControlName="flightCargoInULD"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.pieces.dash'></ngc-label>
+        <ngc-piecesdisplay formControlName="flightPieces"></ngc-piecesdisplay>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.weight.dash'></ngc-label>
+        <ngc-weightdisplay formControlName="flightWeight"></ngc-weightdisplay>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #additionalInformationWindow [width]="1200" [height]="500" title='import.additionalInfo' [formGroup]="displayffmForm">
+    <ngc-container type="section" formGroupName="additionalInfoData">
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label='import.densitygroup'></ngc-label>
+          <div>
+            <ngc-display formControlName="densityGroup" [width]="80" digits="2" decimalDigits="0"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='import.volumeunit'></ngc-label>
+          <div>
+            <ngc-display formControlName="volumeUnitCode" sourceId="General$VolumeCode" [width]="140"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='import.volume'></ngc-label>
+          <div>
+            <ngc-display formControlName="volume" [width]="80" digits="11" decimalDigits="2"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='import.customsref'></ngc-label>
+          <div>
+            <ngc-display formControlName="customsReference" [width]="100" maxlength="65"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label='import.customsorg'></ngc-label>
+          <div>
+            <ngc-display formControlName="customsOrigin" [width]="100" maxlength="2"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="7">
+          <ngc-label label='import.dimensions'></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label='import.osi'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="7">
+          <ngc-table formArrayName="dimensionResultList">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label='import.weight'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.kl' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.dimensionlength' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.dimensionwidth' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.dimensionheight' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.mUnitCode' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.pieces' width='20'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let contact of displayffmForm.get('dimensionResultList').controls; let index = index" [formGroupName]="index">
+                <!--<td>
+                  <ngc-checkbox formControlName="checkBoxValue" [width]="30" type="check"></ngc-checkbox>
+                </td>-->
+
+                <td>
+                  <ngc-weightdisplay formControlName="weight" required="true"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName="weightUnitCode" [width]="60" uppercase='true' required="true" digits="8" decimalDigits="1"
+                    groupSize="0"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="length" [width]="60" uppercase='true' required="true" digits="5" decimalDigits="0"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="width" [width]="60" uppercase='true' required="true" digits="5" decimalDigits="0"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="height" [width]="60" uppercase='true' required="true" digits="5" decimalDigits="0"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="measurementUnitCode" sourceId="Shipment$MeasurementUnitCode" [width]="70" required="true"></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="noOfPieces" required="true"></ngc-piecesdisplay>
+                </td>
+
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+
+        <ngc-column>
+          <ngc-table formArrayName="osiResultList">
+
+            <thead>
+
+            </thead>
+            <tbody>
+              <tr *ngFor="let contact of displayffmForm.get('osiResultList').controls; let index = index" [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="remarks" [width]="60" uppercase='true' maxlength="3"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column formGroupName="additionalInfoData">
+          <ngc-label label='import.movementpri'></ngc-label>
+          <ngc-label label='-'></ngc-label>
+          <ngc-display formControlName="movementPriorityCode"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="7">
+          <ngc-label label='import.consignmentonMvmt'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='import.oci'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="7">
+          <ngc-table formArrayName="onwardMvmtResultList">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label='import.nextdest'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='agent.createRoutingCarrier' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='agent.createRoutingFlight' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='agent.createRoutingDate' width='20'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let contact of displayffmForm.get('onwardMvmtResultList').controls; let index = index" [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="airportCityCode" [width]="60" uppercase='true' maxlength="6">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="carrierCode"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="flightNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="departureDate"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+        <ngc-column [column]="5">
+          <ngc-table formArrayName="ociResultList">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label='import.iso'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.informationIdentifier' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.csrcii' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.scsrcii' width='20'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let contact of displayffmForm.get('ociResultList').controls; let index = index" [formGroupName]="index">
+
+                <td>
+                  <ngc-display formControlName="countryCode" [width]="60" uppercase='true' maxlength="2"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="informationIdentifier" [width]="60" uppercase='true' maxlength="3">
+                  </ngc-display>
+                </td>
+
+                <td>
+                  <ngc-display formControlName="csrciIdentifier" [width]="60" uppercase='true' maxlength="2">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="scsrcInformation" [width]="60" uppercase='true' maxlength="35">
+                  </ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]='12' align="right">
+            <ngc-button (click)="onCacel($event)" label="g.close"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+
+  </ngc-window>
+  <ngc-report #reportWindow1 title="g.report"  reportId='loose&&uld'  [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report #reportWindow2 title="g.report"  reportId='loose_report'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow3 title="g.report"  reportId='ULD_displayffm'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow4 title="g.report"  reportId='displayFFM'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column>
+      <ngc-button (click)='onLogSummary($event)' value="1.Message Log Summary" [disabled]="false"></ngc-button>
+      <ngc-button (click)='redirectToShipmentInformation($event)' value="import.shipment.information" [disabled]="false">
+      </ngc-button>
+      <ngc-button (click)='redirectToAWBDocument($event)' value="import.awb.document" [disabled]="false"></ngc-button>
+      <ngc-button (click)='redirectToFWBScreen($event)' value="import.fwb" [disabled]="false"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

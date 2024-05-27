@@ -1,0 +1,233 @@
+<ngc-titlebar title="import.shipment.for.custom.inspection" (print)="customInspectionReport()" (clear)="onClear()"
+  (cancel)="onCancel()" [disablePrint]="printFlag==false">
+</ngc-titlebar>
+<form [formGroup]="customShipmentForm">
+  <ngc-container>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label="g.awbNumber">
+        </ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" (modelChange)="onAWBChange($event)" formControlName="shipmentNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5" feature="Imp.Bd.HAWBHandling" *ngIf="handledByMasterHouse">
+        <ngc-label label="g.hawbNumber"></ngc-label>
+        <div>
+          <ngc-lov formControlName="hawbnumber" accessEnableOn="r" [noCache]="true" title="g.hawbNumber"
+            displayMember="code" dataField='code' sourceType='query' sourceId="HWBNUMBER" [width]="100"
+            [sourceParameters]="{'parameter1': customShipmentForm.get(['shipmentNumber']).value,r:variable}"
+            (select)="onhawbSelect($event)" maxlength="16">
+            <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="g.inspection"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="inspection" sourceId="volt_batt$volt_batt" [width]="130"
+            (modelChange)="statusSelect($event)" dataField="code">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='g.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            formControlName='fromDate' [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            formControlName='toDate' [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      &nbsp;&nbsp;&nbsp;&nbsp;
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)='onSearch()' iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="sectiontop"></ngc-container>
+  <ngc-container [hidden]="show">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable [columnsHeight]="45" formArrayName="customShipmentList" (itemSelect)="onCheckBoxClick($event)"
+          (linkClick)="onLinkClick($event)" [showToolbar]="false" [pageable]="true" [pagerMode]="'advanced'"
+          [enablePageSizeHeight]="false">
+
+          <ngc-data-column text=" " [width]="10" dataField="flagInsert" type="check" align="center" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="awb" align="center" dataField="shipmentNumber" align="center" [width]="120"
+            cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="g.hawb" align="center" dataField="hawbnumber" align="center" [width]="90"
+            cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="g.awb.hawb.pieces" align="center" dataField="awbHawbPieces" align="center"
+            [width]="100" cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.manifestPiece" align="center" dataField="manifestPieces" align="center"
+            [width]="70" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="import.agent.code" align="center" dataField="agentcode" align="center" [width]="50"
+            cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.custom.freight.in.flight" align="center" dataField="freightFlight"
+            align="center" [width]="80" cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.custom.freight.in.date" align="center" dataField="freightFlightDate"
+            align="center" type="displayDate" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column entityAttribute="Flight.CustomsImportFlightNumber" align="center"
+            dataField="customsImportFlightNumber" align="center" [width]="60" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column entityAttribute="Import.InspectionRequestedOnDt" align="center" type="displayDateTime"
+            dataField="inspectionRequestedOnDt" align="center" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column entityAttribute="Import.MovedToInspectionDt" type="displayDateTime" align="center"
+            dataField="movedToInspectionDt" align="center" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="agent.shc" align="center" dataField="specialHandlingCode" align="center" [width]="100"
+            cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.inspection.number" align="center" dataField="inspectionNumber" align="center"
+            [width]="110" cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.inspection.pieces" align="center" dataField="inspectionpieces" align="center"
+            [width]="80" cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.inspection.remark" align="center" dataField="inspectionremarks" align="center"
+            [width]="150" cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column text="import.inspection.Status" align="center" dataField="inspectionstatus" align="center"
+            [width]="110" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="import.custom.status.update" dataField="cancel" iconType="edit" type="link"
+            [width]="140" align="center" cellsAlign="center"></ngc-data-column>
+
+        </ngc-datatable>
+        <br>
+        <ngc-button label="inspection.request" [width]="240" (click)="picOrderForExamination($event)"></ngc-button>
+        &nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-button label="g.ship.hawb" [width]="190" (click)="shipmentInfo($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #createInspection title="import.custom.update" width="1000" height="200" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="awb"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.hawb"></ngc-label>
+                </th>
+                <th width="180">
+                  <ngc-label value="import.inspection.no"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="import.inspection.piece"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label width="205" entityAttribute="Import.InspectionRequestedOnDt"></ngc-label>
+                </th>
+                <th *ngIf="ffeFlag == true">
+                  <ngc-label width="205" entityAttribute="Import.MovedToInspectionDt"></ngc-label>
+                </th>
+                <th *ngIf="ffeFlag == false">
+                  <ngc-label width="205" entityAttribute="Import.MovedToInspectionDt"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="customList">
+              <tr *ngFor="let item of customShipmentForm.controls.customList.controls let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="shipmentNumber" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="hawbNumber" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="inspectionNumber" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="inspectionRequestPieces" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="inspectionRequestedOnDt" [width]="60"></ngc-display>
+                </td>
+                <td *ngIf="ffeFlag == true">
+                  <ngc-datetimeinput accessEnableOn="r" *ngIf="ffeFlag == true" [showCalendarButton]="true"
+                    [showTimeButton]="true" [width]="150" [showTimeButton]="true" formControlName="movedToInspectionDt"
+                    required>
+                  </ngc-datetimeinput>
+                </td>
+                <td *ngIf="ffeFlag == false">
+                  <ngc-display *ngIf="ffeFlag == false" formControlName="movedToInspectionDt" [width]="60">
+                  </ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label value=""></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label value=""></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label value=""></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label value=""></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-button label="import.complete.inspection" [width]="210" (click)="createInspectionButton()">
+            </ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

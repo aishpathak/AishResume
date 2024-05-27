@@ -1,0 +1,152 @@
+<ngc-titlebar title='accessory.add.title' (save)="onSave($event)" (cancel)="onCancel($event)" (clear)="onClear($event)"
+  *ngIf=!showAsPopup>
+</ngc-titlebar>
+<ngc-error *ngIf=showAsPopup></ngc-error>
+
+<form [formGroup]='materialForm'>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column column='1.5'>
+              <div>
+                <ngc-label label="Flight Type">
+                </ngc-label>
+              </div>
+              <div>
+                <ngc-dropdownlist accessEnableOn="r" [autoSelect]="true" [disabled]="onSearchFlag" [width]="80"
+                  formControlName='flightType' sourceId="Type$TracingType"></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+            <ngc-column column='1.5'>
+              <ngc-label value='flight.Flight'></ngc-label>
+              <div>
+                <ngc-flightkeyinput [disabled]="onSearchFlag" accessEnableOn="r" [width]="100"
+                  formControlName="flightNo" upperCase="true" required>
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column='1.5'>
+              <ngc-label label='flight.date'></ngc-label>
+              <div>
+                <ngc-datetimeinput [disabled]="onSearchFlag" accessEnableOn="r" onlyDate='true' required [width]="80"
+                  formControlName="fltDate">
+                </ngc-datetimeinput>
+              </div>
+            </ngc-column>
+
+            <ngc-column column='1.5'>
+              <ngc-label label='accessory.uld'></ngc-label>
+              <div>
+                <ngc-uldinput [disabled]="uldFlag" accessEnableOn="r" formControlName="uldNo">
+                </ngc-uldinput>
+              </div>
+            </ngc-column>
+
+            <ngc-column *ngIf="!showAsPopup">
+              <br>
+              <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()"></ngc-button>
+            </ngc-column>
+            <ngc-column *ngIf="showAsPopup" align='right'>
+              <div>
+                <ngc-button value='addRow' (click)="onAdd($events) "></ngc-button>
+                <ngc-button label="export.assign.uld.delete" (click)="onDelete($events) ">
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-row>
+    <ngc-column [column]="11" *ngIf="showTable" align='right'>
+      <div>
+        <ngc-button accessSectionId="AddAccessory" value='addRow' (click)="onAdd($events) "></ngc-button>
+        <ngc-button accessSectionId="DeleteAccessory" label="export.assign.uld.delete" (click)="onDelete($events) ">
+        </ngc-button>
+      </div>
+    </ngc-column>
+  </ngc-row>
+
+  <ngc-container *ngIf="showTable && materialForm.get('uldList').controls.length> 0" type="tab ">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="accessory.select"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="accessory.uld"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="accessory.material.code"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="accessory.material.description"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="accessory.quantity"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody formArrayName="uldList">
+            <tr *ngFor="let item of materialForm.get('uldList').controls; let index=index" [formGroupName]="index">
+
+              <td>
+                <ngc-checkbox formControlName="select"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-display [value]="index+1"></ngc-display>
+              </td>
+
+              <td>
+                <ngc-display *ngIf="item.get('uldId').value != ''" formControlName="uldNumber">
+                </ngc-display>
+                <ngc-uldinput required [disabled]="uldFlag" *ngIf="item.get('uldId').value == ''" formControlName="uldNumber">
+                </ngc-uldinput>
+              </td>
+
+              <td>
+                <ngc-lov required formControlName='materialCode' upperCase='true' sourceId='KEY_ACCESSORY_TYPE'
+                  title='Accessory Code' dataField='code' valueMember='parameter1' displayField='parameter1'
+                  accessEnableOn="r" (select)='onSelectCode($event, index)'>
+                  <ngc-data-column text='Accessory Code' dataField='parameter1' [width]='150'></ngc-data-column>
+                  <ngc-data-column text='Accessory Description' dataField='desc' [width]='150'></ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-display formControlName="materialDescription"></ngc-display>
+              </td>
+              <td>
+                <ngc-piecesinput required formControlName="quantity"></ngc-piecesinput>
+              </td>
+              <td>
+                <ngc-remarksinput formControlName="remarks"></ngc-remarksinput>
+              </td>
+
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf=showAsPopup>
+      <ngc-column [column]="11" align="right">
+        <ngc-button label="g.save" (click)="onSave()"> </ngc-button>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

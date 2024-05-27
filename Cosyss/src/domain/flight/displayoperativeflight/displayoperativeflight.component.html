@@ -1,0 +1,257 @@
+<form [formGroup]="dspform">
+  <ngc-titlebar title="flight.displayoperativeflight.title" (print)="printDisplayOperativeFlightReport('pdf')"
+    (clear)="onClear($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov #carrierCode formControlName='carrierCode' [width]='50' upperCase='true' dataField="code"  
+            displayMember="code" displayMember="code" sourceId='CARRIER_OPT' title='flight.carrierType' maxlength='3'
+            accessEnableOn="r">
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.fromsector'></ngc-label>
+        <div>
+          <ngc-lov formControlName='fromSector' [width]='50' upperCase='true' dataField="code"  displayMember="code"
+            sourceId='FINAL_DESTINATION' title='flight.fromsector' entityAttribute="Flight.FromSector" maxlength='3'
+            accessEnableOn="r">
+            <ngc-data-column text='flight.airport_cityCode' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.tosector'></ngc-label>
+        <div>
+          <ngc-lov formControlName='toSector' [width]='50' upperCase='true' dataField="code"  
+            sourceId='FINAL_DESTINATION' title='flight.tosector' entityAttribute="Flight.ToSector" maxlength='3'
+            accessEnableOn="r">
+            <ngc-data-column text='flight.airport_cityCode' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+
+        <ngc-label value='g.fromDate'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="fromDate" [width]='100' required accessEnableOn="r"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+
+        <ngc-label value='g.toDate'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="toDate" [width]='100' [min]="dspform.controls.fromDate.value" [max]="toMax"
+            required accessEnableOn="r"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <br>
+        <div>
+          <ngc-button (click)="onSearch()" label='g.search' accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="3"></ngc-column>
+	  <ngc-column column="1" *ngIf="dataDisplay" entityAttribute="Flight.WarehouseLevel">
+        <br>
+        <div>
+          <ngc-button style="float: right;" accessEnableOn="r" (click)='printDisplayOperativeFlightReport("xls")' value="expbu.daily.flight.report.xls" ></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="dataDisplay">
+        <br>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="collapseall()" value="flight.collapse.all"></ngc-button>
+
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="dataDisplay">
+        <br>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="expandall()" value="flight.expand.all"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="isDisplayOptflag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <tbody formArrayName="resultList">
+            <tr *ngFor="let item of dspform.controls.resultList.controls; let index=index" [formGroupName]="index">
+              <td>
+                <ngc-accordion>
+                  <!--Accordian Part start from here-->
+                  <ngc-accordion-card title="" [selected]="expandorcollapse" [accessIgnore]="true">
+                    <ngc-accordion-titlebar>
+              <td width="120px">
+                <ngc-label label="g.flight"></ngc-label>
+                :
+                <ngc-display formControlName="flightKey"></ngc-display>
+              </td>
+              <td width="120px">
+                <ngc-label label='flight.paxCao' align="center"></ngc-label>
+                :
+                <ngc-display formControlName="caoPax"></ngc-display>
+              </td>
+              <td width="120px">
+                <ngc-label label='flight.apron' align="center"></ngc-label>
+                :
+                <ngc-display formControlName="flgApn"></ngc-display>
+              </td>
+              </ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-table>
+                      <thead>
+                        <tr>
+                          <th width='40'>
+                            <ngc-label label="flight.flightLeg" align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.std' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.sta' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.etd' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.eta' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.atd' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.ata' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.aircraftType' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.acreg' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.bay' align="center"></ngc-label>
+                          </th>
+                          <th width='40'>
+                            <ngc-label label='flight.status' align="center"></ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.WarehouseLevel">
+                            <ngc-label entityAttribute="Flight.WarehouseLevel" align='center'></ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.BuBdOffice">
+                            <ngc-label entityAttribute="Flight.BuBdOffice" align='center'>
+                            </ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.Gate">
+                            <ngc-label entityAttribute="Flight.Gate" align='center'></ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.CargoHandler">
+                            <ngc-label entityAttribute="Flight.CargoHandler" align='center'></ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.FltClosedIndicator">
+                            <ngc-label entityAttribute="Flight.FltClosedIndicator" align='center'></ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.DLSIndicator">
+                            <ngc-label entityAttribute="Flight.DLSIndicator" align='center'></ngc-label>
+                          </th>
+                          <th width='40' entityAttribute="Flight.FFMIndicator">
+                            <ngc-label entityAttribute="Flight.FFMIndicator" align='center'></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+          <tbody formArrayName="flightLegs">
+            <ng-container *ngFor="let sitem of item.controls.flightLegs.controls; let sindex=index"
+              [formGroupName]="sindex">
+              <tr>
+                <td width="120px">
+                  <ngc-display formControlName="boardPointCode"></ngc-display>-
+                  <ngc-display formControlName="offPointCode"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="departureDate"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="arrivalDate"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="datEtd"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="datEta"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="datAtd"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="datAta"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="aircraftModel"></ngc-display>
+                </td>
+                <td width="120px" *ngIf="exportBay">
+                  <ngc-display *ngIf="importBay" formControlName="inboundRegistration"></ngc-display>
+                  <ngc-display *ngIf="exportBay" formControlName="outboundRegistration"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display *ngIf="importBay" formControlName="bayInbound"></ngc-display>
+                  <ngc-display *ngIf="exportBay" formControlName="bayOutbond"></ngc-display>
+                </td>
+                <td width="120px">
+                  <ngc-display formControlName="flightStatus"></ngc-display>
+                </td>
+                <td width="120px" entityAttribute="Flight.WarehouseLevel">
+                  <ngc-display formControlName="warehouseLevel" entityAttribute="Flight.WarehouseLevel">
+                  </ngc-display>
+                </td>
+                <td width="120px" entityAttribute="Flight.BuBdOffice">
+                  <ngc-display formControlName="buBdOffice" entityAttribute="Flight.BuBdOffice"></ngc-display>
+                </td>
+                <td width="120px" entityAttribute="Flight.Gate">
+                  <ngc-display formControlName="gate" entityAttribute="Flight.Gate"></ngc-display>
+                </td>
+                <td width="120px" entityAttribute="Flight.CargoHandler">
+                  <ngc-display formControlName="groundHandlerCode" entityAttribute="Flight.CargoHandler"></ngc-display>
+                </td>
+                <td width="30px" entityAttribute="Flight.FltClosedIndicator">
+                  <ngc-display formControlName="flightClosed" entityAttribute="Flight.FltClosedIndicator"></ngc-display>
+                </td>
+                <td width="30px" entityAttribute="Flight.DLSIndicator">
+                  <ngc-display formControlName="dls" entityAttribute="Flight.DLSIndicator"></ngc-display>
+                </td>
+                <td width="30px" entityAttribute="Flight.FFMIndicator">
+                  <ngc-display formControlName="ffm" entityAttribute="Flight.FFMIndicator"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  </ngc-accordion-card>
+  <!--Accordian Part end here-->
+  </ngc-accordion>
+  </td>
+  </tr>
+  </tbody>
+  </ngc-table>
+  </ngc-column>
+  </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='DisplayOperativeFlight'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #dailyreportWindow title="g.report"  reportId='Display_Operativeflight_Dailyreport'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

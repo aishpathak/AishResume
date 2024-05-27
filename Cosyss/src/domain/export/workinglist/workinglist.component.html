@@ -1,0 +1,721 @@
+<ngc-titlebar title="wrkLst" (cancel)="onCancel($event)"></ngc-titlebar>
+<form [formGroup]="workingListForm">
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [autoFocus]="true" [width]="100" formControlName="flightNo"
+            upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate" required [width]="100"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='1'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button value="g.search" (click)="onSearchWorkinglist()" accessEnableOn="r" #searchButton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag' column='1'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='g.print.report' accessEnableOn="r" (click)="onPrint()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag' column='2'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='g.print.report.uld' accessEnableOn="r" (click)="onPrintUld()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag' column='1.5'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button *ngIf="!showManifestedInformation" label='wrkLst.captrSnpsht' (click)="captureSnapshot()"
+            #captureSnapshotButton></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag' column='1'>
+        <ngc-label label="wrkLst.snapVersion"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="snapshotVersionList" [source]="versionDropdown"
+            [width]="90" [dropDownWidth]="80"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag' column='1'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='wrkLst.viewSnapsht' accessEnableOn="r" (click)="viewSnapshot()" #viewSnapshotButton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag' column='1.5'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-container type="square">
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label='wrkLst.version'></ngc-label>
+                <ngc-display emphasis='md' formControlName="versionNo"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='displayFlag'>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button *ngIf="!showManifestedInformation" label='wrkLst.crtMnfst' (click)="createManifest()"
+            #createManifestButton></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf='displayFlag'>
+      <ngc-column [column]=8>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label='flight.Flight'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' formControlName="flightNo"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='flight.date'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' formControlName="flightDate" [onlyDate]="true"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='flight.std'></ngc-label>
+              <div *ngIf="showStdTimeOnly===false">
+                <ngc-display emphasis='md' [onlyTime]="true" formControlName="std"></ngc-display>
+              </div>
+              <div *ngIf="showStdTimeOnly === true">
+                <ngc-display emphasis='md' formControlName="std"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='flight.etd'></ngc-label>
+              <div *ngIf="showEtdTimeOnly===false">
+                <ngc-display emphasis='md' [onlyTime]="true" formControlName="etd"></ngc-display>
+              </div>
+              <div *ngIf="showEtdTimeOnly===true">
+                <ngc-display emphasis='md' formControlName="etd"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-label label='flight.segment'></ngc-label>
+              <div>
+                <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='wrkLst.selctSeg'></ngc-label>
+              <div>
+                <ngc-dropdownlist accessEnableOn="r" formControlName="segmentList" [source]="segmentDropdown"
+                  [width]="90" [dropDownWidth]="80" (ngModelChange)=onSelect($event)></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+            <ngc-column>
+
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='wrkLst.Aircraft'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' formControlName="aircraftType"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='wrkLst.a/cRegtrn'></ngc-label>
+              <div>
+                <ngc-input emphasis='md' formControlName="aircraftRegistration" [width]="100"></ngc-input>
+              </div>
+            </ngc-column>
+
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="1">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label='wrkLst.ali'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+            <ngc-column>
+              <ngc-table>
+                <tbody>
+                  <tr>
+                    <td>
+                      <ngc-label label="total"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="flt"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="palletsforFlight"></ngc-display>P/
+                      <ngc-display emphasis='md' formControlName="containerForFlight"></ngc-display>A
+                    </td>
+                    <td>
+                      <ngc-label label="cgo"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="palletsForCargo"></ngc-display>P/
+                      <ngc-display emphasis='md' formControlName="containersForCargo"></ngc-display>A
+                    </td>
+                    <td>
+                      <ngc-label label="bty"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="totalTrollies"></ngc-display>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <ngc-label label="used"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="flt"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="palletsUsed"></ngc-display>P/
+                      <ngc-display emphasis='md' formControlName="containersUsed"></ngc-display>A
+                    </td>
+                    <td>
+                      <ngc-label label="cgo"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="palletsUsedForCargo"></ngc-display>P/
+                      <ngc-display emphasis='md' formControlName="containersUsedForCargo"></ngc-display>A
+                    </td>
+                    <td>
+                      <ngc-label label="bty"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="trolliesUsed"></ngc-display>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td>
+                      <ngc-label label="remaining"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="flt"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="remainingPallets"></ngc-display>P/
+                      <ngc-display emphasis='md' formControlName="remainingContainers"></ngc-display>A
+                    </td>
+                    <td>
+                      <ngc-label label="cgo"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="remainingPalletsUsedForCargo"></ngc-display>P/
+                      <ngc-display emphasis='md' formControlName="remainingContainerUsedForCargo"></ngc-display>A
+                    </td>
+                    <td>
+                      <ngc-label label="bty"></ngc-label>
+                      <ngc-display emphasis='md' formControlName="remainingTrollies"></ngc-display>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf="displayFlag">
+      <ngc-column [column]="5">
+        <ngc-label label="export.working.list.total.booked.pcs.wgt" emphasis="lg"></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-piecesdisplay formControlName="totaBookedPiecesFlight" emphasis="lg" color="blue"></ngc-piecesdisplay>/
+        <ngc-weightdisplay formControlName="totaBookedWeightFlight" emphasis="lg" color="blue"></ngc-weightdisplay>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="export.working.list.manifest.created.at" *ngIf="showManifestedInformation" emphasis="lg"></ngc-label>
+        &nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="firstTimeManifestCompletedAtDisplay" *ngIf="showManifestedInformation"
+          emphasis="lg" color="blue"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="export.working.list.snapshot.captured.by" emphasis="lg"></ngc-label>&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="snapShotCapturedBy" emphasis="lg" color="blue"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="sectiontop" *ngIf="displayFlag" title='wrkLst.shprdy'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="export.sno"></ngc-label>
+              </th>
+              <th [width]="400">
+                <ngc-label label="wrlLst.bkgInfo"></ngc-label>
+              </th>
+              <th [width]="40">
+                <ngc-label label="wrkLst.prtShpmt" cellalign="middle"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label label="org"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label label="des"></ngc-label>
+              </th>
+              <th [width]="30">
+                <ngc-label label="wrkLst.pce/wgt"></ngc-label>
+              </th>
+              <th [width]="30">
+                <ngc-label label="exp.acceptance.fwb" cellalign="middle"></ngc-label>
+              </th>
+              <th [width]="30">
+                <ngc-label label="exp.acceptance.fhl" cellalign="middle"></ngc-label>
+              </th>
+              <th [width]="40">
+                <ngc-label label="natureOfGoods"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label label="remarks"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label label="wrkLst.Scrng"></ngc-label>
+              </th>
+              <th [width]="400">
+                <ngc-label label="wrkLst.lctnInfo" align="left"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label label="wrkLst.assULD"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="shimentLoadingList">
+
+            <ng-container *ngFor="let item of workingListForm.controls.shimentLoadingList.controls; let index=index"
+              [formGroupName]="index">
+
+              <tr *ngIf="item.get('shipmentNumber').value!=='NIL'">
+                <td>
+                  <ngc-display formControlName='sno'></ngc-display>
+                </td>
+                <td>
+                  <div *ngIf="item.get('shipmentNumber').value!=='NIL'">
+
+                    <div>
+                      <h5>
+                        <ngc-link (click)="routeShipmentInfo(item.get('shipmentNumber').value)" emphasis='md'
+                          formControlName='shipmentNumber'>
+                        </ngc-link>
+                      </h5>
+                      <ngc-display emphasis='md' formControlName='partSuffix' color="red"></ngc-display>
+                      <ng-container *ngIf="item.get('svc').value">
+                        (
+                        <ngc-label emphasis='md' value="S"></ngc-label>)
+                      </ng-container>
+                    </div>
+                    <div *ngIf="item.get('shipmentInventoryList').value==='NIL'">
+                      <ngc-i18n emphasis='md' value="NIL"></ngc-i18n>
+                    </div>
+                    <div>
+                      <ngc-piecesdisplay emphasis='md' formControlName='shpBookingPieces'></ngc-piecesdisplay>
+                      <ng-container *ngIf="item.get('shpBookingPieces').value!=item.get('bookingPieces').value">
+                        (
+                        <ngc-piecesdisplay emphasis='md' color="red" formControlName='bookingPieces'>
+                        </ngc-piecesdisplay>)
+                      </ng-container>/
+                      <ngc-weightdisplay emphasis='md' formControlName='shpBookingWeight'></ngc-weightdisplay>
+                      <ng-container *ngIf="item.get('shpBookingWeight').value!=item.get('bookingWeight').value">
+                        (
+                        <ngc-weightdisplay emphasis='md' color="red" formControlName='bookingWeight'>
+                        </ngc-weightdisplay>)
+                      </ng-container>
+                    </div>
+                    <div>
+                      <ngc-display emphasis='md' formControlName='flightBoardPoint'></ngc-display>-
+                      <ngc-display emphasis='md' formControlName='flightOffPoint'></ngc-display>
+                    </div>
+                  </div>
+                  <div>
+                    <ngc-shape type="rectangle" [textColor]="getShapeColor(item.get('statusCode').value,'textColor')"
+                      [bgColor]="getShapeColor(item.get('statusCode').value,'bgColor')" formControlName="statusCode"
+                      [width]="30" [height]="25"></ngc-shape>
+                    &nbsp;
+                    <ngc-shape *ngIf="item.get('throughTransit').value" type="rectangle"
+                      [textColor]="getShapeColor(item.get('throughTransit').value,'textColor')"
+                      [bgColor]="getShapeColor(item.get('throughTransit').value,'bgColor')"
+                      formControlName="transferType" [width]="30" [height]="25"></ngc-shape>
+                  </div>
+                  <div [ngSwitch]="item.get('locked').value">
+                    <ngc-icon iconSize="2x" *ngSwitchCase="true" trueColor="red" type="lock" value="yes"></ngc-icon>
+                  </div>
+                </td>
+                <td>
+                  <ngc-shape formControlName='partShpmtStatus' type="circle" textColor="white" bgColor="gray"
+                    [width]="20" [height]="20"> </ngc-shape>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='origin'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='destination'></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay emphasis='md' formControlName='acceptedPieces'></ngc-piecesdisplay>
+                  <ng-container *ngIf="item.get('acceptedPieces').value">/</ng-container>
+                  <ngc-weightdisplay emphasis='md' formControlName='acceptedWeight'></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-shape *ngIf="item.get('fwb').value !== '' &&  item.get('fwb').value !== null"
+                    formControlName='fwb' type="circle" textColor="white" bgColor="gray" [width]="20" [height]="20"
+                    (click)="routeFWBScreen(item.get('shipmentNumber').value)">
+                  </ngc-shape>
+                </td>
+                <td>
+                  <ngc-shape *ngIf="item.get('fhl').value !== '' &&  item.get('fhl').value !== null"
+                    formControlName='fhl' type="circle" textColor="white" bgColor="gray" [width]="20" [height]="20">
+                  </ngc-shape>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='natureOfGoodsDescription'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='shc'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='remarks'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='screeningStatus'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='locationInfo'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display emphasis='md' formControlName='assignedLoadedInfo'></ngc-display>
+                </td>
+              </tr>
+
+              <tr *ngIf="item.get('shipmentNumber').value==='NIL'">
+                <td colpan="10">
+                  <ngc-display emphasis='md' color='red' align="right" formControlName="shipmentNumber" emphasis='md'>
+                  </ngc-display>
+                </td>
+              </tr>
+
+              <tr *ngIf="item.get('dgRemarks').length">
+                <td colspan="14" align="center" formArrayName='dgRemarks'>
+                  <div *ngFor="let subitem of item.controls.dgRemarks.controls; let index=index"
+                    [formGroupName]="index">
+                    <ngc-display emphasis='md' formControlName="remarks">
+                    </ngc-display>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.working.list.total.ready.pieces" emphasis="lg"></ngc-label>&nbsp;
+        <ngc-piecesdisplay *ngIf="showManifestedInformation" formControlName="totalShipmentReadyBookingPieces"
+          emphasis="lg" color="blue"></ngc-piecesdisplay>
+        <ngc-piecesdisplay *ngIf="!showManifestedInformation" formControlName="flightReadyBookingpiecesCount"
+          emphasis="lg" color="blue">
+        </ngc-piecesdisplay>
+      </ngc-column>
+      <ngc-column [column]="9" [align]="right">
+        <ngc-label label="export.working.list.total.ready.weight" emphasis="lg"></ngc-label>&nbsp;
+        <ngc-weightdisplay *ngIf="showManifestedInformation" formControlName="totalShipmentReadyBookingWeight"
+          emphasis="lg" color="blue"></ngc-weightdisplay>
+        <ngc-weightdisplay *ngIf="!showManifestedInformation" formControlName="flightReadyBookingweightCount"
+          emphasis="lg" color="blue">
+        </ngc-weightdisplay>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="displayFlag" title='wrkLstShpNtRdy' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label=""></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.sno"></ngc-label>
+              </th>
+              <th [width]="200" colspan="3">
+                <ngc-label label="wrkLst.awbNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="partShipment"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label label="origin"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label label="destination"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label label="wrLst.bkgPce"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label label="wrkLst.bkgWght"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label label="FWB"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label label="FHL"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label label="natureOfGoods"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label label="erkLst.incmgFlt"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label label="remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="bookingChangesList">
+            <tr *ngFor="let item of workingListForm.controls.bookingChangesList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName='selectFlag'></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-display formControlName='sno'></ngc-display>
+              </td>
+              <td [width]="100">
+                <ngc-link emphasis='md' (click)="routeShipmentInfo(item.get('shipmentNumber').value)"
+                  formControlName='shipmentNumber'></ngc-link>
+                <ngc-display emphasis='md' formControlName='partSuffix' color="red"></ngc-display>
+              </td>
+              <td [width]='100'>
+                <ngc-shape type="rectangle" [textColor]="getShapeColor(item.get('statusCode').value,'textColor')"
+                  [bgColor]="getShapeColor(item.get('statusCode').value,'bgColor')" formControlName="statusCode"
+                  [width]="70" [height]="25"></ngc-shape>
+              </td>
+              <td [width]='100'>
+                <ngc-shape
+                  *ngIf="item.get('bookingChanges').value === 'Created' && item.get('bookingChanges').value!==null"
+                  type="rectangle" [textColor]="getShapeColor(item.get('statusCode').value,'textColor')"
+                  [bgColor]="getShapeColor(item.get('statusCode').value,'bgColor')" formControlName="bookingChanges"
+                  [width]="70" [height]="25"></ngc-shape>
+                <!--  <ngc-shape *ngIf=" item.get('bookingChanges').value===null" type="rectangle" textColor="white" bgColor="green"
+                  formControlName="statusCode" [width]="70" [height]="25"></ngc-shape> -->
+                <ngc-shape
+                  *ngIf="item.get('bookingChanges').value !== 'Created' && item.get('bookingChanges').value!==null"
+                  type="rectangle" [textColor]="getShapeColor(item.get('bookingChanges').value,'textColor')"
+                  [bgColor]="getShapeColor(item.get('statusCode').value,'bgColor')" formControlName="bookingChanges"
+                  [width]="70" [height]="25"></ngc-shape>
+
+              </td>
+              <td [width]="80">
+                <ngc-shape formControlName='partShipmentData' type="circle" textColor="white" bgColor="gray"
+                  [width]="20" [height]="20">
+                </ngc-shape>
+              </td>
+              <td [width]="80">
+                <ngc-display emphasis='md' formControlName='awbOrigin'></ngc-display>
+              </td>
+              <td [width]="100">
+                <ngc-display emphasis='md' formControlName='awbDestination'></ngc-display>
+              </td>
+              <td *ngIf="item.get('bookingPieces').value === item.get('pieces').value" [width]="120">
+                <ngc-display emphasis='md' formControlName='bookingPieces'></ngc-display>
+              </td>
+
+
+
+
+              <td *ngIf="item.get('pieces').value !== item.get('bookingPieces').value" [width]="120">
+                <ngc-display emphasis='md' formControlName='bookingPieces' emphasis='md'></ngc-display>
+                <ng-container *ngIf="item.get('pieces').value !==(null || 0) && item.get('pieces').value &gt; 0">
+                  (
+                  <ngc-display emphasis='md' color='red' formControlName='pieces'></ngc-display>)
+                </ng-container>
+              </td>
+              <td *ngIf="item.get('bookingWeight').value === item.get('weight').value" [width]="120">
+                <ngc-weightdisplay emphasis='md' formControlName='bookingWeight'></ngc-weightdisplay>
+              </td>
+
+              <td *ngIf="item.get('bookingWeight').value !== item.get('weight').value" [width]="120">
+                <ngc-weightdisplay emphasis='md' formControlName='bookingWeight' emphasis='md'></ngc-weightdisplay>
+
+                <ng-container *ngIf="item.get('weight').value !==(null || 0) && item.get('weight').value &gt; 0">
+                  (
+                  <ngc-weightdisplay emphasis='md' color='red' formControlName='weight'></ngc-weightdisplay>)
+                </ng-container>
+              </td>
+              <td [width]="150">
+                <ngc-shape *ngIf="item.get('fwb').value !== '' &&  item.get('fwb').value !== null" formControlName='fwb'
+                  type="circle" textColor="white" bgColor="gray" [width]="20" [height]="20"
+                  (click)="routeFWBScreen(item.get('shipmentNumber').value)">
+                </ngc-shape>
+              </td>
+              <td [width]="150">
+                <ngc-display emphasis='md' formControlName='fhl'></ngc-display>
+              </td>
+              <td [width]="150">
+                <ngc-display emphasis='md' formControlName='natureOfGoodsDescription'></ngc-display>
+              </td>
+              <td [width]="150">
+                <ngc-display emphasis='md' formControlName='shc'></ngc-display>
+              </td>
+              <td [width]="150">
+                <ngc-display emphasis='md' formControlName='incomingFlightKey'></ngc-display>
+                &nbsp;
+                <ngc-display emphasis='md' formControlName='incomingFlightDate'></ngc-display>
+                &nbsp;
+                <ngc-display emphasis='md' formControlName='incomingFlightBoardPoint'></ngc-display>
+                &nbsp;
+              </td>
+              <td [width]="150">
+                <ngc-display emphasis='md' formControlName='workingListRemarks'></ngc-display>
+              </td>
+
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.working.list.total.not.ready.pieces" emphasis="lg"></ngc-label>&nbsp;
+        <ngc-piecesdisplay formControlName="totalShipmentNotReadyBookingPieces" emphasis="lg" color="blue">
+        </ngc-piecesdisplay>
+      </ngc-column>
+      <ngc-column [column]="9" [align]="right">
+        <ngc-label label="export.working.list.total.not.ready.weight" emphasis="lg"></ngc-label>&nbsp;
+        <ngc-weightdisplay formControlName="totalShipmentNotReadyBookingWeight" emphasis="lg" color="blue">
+        </ngc-weightdisplay>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="displayFlag" type="tab">
+    <ngc-row>
+      <ngc-column align='left'>
+        <ngc-button label='wrkList.ali/cba' accessEnableOn="r" (click)="routeToAli()" #aliButton></ngc-button>
+        <ngc-button label='wrkList/bkSnglShpmt' accessEnableOn="r" (click)="routeToBookSingle()" #bookingButton>
+        </ngc-button>
+        <ngc-button label='wrkLst.cnclBkng' (click)="cancelShipment()"></ngc-button>
+        <ngc-button label='wrkLst.assULD/Trolly' accessEnableOn="r" (click)="routeToAssignUld()" #assignUldButton>
+        </ngc-button>
+        <ngc-button label='wrkList.ldShpmt' accessEnableOn="r" (click)="routeToLoadShipment()" #loadShipmentButton>
+        </ngc-button>
+        <ngc-button label='wrkList.unldShpmt' accessEnableOn="r" (click)="routeToUnloadShipment()"
+          #unloadShipmentButton></ngc-button>
+        <ngc-button label='wrkList.otBndLyngLst' accessEnableOn="r" (click)="routeToOutbound()" #outboundButton>
+        </ngc-button>
+        <ngc-button label='wrkList.cargomanifest' accessEnableOn="r" (click)="routeToCargoManifest()"
+          #cargoManifestButton>
+        </ngc-button>
+        <ngc-button label='wrkList.updatedls' accessEnableOn="r" (click)="routeToUpdateDLS()" #updateDLSButton>
+        </ngc-button>
+        <ngc-button label='wrkList.mailmanifest' accessEnableOn="r" (click)="mailManifest()" #mailManifestButton>
+        </ngc-button>
+        <ngc-button label='wrkList.cnclReBkng' accessEnableOn="r" (click)="cancelRebookShipments()" #mailManifestButton>
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='Export_Working_List_Modified'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+  <ngc-report #reportWindow1 title="g.report"  reportId='Export_Working_List_ModifiedSq'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+  <ngc-window #shipmentNotLoadedPopup title="flight.buildup.not.completed" [showCloseButton]="true" [showCloseButton]="true"
+    [width]="12">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-display emphasis='md' value="flight.buildup.not.completed"></ngc-display>
+          <div>
+            <ngc-display emphasis='md' value="flight.cancel.booking.create.manifest"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+
+  </ngc-window>
+
+  <ngc-window #mailManifestPopup title="airmail.mail.Information" [width]="800">
+
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="mailInformationList">
+            <ngc-data-column text="flight.flight.segment" dataField="flightSegmentId" [width]='100'>
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dropdownlist required width="90" formControlName="flightSegmentId" sourceType="query"
+                    sourceId="FLIGHTSEGMENT_DLS" [sourceParameters]="sourceIdSegmentDropdown"></ngc-dropdownlist>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <ngc-data-column text="mailbag.mail.type" dataField="mailType" [width]='100'>
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dropdownlist required width="90" formControlName="mailType" sourceId="EXPORT$ManifestMailType">
+                  </ngc-dropdownlist>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <ngc-data-column text="g.piece" dataField="piece" [width]='100'>
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-piecesinput required formControlName="piece" value=0 width="90"></ngc-piecesinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <ngc-data-column text="g.weight" dataField="weight" [width]='100'>
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-weightinput required formControlName="weight" value=0.0 width="90"></ngc-weightinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <ngc-data-column text="g.delete" [width]='100'>
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (click)="deleteData(group)" iconType="delete"></ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="saveMailManifestInformation()" value="g.save"></ngc-button>
+            <ngc-button (click)="addMailManifestInformation()" value="g.addRow"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+
+  </ngc-window>
+</form>

@@ -1,0 +1,1133 @@
+<form [formGroup]='form'>
+  <ngc-titlebar title='import.inbound.ramp.check-in' (cancel)="onCancel($event)" (print)='print()'
+    (save)='onSave($event)'>
+  </ngc-titlebar>
+
+  <ngc-container type="box" formGroupName="search">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flight" required></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" showCalendarButton="true" formControlName="flightDate" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="searchFlight()" value="g.search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="searchResults">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-checkbox *ngIf="!this.piggyBackLinkFlag" (modelChange)="onDamageCheck($event)">
+            <strong>
+              <ngc-label label="import.damaged.uld.ramp"></ngc-label>
+            </strong>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="12" align="right" *ngIf="switchReopenCheckInTab">
+        <b>{{checkInStatusMessage}}</b>
+        <div>
+          <ngc-display formControlName="checkInUser" emphasis="md"></ngc-display>
+          <ngc-display formControlName="checkInDateTime" type="displayDate" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="searchResults" type="box">
+    <ngc-row formGroupName="information">
+      <ngc-column column="12">
+      </ngc-column>
+      <ngc-column column="1" [grid24]="true">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flight"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" [grid24]="true">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-display [onlyDate]="true" [onlyTime]="false" formControlName="flightDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" [grid24]="true">
+        <ngc-label label="flight.sta"></ngc-label>
+        <div>
+          <ngc-display formControlName="sta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" [grid24]="true">
+        <ngc-label label="flight.eta"></ngc-label>
+        <div>
+          <ngc-display formControlName="eta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" [grid24]="true">
+        <ngc-label label="flight.ata"></ngc-label>
+        <div>
+          <ngc-display formControlName="ata"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label="flight.segment"></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label="mb.uldreceived"></ngc-label>
+        <div>
+          <ngc-display formControlName="uldReceived"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label="mb.uldmanifested"></ngc-label>
+        <div>
+          <ngc-display formControlName="uldManifested"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" [grid24]="true">
+        <ngc-label label="import.ramp.check.trolley.received"></ngc-label>
+        <div>
+          <ngc-display formControlName="trollyReceived"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" entityAttribute='Import.WeatherCondidtion' [grid24]="true">
+        <ngc-label label="import.weather.condition" entityAttribute='Import.WeatherCondidtion'></ngc-label>
+        <div>
+          <ngc-display formControlName="weather" entityAttribute='Import.WeatherCondidtion'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" [grid24]="true" entityAttribute='Import.BulkCount'>
+        <ngc-label label="import.bulk.count.ramp" entityAttribute='Import.BulkCount'></ngc-label>
+        <div>
+          <ngc-display formControlName="bulkCount" entityAttribute='Import.BulkCount'></ngc-display>
+        </div>
+      </ngc-column>
+
+
+      <ngc-column column="1" *ngIf="searchResults">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="bulk" (modelChange)="onUpdateBulkFlag($event)">
+            <strong>
+              <ngc-label label="g.bulk"></ngc-label>
+            </strong>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <hr>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <!-- <ngc-button (click)="print()" value="Print(P)"></ngc-button> -->
+        <ngc-button *ngIf="switchCheckInTab && tenantName" (click)="driverID()" value="import.ramp.check.driver.id.i">
+        </ngc-button>
+        <ngc-button *ngIf="switchCheckInTab && !tenantName" (click)="driverID()" value="imp.check.in.button">
+        </ngc-button>
+        <ngc-button *ngIf="switchCheckInTab" (click)="unCheckIn()" value="import.ramp.check.un.check.in.b"></ngc-button>
+        <ngc-button *ngIf="switchCheckInTab" (click)="onCheckIn()" value="import.ramp.check.complete.in.k"></ngc-button>
+        <ngc-button *ngIf="switchReopenCheckInTab" (click)="onReopen()" value="import.ramp.check.reopen.r"></ngc-button>
+        <ngc-button *ngIf="switchCheckInTab" (click)="addULD()" value="import.ramp.check.add.uld.trolly.u"></ngc-button>
+        <ngc-button *ngIf="switchCheckInTab" (click)="deleteUlds()" value="import.ramp.check.delete.uld.trolley.m">
+        </ngc-button>
+        <ngc-button (click)="uploadPhoto()" value="Upload Photo(P)"></ngc-button>
+        <ngc-button (click)="tempLogDetailsSave()" value="import.temp.log.button"></ngc-button>
+        <ngc-button *ngIf="switchCheckInTab" (click)="sendTelex()" value="import.ramp.check.send.telex.t"></ngc-button>
+        <ngc-button (click)="expandall()" value="import.ramp.check.expand.all.j"></ngc-button>
+        <ngc-button (click)="collapseall()" value="import.ramp.check.collapseall.c"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="!nilCargo">
+      <ngc-column>
+        <div style="padding-top:5px;"></div>
+        <ngc-accordion>
+          <ngc-accordion-card title="import.checkin.pending" [selected]="expandorcollapse">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="import.ramp.check.in.pending"></ngc-label>
+                    (<ngc-display [value]="checkInPending"></ngc-display>)
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="checkInPendingList">
+                    <ngc-data-column text=" " type="check" align="left" cellsAlign="center" dataField="sno"
+                      [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="sno" [width]="30"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='uld.uld.number' [width]="80" dataField="uldNumber" cellsAlign="center"
+                      type="input" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container *ngIf="form.get(['checkInPendingList',group,'contentCode']).value !== 'M'"
+                            [formGroupName]="group">
+                            <ngc-display formControlName="uldNumber" [width]="120"></ngc-display>
+                            <div *ngIf="form.get(['checkInPendingList',group,'ouboundFlightKey']).value">
+                              (
+                              <ngc-display formControlName="ouboundFlightKey"></ngc-display>
+                              /
+                              <ngc-display [onlyDate]="true" formControlName="ouboundFlightDate"></ngc-display>
+                              )
+                            </div>
+                          </ng-container>
+                          <ng-container [formGroupName]="group"
+                            *ngIf="form.get(['checkInPendingList',group,'contentCode']).value === 'M'">
+                            <ngc-display formControlName="uldNumber" color='red' [width]="120"></ngc-display>
+                            <div *ngIf="form.get(['checkInPendingList',group,'ouboundFlightKey']).value">
+                              (
+                              <ngc-display formControlName="ouboundFlightKey"></ngc-display>
+                              /
+                              <ngc-display [onlyDate]="true" formControlName="ouboundFlightDate"></ngc-display>
+                              )
+                            </div>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.ramp.check.transfer.type' dataField="transferType" cellsAlign="center"
+                      align="center" dataType="string" [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist sourceId="WH_TRANSFER_TYPE" sourceType='query'
+                              formControlName="transferType" (ngModelChange)="onChange($event)" [width]="65"
+                              [dropDownWidth]="70" [disabled]="checkInStatus" displayMember="code"></ngc-dropdownlist>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column entityAttribute='Import.Ramp.ContentCode' text='import.ramp.check.content.code.br'
+                      dataField="contentCode" cellsAlign="center" align="center" dataType="string" [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist entityAttribute='Import.Ramp.ContentCode' sourceId='RAMPCONTENTCODE'
+                              sourceType="query" [noBlank]="true" formControlName="contentCode" [width]="45"
+                              [dropDownWidth]="70" [disabled]="checkInStatus"></ngc-dropdownlist>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='g.shc' dataField="shc" cellsAlign="left" align="left" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-shcinput [width]="180" formArrayName="shcs" dataField="shc" [noWrap]="false"
+                              [disabled]="checkInStatus"></ngc-shcinput>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.used.as.trolley" type="check" align="left"
+                      cellsAlign="center" dataField="usedAsTrolley" [width]="30">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="usedAsTrolley" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.damage" type="check" align="left" cellsAlign="center"
+                      dataField="damaged" [width]="30">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="damaged" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.empty" type="check" align="left" cellsAlign="center"
+                      dataField="empty" [width]="30">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="empty" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column *ngIf='!piggyBackLinkFlag' text='imp.eic' [width]="40" dataField="piggyback"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="piggyback">
+                          </ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column *ngIf='piggyBackLinkFlag' text='import.ramp.check.pgy' [width]="40"
+                      dataField="piggyback" cellsAlign="center" align="center" dataType="string"
+                      feature="Imp.Ramp.EicUldHandling">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="piggyback"
+                            (modelChange)="piggiBackInfo(form.get(['checkInPendingList',group]).value, $event,group,'C')">
+                          </ngc-checkbox>
+                          <ngc-link (click)="managePiggyback(form.get(['checkInPendingList',group]).value, $event)"
+                            iconType="edit">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="imp.phc" type="check" align="center" cellsAlign="center" dataField="phc"
+                      [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="phc" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="mb.val" type="check" align="center" cellsAlign="center" dataField="val"
+                      value="true" [width]="30">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="val" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="driverID" align="left" cellsAlign="left" dataField="driverId" value="true"
+                      [width]="60">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display formControlName="driverId"></ngc-display>
+                          <br>
+                          <ngc-display [onlyDate]="true" [onlyTime]="true" formControlName="handoverDateTime">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.checked.in.by" align="left" cellsAlign="left"
+                      dataField="checkedinBy" value="true" [width]="60"></ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.in.area.br" align="center" cellsAlign="center"
+                      dataField="checkedinArea" value="true"></ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.reconcilliation" dataField="offloadReason"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea [width]="200" [height]="30" [disabled]="checkInStatus"
+                            formControlName="offloadReason" [maxlength]="65"></ngc-textarea>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.upload.photo" [width]="20" align="center"
+                      cellsAlign="center" dataField="uploadphotoFlag" dataField="uploadphotoFlag" type="icon"
+                      iconType="yesno">
+                    </ngc-data-column>
+                    <ngc-data-column text='import.ramp.handling.instruction' dataField="remarks" cellsAlign="center"
+                      align="center" dataType="string" [width]="100">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea [width]="200" [height]="30" [disabled]="checkInStatus" formControlName="remarks"
+                            [maxlength]="65"></ngc-textarea>
+                        </ng-container>
+                        <ng-container [formGroupName]="group">
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.damage.remark.ramp' dataField="damagedRemarks" cellsAlign="center"
+                      align="center" dataType="string" [width]="100" feature="Imp.Ramp.DamageRemarks">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-remarksinput formControlName="damagedRemarks" [width]="300"
+                            [required]="form.get(['checkInPendingList',group,'damaged']).value== true"
+                            [disabled]="checkInStatus">
+                          </ngc-remarksinput>
+                        </ng-container>
+                        <ng-container [formGroupName]="group">
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.owner.code.ramp' dataField="ownerCarrierCode" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.CarrierOwnerCode">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-lov [maxLength]="3" formControlName="ownerCarrierCode" upperCase='true'
+                              sourceId='CARRIER' sourceType='query' title="import.owner.code.ramp" dataField='code'
+                              [width]="50" [disabled]="checkInStatus">
+                              <ngc-data-column text="g.carrierCode" [width]="80" dataField="code"></ngc-data-column>
+                              <ngc-data-column text="g.carrierName" [width]="150" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.whse.dest" dataField="warehouseDest" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.WhDestination">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-locations-list [noTerminal]="terminalRequired" [displayOnlyLocation]="true"
+                              [width]="120" formControlName="warehouseDest" [disabled]="checkInStatus"
+                              [locationTypeList]="['STORAGE']" (select)="onLocationChange($event , group,'CP')"
+                              feature="Imp.Ramp.WhDestination" required>
+                            </ngc-locations-list>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.location' dataField="actualLocation" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.ActualLocation">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-locations-list [displayOnlyLocation]="true" [width]="120"
+                              [sectorId]="form.get(['checkInPendingList', group, 'sector']).value"
+                              [locationTypeList]="['STORAGE']" formControlName="actualLocation"
+                              [disabled]="checkInStatus" feature="Imp.Ramp.ActualLocation">
+                            </ngc-locations-list>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.unserviceable.ramp" type="check" align="left" cellsAlign="center"
+                      dataField="unserviceable" [width]="30" feature="Imp.Ramp.UnServiceable">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="unserviceable" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.confirmed.ramp" [width]="20" align="center" cellsAlign="center"
+                      dataField="uldConfirmed" feature="Imp.Ramp.Confirmed">
+                    </ngc-data-column>
+                    <ngc-data-column text="accessory" [width]="20" align="center" cellsAlign="center"
+                      dataField="uldConfirmed" feature="Imp.Ramp.Accessory">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-link (click)="openAddAccessory(form.get(['checkInPendingList',group]).value, $event)"
+                            iconType="edit" [disabled]="checkInStatus">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+          <ngc-accordion-card title="import.pending.verification" [selected]="expandorcollapse">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column [column]="3">
+                    <ngc-label label="import.ramp.check.pending.verification"></ngc-label> (
+                    <ngc-display [value]="pendingVerification"></ngc-display>)
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="pendingVerfication">
+                    <ngc-data-column text=" " type="check" [width]="30" align="left" cellsAlign="center"
+                      dataField="sno">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="sno"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='uld.uld.number' [width]="80" dataField="uldNumber" cellsAlign="center"
+                      type="input" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container *ngIf="form.get(['pendingVerfication',group,'contentCode']).value !== 'M'"
+                          [formGroupName]="group">
+                          <ngc-display formControlName="uldNumber" [width]="120"></ngc-display>
+                          <div *ngIf="form.get(['pendingVerfication',group,'ouboundFlightKey']).value">
+                            (
+                            <ngc-display formControlName="ouboundFlightKey"></ngc-display>
+                            /
+                            <ngc-display [onlyDate]="true" formControlName="ouboundFlightDate"></ngc-display>
+                            )
+                          </div>
+                        </ng-container>
+                        <ng-container [formGroupName]="group"
+                          *ngIf="form.get(['pendingVerfication',group,'contentCode']).value === 'M'">
+                          <ngc-display formControlName="uldNumber" color='red' [width]="120"></ngc-display>
+                          <div *ngIf="form.get(['pendingVerfication',group,'ouboundFlightKey']).value">
+                            (
+                            <ngc-display formControlName="ouboundFlightKey"></ngc-display>
+                            /
+                            <ngc-display [onlyDate]="true" formControlName="ouboundFlightDate"></ngc-display>
+                            )
+                          </div>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text='import.ramp.check.transfer.type' dataField="transferType" cellsAlign="center"
+                      align="center" dataType="string" [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist sourceId="WH_TRANSFER_TYPE" sourceType='query'
+                              formControlName="transferType" (ngModelChange)="onChange($event)" [width]="65"
+                              [dropDownWidth]="70" [disabled]="checkInStatus" displayMember="code"></ngc-dropdownlist>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column entityAttribute='Import.Ramp.ContentCode' text='import.ramp.check.content.code.br'
+                      dataField="contentCode" cellsAlign="center" align="center" dataType="string" [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist entityAttribute='Import.Ramp.ContentCode' sourceId='RAMPCONTENTCODE'
+                              sourceType="query" [noBlank]="true" formControlName="contentCode" [width]="45"
+                              [dropDownWidth]="70" [disabled]="checkInStatus"></ngc-dropdownlist>
+                          </ng-container>
+                        </ng-container>
+                        <ng-container *ngIf="checkInStatus">
+                          <ngc-display formControlName="contentCode"></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='g.shc' dataField="shc" cellsAlign="left" align="left" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-shcinput [width]="180" formArrayName="shcs" dataField="shc" [noWrap]="false"
+                              [disabled]="checkInStatus"></ngc-shcinput>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.used.as.trolley" type="check" [width]="30" align="left"
+                      cellsAlign="left" dataField="usedAsTrolley">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="usedAsTrolley" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.damage" type="check" [width]="30" align="left"
+                      cellsAlign="left" dataField="damaged">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="damaged" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.empty" type="check" [width]="30" align="left"
+                      cellsAlign="left" dataField="empty">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="empty" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column *ngIf='!piggyBackLinkFlag' text='imp.eic' [width]="40" dataField="piggyback"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="piggyback">
+                          </ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column *ngIf='piggyBackLinkFlag' text='import.ramp.check.pgy' [width]="40"
+                      dataField="piggyback" cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="piggyback"
+                            (modelChange)="piggiBackInfo(form.get(['pendingVerfication',group]).value, $event,group,'P')">
+                          </ngc-checkbox>
+                          <ngc-link (click)="managePiggyback(form.get(['pendingVerfication',group]).value, $event)"
+                            iconType="edit">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="imp.phc" type="check" [width]="30" align="center" cellsAlign="left"
+                      dataField="phc">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="phc" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="mb.val" type="check" [width]="30" align="left" cellsAlign="center"
+                      dataField="val" value="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="val" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="driverID" [width]="60" align="left" cellsAlign="left" dataField="driverId"
+                      value="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display formControlName="driverId"></ngc-display>
+                          <br>
+                          <ngc-display [onlyDate]="true" [onlyTime]="true" formControlName="handoverDateTime">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.checked.in.by" [width]="60" align="left" cellsAlign="left"
+                      dataField="checkedinBy" value="true"></ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.in.area.br" [width]="20" align="center" cellsAlign="center"
+                      dataField="checkedinArea" value="true"></ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.reconcilliation" [width]="80" dataField="offloadReason"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea [width]="200" [height]="30" [disabled]="checkInStatus"
+                            formControlName="offloadReason" [maxlength]="65"></ngc-textarea>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.upload.photo" [width]="20" align="center"
+                      cellsAlign="center" dataField="uploadphotoFlag" dataField="uploadphotoFlag" type="icon"
+                      iconType="yesno">
+                    </ngc-data-column>
+                    <ngc-data-column text='import.ramp.handling.instruction' [width]="100" dataField="remarks"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea [width]="200" [height]="30" [disabled]="checkInStatus" formControlName="remarks"
+                            [maxlength]="65"></ngc-textarea>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.damage.remark.ramp' dataField="damagedRemarks" cellsAlign="center"
+                      align="center" dataType="string" [width]="100" feature="Imp.Ramp.DamageRemarks">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-remarksinput formControlName="damagedRemarks" [width]="300"
+                            [required]="form.get(['pendingVerfication',group,'damaged']).value==true"
+                            [disabled]="checkInStatus">
+                          </ngc-remarksinput>
+                        </ng-container>
+                        <ng-container [formGroupName]="group">
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.owner.code.ramp' dataField="ownerCarrierCode" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.CarrierOwnerCode">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-lov [maxLength]="3" formControlName="ownerCarrierCode" upperCase='true'
+                              sourceId='CARRIER' sourceType='query' title="import.owner.code.ramp" dataField='code'
+                              [width]="50" [disabled]="checkInStatus">
+                              <ngc-data-column text="g.carrierCode" [width]="80" dataField="code"></ngc-data-column>
+                              <ngc-data-column text="g.carrierName" [width]="150" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.whse.dest" dataField="warehouseDest" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.WhDestination">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-locations-list [noTerminal]="terminalRequired" [displayOnlyLocation]="true"
+                              [width]="120" formControlName="warehouseDest" [disabled]="checkInStatus"
+                              [locationTypeList]="['STORAGE']" (select)="onLocationChange($event , group,'PV')"
+                              feature="Imp.Ramp.WhDestination" required>
+                            </ngc-locations-list>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.location' dataField="actualLocation" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.ActualLocation">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-locations-list [displayOnlyLocation]="true" [width]="120"
+                              [sectorId]="form.get(['pendingVerfication', group, 'sector']).value"
+                              [locationTypeList]="['STORAGE']" formControlName="actualLocation"
+                              [disabled]="checkInStatus" feature="Imp.Ramp.ActualLocation">
+                            </ngc-locations-list>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.unserviceable.ramp" type="check" align="left" cellsAlign="center"
+                      dataField="unserviceable" [width]="30" feature="Imp.Ramp.UnServiceable">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="unserviceable" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.confirmed.ramp" [width]="20" align="center" cellsAlign="center"
+                      dataField="uldConfirmed" feature="Imp.Ramp.Confirmed">
+                    </ngc-data-column>
+                    <ngc-data-column text="accessory" [width]="20" align="center" cellsAlign="center"
+                      dataField="uldConfirmed" feature="Imp.Ramp.Accessory">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-link (click)="openAddAccessory(form.get(['pendingVerfication',group]).value, $event)"
+                            iconType="edit" [disabled]="checkInStatus">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+          <ngc-accordion-card title="import.checkin.verified" [selected]="expandorcollapse">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column [column]="3">
+                    <ngc-label label="import.ramp.check.in.verified"></ngc-label> ({{verified}})
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="verifiedList">
+
+                    <ngc-data-column text=" " type="check" [width]="30" align="left" cellsAlign="center"
+                      dataField="sno">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="sno"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='uld.uld.number' [width]="80" dataField="uldNumber" cellsAlign="center"
+                      type="input" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container *ngIf="form.get(['verifiedList',group,'contentCode']).value !== 'M'"
+                          [formGroupName]="group">
+                          <ngc-display formControlName="uldNumber" [width]="120"></ngc-display>
+                          <div *ngIf="form.get(['verifiedList',group,'ouboundFlightKey']).value">
+                            (
+                            <ngc-display formControlName="ouboundFlightKey"></ngc-display>
+                            /
+                            <ngc-display [onlyDate]="true" formControlName="ouboundFlightDate"></ngc-display>
+                            )
+                          </div>
+                        </ng-container>
+                        <ng-container [formGroupName]="group"
+                          *ngIf="form.get(['verifiedList',group,'contentCode']).value === 'M'">
+                          <ngc-display formControlName="uldNumber" color='red' [width]="120"></ngc-display>
+                          <div *ngIf="form.get(['verifiedList',group,'ouboundFlightKey']).value">
+                            (
+                            <ngc-display formControlName="ouboundFlightKey"></ngc-display>
+                            /
+                            <ngc-display [onlyDate]="true" formControlName="ouboundFlightDate"></ngc-display>
+                            )
+                          </div>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.ramp.check.transfer.type' dataField="transferType" cellsAlign="center"
+                      align="center" dataType="string" [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist sourceId="WH_TRANSFER_TYPE" sourceType='query'
+                              formControlName="transferType" (ngModelChange)="onChange($event)" [width]="65"
+                              [dropDownWidth]="70" [disabled]="checkInStatus" displayMember="code"></ngc-dropdownlist>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column entityAttribute='Import.Ramp.ContentCode' text='import.ramp.check.content.code.br'
+                      dataField="contentCode" cellsAlign="center" align="center" dataType="string" [width]="20">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist entityAttribute='Import.Ramp.ContentCode' sourceId='RAMPCONTENTCODE'
+                              sourceType="query" [noBlank]="true" formControlName="contentCode" [width]="45"
+                              [dropDownWidth]="70" [disabled]="checkInStatus"></ngc-dropdownlist>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='g.shc' dataField="shc" cellsAlign="left" align="left" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-shcinput [width]="180" formArrayName="shcs" dataField="shc" [noWrap]="false"
+                              [disabled]="checkInStatus"></ngc-shcinput>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.used.as.trolley" type="check" [width]="30" align="center"
+                      cellsAlign="center" dataField="usedAsTrolley">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="usedAsTrolley" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.damage" type="check" [width]="30" align="center"
+                      cellsAlign="center" dataField="damaged">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="damaged" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.empty" type="check" [width]="30" align="center"
+                      cellsAlign="center" dataField="empty">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="empty" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column *ngIf='!piggyBackLinkFlag' text='imp.eic' [width]="40" dataField="piggyback"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="piggyback">
+                          </ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column *ngIf='piggyBackLinkFlag' text='import.ramp.check.pgy' [width]="40"
+                      dataField="piggyback" cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="piggyback"
+                            (modelChange)="piggiBackInfo(form.get(['verifiedList',group]).value, $event,group,'V')">
+                          </ngc-checkbox>
+                          <ngc-link (click)="managePiggyback(form.get(['verifiedList',group]).value, $event)"
+                            iconType="edit">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="imp.phc" type="check" [width]="30" align="left" cellsAlign="center"
+                      dataField="phc">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="phc" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="mb.val" type="check" [width]="30" align="center" cellsAlign="center"
+                      dataField="val" value="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="val" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="driverID" [width]="60" align="left" cellsAlign="left" dataField="driverId"
+                      value="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display formControlName="driverId"></ngc-display>
+                          <br>
+                          <ngc-display [onlyDate]="true" [onlyTime]="true" formControlName="handoverDateTime">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.checked.in.by" [width]="60" align="left" cellsAlign="left"
+                      dataField="checkedinBy" value="true">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display formControlName="checkedinBy"></ngc-display>
+                          <br>
+                          <ngc-display [onlyDate]="true" [onlyTime]="true" formControlName="checkedinAt"></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.in.area.br" [width]="20" align="center" cellsAlign="center"
+                      dataField="checkedinArea" value="true">
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ramp.check.upload.photo" [width]="20" align="center"
+                      cellsAlign="center" dataField="uploadphotoFlag" type="icon" iconType="yesno">
+                    </ngc-data-column>
+                    <ngc-data-column text='import.ramp.handling.instruction' [width]="120" dataField="remarks"
+                      cellsAlign="center" align="center" dataType="string">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea [width]="250" [height]="30" [disabled]="checkInStatus" formControlName="remarks"
+                            [maxlength]="65"></ngc-textarea>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.damage.remark.ramp' dataField="damagedRemarks" cellsAlign="center"
+                      align="center" dataType="string" [width]="100" feature="Imp.Ramp.DamageRemarks">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-remarksinput formControlName="damagedRemarks" [width]="300"
+                            [required]="form.get(['verifiedList',group,'damaged']).value==true"
+                            [disabled]="checkInStatus">
+                          </ngc-remarksinput>
+                        </ng-container>
+                        <ng-container [formGroupName]="group">
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.owner.code.ramp' dataField="ownerCarrierCode" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.CarrierOwnerCode">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-lov [maxLength]="3" formControlName="ownerCarrierCode" upperCase='true'
+                              sourceId='CARRIER' sourceType='query' title="import.owner.code.ramp" dataField='code'
+                              [width]="50" [disabled]="checkInStatus">
+                              <ngc-data-column text="g.carrierCode" [width]="80" dataField="code"></ngc-data-column>
+                              <ngc-data-column text="g.carrierName" [width]="150" dataField="desc"></ngc-data-column>
+                            </ngc-lov>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.whse.dest" dataField="warehouseDest" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.WhDestination">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-locations-list [noTerminal]="terminalRequired" [displayOnlyLocation]="true"
+                              [width]="120" formControlName="warehouseDest" [disabled]="checkInStatus"
+                              [locationTypeList]="['STORAGE']" (select)="onLocationChange($event , group,'V')"
+                              feature="Imp.Ramp.WhDestination" required>
+                            </ngc-locations-list>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text='import.location' dataField="actualLocation" cellsAlign="center"
+                      align="center" dataType="string" [width]="20" feature="Imp.Ramp.ActualLocation">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container>
+                          <ng-container [formGroupName]="group">
+                            <ngc-locations-list [displayOnlyLocation]="true" [width]="120"
+                              [sectorId]="form.get(['verifiedList', group, 'sector']).value"
+                              [locationTypeList]="['STORAGE']" formControlName="actualLocation"
+                              [disabled]="checkInStatus" feature="Imp.Ramp.ActualLocation">
+                            </ngc-locations-list>
+                          </ng-container>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.unserviceable.ramp" type="check" align="left" cellsAlign="center"
+                      dataField="unserviceable" [width]="30" feature="Imp.Ramp.UnServiceable">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="unserviceable" [disabled]="checkInStatus"></ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.confirmed.ramp" [width]="20" align="center" cellsAlign="center"
+                      dataField="uldConfirmed" feature="Imp.Ramp.Confirmed">
+                    </ngc-data-column>
+                    <ngc-data-column text="accessory" [width]="20" align="center" cellsAlign="center"
+                      dataField="uldConfirmed" feature="Imp.Ramp.Accessory">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-link (click)="openAddAccessory(form.get(['verifiedList',group]).value, $event)"
+                            iconType="edit" [disabled]="checkInStatus">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="nilCargo">
+      <ngc-column align='center'>
+        <br>
+        <br>
+        <h4>
+          <ngc-label label="import.ramp.check.no.ulds.manifested"></ngc-label>
+        </h4>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #telexWindow [width]="700" [height]="550" title="import.ramp.check.send.telex">
+    <app-send-telex #telexWindowRef (update)="closeSendTelex($event)" [list]="arrayListSendTelex"></app-send-telex>
+  </ngc-window>
+
+  <ngc-window #driverIDWindow [width]="600" [height]="300" [title]="driverIdLabel">
+    <app-driver-id #driverIDRef (update)="closeUldWindowEvent($event)" [list]="arrayList"></app-driver-id>
+  </ngc-window>
+
+  <ngc-window #addULDWindow [width]="900" [height]="700" title="import.ramp.check.add.uld.trolly">
+    <app-add-uld #addULDRef (update)="closeAddNewUldWindowEvent($event)" [list]="addUldDetails"></app-add-uld>
+  </ngc-window>
+
+  <ngc-window #uploadPhotoWindow [width]="1100" [height]="650" title="import.ramp.check.upload.photo"
+    (close)="onClosePhotoWindow()">
+    <app-upload-photo #uploadPhotoWindow (update)="closeUploadPhotoWindow($event)" [list]="arrayListforUpload">
+    </app-upload-photo>
+  </ngc-window>
+
+  <ngc-window #tempLogWindow [width]="1200" [height]="300" title="import.temp.log.entry">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th width="20">
+                  <ngc-label label="uld.uld.number"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label label="import.temp.by.voltage"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label label="import.v.by.b"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label label="g.event"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label label="temp.temparature"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label label="import.capture.dt.time"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label label="import.temp.remarks.locn"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName='tempList'>
+              <tr *ngFor="let item of form.get('tempList').controls; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-uldinput formControlName="uldNumber" required [disabled]="true"></ngc-uldinput>
+                </td>
+                <td>
+                  <ngc-dropdownlist accessEnableOn="r" [width]="120" [dropDownWidth]="110"
+                    sourceId="ULD_Temp_Type$Temperature_Type" formControlName="temperatureType">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-numberinput [width]='50' decimalDigits="2" max="999" formControlName="temperatureTypeValue">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-dropdownlist accessEnableOn="r" [width]="120" [dropDownWidth]="110"
+                    sourceId="ULD_Temp_Type$ULD_Temperature_Event" formControlName="uldEvent" required>
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-numberinput formControlName="temperatureValue" required [width]="80" decimalDigits="2"
+                    max="9999999">
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-datetimeinput formControlName="temperatureCaptureDt" showCalendarButton="true"
+                    showTimeButton="true" required>
+                  </ngc-datetimeinput>
+                </td>
+                <td>
+                  <ngc-input formControlName="tempRemarks"></ngc-input>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="12" align="right">
+          <br>
+          <ngc-button (click)="onSaveTempLog()" value="g.save"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+
+  <ngc-window #piggybackWindow [width]="600" [height]="450" title="import.ramp.check.piggyback">
+    <ngc-container *ngIf="showPiggyback" type="tab">
+      <ngc-row>
+        <ngc-column column="6">
+          <strong>
+            <ngc-label label="import.ramp.check.base.uld"></ngc-label> - {{selectedPiggybackUld}}
+          </strong>
+        </ngc-column>
+        <ngc-column align="right" column="5">
+          <ngc-button (click)="addMorePiggybackUld()" value="g.add.more" [disabled]="checkInStatus"></ngc-button>
+        </ngc-column>
+        <ngc-column column="11">
+          <ngc-table>
+            <thead>
+              <th>
+                <ngc-checkbox></ngc-checkbox>
+              </th>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="import.ramp.check.piggybacked.uld"></ngc-label>
+              </th>
+            </thead>
+            <tbody formArrayName="piggybackUldList">
+              <ng-container *ngFor="let piggyback of form.get('piggybackUldList').controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td width="10px" style="text-align:center;vertical-align: middle;">
+                    <ngc-checkbox formControlName="sno" [disabled]="checkInStatus"></ngc-checkbox>
+                  </td>
+                  <td width="30px" style="text-align:center;vertical-align: middle;">
+                    <ngc-display [value]="index + 1"></ngc-display>
+                  </td>
+                  <td width="120px">
+                    <ngc-uldinput formControlName="uldNumber" required [disabled]="checkInStatus"></ngc-uldinput>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+        <ngc-column column="11" align="right">
+          <ngc-button (click)="deletePiggybackUld()" value="g.delete" [disabled]="checkInStatus"></ngc-button>
+          <ngc-button (click)="updatePiggybackUld()" value="g.save" [disabled]="checkInStatus"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-window #accessoryPopUp [width]="1500" [height]="600" title="accessory.add.title">
+    <app-add-accessory (autoSearchAccessoryInfo)="autoSearchAccessoryInfo()" (closeWindow)="closeWindow()"
+      [showAsPopup]="true" [inputData]="inputData">
+    </app-add-accessory>
+  </ngc-window>
+  <ngc-report #reportWindow title="g.report"  reportId='InboundRampHandoverForm'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

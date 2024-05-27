@@ -1,0 +1,162 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="title.acceptance.service"></ngc-titlebar>
+  <ngc-container type='square'>
+    <ngc-row>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="awb.acceptancetype"></ngc-label>
+        </div>
+        <ngc-dropdownlist formControlName="acceptanceType" sourceId="CARGO_ACCEPTANCE_TYPE" sourceType="query" required [displayMember]="desc"></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="awb.acceptance.servicenumber"></ngc-label>
+        </div>
+        <ngc-input width="100px" formControlName="serviceNumber"></ngc-input>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-input width="190px" formControlName="awbNumber"></ngc-input>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="disableCourierTranshipment">
+        <div>
+          <ngc-label label="flight.incoming.flight"></ngc-label>
+        </div>
+        <ngc-input width="100px" formControlName="incomingFlight"></ngc-input>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="disableCourierTranshipment">
+        <div>
+          <ngc-label label="flight.incoming.flight.date"></ngc-label>
+        </div>
+        <!-- <ngc-input width="200px" formControlName="incomingFlightDate"></ngc-input> -->
+        <ngc-datetimeinput [width]="150" formControlName="incomingFlightDate"></ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button width="100px" label="g.search" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button width="150px" label="export.all.service.no" (click)="onServiceNumber()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--<form [formGroup]="displayForm">-->
+  <ngc-container *ngIf="disableControls" type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="awb.acceptance.servicenumber"></ngc-label>
+        </div>
+        <ngc-display formControlName="serviceNumber"></ngc-display>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="agent.agentCode"></ngc-label>
+        </div>
+        <!-- <ngc-input formControlName="agentCode" required></ngc-input> -->
+        <ngc-lov required (select)="onAgentNameAutoFill($event,item)" formControlName="agentCode" sourceId="COMPANY" title="g.customer.list"
+          dataField="code" [width]="100" [disabled]="agentCodeFlag">
+          <ngc-data-column text="agent.agentCode" dataField="code" [width]="50"></ngc-data-column>
+          <ngc-data-column text="agent.agentName" dataField="desc" [width]="80"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="agent.agentName"></ngc-label>
+        </div>
+        <ngc-input formControlName="agentName" required [disabled]="agentNameFlag"></ngc-input>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.cargo.doc.service.creation.datetime"></ngc-label>
+        </div>
+        <ngc-display formControlName="serviceCreationDate"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <!-- <ngc-column column="2" *ngIf="disableContractorICPass"> -->
+        <div>
+          <ngc-label label="export.cargo.doc.contractor.ic.airport.pass"></ngc-label>
+        </div>
+      
+        <ngc-input formControlName="authorizationIdentificationNumber" required></ngc-input>
+      </ngc-column>
+      <ngc-column column="2">
+        <!-- <ngc-column column="2" *ngIf="disableContractorICPass"> -->
+        <div>
+          <ngc-label label="g.contractorName"></ngc-label>
+        </div>
+        <ngc-input formControlName="authorizationIdentificationName" required></ngc-input>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="nextFlag">
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button label="g.next" (click)="onNext()"></ngc-button>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="!nextFlag">
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button label="g.validate" (click)="onValidate()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--</form>-->
+  <!--// WINDOW POP UP FOR List of Service Numbers //-->
+  <ngc-window #window width="900" height="400" title="export.cargo.doc.service.numbers.list" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="exp.acceptance.service.terminal"></ngc-label>
+          </div>
+          <ngc-input formControlName="serviceTerminal"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="awb.acceptance.servicenumber"></ngc-label>
+          </div>
+          <ngc-input formControlName="serviceNumber"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="agent.agentCode"></ngc-label>
+          </div>
+          <ngc-input formControlName="agentCode"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="g.status"></ngc-label>
+          </div>
+          <ngc-input formControlName="status"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label=" "></ngc-label>
+          </div>
+          <ngc-button label="g.search" (click)="onSearchFilter($event)"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-datagrid formArrayName="serviceNumberList" [height]="200" (linkClick)="onLinkClick($event)">
+            <ngc-data-column text="awb.acceptance.servicenumber" dataField="serviceNumber" [width]='100' align="center" type="link" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="agent.agentCode" dataField="agentCode" [width]='100' align="center" type="link" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="agent.agentName" dataField="agentName" [width]='100' align="center" type="link" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.date" dataField="serviceCreationDate" [width]='100' align="center" type="displayDate" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.status" dataField="status" [width]='100' align="center" type="link" cellsAlign="center"></ngc-data-column>
+          </ngc-datagrid>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

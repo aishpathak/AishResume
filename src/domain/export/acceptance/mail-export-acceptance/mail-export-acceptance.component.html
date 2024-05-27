@@ -1,0 +1,481 @@
+<ngc-titlebar title='export.export.mail.acceptance.title' (save)="onSave($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="exportAcceptanceForm">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="byAgentMode" checked="true">
+            <ngc-i18n value="agent.agent" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="byGHAMode">
+            <ngc-i18n value="export.mail.acceptance.other.gha" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column column="11">
+        <ngc-row>
+          <ngc-column column="2" *ngIf="agentModeFlag && !displayQuery">
+            <ngc-label label="agent.agent"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" (select)="customerDetails($event)" formControlName="agentCode"
+                [validOnly]='true' required sourceId="PA_CUSTOMER" title="g.customer.list" dataField="desc"
+                [width]="130" [noCache]="true">
+                <ngc-data-column text="customer.code" dataField="code" [width]="80"></ngc-data-column>
+                <ngc-data-column text="customer.name" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="agentModeFlag && displayQuery">
+            <ngc-label label="agent.agent"></ngc-label>
+            <div>
+              <ngc-display formControlName="agentCode"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="agentModeFlag && !displayQuery">
+            <ngc-label label="mailbag.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="carrierCode" required sourceId="CARRIER_OPT"
+                [validOnly]='true' title="Carrier" dataField="code" [width]="120">
+                <ngc-data-column text="g.carrierCode" dataField="code" [width]="30"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="agentModeFlag && displayQuery">
+            <ngc-label label="mailbag.carrier"></ngc-label>
+            <div>
+              <ngc-display formControlName="carrierCode"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="!agentModeFlag && !displayQuery">
+            <ngc-label label="export.mail.acceptance.trf.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="fromcarrier" required sourceId="DNATA_CARRIERCODE"
+                [validOnly]='true' (select)="onCarrier($event)" title="Carrier" dataField="code" [width]="120">
+                <ngc-data-column text="g.carrierCode" dataField="code" [width]="30"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="!agentModeFlag && displayQuery">
+            <ngc-label label="export.mail.acceptance.trf.carrier"></ngc-label>
+            <div>
+              <ngc-display formControlName="fromcarrier"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="!agentModeFlag && !displayQuery">
+            <ngc-label label="awb.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="carrierCode" required sourceId="SATS_CARRIERCODE"
+                [validOnly]='true' title="Carrier" dataField="code" [width]="120">
+                <ngc-data-column text="g.carrierCode" dataField="code" [width]="30"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="!agentModeFlag && displayQuery">
+            <ngc-label label="awb.carrier"></ngc-label>
+            <div>
+              <ngc-display formControlName="carrierCode"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-label label="mailbag.store.location"></ngc-label>
+            <div>
+              <!-- <ngc-input formControlName="uldNumber" (ngModelChange)="onUldNumber($event)" upperCase="true"
+                [width]="140"></ngc-input> -->
+              <ngc-movable-storage-location accessEnableOn="r" upperCase="true" [maxlength]="12" [minlength]="3"
+                [width]="130" (ngModelChange)="onUldNumber($event)" formControlName="uldNumber">
+              </ngc-movable-storage-location>
+            </div>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-label label="outhouse.warehouselocation"></ngc-label>
+            <div>
+              <ngc-locations-list accessEnableOn="r" [noTerminal]="true" formControlName="warehouseLocation"
+                [displayOnlyLocation]="true">
+              </ngc-locations-list>
+              <!-- <ngc-alphanuminput formControlName='warehouseLocation' upperCase='true' [maxlength]="11" [width]="140">
+              </ngc-alphanuminput> -->
+            </div>
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button accessEnableOn="r" value="expMailAcceptance.next" (click)="onNext()" iconType="next"
+                *ngIf='!displayQuery'>
+              </ngc-button>
+              <ngc-button accessEnableOn="r" value="expMailAcceptance.clear" (click)="onNext()" iconType="clear"
+                *ngIf='displayQuery'>
+              </ngc-button>
+            </div>
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()" iconType="search"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-tabs [width]="800" [height]="200">
+              <ngc-tab-card title="Mail">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column column="4">
+                      <ngc-label label="g.mailBagNumber"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="mailBagNumber" upperCase="true" [width]="300" [maxlength]="29"
+                          required></ngc-input>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="2">
+                      <ngc-label label=""></ngc-label>
+                      <div>
+                        <ngc-button value="expMailAcceptance.addMailBag" (click)="onAdd($event,index)" iconType="add">
+                        </ngc-button>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="4">
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="mailbag.details">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column column="0.5">
+                      <ngc-label label="export.bup"></ngc-label>
+                      <div>
+                        <ngc-checkbox formControlName="bup" cellsAlign="center" (ngModelChange)="onBup($event)"
+                          [width]="38"></ngc-checkbox>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1.7">
+                      <ngc-label label="export.mail.origin.oe"></ngc-label>
+                      <ngc-container>
+                        <ngc-row>
+                          <ngc-column column="3">
+                            <div>
+                              <ngc-input formControlName="originOe1" [maxlength]="2" upperCase="true" [width]="40">
+                              </ngc-input>
+                            </div>
+                          </ngc-column>
+                          <ngc-column column="4">
+                            <div>
+                              <ngc-lov formControlName="originOe2" (select)="getCountryCodeOrigin($event)" required
+                                sourceId="COUNTRY_AND_CITY" title="Origin" dataField="code" [width]="40"
+                                [maxlength]="3">
+                                <ngc-data-column text="flight.airportCode" dataField="code" [width]="30">
+                                </ngc-data-column>
+                              </ngc-lov>
+                            </div>
+                          </ngc-column>
+                          <ngc-column column="3">
+                            <div>
+                              <ngc-input [maxlength]="1" formControlName="originOe3" required upperCase="true"
+                                [width]="40"></ngc-input>
+                            </div>
+                          </ngc-column>
+                        </ngc-row>
+                      </ngc-container>
+                    </ngc-column>
+                    <ngc-column column="1.7">
+                      <ngc-label label="export.mail.destination.oe"></ngc-label>
+                      <div>
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column column="3">
+                              <div>
+                                <ngc-input formControlName="destinationOe1" [maxlength]="2" upperCase="true"
+                                  [width]="40"></ngc-input>
+                              </div>
+                            </ngc-column>
+
+                            <ngc-column column="4">
+                              <div>
+                                <ngc-lov formControlName="destinationOe2" required
+                                  (select)="getCountryCodeDestination($event)" sourceId="COUNTRY_AND_CITY"
+                                  title="Destination" dataField="code" [width]="40" [maxlength]="3">
+                                  <ngc-data-column text="flight.airportCode" dataField="code" [width]="30">
+                                  </ngc-data-column>
+                                </ngc-lov>
+                              </div>
+                            </ngc-column>
+
+                            <ngc-column column="3">
+                              <div>
+                                <ngc-input formControlName="destinationOe3" [maxlength]="1" required upperCase="true"
+                                  [width]="40">
+                                </ngc-input>
+                              </div>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="export.category"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='Mail$MailCategory' required [width]="80" formControlName="category">
+                        </ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="mailbag.mail.type"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='MAIL_SUBTYPE' [width]="80" required sourceType='query'
+                          formControlName="mailType"></ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="mailbag.year"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='MAIL_YEARS' [width]="80" required sourceType='query'
+                          formControlName="year"></ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="mailbag.dsn"></ngc-label>
+                      <div>
+                        <ngc-maskedinput formControlName="dsn" (ngModelChange)="appendDsnNumber()" upperCase="true"
+                          [width]="80" mask="####" required></ngc-maskedinput>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1" *ngIf="!showPiece">
+                      <ngc-label label="mailbag.rsn"></ngc-label>
+                      <div>
+                        <ngc-maskedinput formControlName="rsn" (ngModelChange)="appendReceptacleNumber()"
+                          upperCase="true" [width]="80" mask="###" required></ngc-maskedinput>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1" *ngIf="showPiece">
+                      <ngc-label label="awb.pieces"></ngc-label>
+                      <div>
+                        <ngc-piecesinput formControlName="pieces" upperCase="true" [width]="80" mask="###" required>
+                        </ngc-piecesinput>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="export.mail.acceptance.last.bag"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='Mail$MailLastBag' required [width]="80" formControlName="lastBag">
+                        </ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="export.mail.acceptance.register.mail"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='Mail$MailRegistered' required [width]="80"
+                          formControlName="registerMail"></ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <ngc-column column="1">
+                      <ngc-label label="g.weight"></ngc-label>
+                      <div>
+                        <!-- <ngc-weightinput [weightDigits] = "3" [weightDecimalDigits]="1" formControlName="weight" required></ngc-weightinput> -->
+                        <ngc-numberinput *ngIf="!showPiece" [digits]="3" [decimalDigits]="1"  formControlName="weight"
+                          required></ngc-numberinput>
+                        <ngc-numberinput *ngIf="showPiece" [digits]="4" [decimalDigits]="1"  formControlName="weight"
+                          required></ngc-numberinput>
+                        <!-- showPiece -->
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column column="10"></ngc-column>
+                    <ngc-column column="2">
+                      <ngc-button value="expMailAcceptance.addMailBagDetails" (click)="onAdd($event)" iconType="add">
+                      </ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+            </ngc-tabs>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="show" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.sel"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.bag.number"></ngc-label>
+              </th>
+              <th *ngIf="byGHAEnabled">
+                <ngc-label label="export.mail.acceptance.transfer.from.carrier"></ngc-label>
+              </th>
+              <th *ngIf="byGHAEnabled">
+                <ngc-label label="mailbag.carrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.next.destination"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.dispatch"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.mail.acceptance.receptacle.number"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.origin"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.destination"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.pieces"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.warehouse.location"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.shipment.location"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.registered"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.embargo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mailbag.damaged"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flight.pa.flight"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="mailExportAcceptance">
+            <tr *ngFor="let item of exportAcceptanceForm.controls.mailExportAcceptance.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="select"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-display formControlName="mailBagNumber">
+                </ngc-display>
+              </td>
+              <td *ngIf="byGHAEnabled">
+                <ngc-lov formControlName="outgoingCarrier" sourceId="SATS_CARRIERCODE" [validOnly]='true'
+                  title="mailbag.transferCarrier" dataField="code" [width]="70">
+                  <ngc-input formControlName="outgoingCarrier" upperCase="true" [width]="70"></ngc-input>
+                </ngc-lov>
+              </td>
+              <td *ngIf="byGHAEnabled">
+                <ngc-lov formControlName="carrierCode" sourceId="SATS_CARRIERCODE" [validOnly]='true'
+                  title="mailbag.transferCarrier" dataField="code" [width]="40">
+                  <ngc-input formControlName="carrierCode" upperCase="true" [width]="50"></ngc-input>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-lov formControlName="nextDestination" (select)="getCountryCodeDestination($event)"
+                  sourceId="COUNTRY_AND_CITY" title="nextDestination" dataField="code" [width]="40" [maxlength]="3">
+                  <!-- <ngc-input formControlName="nextDestination" upperCase="true" [width]="80"></ngc-input> -->
+                  <ngc-data-column text="flight.airportCode" dataField="code" [width]="30">
+                  </ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-display formControlName="dispatchNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="receptacleNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="origin"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="destination"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="pieces"></ngc-display>
+              </td>
+              <td>
+                <ngc-weightdisplay  minValue="0"  formControlName="weight">
+                </ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="warehouseLocation"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="shipmentLocation"></ngc-display>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="registeredIndicator"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="embargoFlag"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="damaged"></ngc-icon>
+              </td>
+              <td>
+                <ngc-display formControlName="paFlightKey"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12" align="right">
+        <ngc-button value="g.delete" (click)="onDelete($event)" iconType="delete"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12" align="right"></ngc-column>
+      <ngc-button value="g.delete" (click)="onDelete($event)" iconType="delete"></ngc-button>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #insertionWindow [width]="350" title="export.mail.manifest.add.nestedid" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="mailbag.store.location"></ngc-label>
+          <div>
+            <ngc-input formControlName="nestedStoreLocation" [width]="320" maxLength='30' required></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.mail.manifest.nestedid"></ngc-label>
+          <div>
+            <ngc-input formControlName="nestedId" [width]="320" maxLength='30' required></ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column='11' align='right'>
+          <ngc-button (click)="addNestedId()" value="g.save"></ngc-button>
+          <ngc-button (click)="onToggleInsert()" value="g.cancel"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+
+<ngc-footer>
+  <ngc-row>
+    <ngc-column type="tab">
+      <ngc-button value="expMailAcceptance.capture" (click)="captureDamage($event)"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

@@ -1,0 +1,186 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='Batch Job Monitoring Function' (save)="onSave($event)" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="4">
+        <ngc-label label='Enter Job Name'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="400" formControlName="jobName" uppercase="false"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label label='Enter Job Group'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="400" formControlName="jobGroup"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label='Check Job With Name Exist' (click)="onCheckJob($event)"
+            iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='Enter Date And Time'></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="jobScheduleTime" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label='Enter Cron Expression'></ngc-label>
+        <div>
+          <ngc-input [width]="300" formControlName="cronExpression"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='Select Sample Cron'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="cronExpression" [width]="159" [dropDownWidth]="159"
+            sourceId="General$SampleCRON"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label label='Job Class'></ngc-label>
+        <div>
+          <ngc-input [width]="360" formControlName="jobClazz" uppercase="false"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='Submit' (click)="onCreateJob($event)"></ngc-button>
+          <ngc-button label='Refresh' (click)="onRefreshJob($event)"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="S No"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Job Name"></ngc-label>
+              </th>
+              <!-- <th>
+                <ngc-label label="Job Schedule Time"></ngc-label>
+              </th> -->
+              <th>
+                <ngc-label label="Job Last Fired Time"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Job Next Fired Time"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Action"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Job Status"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="jobDataMap">
+            <tr *ngFor="let item of form.controls.jobDataMap.controls; let index=index" [formGroupName]="index"
+              [ngStyle]="{'backgroundColor': (item.controls.jobNotRunningFlag.value === 1 || item.controls.jobStatus.value === 'ERROR') ? 'orange' : null}">
+              <td>
+                {{index + 1}}
+              </td>
+              <td>
+                <ngc-display formControlName="jobName"></ngc-display>
+              </td>
+              <!-- <td>
+                <ngc-display formControlName="jobScheduleTime"></ngc-display>
+              </td> -->
+              <td>
+                <ngc-display formControlName="jobLastFireTime"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="jobNextFireTime"></ngc-display>
+              </td>
+              <td>
+                <ngc-button label='Start Job Now' (click)="onStartJob(index)"></ngc-button>
+                <ngc-button label='Pause Job' (click)="onPauseJob(index)"></ngc-button>
+                <ngc-button label='Resume Job' (click)="onResumeJob(index)"></ngc-button>
+                <ngc-button label='Delete Job' (click)="onDeleteJob(index)"></ngc-button>
+                <ngc-button label='Stop Job' (click)="onStopJob(index)"></ngc-button>
+                <ngc-button label='Edit Job' (click)="onEditJob(index)"></ngc-button>
+                <ngc-button label='Clean Up Job' (click)="onCleanUpJob(index)"></ngc-button>
+              </td>
+              <td>
+                <ngc-label formControlName="jobStatus"></ngc-label>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]='reinitiateForm'>
+  <ngc-window #reinitiateWindow width="500" [height]="300" title="reinitiate.esb.msg">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="g.message"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="messages" sourceId='DROPDOWN_MESSAGETYPE1' sourceType='query'
+              [multiSelect]="true"></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="date"></ngc-label>
+          <div>
+            <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" [width]='150'
+              formControlName='datetoUpdate'></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="diff.in.mins"></ngc-label>
+          <div>
+            <ngc-numberinput negativeSymbol=" " formControlName="diffInMins" digits="10" decimalDigits="0"
+              [width]="100">
+            </ngc-numberinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <!-- <ngc-container type="box"> -->
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=""></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value=""></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="updateMsgDetails()" value="g.update">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <!-- </ngc-container> -->
+    </ngc-container>
+  </ngc-window>
+  <ngc-footer [height]="50">
+    <ngc-row>
+      <ngc-column>
+        <ngc-button value="reinitiate.esb.msg" (click)="openWindow()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-footer>
+</form>

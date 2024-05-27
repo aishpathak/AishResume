@@ -1,0 +1,214 @@
+<ngc-titlebar title='trm.maintainTransferManifestbyAWB' (save)="onSave($event)" [disableSave]="disableSave"
+  (onClear)="onClear($event)" (cancel)="cancel()"></ngc-titlebar>
+<form [formGroup]="form" *ngIf="showPage">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label="transhipment.from.airline"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" formControlName="carrierCodeFrom" sourceId='CARRIER' title='g.carrier' [width]="40"
+          dataField='code' displayMember='code'>
+          <ngc-data-column text="g.carrier" dataField="code" [width]="70"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="transhipment.to.airline"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" formControlName="carrierCodeTo" sourceId='CARRIER' title='g.carrier' [width]="40"
+          dataField='code' displayMember='code'>
+          <ngc-data-column text="g.carrier" dataField="code" [width]="70"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column feature="Transhipment.TRM.SearchByULD">
+        <div>
+          <ngc-label label="billing.uld"></ngc-label>
+        </div>
+        <ngc-uldinput formControlName="uldNumber"></ngc-uldinput>
+      </ngc-column>
+      <ngc-column>
+        <br>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)="search()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="8">
+
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.trmNumber"></ngc-label>
+        </div>
+        <ngc-input width='90px' formControlName="trmNumber" upperCase='true'></ngc-input>
+      </ngc-column>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.issueDateTime"></ngc-label>
+        </div>
+        <ngc-datetimeinput width='150px' formControlName="issuedDate" [showCalendarButton]="true"
+          [showTimeButton]="true"></ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.airlineNumber"></ngc-label>
+        </div>
+        <ngc-input width='90px' formControlName="airlineNumber" upperCase='true' pattern="^[A-Za-z0-9]*$"
+          maxlength="10"></ngc-input>
+      </ngc-column>
+      <ngc-column column="8">
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <!-- <ngc-button value='delete' (click)="delete()"></ngc-button> -->
+        <ngc-button value='g.add' (click)="add()" [disabled]="disableSave"></ngc-button>
+        <!-- <ngc-button value='trm.finalize' (click)="finalize()"></ngc-button> -->
+
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="awbInfoList" [pageSize]="9" #awbList>
+          <!-- <ngc-data-column text='inventoryPieces' dataField="inventoryPieces" [hidden]="true" ></ngc-data-column> -->
+          <ngc-data-column text="g.select" dataField="select" type="check" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="select"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-awbinput #shipmentNo formControlName="shipmentNumber"
+                  (ngModelChange)='changeShipmentnumberSubscription($event,group)' required></ngc-awbinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="trm.flight" dataField="inboundFlightNumber" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-combobox formControlName="inboundFlightNumber" upperCase="true" [width]='100'
+                  [sourceParameters]="{ 'parameter1': form.get(['awbInfoList',group,'shipmentNumber']).value }"
+                  (select)="getFlight($event , group)" sourceId='MANIFEST_FLIGHT_INFO' sourceType='query'
+                  valueMember="desc"></ngc-combobox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="trm.arrivalDate" dataField="inboundFlightDate" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput upperCase="true" [width]='100' formControlName="inboundFlightDate">
+                </ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.handler" dataField="inboundFlightHandler" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist width="80" formControlName="inboundFlightHandler" displayMember='code'
+                  sourceId="Flight$Handler" required></ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.destination" dataField="destination" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input upperCase="true" [width]='80' formControlName="destination" required></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" dataField="pieces" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-piecesinput formControlName="pieces" required></ngc-piecesinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.weight" dataField="weight" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightinput formControlName="weight" required></ngc-weightinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="trm.weightCode" dataField="weightUnitCode" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist [noBlank]="true" sourceId='EXPORT$Weight_Code' formControlName="weightUnitCode"
+                  width='50px'></ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.natureOfGoods" dataField="natureOfGoodsDescription" align="center"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input upperCase="true" [width]="150" formControlName="natureOfGoodsDescription"></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shcList" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-shcinput upperCase="true" [width]="50" formArrayName="shcList" dataField="specialHandlingCode">
+                </ngc-shcinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="trm.remark" dataField="remarks" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input upperCase="true" [width]="200" [maxLength]="48" formControlName="remarks"></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="import.ShipmentInformation" dataField="" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link iconType="open-link" (linkClick)="redirectToShipmentInformation(group)">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="g.delete" dataField="select" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link iconType="delete" (linkClick)="onDelete(group)">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #showTRMNumberWindow title="trm.trmNumber" [showCloseButton]="true" [width]="10" [showCloseButton]="true"
+    [width]="10">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-label emphasis='md' value="transhipment.trm.number.generated.is"></ngc-label>
+          <div>
+            <ngc-display emphasis='md' formControlName="generatedTRMNumber"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+
+  </ngc-window>
+</form>

@@ -1,0 +1,417 @@
+<ngc-titlebar title="addShipmentsToBeScreenedTitle" (clear)="onClear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="shipmentsToBeScreenedForm">
+  <ngc-container type="tab">
+    <ngc-row feature="Exp.Screening.KCShipment">
+      <ngc-column></ngc-column>
+      <ngc-column [grid24]="true" column="13" align="right">
+        <ngc-container type="square">
+          <ngc-row>
+            <ngc-column>
+              <ngc-container type="square">
+                <ngc-row>
+                  <ngc-column align="center">
+                    <ngc-label label="export.screening.kc.target"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+            <ngc-column>
+              <ngc-container type="square">
+                <ngc-row>
+                  <ngc-column align="center">
+                    <ngc-label label="export.screening.transhipment.target"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="center">
+              <ngc-label label="export.screening.pax.status"></ngc-label>
+              <div>
+                {{kcPAXTarget}}
+              </div>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-label label="export.screening.cao.status"></ngc-label>
+              <div>
+                {{kcCAOTarget}}
+              </div>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-label label="export.screening.pax.status"></ngc-label>
+              <div>
+                {{transPAXTarget}}
+              </div>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-label label="export.screening.cao.status"></ngc-label>
+              <div>
+                {{transCAOTarget}}
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <div ngc-tab-card title='addAWBToScreening'>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="awbnumber"></ngc-label>
+                  <div>
+                    <ngc-awbinput formControlName="shipmentNumber"></ngc-awbinput>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="2" *ngIf="!tenantSpecific">
+                  <ngc-label label="g.reason"></ngc-label>
+                  <div>
+                    <ngc-dropdownlist [width]="185" [source]="screeningReasons" formControlName="reason">
+                    </ngc-dropdownlist>
+                    <!-- <ngc-input formControlName="reason"></ngc-input> -->
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1" *ngIf="!tenantSpecific">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onAddToScreening("awb")' label='export.add.to.screening' #addtoscreeningbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1" feature="Exp.AddToScreening.ByMultipleAwb">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onSearchULDAWB("awb")' label='g.search' iconType="search" #searchbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container *ngIf='shipmentsToBeScreenedForm.get("awbScreeningList").value.length > 0'
+              feature="Exp.AddToScreening.ChargeTo">
+              <ngc-row>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="g.reason"></ngc-label>
+                  <div>
+                    <ngc-dropdownlist [width]="120" sourceId="EXPORT$SCREENINGREASON" formControlName="reason">
+                    </ngc-dropdownlist>
+                    <!-- <ngc-input formControlName="reason"></ngc-input> -->
+                  </div>
+                </ngc-column>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="export.screening.chargeto"></ngc-label>
+                  <div>
+                    <ngc-dropdownlist [width]="120" formControlName="screeningChargeCustomer"
+                      sourceId="EXPORT$SCREENINGCHARGETO" [dropDownWidth]="110" accessEnableOn="r"></ngc-dropdownlist>
+                  </div>
+                </ngc-column>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onAddToScreeningULDAWB("awb")' label='export.add.to.screening'
+                      #addtoscreeningbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container *ngIf='shipmentsToBeScreenedForm.get("awbScreeningList").value.length > 0'
+              feature="Exp.AddToScreening.ByMultipleAwb">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="awbScreeningList">
+                    <ngc-data-column text="" dataField="select" type="check" [width]="30" cellsAlign="center"
+                      align="left">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="select" (click)="onSelectShipment('awb',group)">
+                          </ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.agent" dataField="customerName" [width]="150" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="100" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.carrier" dataField="carrier" [width]="100" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.location" dataField="shipmentLocation" [width]="100" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.origin" dataField="origin" [width]="50" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.destination" dataField="destination" [width]="50" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="piece" [width]="80" cellsAlign="right" align="left"
+                      type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="weight" [width]="80" cellsAlign="right" align="left"
+                      type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="export.book.natureofgoods" dataField="natureOfGoods" [width]="150"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shc" [width]="200" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column [width]="150" text="export.screening.screeningreqpcs"
+                      dataField="screeningReqPieces">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input [width]="300" patternName="digit"
+                            (ngModelChange)="onScrReqPcsUpdate('awb',$event,group)"
+                            formControlName="screeningReqPieces">
+                          </ngc-input>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title='addTranshipmentToScreening' *ngIf="!tenantSpecific">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="flight"></ngc-label>
+                  <div>
+                    <ngc-flightkeyinput formControlName="flightKey" [width]='100'></ngc-flightkeyinput>
+                  </div>
+                </ngc-column>
+                <ngc-column [grid72]="true" [column]="7">
+                  <ngc-label label="date"></ngc-label>
+                  <div>
+                    <ngc-datetimeinput formControlName="flightDate" [width]="100"></ngc-datetimeinput>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onSearch("transhipment")' label='g.search' iconType="search" #searchbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onAddToScreening("transhipment")' label='export.add.to.screening'
+                      #addtoscreeningbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row *ngIf='shipmentsToBeScreenedForm.get("transhipmentScreeningList").value.length > 0'>
+                <ngc-column>
+                  <ngc-datatable formArrayName="transhipmentScreeningList" (linkClick)="onLinkClick($event)">
+                    <ngc-data-column text="" dataField="select" type="check" [width]="30" cellsAlign="center"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="cfAgent" dataField="customerName" [width]="150" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="100" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="awb.origin" dataField="origin" [width]="50" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.destination" dataField="destination" [width]="50" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="piece" [width]="80" cellsAlign="right" align="left"
+                      type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="weight" [width]="80" cellsAlign="right" align="left"
+                      type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="export.book.natureofgoods" dataField="natureOfGoods" [width]="150"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="flight.Flight" dataField="flightKey" [width]="100" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="flight.date" dataField="date" [width]="100" type="displayDate"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="flight.std" dataField="std" [width]="100" type="displayTime"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shc" [width]="150" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title='kcShipmentList' feature="Exp.Screening.KCShipment">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [grid48]="true" [column]="5">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-radiobutton formControlName="flightTypePAX" groupName="flightType">
+                      <ngc-i18n value="flight.flighttype.pax"></ngc-i18n>
+                    </ngc-radiobutton>
+                  </div>
+                </ngc-column>
+                <ngc-column [grid48]="true" [column]="5">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-radiobutton formControlName="flightTypeCAO" groupName="flightType">
+                      <ngc-i18n value="flight.flighttype.cao"></ngc-i18n>
+                    </ngc-radiobutton>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onSearch("kc")' label='g.search' iconType="search" #searchbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onAddToScreening("kc")' label='export.add.to.screening' #addtoscreeningbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row *ngIf='shipmentsToBeScreenedForm.get("kcScreeningList").value.length > 0'>
+                <ngc-column>
+                  <ngc-datatable formArrayName="kcScreeningList" (linkClick)="onLinkClick($event)">
+                    <ngc-data-column text="" dataField="select" type="check" [width]="30" cellsAlign="center"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="cfAgent" dataField="customerName" [width]="150" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="100" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="awb.origin" dataField="origin" [width]="50" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.destination" dataField="destination" [width]="50" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="awb.pieces" dataField="piece" [width]="80" cellsAlign="right" align="left"
+                      type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="awb.weight" dataField="weight" [width]="80" cellsAlign="right" align="left"
+                      type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="export.book.natureofgoods" dataField="natureOfGoods" [width]="150"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="flight.Flight" dataField="flightKey" [width]="100" cellsAlign="left"
+                      align="left"></ngc-data-column>
+                    <ngc-data-column text="flight.date" dataField="date" [width]="100" type="displayDate"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="flight.std" dataField="std" [width]="100" type="displayTime"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shc" [width]="150" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title='addULDShipmentToScreening' feature="Exp.AddToScreening.ByUld">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="export.uldNumber"></ngc-label>
+                  <div>
+                    <ngc-uldinput accessEnableOn="r" [width]="120" formControlName="uldNumber">
+                    </ngc-uldinput>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onSearchULDAWB("uld")' label='g.search' iconType="search" #searchbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container *ngIf='shipmentsToBeScreenedForm.get("uldScreeningList").value.length > 0'>
+              <ngc-row>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="g.reason"></ngc-label>
+                  <div>
+                    <ngc-dropdownlist [width]="120" sourceId="EXPORT$SCREENINGREASON" formControlName="reason">
+                    </ngc-dropdownlist>
+                    <!-- <ngc-input formControlName="reason"></ngc-input> -->
+                  </div>
+                </ngc-column>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label label="export.screening.chargeto"></ngc-label>
+                  <div>
+                    <ngc-dropdownlist [width]="120" formControlName="screeningChargeCustomer" [dropDownWidth]="110"
+                      sourceId="EXPORT$SCREENINGCHARGETO" accessEnableOn="r"></ngc-dropdownlist>
+                  </div>
+                </ngc-column>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onAddToScreeningULDAWB("uld")' label='export.add.to.screening'
+                      #addtoscreeningbutton>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+                <ngc-column [grid72]="true" [column]="8">
+                  <ngc-label></ngc-label>
+                  <div>
+                    <ngc-button (click)='onPrintBUPList()' label='export.screening.printbuplist'>
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-container *ngIf='shipmentsToBeScreenedForm.get("uldScreeningList").value.length > 0'>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="uldScreeningList" [pageable]="false" [showToolbar]="false">
+                    <ngc-data-column text="" dataField="select" type="check" [width]="30" cellsAlign="center"
+                      align="left">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-checkbox formControlName="select" (click)="onSelectShipment('uld',group)">
+                          </ngc-checkbox>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.agent" dataField="customerName" [width]="150" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="100" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.carrier" dataField="carrier" [width]="100" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.uld" dataField="shipmentLocation" [width]="100" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.origin" dataField="origin" [width]="50" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.destination" dataField="destination" [width]="50" cellsAlign="left"
+                      align="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="piece" [width]="80" cellsAlign="right" align="left"
+                      type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="weight" [width]="80" cellsAlign="right" align="left"
+                      type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="export.book.natureofgoods" dataField="natureOfGoods" [width]="150"
+                      cellsAlign="left" align="left"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shc" [width]="200" cellsAlign="left" align="left">
+                    </ngc-data-column>
+                    <ngc-data-column [width]="150" text="export.screening.screeningreqpcs"
+                      dataField="screeningReqPieces">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input [width]="300" patternName="digit"
+                            (ngModelChange)="onScrReqPcsUpdate('uld',$event,group)"
+                            formControlName="screeningReqPieces">
+                          </ngc-input>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-report #reportWindow1 title="g.report" reportId='Screening_Record' [reportParameters]='reportParameters'>
+</ngc-report>

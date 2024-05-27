@@ -1,0 +1,213 @@
+<ngc-titlebar title="tcs.preWaiveparkingMaintenance"></ngc-titlebar>
+<!-- // SEARCH FORM // -->
+<form [formGroup]="preWaivingParkActivitySearchForm">
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="tcs.vehicleNo"></ngc-label>
+                <div>
+                    <ngc-input formControlName="vehicleNo" accessEnableOn="r" sourceId="TCS_VEHICLES"
+                        sourceCategory="dropdown" sourceType="query" [maxlength]="10"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="tcs.periodfrom"></ngc-label>
+                <div>
+                    <ngc-dateinput [width]="120" formControlName="effectiveFromDateTime" accessEnableOn="r" required>
+                    </ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="tcs.periodto"></ngc-label>
+                <div>
+                    <ngc-dateinput [min]="preWaivingParkActivitySearchForm.get('effectiveFromDateTime').value"
+                        [width]="120" formControlName="effectiveTillDateTime" accessEnableOn="r" required>
+                    </ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="tcs.all"></ngc-label>
+                <div>
+                    <ngc-checkbox accessEnableOn="r" formControlName="active"></ngc-checkbox>
+                </div>
+            </ngc-column>
+            <ngc-column align="right">
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" label="search" (click)="onSearch()"></ngc-button>
+                    <ngc-button label="arrival.create" (click)="onCreateUpdateWindow('create')"></ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<!-- // DISPLAY FORM // -->
+<form [formGroup]="preWaivingParkActivity" *ngIf="showData">
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable formArrayName="truckParkList" (linkClick)="onCreateUpdateWindow($event)">
+                    <ngc-data-column text="tcs.vehicleNo" cellsAlign="center" dataField="vehicleNo" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.periodfrom" dataField="effectiveFromDateTime" cellsAlign="center"
+                        type="displayDate" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.periodto" cellsAlign="center" dataField="effectiveTillDateTime"
+                        type="displayDate" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.waivinghours" dataField="waiveHours" cellsAlign="center" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.waivingsetfee" dataField="waiveFee" cellsAlign="center" type="icon"
+                        iconType="yesno" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.multiuse" dataField="multiUse" cellsAlign="center" type="icon"
+                        iconType="yesno" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.used" dataField="active" cellsAlign="center" type="icon" iconType="yesno"
+                        align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.requestedBy" dataField="visitorName" cellsAlign="center" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.update" [width]="50" cellsAlign="center" dataField="edit" iconType='edit'
+                        type="link" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.delete" [width]="50" cellsAlign="center" dataField="delete"
+                        iconType='delete' type="link" align="center">
+                    </ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<!-- //CREATE OR UPDATE FORM// -->
+<form [formGroup]="preWaivingParkActivityCreateUpdateForm">
+    <ngc-window #createUpdateWindow title="tcs.addUpdatepreWaiveparking" [width]="800" [height]="500"
+        (close)="onCreateUpdateWindowClose($event)">
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.dateofapplication"></ngc-label>
+                    <div>
+                        <ngc-dateinput [width]="150" [min]="toMin" required formControlName="applicationDateTime"
+                            (change)=changeDate($event) accessEnableOn="r" type="displayDateTime"></ngc-dateinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.vehicleNo"></ngc-label>
+                    <div>
+                        <ngc-display *ngIf="this.preWaivingParkActivityCreateUpdateForm.get('preWaiveId').value"
+                            formControlName="vehicleNo">
+                        </ngc-display>
+                        <ngc-input required *ngIf="!this.preWaivingParkActivityCreateUpdateForm.get('preWaiveId').value"
+                            formControlName="vehicleNo" accessEnableOn="r" sourceId="TCS_VEHICLES"
+                            sourceCategory="dropdown" sourceType="query" patternName='alphanum' [maxlength]="10">
+                        </ngc-input>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.visitorname"></ngc-label>
+                    <div>
+                        <ngc-alphanuminput upperCase="true" required [width]="150" formControlName="visitorName"
+                            [maxlength]="32"></ngc-alphanuminput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.visitorcompanyname"></ngc-label>
+                    <div>
+                        <ngc-lov formControlName="visitorCompanyId" required dataField="param1" displayField="desc"
+                            patternName="alphanum" sourceId="COMPANY_NAME" [width]="300">
+                            <ngc-data-column text="tcs.companyId" dataField="code" [width]="50"></ngc-data-column>
+                            <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.periodfrom"></ngc-label>
+                    <div>
+                        <ngc-dateinput [width]="150" required formControlName="effectiveFromDateTime"
+                            accessEnableOn="r">
+                        </ngc-dateinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.periodto"></ngc-label>
+                    <div>
+                        <ngc-dateinput [width]="150"
+                            [min]="preWaivingParkActivityCreateUpdateForm.get('effectiveFromDateTime').value" required
+                            formControlName="effectiveTillDateTime" accessEnableOn="r">
+                        </ngc-dateinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.waivinghours"></ngc-label>
+                    <div>
+                        <ngc-numberinput [width]="150" required formControlName="waiveHours" [max]="24"
+                            decimalDigits="0"></ngc-numberinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.waivingsetfee"></ngc-label>
+                    <div>
+                        <ngc-checkbox required formControlName="waiveFee"></ngc-checkbox>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.multiuse"></ngc-label>
+                    <div>
+                        <ngc-checkbox required formControlName="multiUse"></ngc-checkbox>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="6">
+                    <ngc-label label="tcs.reason"></ngc-label>
+                    <div>
+                        <ngc-alphanuminput upperCase="true" [width]="250" required formControlName="reason"
+                            [maxlength]="32"></ngc-alphanuminput>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container type="sectiontop">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="tcs.forInternalUse"></ngc-label>
+                            <div>
+                                <ngc-label label=""></ngc-label>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="tcs.dateofcollection"></ngc-label>
+                            <div>
+                                <ngc-dateinput [width]="150" [min]="toMin" required formControlName="collectionDateTime"
+                                    accessEnableOn="r">
+                                </ngc-dateinput>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="tcs.remarks"></ngc-label>
+                            <div>
+                                <ngc-alphanuminput required upperCase="true" patternName="alpha" [width]="250"
+                                    formControlName="remarks" [maxlength]="65"></ngc-alphanuminput>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+            <ngc-container type="sectiontop">
+                <ngc-row>
+                    <ngc-column align="right">
+                        <ngc-button label="g.save.e" (click)="onCreateUpdate()"></ngc-button>
+                        <ngc-button label="cancel" (click)="onCreateUpdateWindowClose()"></ngc-button>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+</form>

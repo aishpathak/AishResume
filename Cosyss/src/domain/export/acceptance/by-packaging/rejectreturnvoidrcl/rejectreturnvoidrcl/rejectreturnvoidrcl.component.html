@@ -1,0 +1,267 @@
+<ngc-titlebar title="Return Reject Void" [disablePrint]="this.searchResult == false"
+  [disableSave]="this.showTable == false" (print)="onPrint()" (save)="onSave()" (clear)="clear()" (cancel)="onCancel()">
+</ngc-titlebar>
+
+<form [formGroup]="rejectReturnVoidSearchForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="3">
+        <ngc-label label="Return/Reject/Void"></ngc-label>
+        <div>
+          <ngc-dropdownlist [source]='RejRetVoidData' formControlName="actionType" [width]="130"
+            (select)="selectType($event)" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Void'">
+        <ngc-label label="RCL"></ngc-label>
+        <div>
+          <ng-container>
+            <ngc-input accessEnableOn="r" [autoFocus]="true" formControlName="serviceNumber" [width]="130" required>
+            </ngc-input>
+          </ng-container>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Return' 
+        || rejectReturnVoidSearchForm.get(['actionType']).value == 'Reject'">
+        <ngc-label label="g.shipmentNumber"></ngc-label>
+        <div>
+          <ng-container>
+            <ngc-input [disabled]="this.rejectReturnVoidSearchForm.get('uldNumber').value != null" accessEnableOn="r"
+              formControlName="shipmentNumber" [width]="130"
+              [required]="this.rejectReturnVoidSearchForm.get('uldNumber').value == null"></ngc-input>
+          </ng-container>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Return' 
+        || rejectReturnVoidSearchForm.get(['actionType']).value == 'Reject'">
+        <ngc-label label="uld.uld">
+        </ngc-label>
+        <div>
+          <ngc-uldinput [disabled]="this.rejectReturnVoidSearchForm.get('shipmentNumber').value != null"
+            formControlName="uldNumber" [width]="130">
+          </ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1" align="left" verticalAlign="bottom">
+        <ngc-button value="search" (click)="search()" [disabled]="searchButton">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="rejectReturnVoidForm">
+  <ngc-container type="tab" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column [column]="3">
+        <ngc-label label="cus.res"></ngc-label>
+        <div>
+          <ngc-input [width]='250' formControlName="reason" uppercase='true' [maxlength]="20" required>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" *ngIf="this.rejectReturnVoidSearchForm.get(['actionType']).value == 'Return' ">
+        <ngc-label label="Name"></ngc-label>
+        <div>
+          <ngc-input [width]='250' formControlName="authorizedPeronalName" uppercase='true' [maxlength]="20" required>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" *ngIf="this.rejectReturnVoidSearchForm.get(['actionType']).value == 'Return' ">
+        <ngc-label label="HKID"></ngc-label>
+        <div>
+          <ngc-input [width]='250' formControlName="authorizedPeronalNumber" uppercase='true' [maxlength]="20" required>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1" *ngIf="this.rejectReturnVoidSearchForm.get(['actionType']).value == 'Return' ">
+        <ngc-label label="Truck No"></ngc-label>
+        <div>
+          <ngc-input formControlName="truckNumber" uppercase='true' [maxlength]="20">
+          </ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="AWB Number"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.ori.dest"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="warehouse.pcs"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="agent.weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.natureOfGoods"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="agent.shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="uld.uld"></ngc-label>
+              </th>
+              <ng-container *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value != 'Reject'">
+
+                <th>
+                  <ngc-label label="Shipment <br/> Location"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Warehouse <br/> Location"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Warehouse <br/> Destination"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Location <br/> Pieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Location <br/> Weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Return'"
+                    label="Return <br/> Pieces"></ngc-label>
+                  <ngc-label *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Void'"
+                    label="Void <br/> Pieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Return'"
+                    label="Return <br/> Weight"></ngc-label>
+                  <ngc-label *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value == 'Void'"
+                    label="Void <br/> Weight"></ngc-label>
+                </th>
+              </ng-container>
+            </tr>
+          </thead>
+          <tbody formArrayName="shipmentInfo">
+            <ng-container *ngFor="let item of rejectReturnVoidForm.controls.shipmentInfo.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-display formControlName="shipmentNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="origin"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="piece"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="weight">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="natureOfGoodsDescription">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="specialHandlingCode">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="uldNumber">
+                  </ngc-display>
+                </td>
+                <td colspan="7" *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value != 'Reject'"></td>
+                <!-- <ng-container *ngIf="item.controls.shipmentStorageInfo.controls &&
+                                item.controls.shipmentStorageInfo.controls.length > 0; else emptyRow">
+                  <ng-container formArrayName="shipmentStorageInfo">
+                    <ng-container *ngFor="let sitem of item.controls.shipmentStorageInfo.controls let sindex=index"
+                      [formGroupName]="sindex">
+                      <ng-container *ngIf="sindex == 0">
+                        <td>
+                          <ngc-input formControlName="shipmentLocation">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="warehouseLocation">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="actualLocation">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="locationPieces">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="locationWeight">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="returnPieces">
+                          </ngc-input>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="returnWeight">
+                          </ngc-input>
+                        </td>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+                <ng-template #emptyRow>
+                  <td colspan="7"></td>
+                </ng-template> -->
+              </tr>
+              <ng-container *ngIf="rejectReturnVoidSearchForm.get(['actionType']).value != 'Reject'">
+                <ng-container formArrayName="shipmentStorageInfo">
+                  <tr *ngFor="let sitem of item.controls.shipmentStorageInfo.controls let sindex=index"
+                    [formGroupName]="sindex">
+                    <!-- <ng-container *ngIf="sindex > 0"> -->
+                    <td colspan=8>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="shipmentLocation">
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="warehouseLocation">
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="actualLocation">
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="locationPieces">
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-weightinput formControlName="locationWeight">
+                      </ngc-weightinput>
+                    </td>
+                    <td>
+                      <ngc-piecesinput formControlName="returnPieces">
+                      </ngc-piecesinput>
+                    </td>
+                    <td>
+                      <ngc-weightinput formControlName="returnWeight">
+                      </ngc-weightinput>
+                    </td>
+                    <!-- </ng-container> -->
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

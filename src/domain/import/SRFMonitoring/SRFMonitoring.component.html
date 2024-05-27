@@ -1,0 +1,142 @@
+<form [formGroup]="SRFMonitoringForm">
+  <ngc-titlebar title="imp.srf.monitoring" (clear)="clear($event)">
+  </ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='imp.srf.issue.from'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="fromDate" [width]='100' accessEnableOn="r" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='imp.srf.issue.to'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="toDate" [width]='100' [min]="SRFMonitoringForm.controls.fromDate.value"
+            [max]="toMax" accessEnableOn="r" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='import.srf.Number'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="srfNumber" [width]='120'>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='AWB'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" [width]='120'>
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.agent'></ngc-label>
+        <div>
+          <ngc-lov [width]="70" accessEnableOn="r" formControlName="customerShortName" sourceId="AGENT_NAME_DISPLAY_PO"
+            title="g.customer.list" dataField="code">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="import.customer.full.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='agent.searchStatus'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="status" sourceId="SRF_Monitoring$Monitoring_Status"
+            [width]="140">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)='onSearch()' iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <!-- tableview -->
+  <ngc-container *ngIf="showTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value=' '></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="shipmentArray" [pageable]="true" [widthInPixels]="true" [pageSize]="10"
+          [showToolbar]="false" [showPrint]="false" [showXLS]="false" [showPDF]="false" [showCSV]="false"
+          [columnsHeight]="50" (itemSelect)="onCheckBoxClick($event)">
+          <ngc-data-column text="Sel" dataField="selectCheck" [width]='30' align="center" cellsAlign="center"
+            type="check" [checkAll]="true"></ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='50' dataField="serialNo" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="srf.no" [width]='130' dataField="srfNumber" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.srf.date" [width]='120' dataField="srfDate" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" [width]='110' dataField="shipmentNumber" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.agentName" [width]='100' dataField="customerShortName" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.agentCode" [width]='100' dataField="customerCode" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.cc" [width]='50' dataField="ccDes" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.srf.pcs.wt" [width]='110' dataField="srfPicesWeight" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="srf.expiry" [width]='110' dataField="srfExpieryDate" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="exp.truck.number" [width]='120' dataField="truckNumber" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="poIssue.truck" [width]='90' dataField="truckDock" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="timeslot" [width]='80' dataField="timeSlot" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.print.srf" [width]='80' dataField="printSrf" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="cargo.arr" [width]='140' dataField="cargoOffArr" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="cargo.del" [width]='150' dataField="firstCargoDelivery" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="delivery.complete" [width]='150' dataField="deliveryComplete" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.post.srf" [width]='100' dataField="postSrf" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="tracing.userid" [width]='100' dataField="srfIssueUserId" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.cdif" [width]='100' dataField="cdif" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.cancel.srf" [width]='100' dataField="cancelSrf" align="center" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-footer *ngIf="showTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-button class="btn btn-sm" value="imp.capture.time.stamp" (click)="navigateToCaptureTimeStamp()"
+          accessEnableOn="r"></ngc-button>
+        <ngc-button class="btn btn-sm" value="imp.post.unpost.srf" (click)="navigateToPostUnpostSrf()"
+          accessEnableOn="r"></ngc-button>
+        <!-- <ngc-button class="btn btn-sm" value="imp.shp.info" (click)="navigateToShipmentInformation()"
+          accessEnableOn="r">
+        </ngc-button> -->
+      </ngc-column>
+    </ngc-row>
+  </ngc-footer>
+
+</form>

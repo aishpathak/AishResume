@@ -1,0 +1,264 @@
+<ngc-titlebar title="mRCL Summary" (print)="print('pdf')" (clear)="clear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="mrclsummaryFormSearch">
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+
+
+
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+
+      <ngc-column [column]="1.5">
+        <ngc-label label="exp.submission.dt.from">
+        </ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="prelodgeCreationDateFrom" [width]="180">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="exp.submission.dt.to"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="prelodgeCreationDateTo" [width]="180">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="agent.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="shipmentStatus" placeholder="flight.exportimport"
+            sourceId='EXPORT$mRCL_Summary_Status' [autoSelect]="true" width="180">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="exp.security.scr.option"></ngc-label>
+        <div>
+          <ngc-dropdownlist placeholder="flight.exportimport" sourceId='EXPORT$Screening_Option' [width]="230"
+            [autoSelect]="true" formControlName="securityScreeningOption"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="flight.carrier">
+        </ngc-label>
+        <div>
+          <ngc-lov formControlName="carrierCode" sourceId='CARRIER' (modelChange)="checkCarrierCode($event)"
+            title='g.airline' displayMember="code" dataField='code' [width]="80" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="exp.carrier.group"></ngc-label>
+        <div>
+          <ngc-lov formControlName="carriergroup" sourceId="CARRIER_GROUP" (modelChange)="checkCarrierGroup($event)"
+            title='g.airline' displayMember="code" dataField='code' [width]="80" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label="agent.agent"></ngc-label>
+        <div>
+          <ngc-lov [disabled]="true" formControlName="agentName" sourceId="CUSTOMER_LIST_AGT_DEREG"
+            title="agent.appointed.agent.code" dataField="code" width="160" valueMember="code"
+            (select)='onCompanyLOVSelect($event)' accessEnableOn="r">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="exp.iata.name"></ngc-label>
+        <div>
+          <ngc-lov [disabled]="true" formControlName="agentIATACode" sourceId="CUSTOMER_LIST_AGT_DEREG"
+            title="agent.appointed.agent.name" dataField="desc" [width]="160" valueMember="desc"
+            (select)='onCompanyNameLOVSelect($event)' accessEnableOn="r">
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="exp.mrcl.pre.declaration.no">
+        </ngc-label>
+        <div>
+          <ngc-input upperCase="true" formControlName="prelodgeServiceNo" [width]="180"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="exp.truck.number">
+        </ngc-label>
+        <div>
+          <ngc-input formControlName="truckNumber" patternName="alphanum" type="text" [width]="180" maxlength="8">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="exp.secured.transportation.method">
+        </ngc-label>
+        <div>
+          <ngc-dropdownlist placeholder="flight.exportimport" sourceId='EXPORT$Sec_Tr_Md' [width]="230"
+            formControlName="screeningSecuredTransportationMethod"></ngc-dropdownlist>
+        </div>
+        <br />
+      </ngc-column>
+      <ngc-column verticalAlign="middle">
+        <ngc-button label='tracing.search' (click)="onSearch()" accessEnableOn="r" iconType="search">
+        </ngc-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-button *ngIf="this.searchResult == true" label="mrcl.summary.pdf" (click)='createReport("pdf")'>
+        </ngc-button>&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-button *ngIf="this.searchResult == true" label="mrcl.summary.xls" (click)='createReport("xls")'>
+        </ngc-button>
+      </ngc-column>
+
+    </ngc-row>
+
+  </ngc-container>
+</form>
+<form [formGroup]="mrclsummaryForm">
+  <ng-container *ngIf="searchResult">
+    <hr>
+
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="mRCLSummaryTable" [pageable]="true" [pageSize]="10">
+
+            <ngc-data-column text="g.sel" dataField="select" type="radio" [width]='4'>
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-radiobutton groupName="sel" formControlName="select" (click)="selectionRow(group)">
+                  </ngc-radiobutton>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="exp.mrcl.type" align="center" dataField="acceptanceType" [width]="30"
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="exp.mrcl.number" align="center" dataField="prelodgeServiceNo" type="text"
+              [width]='10' cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="exp.rcl.no" align="center" dataField="rclNumber" type="text" [width]='30'
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="exp.mrcl.ttl.pcs.ntwt" dataField="totalPiecesAndWeight" type="text" [width]='30'
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="exp.awb.uld.no" align="center" dataField='shipmentNumber' [width]='30'
+              cellsAlign="center">
+            </ngc-data-column>
+
+            <ngc-data-column text="exp.truck.number" align="center" dataField='truckNumber' [width]='20'
+              cellsAlign="center">
+            </ngc-data-column>
+
+            <ngc-data-column text="agent.agent.name" align="center" dataField="agentName" type="text" [width]='50'
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="flight.carrier" align="center" dataField="carrierCode" type="text" [width]='20'
+              cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="exp.date.time.submission" dataField="prelodgeCreationDateFrom" type="displayDateTime"
+              [width]='50' cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="agent.status" align="center" dataField="shipmentStatus" [width]='20'
+              cellsAlign="center">
+            </ngc-data-column>
+
+            <ngc-data-column text="exp.security.scr.option" align="center" dataField='securityScreeningOption'
+              [width]='50' cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="exp.secured.transportation.method" dataField="screeningSecuredTransportationMethod"
+              [width]='30' align="center" cellsAlign="center">
+            </ngc-data-column>
+            <!---For InLine EDIT-->
+            <ngc-data-column text="Edit" dataField="edit" [width]="20" type="link" iconType="edit" align="center"
+              cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container>
+                  <ngc-link (linkClick)="editmRCL(group)" iconType="edit"
+                    [disabled]="this.mrclsummaryForm.get(['mRCLSummaryTable', group, 'shipmentStatus']).value == 'expired'">
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label class="notes"
+            label='&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp; Wt_Difference - Wt difference between cargo breakdownlist and actual cargo acceptance. Please update the cargo breakdownlist'>
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-container class="notes" *ngIf="this.searchResult == true" type="box" title='import.breakdown.delay.legend'>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label class="notes" label='exp.mrcl.type'></ngc-label>
+        </ngc-column>
+
+        <ngc-column>
+          <ngc-label class="notes" label='agent.status'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label class="notes" label='Bulk    - Bulk Cargo'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label class="notes" label='Submitted'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label class="notes" label='BUP    - Prepack Cargo'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label class="notes" label='import.confirmed.ramp'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label class="notes" label='Mix    - Mix/Prepack Cargo'></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label class="notes" label='Expired'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=''></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label class="notes" label='Wt_Diff'></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ng-container>
+
+
+</form>
+<ngc-report #reportWindow [format]='formatType' title="g.report" [reportId]='reportIdParam'
+  [reportParameters]='reportParameters'>
+</ngc-report>

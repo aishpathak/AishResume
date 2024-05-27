@@ -1,0 +1,37 @@
+<ngc-container>
+    <ngc-row>
+        <ngc-column>
+            <ngc-display-constraint [newConstraintName]="newConstraintName"
+                [constraintName]="terminal.whsHandlingConstraintsName"></ngc-display-constraint>
+            <ngc-button iconType="edit" accessEnableOn="r" label="warehouse.handling.constraint"
+                (click)="onAddHandlingConstraints()"></ngc-button>
+            <ngc-button iconType="refresh" (click)="onRequestRefresh()"></ngc-button>
+        </ngc-column>
+    </ngc-row>
+    <ngc-row>
+        <ngc-column>
+            <ngc-tabs (add)="onAddSector()" (select)='onTabSelect($event)'>
+                <ng-container *ngFor="let sector of terminal.sectorsList; let index=index">
+                    <ngc-tab-card [title]='sector.sectorCode'>
+                        <ngc-terminal-sector (requestRefresh)="onCatchRequestRefresh($event, index)"
+                            *ngIf="currentSelectedIndex === index && sector"
+                            [parentConstraintName]="newConstraintName ? newConstraintName : terminal.whsHandlingConstraintsName"
+                            [parentConstraintId]="newConstraintId ? newConstraintId : constraintId"
+                            [allParentsNames]="terminal.terminalCode" [allParentsIds]="terminal.whsTerminalId"
+                            [sector]="sector"></ngc-terminal-sector>
+                    </ngc-tab-card>
+                </ng-container>
+            </ngc-tabs>
+        </ngc-column>
+    </ngc-row>
+</ngc-container>
+<ngc-window #windowAssociateHandlingConstraint [width]="400" [title]="'warehouse.associate.handling.constraint'">
+    <ngc-associate-handling-constraint [currentConstraintId]="newConstraintId || constraintId"
+        [whsAssociateHandlingConstraintWithAreaId]="terminal.whsAssociateHandlingConstraintWithAreaId"
+        (save)="windowCloseAssociateHandlingConstraint($event)" *ngIf="popUpWindowConfig.associateHandlingConstraint">
+    </ngc-associate-handling-constraint>
+</ngc-window>
+
+<ngc-window #windowAddSectors [width]="1366" [height]="500" title="warehouse.add.sectors" [showCloseButton]="true">
+    <ngc-add-sector (modifySector)="onModifySector($event)" *ngIf="popUpWindowConfig.addSectors"></ngc-add-sector>
+</ngc-window>

@@ -1,0 +1,376 @@
+<form [formGroup]="form">
+    <!-- SHC_CODE_WH -->
+    <ngc-titlebar title="warehouse.handlingconstraints" (save)="onSave()" (clear)="onClear()" (cancel)="onCancel()">
+    </ngc-titlebar>
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column [column]="1.5">
+                <ngc-display [value]="'warehouse.constraint.name'" [i18n]="true"></ngc-display>
+                <div>
+                    <!-- <ngc-input [width]="100" upperCase="true" formControlName="name" required></ngc-input> -->
+                    <ngc-lov accessEnableOn="r" (select)="onLovSelection($event)"
+                        [disabled]="searchDone || showDeleteButton" [noCache]="true" formControlName='name'
+                        [width]='150' upperCase='true' sourceId='WHS_HANDLING_CONSTRAINTS' title='warehouse.handling.constraint'
+                        sourceType="query" [sourceParameters]="sourceParametersValue" dataField='code' required>
+                        <ngc-data-column text='warehouse.handling.constraint' dataField='code' [width]='180'>
+                        </ngc-data-column>
+                        <ngc-data-column text='warehouse.process.handled' dataField='param1' [width]='180'>
+                        </ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1">
+                <ngc-display [value]="'warehouse.process'" [i18n]="true"></ngc-display>
+                <div>
+                    <!-- <ngc-input [width]="100" upperCase="true" formControlName="processHandled"></ngc-input> -->
+                    <ngc-dropdownlist accessEnableOn="r" [disabled]="searchDone || showDeleteButton" [width]="100"
+                        [noBlank]="true" formControlName="processHandled" sourceId='Warehouse$ProcessHandled' required>
+                    </ngc-dropdownlist>
+                    <!-- <ngc-dropdownlist formControlName="segmentId" sourceId="FLIGHTSEGMENT" [width]='70' [noCache]="true" sourceType="query"></ngc-dropdownlist> -->
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="1">
+                <ngc-display [value]="'g.carrier'" [i18n]="true"></ngc-display>
+                <div>
+                    <ngc-lov formControlName="carrierCode" upperCase="true" dataField="code" displayMember="code"
+                        [width]="75" sourceId='CARRIER' title='flight.carrierType'>
+                        <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="1">
+                <div>
+                    &nbsp;
+                </div>
+                <div>
+                    <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch(false)"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1">
+                <div>
+                    &nbsp;
+                </div>
+                <div>
+                    <ngc-button label="warehouse.create" (click)="onCreateNew()" [disabled]="showDeleteButton"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1">
+                <div>
+                    &nbsp;
+                </div>
+                <div>
+                    <ngc-button label="warehouse.deletehandlingconstraint" (click)="onDeleteHandlingConstraintCompletely()" [disabled]="!showDeleteButton">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <!-- ========================Container contains carrier's table===========================   -->
+    <ng-container *ngIf="searchDone">
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button label="add" (click)="handlingConstraintsCarrierListRowAdd()"></ngc-button>
+                    <ngc-button label="delete" (click)="handlingConstraintsCarrierListRowsDelete()"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <div>
+                        <ngc-table>
+                            <thead>
+                                <tr>
+                                    <th>
+                                        <ngc-label label=" "></ngc-label>
+                                    </th>
+                                    <th>
+                                        <ngc-label label="g.carrier"></ngc-label>
+                                    </th>
+                                    <th>
+                                        <ngc-label label="warehouse.process"></ngc-label>
+                                    </th>
+                                    <th>
+                                        <ngc-label label="warehouse.ac.bodytype"></ngc-label>
+                                    </th>
+                                    <th>
+                                        <ngc-label label="warehouse.ac.type"></ngc-label>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody formArrayName="handlingConstraintsCarrierList">
+                                <tr *ngFor="let item of form.controls.handlingConstraintsCarrierList.controls; index as index"
+                                    [formGroupName]="index">
+                                    <td>
+                                        <ngc-checkbox formControlName="select"></ngc-checkbox>
+                                    </td>
+                                    <td>
+                                        <!-- <ngc-input formControlName="carrierCode"></ngc-input> -->
+                                        <ngc-lov formControlName="carrierCode" upperCase="true" dataField="code"
+                                            displayMember="code" [width]="75" sourceId='CARRIER'
+                                            title='flight.carrierType'>
+                                            <ngc-data-column text="g.carrier" dataField="code" [width]="100">
+                                            </ngc-data-column>
+                                            <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                            </ngc-data-column>
+                                        </ngc-lov>
+                                        <!-- <ngc-data-column text="flight.assisted" dataField="param1" [width]="150"></ngc-data-column> -->
+                                    </td>
+                                    <td>
+                                        <ngc-buttoninput formControlName="processHandled"
+                                            sourceId='Warehouse$ProcessHandled'></ngc-buttoninput>
+                                        <!-- <ngc-input formControlName="processHandled"></ngc-input> -->
+                                        <!-- <ngc-dropdownlist [width]="100" [noBlank]="true" formControlName="processHandled"
+                                            sourceId='Warehouse$ProcessHandled'></ngc-dropdownlist> -->
+                                    </td>
+                                    <td>
+                                        <ngc-buttoninput formControlName="aircraftBodyType"
+                                            sourceId='Warehouse$AircraftBodyType'></ngc-buttoninput>
+                                        <!-- <ngc-input formControlName="aircraftBodyType"></ngc-input> -->
+                                        <!-- <ngc-dropdownlist [width]="100" [noBlank]="true" formControlName="aircraftBodyType"
+                                            sourceId='Warehouse$AircraftBodyType'></ngc-dropdownlist> -->
+                                    </td>
+                                    <td>
+                                        <ng-container formArrayName="handlingConstraintsCarrierAircraftTypeList">
+                                            <ng-container
+                                                *ngFor="let subitem of item.controls.handlingConstraintsCarrierAircraftTypeList.controls; index as subindex"
+                                                [formGroupName]="subindex">
+                                                <ngc-checkbox formControlName="select"></ngc-checkbox>
+                                                <ngc-input [width]="50" formControlName="aircraftType"></ngc-input>
+                                            </ng-container>
+                                        </ng-container>
+                                        <ngc-button iconType="delete" label=""
+                                            (click)="handlingConstraintsCarrierAircraftTypeListInnerRowsDelete(index)">
+                                        </ngc-button>
+                                        <ngc-button iconType="add" label=""
+                                            (click)="handlingConstraintsCarrierAircraftTypeListInnerRowAdd(index)">
+                                        </ngc-button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </ngc-table>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+
+        <!-- ========================Container contains next three tables===========================   -->
+
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="warehouse.shc.handlinggroup"></ngc-label>
+                        </ngc-column>
+                        <ngc-column align="right">
+                            <ngc-button label="warehouse.addmore"
+                                (click)="handlingConstraintsSHCHandlingGroupListRowAdd()">
+                            </ngc-button>
+                            <ngc-button label="delete" (click)="handlingConstraintsSHCHandlingGroupListRowsDelete()">
+                                </ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <div>
+                                <ngc-table>
+                                    <thead>
+                                        <tr>
+                                            <th>
+                                                <ngc-label></ngc-label>
+                                            </th>
+                                            <th>
+                                                <ngc-label label="g.name"></ngc-label>
+                                            </th>
+                                        </tr>
+                                    </thead>
+                                    <tbody formArrayName="handlingConstraintsSHCHandlingGroupList">
+                                        <tr *ngFor="let item of form.controls.handlingConstraintsSHCHandlingGroupList.controls; index as index"
+                                            [formGroupName]="index">
+                                            <td>
+                                                <ngc-checkbox formControlName="select"></ngc-checkbox>
+                                            </td>
+                                            <td>
+                                                <ngc-dropdownlist formControlName="shcHandlingGroupCode"
+                                                    sourceType='query' sourceId='WH_SHC_HANDLING_GP' [width]="105">
+                                                </ngc-dropdownlist>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </ngc-table>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-column>
+                <ngc-column column="1">
+
+                </ngc-column>
+                <ngc-column>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="warehouse.billing.chargablelocationtype"></ngc-label>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-table>
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <ngc-label label="warehouse.chargable.locationtype"></ngc-label>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <tr>
+                                        <td>
+                                            <ngc-dropdownlist [width]="200" formControlName="chargableLocationType"
+                                                sourceType='query' sourceId='BILLING_CHARGEABLELOCATION_TYPE'>
+                                            </ngc-dropdownlist>
+                                            <!-- <ngc-dropdownlist formControlName="uldContentCode" sourceType='query' sourceId='WH_CONTENTCODE' [width]="105"></ngc-dropdownlist> -->
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </ngc-table>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-column>
+                <ngc-column column="1">
+                </ngc-column>
+                <ngc-column>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="warehouse.zonelist"></ngc-label>
+                        </ngc-column>
+                        <ngc-column align="right">                            
+                            <ngc-button label="warehouse.addmore" (click)="handlingContraintsZoneListRowAdd()">
+                            </ngc-button>
+                            <ngc-button label="delete" (click)="handlingContraintsZoneListRowsDelete()">
+                            </ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-table>
+                                <thead>
+                                    <tr>
+                                        <th>
+                                            <ngc-label></ngc-label>
+                                        </th>
+                                        <th>
+                                            <ngc-label label="g.type"></ngc-label>
+                                        </th>
+                                        <th>
+                                            <ngc-label label="warehouse.groupname"></ngc-label>
+                                        </th>
+                                        <th>
+                                            <ngc-label label="g.description"></ngc-label>
+                                        </th>
+                                    </tr>
+                                </thead>
+                                <tbody formArrayName="handlingContraintsZoneList">
+                                    <tr *ngFor="let item of form.controls.handlingContraintsZoneList.controls; index as index"
+                                        [formGroupName]="index">
+                                        <td>
+                                            <ngc-checkbox formControlName="select"></ngc-checkbox>
+                                        </td>
+                                        <td>
+                                            <ngc-dropdownlist [width]="100" required [noBlank]="true"
+                                                formControlName="zoneCode" sourceId='Warehouse$ZoneTypes'>
+                                            </ngc-dropdownlist>
+                                        </td>
+                                        <td>
+                                            <ngc-input formControlName="groupName"></ngc-input>
+                                        </td>
+                                        <td>
+                                            <ngc-input formControlName="description"></ngc-input>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </ngc-table>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+
+        <!-- ========================Transfer type table===========================   -->
+
+
+
+        <!-- ========================Container contains last two tables===========================   -->
+
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="warehouse.authorizedagent"></ngc-label>
+                </ngc-column>
+                <ngc-column align="right">                
+                    <ngc-button label="warehouse.addmore" (click)="handlingConstraintsAuthorisedAgentListRowAdd()">
+                    </ngc-button>
+                    <ngc-button label="delete" (click)="handlingConstraintsAuthorisedAgentListRowsDelete()">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <div>
+                        <ngc-table>
+                            <thead>
+                                <tr>
+                                    <th>
+
+                                        <ngc-label label=" "></ngc-label>
+                                    </th>
+                                    <th>
+                                        <ngc-label label="g.name"></ngc-label>
+                                    </th>
+                                    <th>
+                                        <ngc-label label="warehouse.screen.functioncode"></ngc-label>
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody formArrayName="handlingConstraintsAuthorisedAgentList">
+                                <tr *ngFor="let item of form.controls.handlingConstraintsAuthorisedAgentList.controls; index as index"
+                                    [formGroupName]="index">
+                                    <td>
+                                        <ngc-checkbox formControlName="select"></ngc-checkbox>
+                                    </td>
+                                    <td>
+                                        <!-- <ngc-input [width]="100" formControlName="customerCode"></ngc-input> -->
+                                        <ngc-dropdownlist formControlName="customerCode" sourceId="AGENT" [width]='70'
+                                            sourceType="query"></ngc-dropdownlist>
+                                    </td>
+                                    <td>
+                                        <ng-container formArrayName="handlingConstraintsAuthorisedAgentFunctionsList">
+                                            <ng-container
+                                                *ngFor="let subitem of item.controls.handlingConstraintsAuthorisedAgentFunctionsList.controls; index as subindex"
+                                                [formGroupName]="subindex">
+                                                <!-- WH_APPSCREEN -->
+                                                <!-- <ngc-input [width]="50" formControlName="screenFunctionCode"></ngc-input> -->
+                                                <ngc-checkbox formControlName="select"></ngc-checkbox>
+                                                <ngc-dropdownlist formControlName="screenFunctionCode"
+                                                    sourceId="WH_APPSCREEN" [width]='300' [noCache]="true"
+                                                    sourceType="query"></ngc-dropdownlist>
+                                            </ng-container>
+                                        </ng-container>
+                                        <ngc-button iconType="delete" label=""
+                                            (click)="handlingConstraintsAuthorisedAgentFunctionsListInnerRowsDelete(index)">
+                                        </ngc-button>
+                                        <ngc-button iconType="add" label=""
+                                            (click)="handlingConstraintsAuthorisedAgentFunctionsListInnerRowAdd(index)">
+                                        </ngc-button>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </ngc-table>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ng-container>
+</form>

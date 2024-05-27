@@ -1,0 +1,497 @@
+<ngc-titlebar title="eAWB Monitoring" (clear)="onClear($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+
+<form [formGroup]='eawbsearchform'>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='g.awbNumber' shortcutFor="shipmentNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="awb.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrier" [width]="90" title='carrier' upperCase="true"
+            dataField="code" displayMember="code" sourceId="CARRIER">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.flightNumber"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.origin"></ngc-label>
+        </div>
+        <ngc-lov formControlName="origin" [width]="45" title='ORIGIN' upperCase="true" dataField="code"
+          displayMember="code" sourceId="APT">
+          <ngc-data-column text="code" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.destination"></ngc-label>
+        </div>
+        <ngc-lov formControlName="destination" [width]="45" title='DESTINATION' upperCase="true" dataField="code"
+          displayMember="code" sourceId="APT">
+          <ngc-data-column text="code" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="0.5">
+        <ngc-label> </ngc-label>
+        <div>
+          <ngc-checkbox formControlName="seachWithFlightDate" (modelChange)="clickSearchWithFlight($event)">
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='export.flight.report.date.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput [required]="this.eawbsearchform.get('seachWithFlightDate').value" accessEnableOn="r"
+            formControlName="fromDateTimeFlight" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='export.flight.report.date.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput [required]="this.eawbsearchform.get('seachWithFlightDate').value" accessEnableOn="r"
+            formControlName="toDateTimeFlight" [showCalendarButton]="true" [showTimeButton]="true"
+            [min]='eawbsearchform.controls.fromDateTimeFlight.value'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="fwb.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="fwbStatus" sourceId='FWB_Status$FWB_StatusDrop'
+            [width]="110">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button [width]="100" accessEnableOn="r" (click)="onQuery()" value="ecc.query"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12">
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.uldbt"></ngc-label>
+        <div>
+          <ngc-uldinput formControlName="uldNumber"></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="eawb.packagingType"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="accType" sourceId='Accpt_Type$Accpt_TypeDrop'
+            [width]="110">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label="g.shc"></ngc-label>
+        <div>
+          <ngc-shcinput [softDelete]="true" formControlName="shc">
+          </ngc-shcinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="0.5">
+        <ngc-label> </ngc-label>
+        <div>
+          <ngc-checkbox formControlName="seachWithFWBRecv" (modelChange)="clickSearchWithFWBDate($event)">
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='fwb.recv.date.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput [required]="this.eawbsearchform.get('seachWithFWBRecv').value" accessEnableOn="r"
+            formControlName="fwbFromDateTime" [showCalendarButton]="true" [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='fwb.recv.date.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput [required]="this.eawbsearchform.get('seachWithFWBRecv').value" accessEnableOn="r"
+            formControlName="fwbToDateTime" [showCalendarButton]="true" [showTimeButton]="true"
+            [min]='eawbsearchform.controls.fwbFromDateTime.value'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <div>
+          <ngc-label label='warehouse.autorefresh'></ngc-label>
+          <ngc-switchbutton accessEnableOn="r" formControlName="autoRefresh" (modelChange)="autoRefreshChange($event)"
+            [width]="200">
+          </ngc-switchbutton>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12">
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-checkbox formControlName="rclOnly"></ngc-checkbox>
+        <ngc-label label='eawb.with.rcl.only'></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-checkbox formControlName="showBothAWB"></ngc-checkbox>
+        <ngc-label label='show.both.eawb.awb'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <br>
+  <ngc-container *ngIf="showDataOfListFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width="1%">
+                <ngc-label value="val.s.no"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.awbNumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.packagingType"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.uldbt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="billing.org"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.dest"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.rcl.pcs.wgt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.ecc.fwb.pcs.wgt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.fhl.pcs.wgt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.fwb.shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.nog"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.flightno.date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.STDandETD"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.time.remain"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.NAWB.slac"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.flight.doc.recv"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="cdh.pouch"></ngc-label>
+              </th>
+              <th colspan="2">
+                <ngc-label label="fwb.status"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.rcs.time"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.event"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="eawb.multimedia.files"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="eawbMonitoringList">
+            <ng-container *ngFor="let item of eawbsearchform.get('eawbMonitoringList').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td width="1%">
+                  {{index+1}}
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="shipmentNumber">
+                  </ngc-display>
+                  <!-- <ngc-link (click)="routeFHL(item.get('shipmentNumber').value)" emphasis='md'
+                    [model]="item.get('shipmentNumber').value">
+                  </ngc-link> -->
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="packagingType">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="uldNumber">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="origin">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="destination">
+                  </ngc-display>
+                </td>
+                <td [ngStyle]="{'background-color': (item.get('fwbPieces').value !=null && item.get('rclPieces').value != null && item.get('fwbWeight').value != null && item.get('rclWeight').value != null
+                    && item.get('fwbPieces').value  === item.get('rclPieces').value 
+                    && item.get('fwbWeight').value  === item.get('rclWeight').value ) ? 'lightgreen' :'white'}">
+                  <div *ngIf="item.get('rclPieces').value!=null">
+                    <ngc-piecesdisplay formControlName="rclPieces">
+                    </ngc-piecesdisplay>/
+                    <ngc-weightdisplay formControlName="rclWeight">
+                    </ngc-weightdisplay>
+                  </div>
+                </td>
+                <td [ngStyle]="{'background-color': (item.get('fwbPieces').value !=null && item.get('rclPieces').value != null && item.get('fwbWeight').value != null && item.get('rclWeight').value != null
+                    && item.get('fwbPieces').value  === item.get('rclPieces').value 
+                    && item.get('fwbWeight').value  === item.get('rclWeight').value ) ? 'lightgreen' :'white'}">
+                  <!-- <ngc-piecesdisplay formControlName="fwbPieces">
+                  </ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="fwbWeight">
+                  </ngc-weightdisplay> -->
+                  <div *ngIf="item.get('fwbPieces').value!=null">
+                    <ngc-link (click)="openFWB(index)" [model]="item.get('fwbPiecesWeight').value">
+                    </ngc-link>
+                  </div>
+                </td>
+                <td [ngStyle]="{'background-color': (item.get('fwbPieces').value !=null && item.get('fhlPieces').value != null && item.get('fwbWeight').value != null && item.get('fhlWeight').value != null
+                && item.get('fwbPieces').value  === item.get('fhlPieces').value 
+                  && item.get('fwbWeight').value  === item.get('fhlWeight').value ) ? 'lightgreen' :'white'}">
+                  <!-- <ngc-piecesdisplay formControlName="fhlPieces">
+                  </ngc-piecesdisplay>/
+                  <ngc-weightdisplay formControlName="fhlWeight">
+                  </ngc-weightdisplay> -->
+                  <div *ngIf="item.get('fhlPieces').value!=null">
+                    <ngc-link accessEnableOn="r" (click)="openFHL(index)" emphasis='md'
+                      [model]="item.get('fhlPiecesWeight').value">
+                    </ngc-link>
+                  </div>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="fwbshc">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="natureOfGoodsDescription">
+                  </ngc-display>
+                </td>
+                <td>
+                  <div *ngIf="item.get('flightKey').value!=null">
+                    <ngc-display [width]="40" formControlName="flightKey">
+                    </ngc-display>/
+                    <ngc-display [width]="40" formControlName="flightDate" [onlyDate]="true">
+                    </ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <div *ngIf="item.get('dateAtd').value!=null">
+                    <ngc-display [width]="40" formControlName="dateAtd" [onlyTime]="true">
+                    </ngc-display>
+                  </div>
+                  <div *ngIf="item.get('dateAtd').value==null && item.get('dateEtd').value!=null">
+                    <ngc-display [width]="40" formControlName="dateEtd" [onlyTime]="true">
+                    </ngc-display>
+                  </div>
+                  <div
+                    *ngIf="item.get('dateAtd').value==null && item.get('dateEtd').value==null && item.get('dateStd').value!=null">
+                    <ngc-display [width]="40" formControlName="dateStd" [onlyTime]="true">
+                    </ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="remainingTime">
+                  </ngc-display>
+                </td>
+                <td>
+                  <div *ngIf="item.get('slacCheck').value!=null">
+                    <div *ngIf="item.get('slacCheck').value">
+                      <ngc-icon type="yesno" [width]="40" value="yes">
+                      </ngc-icon>
+                    </div>
+                    <div *ngIf="item.get('slacCheck').value==false">
+                      <ngc-icon type="yesno" [width]="40" value="no">
+                      </ngc-icon>
+                    </div>
+                  </div>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="docReceived">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40">
+                  </ngc-display>
+                </td>
+                <td>
+                  <div *ngIf="item.get('fwbStatus').value!=null">
+                    <ngc-display [width]="40" formControlName="fwbStatus" [tooltip]="item.get('tooltipData').value">
+                    </ngc-display>
+                  </div>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="messageProcessedDate">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="rcs">
+                  </ngc-display>
+                </td>
+                <td>
+                  <!-- <ngc-link (linkClick)="fetchAuditTrail(index)" iconType="search"></ngc-link> -->
+                  <ngc-link accessKey="r" (linkClick)="openAuditPage(index,$event)" iconType="open-link"
+                    linkClass="link-shipment-info"></ngc-link>
+                </td>
+                <td>
+                  <ngc-link (linkClick)="onAddPhoto(index)" value="Upload/View Files"></ngc-link>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- Parent Window  for audit trail-->
+  <ng-template #auditTrail title="AUDIT TRAIL">
+    <ngc-container *ngIf="!isClosePopupScreen">
+      <ngc-row>
+        <ngc-column>
+          <app-audit-trail-by-awb [shipmentNumberData]="shipmentNumber"
+            (autoSearchShipmentInfo)="autoSearchShipmentInfo()" [showAsPopup]="true">
+          </app-audit-trail-by-awb>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-template>
+
+  <ngc-window #parentWindow [title]="title" [width]="popUpWidth" [height]="popUpHeight" (close)="closePopScreen()">
+
+    <ng-container *ngTemplateOutlet="templateRef;"></ng-container>
+
+  </ngc-window>
+  <ngc-window #openUploadPhotoPopup title="capture.damage.addphoto" [width]="1200" [height]="500"
+    style="top:170px !important;" [showCloseButton]="true" (close)="onClose()">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="AWB Number"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="Add"></ngc-label>
+                </th>
+                <!-- <th>
+                  <ngc-label value="View"></ngc-label>
+                </th> -->
+              </tr>
+            </thead>
+            <!-- <tbody formArrayName="inventoryListforaddphoto"> -->
+            <ng-container>
+              <tr>
+                <td>
+                  <ngc-display value={{entityKey}}></ngc-display>
+
+                </td>
+                <td>
+                  <div>
+                    <ngc-fileupload #uploadedfiles accept="*/*"
+                      [entityType]="this.eawbsearchform.get('entityType').value" [entityKey]="this.entityKey"
+                      associatedTo="eAWB" stage="eAWB" type="link" icon="camera"
+                      (choose)="onChooseDocuments(uploadedfiles,$event,item.get('entityKey').value)">
+                    </ngc-fileupload>
+
+                  </div>
+
+                </td>
+                <!-- <td>
+                  <div>
+                    <ngc-fileupload [multiple]="true" accept="*/*" viewMode="readonly" [selectable]="false"
+                      [entityType]="this.eawbsearchform.get('entityType').value" [entityKey]="this.entityKey">
+                    </ngc-fileupload>
+                  </div>
+
+                </td> -->
+                <!--<td>
+                   <div>
+                      <ngc-fileupload [multiple]="true" accept="*/*" viewMode="readonly" [selectable]="false"
+                        [entityType]="this.SpecialCargoHandoverForm.get('entityType').value"
+                        [entityKey]="item.get('identityKeyForImage').value">
+                      </ngc-fileupload>
+                    </div> 
+
+                </td>-->
+              </tr>
+            </ng-container>
+            <!-- </tbody> -->
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+
+  <!--  Window  for FHL-->
+  <ng-template #windowFHL title="FHL">
+    <ngc-container *ngIf="!isClosePopupScreen">
+      <ngc-row>
+        <ngc-column>
+          <app-maintain-house [shipmentNumberData]='shipmentNumber' (autoSearchShipmentInfo)="autoSearchShipmentInfo()"
+            [showAsPopup]="true">
+          </app-maintain-house>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-template>
+
+
+  <!--  Window  for FWB-->
+  <ng-template #windowFWB title="FWB">
+    <ngc-container *ngIf="!isClosePopupScreen">
+      <ngc-row>
+        <ngc-column>
+          <app-maintainfwb [shipmentNumberData]='shipmentNumber' (autoSearchShipmentInfo)="autoSearchShipmentInfo()"
+            [showAsPopup]="true">
+          </app-maintainfwb>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-template>
+
+</form>

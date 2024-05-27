@@ -1,0 +1,391 @@
+<form [formGroup]="blackListForm">
+  <ngc-titlebar title='admin.title.blacklist.customer.auth.prsnl'></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="customer.customer.authorized.personnel"></ngc-label>
+        <div>
+          <ngc-dropdownlist [source]="dropdownsourcesearch" formControlName="customerAuthorizedPerson" [width]="170"
+            [dropDownWidth]="159" required accessEnableOn="r"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showAuthPersonnel">
+        <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+        <div>
+          <ngc-input formControlName="authorizedPersonnelName" accessEnableOn="r"
+            entityAttribute='Customer.AuthorisedPersonName' patternName='alphanumspace'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showAuthPersonnel">
+        <ngc-label entityAttribute="Customer.PersonalIdentificationNumber"></ngc-label>
+        <div>
+          <ngc-input formControlName="authorizedPersonnelNumber"
+            entityAttribute="Customer.PersonalIdentificationNumber">
+          </ngc-input>
+        </div>
+        <font size="-2"><i>(Last FOUR characters)</i></font>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showAuthPersonnel">
+        <ngc-label entityAttribute="Customer.AirportPassNumber"></ngc-label>
+        <div>
+          <ngc-input formControlName="airportPassNumber" accessEnableOn="r"
+            entityAttribute="Customer.AirportPassNumber"></ngc-input>
+        </div>
+        <font size="-2" entityAttribute="Customer.AirportPassNumber"><i>(Last FOUR characters)</i></font>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showCustPersonnel">
+        <ngc-label label="g.customerCode"></ngc-label>
+        <div>
+          <ngc-lov formControlName='customerCode' [width]='140' upperCase='true' sourceId='COMPANY_DEREGISTER'
+            title='g.customerCode' dataField='code' (select)='onCustomerCodeLOVSelect($event)' valueMember='code'
+            accessEnableOn="r">
+            <ngc-data-column text='g.customerCode' dataField='code' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.customerName' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+          <!-- //  <ngc-input formControlName="customerCode" placeHolder="g.customerCode" required></ngc-input> -->
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showCustPersonnel">
+        <ngc-label label="g.customerName"></ngc-label>
+        <div>
+          <!-- <ngc-input formControlName="customerName" placeHolder="g.customerName"></ngc-input> -->
+          <ngc-lov formControlName='customerName' [width]='140' upperCase='true' sourceId='COMPANY_DEREGISTER_NAME'
+            title='g.customerName' dataField='desc' (select)='onCustomerNameLOVSelect($event)' valueMember='desc'
+            accessEnableOn="r">
+
+            <ngc-data-column text='g.customerName' dataField='desc' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.customerCode' dataField='code' [width]='100'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1" *ngIf="showCustPersonnel">
+        <br>
+        <div>
+          <ngc-button value="g.search" (click)="onSearchBlackListCustomer()" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1" *ngIf="showAuthPersonnel">
+        <br>
+        <ngc-button vertical-align='middle' value="g.search" (click)="onSearchAuthorizedPersonnel()" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+      <!--<ngc-column [column]="2" *ngIf="showAuthPersonnel">-->
+      <ngc-column [column]="2">
+        <br>
+        <ngc-button vertical-align='middle' value="admin.blacklist.auth.prsnl.rep" (click)="onReportCreation()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="flagShowEditBlackListedCustomer" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="100">
+                <ngc-label value="custauth.customercode"></ngc-label>
+              </th>
+              <th [width]="175">
+                <ngc-label value="custauth.customername"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.associatedairlines"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blackliststartdate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistenddate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistrequestedby"></ngc-label>
+              </th>
+              <th [width]="175">
+                <ngc-label value="custauth.blacklistreason"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistpurpose"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-label formControlName="customerCode1"></ngc-label>
+              </td>
+              <td>
+                <ngc-label formControlName="customerName"></ngc-label>
+              </td>
+              <td>
+                <ngc-taginput formControlName="associatedAirlinesList" UPPERCASE="true"></ngc-taginput>
+              </td>
+              <td>
+                <ngc-datetimeinput [max]="maxDate" formControlName="blackListStartDate" required
+                  [showCalendarButton]="true"></ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-datetimeinput [max]="maxDate" formControlName="blackListEndDate" required
+                  [showCalendarButton]="true"></ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-input formControlName="blackListRequestedBy"></ngc-input>
+              </td>
+              <td>
+                <ngc-combobox sourceId="BLK_CUST_AUTH" sourceType='query' [maxlength]='65'
+                  formControlName="blackListReason" [width]="159" [dropDownWidth]="159" required></ngc-combobox>
+              </td>
+              <td>
+                <ngc-dropdownlist sourceId="Black_List$Blk_Cust_Auth" formControlName="blackListPurpose" [width]="159"
+                  [dropDownWidth]="159" required></ngc-dropdownlist>
+                <!--<ngc-combobox  [width]="300"  formControlName="reasonForRejection" sourceId='COM_REQ_REJECT'
+             sourceType='query' valueMember="desc"></ngc-combobox>-->
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+        <div align='right'>
+          <ngc-button value="admin.blacklist" (click)="onUpdateBlackListCustomer()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="flagShowBlackListedCustomer" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="100">
+                <ngc-label value="custauth.customercode"></ngc-label>
+              </th>
+              <th [width]="175">
+                <ngc-label value="custauth.customername"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="admin.blacklist.associated.airlines"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blackliststartdate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistenddate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistrequestedby"></ngc-label>
+              </th>
+              <th [width]="175">
+                <ngc-label value="custauth.blacklistreason"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistpurpose"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-display formControlName="customerCode2"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="customerName1"></ngc-display>
+              </td>
+              <td>
+                <ngc-taginput formControlName="associatedAirlinesList1" UPPERCASE="true"></ngc-taginput>
+              </td>
+              <td>
+                <ngc-display formControlName="blackListStartDate1" [onlyDate]="true"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="blackListEndDate1" [onlyDate]="true"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="blackListRequestedBy1"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="blackListReason1"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="blackListPurpose1"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+        <div align='right'>
+          <ngc-button value="g.remove" (click)="onRemoveBlackListCustomer()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="flagEditAuthorizedPersonnel" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="100">
+                <ngc-checkbox formControlName="selectAllCheckBox"></ngc-checkbox>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.customername"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.customercode"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.pername"></ngc-label>
+              </th>
+              <th entityAttribute="Customer.PersonalIdentificationNumber" [width]="100">
+                <ngc-label entityAttribute="Customer.PersonalIdentificationNumber" value="custauth.pernumber">
+                </ngc-label>
+              </th>
+              <th entityAttribute="Customer.AirportPassNumber" [width]="100">
+                <ngc-label value="custauth.airportpassno"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blackliststartdate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistenddate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistrequestedby"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistpurpose"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="custauth.blacklistreason"></ngc-label>
+              </th>
+              <th [width]="10">
+                <ngc-label value="custauth.blackliststatus"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="noblackListedAuhtorizedPersonnel">
+            <tr *ngFor="let item of blackListForm.controls.noblackListedAuhtorizedPersonnel.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="check"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-display formControlName="customerName"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="customerCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="authorizedPersonnelName"></ngc-display>
+              </td>
+              <td entityAttribute="Customer.PersonalIdentificationNumber">
+                <ngc-display entityAttribute="Customer.PersonalIdentificationNumber" formControlName="icfin_id">
+                </ngc-display>
+              </td>
+              <td entityAttribute="Customer.AirportPassNumber">
+                <ngc-display formControlName="airportPassNumber"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] == null">
+                <ngc-display value=''></ngc-display>
+                <!-- <ngc-datetimeinput  formControlName="blackListStartDate" required [showCalendarButton]="true" ></ngc-datetimeinput> -->
+              </td>
+              <td *ngIf="arrayReason[index] != null">
+                <ngc-display formControlName="blackListStartDate" [onlyDate]="true"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] == null">
+                <ngc-display value=''></ngc-display>
+                <!-- <ngc-datetimeinput  formControlName="blackListEndDate" required [showCalendarButton]="true" ></ngc-datetimeinput> -->
+              </td>
+              <td *ngIf="arrayReason[index] != null">
+                <ngc-display formControlName="blackListEndDate" [onlyDate]="true"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] == null">
+                <!-- <ngc-input formControlName="blackListRequestedBy"></ngc-input> -->
+                <ngc-display value=''></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] != null">
+
+                <ngc-display formControlName="blackListRequestedBy"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] == null">
+                <ngc-display value=''></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] != null">
+                <ngc-display formControlName="blackListPurpose"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] == null">
+                <ngc-display value=''></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] != null">
+                <ngc-display formControlName="blackListReason"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] == null">
+                <ngc-display value="No"></ngc-display>
+              </td>
+              <td *ngIf="arrayReason[index] != null">
+                <ngc-display value="Yes"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+        <ngc-table>
+          <tr>
+            <th>
+              <ngc-label value="admin.blacklist.fill.details"></ngc-label>
+            </th>
+          </tr>
+          <tr>
+            <th [width]="100">
+              <ngc-label value="custauth.blackliststartdate"></ngc-label>
+            </th>
+            <th [width]="100">
+              <ngc-label value="custauth.blacklistenddate"></ngc-label>
+            </th>
+            <th [width]="100">
+              <ngc-label value="custauth.blacklistrequestedby"></ngc-label>
+            </th>
+            <th [width]="100">
+              <ngc-label value="custauth.blacklistpurpose"></ngc-label>
+            </th>
+            <th [width]="100">
+              <ngc-label value="custauth.blacklistreason"></ngc-label>
+            </th>
+          </tr>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-datetimeinput [min]="dateFrom" formControlName="blackListStartDate" required
+                  [showCalendarButton]="true">
+                </ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-datetimeinput [min]="dateTo" formControlName="blackListEndDate" required
+                  [showCalendarButton]="true">
+                </ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-input formControlName="blackListRequestedBy" required></ngc-input>
+              </td>
+              <td>
+                <ngc-dropdownlist sourceId="Black_List$Blk_Cust_Auth" formControlName="blackListPurpose" [width]="159"
+                  [dropDownWidth]="159" required></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-combobox sourceId="BLK_CUST_AUTH" sourceType='query' [maxlength]='65'
+                  formControlName="blackListReason" [width]="159" [dropDownWidth]="159" required></ngc-combobox>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+        <div align='right'>
+
+          <ngc-button value="admin.blacklist" (click)="onUpdateAllAuthorizedPersonnel()"></ngc-button>
+          <ngc-button [disabled]="disableFlag" value="admin.blacklist.remove" (click)="onRemoveAuthorizedPersonnel()"
+            (click)="onRemoveAllAuthorizedPersonnel()"></ngc-button>
+
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report format='pdf' #reportWindow title="g.report"  reportId='BlackListedAuthorizedPersonnels'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>

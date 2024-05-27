@@ -1,0 +1,164 @@
+<form [formGroup]="sapInvoiceForm">
+  <ngc-titlebar title='billing.sap.invoice' (clear)="onClear($event)" (save)="onSave($event)"
+    (cancel)='backToHome($event)'></ngc-titlebar>
+  <ngc-container type="tab" formGroupName="searchOptions">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="billingverification.customer"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" sourceId="CUSTOMER_LIST" (select)='getCustomerId($event)' formControlName="customerId"
+            title="billing.list.of.customer"  dataField="param1" displayField="desc" valueMember="desc">
+            <ngc-data-column text="billing.id.lowercase"  dataField="param1" [hidden]="true"></ngc-data-column>
+            <ngc-data-column text="g.code"  dataField="code"  [width]="30"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="80" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="import.dateFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="dateTimeFrom" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="import.dateTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="dateTimeTo" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="sap.invoice.credit.no"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="finSysInvoiceNumber"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="billing.esupportdocsent"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="Billing$ESUPPORTDOCSENT" formControlName="esupportDocEmailSent"
+            [noBlank]="true" [width]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+
+      <ngc-column [column]="2" align='left'>
+        <div>
+          <br />
+          <ngc-button accessEnableOn="r" label="g.search" iconType="search" (click)='searchInvoice(0)'></ngc-button><br /><br />
+          <ngc-button label="sap.mailSendingOptions" iconType="send" (click)='sendMail($event)'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="130">
+                <ngc-label value="billingverification.customername"></ngc-label>
+              </th>
+              <th [width]="130">
+                <ngc-label value="sap.invoice"></ngc-label>
+              </th>
+              <th [width]="230">
+                <ngc-label value="sap.invoice.date"></ngc-label>
+              </th>
+              <th [width]="130">
+                <ngc-label value="flight.serviceType"></ngc-label>
+              </th>
+              <th [width]="130">
+                <ngc-label value="billingverification.amount"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label value="billingverification.void"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label value="sap.invoice.doc.sent"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="resultList">
+            <ng-container *ngFor="let item of sapInvoiceForm.get('resultList').controls; let index=index"
+              [formGroupName]="index">
+              <ng-container formArrayName="sapInvCreditNoteList">
+                <ng-container *ngFor="let sitem of item.get('sapInvCreditNoteList').controls; let sindex=index"
+                  [formGroupName]="sindex">
+                  <tr>
+                    <td>
+                      <ngc-display *ngIf="sindex == 0" [value]="item.get('customerName').value"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="finSysInvoiceNumber"></ngc-display>&nbsp;&nbsp;
+                      <ngc-link iconType='download' (linkClick)='downloadInvoice($event, index, sindex)'>
+                        <ngc-label label="billing.invoice"></ngc-label>
+                      </ngc-link>
+
+                      &nbsp;&nbsp;
+                      <ngc-link iconType='download' (linkClick)='downloadSupportingDoc($event, index, sindex)'>
+                        <ngc-label label="billing.supporting.document"></ngc-label>
+                      </ngc-link>&nbsp;&nbsp;
+                      <ngc-dropdownlist accessEnableOn="r" sourceId='Billing$SAPInvoiceDownloadFormats'
+                        formControlName="reportType" [width]="70" [noBlank]="true" required>
+                      </ngc-dropdownlist>
+                      <ngc-report #invoiceReportWindow reportId="TaxInvoiceReport" [format]='reportFormat'>
+                      </ngc-report>
+                      <ngc-report #reportWindow reportId="TaxSupportingDocumentReport" [format]='reportFormat'>
+                      </ngc-report>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="creditNoteDate" dataType="date" [onlyDate]="true"></ngc-display>
+                    </td>
+                    <td colspan='2'></td>
+                    <td align="center">
+                      <ngc-checkbox *ngIf="!sitem.get(['invDetail', 0, 'esupportDocEmailSent']).value"
+                        formControlName="isVoid">
+                      </ngc-checkbox>
+                      <ngc-checkbox *ngIf="sitem.get(['invDetail', 0, 'esupportDocEmailSent']).value" [hidden]="true">
+                      </ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-icon *ngIf="sitem.get(['invDetail', 0, 'esupportDocEmailSent']).value"
+                        [value]="sitem.get(['invDetail', 0, 'esupportDocEmailSent']).value" type="yesno">
+                      </ngc-icon>
+                      <ngc-button
+                        *ngIf="!sitem.get(['invDetail', 0, 'esupportDocEmailSent']).value && !sitem.get('tempIsVoid').value "
+                        label="g.send" iconType="send" (click)="sendAndUpdate(sitem, index)">
+                      </ngc-button>
+                    </td>
+                  </tr>
+                  <ng-container formArrayName="invDetail">
+                    <tr *ngFor="let ssitem of sitem.get('invDetail').controls; let ssindex=index"
+                      [formGroupName]="ssindex">
+                      <td colspan="3">
+                      </td>
+
+                      <td>
+                        <ngc-display formControlName="serviceType"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-currencydisplay formControlName="amount"></ngc-currencydisplay>
+                      </td>
+                      <td align="center">
+                        <!-- <ngc-icon formControlName="isVoid" type="yesno" [negative]="true"></ngc-icon> -->
+                      </td>
+                      <td>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

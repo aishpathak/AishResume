@@ -1,0 +1,183 @@
+<ngc-titlebar title="title.display.hold.notify.shipments" (save)="onSave($event)" (print)="onPrint()"
+  (clear)="onClear($event)" [disableSave]="saveFlag==false"></ngc-titlebar>
+<form [formGroup]='holdNotifyShipmentsForm'>
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='shp.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminalPoint" sourceId="WAREHOUSE_TERMINAL"
+            [width]="100" sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="user.notify.group"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="159" formControlName="holdNotifyGroup"
+            sourceId="SHIPMENTONHOLDNOTIFYGROUP" sourceType='query' required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" (ngModelChange)="validateNotifyGroup()">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="export.dateTimeFrom" [width]="40"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="from" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="export.dateTimeTo" [width]="40"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="to" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="&nbsp"></ngc-label>
+        <div>
+          <ngc-checkbox accessEnableOn="r" formControlName="utl">
+            <ngc-label label="awb.utl"></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awb.acknowledge"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="80" formControlName="acknowledge" sourceId="PCH$PCH_TYPE"
+            [autoSelect]="true" [noBlank]="false" default="N">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="display.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column *ngIf="searchFlag">
+        <ngc-datatable formArrayName="shipment" [pageSize]="18" [showToolbar]="false" [enablePageSizeHeight]="false"
+          (linkClick)="openShipmentInfoPage($event)">
+          <ngc-data-column type="check" text="g.select" dataField="select" align="left" cellsAlign="left" [width]="40">
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" [width]="95" type="link">
+          </ngc-data-column>
+          <ngc-data-column text="awb.part.suffix" dataField="partSuffix" [width]="80" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.ori" dataField="origin" [width]="35"></ngc-data-column>
+          <ngc-data-column text="awb.des" dataField="destination" [width]="35"></ngc-data-column>
+          <ngc-data-column text="awb.nog" dataField="natureOfGoodsDescription" [width]="100" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="awb.loc" dataField="location" [width]="100" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Gen.WareHouseDestination" dataField="warehouseLocation" [width]="160"
+            cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column feature="Gen.Shipment.ActualLocation" text="Gen.ActualLocation" dataField="actualLocation"
+            [width]="120" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="awb.inv.pieces" dataField="piecesInv" [width]="75" cellsAlign="right"
+            type="displayPieces">
+          </ngc-data-column>
+          <ngc-data-column text="awb.inv.weight" dataField="weightInv" [width]="75" cellsAlign="right"
+            type="displayWeight">
+          </ngc-data-column>
+          <ngc-data-column text="awb.inv.shc" dataField="shcListInv" [width]='90'></ngc-data-column>
+          <ngc-data-column text="awb.hold.date" dataField="datetime" type="displayDateTime" [width]="100"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.hold.user" dataField="modifiedBy" [width]="80" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="awb.hold.reason" dataField="reasonForHold" [width]="120" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remarks" [width]="120" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="user.notify.group" dataField="holdNotifyGroup" [width]="95" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.last.ack.assign.date" dataField="ackDate" [width]="155" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="searchFlag" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-row>
+          <ngc-column column=10.5></ngc-column>
+          <ngc-column column="1.5">
+            <ngc-label label="awb.change.notify.group"></ngc-label>
+            <div>
+              <ngc-dropdownlist [width]="150" formControlName="holdNotifyGroupUpdate"
+                sourceId="SHIPMENTONHOLDNOTIFYGROUP" sourceType='query'>
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+  <ngc-report format='xls' #reportWindow title="g.report"  reportId='display_hold_notify_shipment'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column>
+      <ngc-button accessEnableOn="r" label="1.hold.Shp" (click)="onHoldShipment()" [disabled]=showAsPopup>
+      </ngc-button>
+      <ngc-button label="2.Unhold.Shp" (click)="unHoldShipment()" [disabled]=showAsPopup>
+      </ngc-button>
+      <ngc-button label="3.hold.ack" (click)="updateACK()" [disabled]=showAsPopup>
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>
+<ng-template #holdPopUp *ngIf="showMe">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="9">
+        <div>
+          <ngc-label label="awb.enter.remarks.unhold"></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row [formGroup]="unholdForm">
+      <ngc-column>
+        <ngc-label label='g.remarks'></ngc-label>
+        <div>
+          <ngc-input [width]="250" maxLength='65' formControlName="unHoldRemarks" required></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button label="awb.unhold" [width]="80" (click)="unHold()">
+        </ngc-button>
+        <ngc-button label="g.cancel" [width]="80" (click)="closeHoldPopUp()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ng-template>
+<ngc-window *ngIf="showMe" #parentWindow title="title" [width]="popUpWidth" [height]="popUpHeight"
+  (close)="closePopScreen()">
+  <ng-container *ngTemplateOutlet="templateRef;"></ng-container>
+</ngc-window>

@@ -1,0 +1,268 @@
+<form [formGroup]="ediInterfaceEventSetUp">
+  <ngc-titlebar title='edi.interface.event.setup.title'></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='g.message.type'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='messageType' [width]='80' upperCase='true' [displayAllInSuggestion]="true" 
+            sourceId='KEY_MESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.message.type' dataField='desc' displayMember="desc"
+            (select)="onSelectMessageType($event)">
+            <ngc-data-column text='g.message.type' dataField='desc' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.sub.message.type' dataField='param5' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='g.sub.message.type'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [validOnly]="true" [width]='80' formControlName='subMessageType'
+            [filter]="{ 'messageTypeId': ediInterfaceEventSetUp.get('messageType').value }" [width]='140'
+            upperCase='true' sourceId='KEY_SUBMESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.sub.message.type'
+            dataField='code' valueMember='code' (select)="onSelectSubMessageType($event)">
+            <ngc-data-column text='g.sub.message.type' dataField='code' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+             sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="60">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='messaging.event.type' width='30'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [validOnly]="true" formControlName='eventType' [width]='150' upperCase='true'
+            sourceId='KEY_EVENT_TYPES_FOR_CARGO_MESSAGING' title='messaging.event.type' dataField='code' displayField='desc'>
+            <ngc-data-column text='messaging.event.type' dataField='code' [width]='150'></ngc-data-column>
+            <ngc-data-column text='messaging.event.name' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+
+        <ngc-button accessEnableOn="r" (click)="onSearch()" value="display.search"></ngc-button>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button (click)="onAdd()" value="g._add"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column *ngIf="showData" column="8">
+        <ngc-edittable formArrayName="messageHandlingDefinition" [showToolbar]="true">
+          <ngc-data-column text="g.message.type" dataField="messageType" [width]="150"></ngc-data-column>
+          <ngc-data-column text="g.sub.message.type" dataField="subMessageType" [width]="150"></ngc-data-column>
+          <ngc-data-column text="g.carrierCode" dataField="carrierCode" [width]="150"></ngc-data-column>
+          <ngc-data-column text="messaging.event.type" dataField="eventType" [width]="400">
+            <ng-template let-name="name" let-group="group" let-record="record">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]="name" sourceCategory="lov"
+                  sourceId="KEY_EVENT_TYPES_FOR_CARGO_MESSAGING"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text='g.edit' [width]="270" iconType='edit' type="link" cellsAlign="center" align="left">
+            <ng-template let-name="name" let-group="group" let-record="record">
+              <ng-container *ngIf="this.messageHandlingDefinition" [formGroupName]="group">
+                <ngc-link iconType="edit" (linkClick)="onLinkClick('edit', group)"></ngc-link>
+              </ng-container>
+              <ng-container [formGroupName]="group">
+
+                <ngc-link accessEnableOn="r" iconType="edit" (linkClick)="onLinkClick('edit', group)"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='messaging.edit.telex' [width]="270" iconType='edit' type="link" cellsAlign="center" align="left">
+            <ng-template let-name="name" let-group="group" let-record="record">
+              <ng-container [formGroupName]="group">
+                <ngc-link
+                  *ngIf="this.ediInterfaceEventSetUp.get(['messageHandlingDefinition',group, 'manualEvent' ]) && this.ediInterfaceEventSetUp.get(['messageHandlingDefinition',group, 'manualEvent' ]).value"
+                  iconType="edit" (linkClick)="onLinkClickTelex('edit', group)" accessEnableOn="r">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='g.delete' dataField="delete" [width]="270" iconType='delete' type="link"
+            cellsAlign="center" align="left">
+            <ng-template let-name="name" let-group="group" let-record="record">
+              <ng-container [formGroupName]="group">
+
+                <ngc-link iconType="delete" (linkClick)="onLinkClick('delete', group)">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+        </ngc-edittable>
+      </ngc-column>
+      <ngc-column column="6">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #saveWindow title="edi.interface.system.event.setup.title" [showCloseButton]="true" width="400"
+    height="400" (close)="onWindowClose(saveEdiInterfaceEventSetUp)">
+    <form [formGroup]="saveEdiInterfaceEventSetUp">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label='g.message.type'></ngc-label>
+            <div>
+              <ngc-lov formControlName='messageType' required [width]='80' upperCase='true' [displayAllInSuggestion]="true" 
+                sourceId='KEY_MESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.message.type' dataField='desc'
+                displayMember="desc" (select)="onSelectMessageType($event)"
+                [disabled]="this.saveEdiInterfaceEventSetUp.get('messageType') && this.saveEdiInterfaceEventSetUp.get('messageType').value != null">
+                <ngc-data-column text='g.message.type' dataField='desc' [width]='150'></ngc-data-column>
+                <ngc-data-column text='g.sub.message.type' dataField='param5' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="6">
+            <ngc-label label='g.sub.message.type'></ngc-label>
+            <div>
+              <ngc-lov [validOnly]="true" [width]='80' formControlName='subMessageType'
+                [filter]="{ 'messageTypeId': saveEdiInterfaceEventSetUp.get('messageType').value }" [width]='140'
+                upperCase='true' sourceId='KEY_SUBMESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.sub.message.type'
+                dataField='code' valueMember='code' (select)="onSelectSubMessageType($event)">
+                <ngc-data-column text='g.sub.message.type' dataField='code' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='messaging.event.type' width='30'></ngc-label>
+            <div>
+              <ngc-lov [validOnly]="true" required formControlName='eventType' [width]='250' upperCase='true'
+                sourceId='KEY_EVENT_TYPES_FOR_CARGO_MESSAGING' title='messaging.event.type' dataField='code'
+                displayField='desc'>
+                <ngc-data-column text='messaging.event.type' dataField='code' [width]='150'></ngc-data-column>
+                <ngc-data-column text='messaging.event.name' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label="flight.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+                 sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="60">
+                <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+                <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column align="center">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button (click)="saveSetUp()" value="g.save"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+
+      </ngc-container>
+    </form>
+  </ngc-window>
+  <ngc-window #editWindow title="edi.interface.system.event.setup.title" [width]="500" [height]="400"
+    [showCloseButton]="true">
+    <form [formGroup]="editEdiInterfaceEventSetUp">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="4">
+            <ngc-label label='g.message.type'></ngc-label>
+            <div>
+              <ngc-lov formControlName='messageType' required [disabled]="true" [width]='100' upperCase='true' [displayAllInSuggestion]="true" 
+                sourceId='KEY_MESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.message.type' dataField='desc'
+                displayMember="desc" (select)="onSelectMessageType($event)">
+                <ngc-data-column text='g.message.type' dataField='desc' [width]='150'></ngc-data-column>
+                <ngc-data-column text='g.sub.message.type' dataField='param5' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="4">
+            <ngc-label label='g.sub.message.type'></ngc-label>
+            <div>
+              <ngc-lov [validOnly]="true" [width]='100' [disabled]="true" formControlName='subMessageType'
+                [filter]="{ 'messageTypeId': saveEdiInterfaceEventSetUp.get('messageType').value }" [width]='140'
+                upperCase='true' sourceId='KEY_SUBMESSAGE_TYPES_FOR_CARGO_MESSAGING' title='g.sub.message.type'
+                dataField='code' valueMember='code' (select)="onSelectSubMessageType($event)">
+                <ngc-data-column text='g.sub.message.type' dataField='code' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label='messaging.event.type' width='100'></ngc-label>
+            <div>
+              <ngc-lov required formControlName='eventType' [width]='250' upperCase='true'
+                sourceId='KEY_EVENT_TYPES_FOR_CARGO_MESSAGING' title='messaging.event.type' dataField='code'>
+                <ngc-data-column text='messaging.event.type' dataField='code' [width]='150'></ngc-data-column>
+                <ngc-data-column text='messaging.event.name' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label="flight.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+                 sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="100">
+                <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+                <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column align="center">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button (click)="updateSetUp()" value="g.save"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+
+      </ngc-container>
+    </form>
+  </ngc-window>
+
+  <ngc-window #addTelexSetupEdit title="set.up.message.defintion.edit.title" [width]="1300"
+    [height]="1300" [showCloseButton]="true">
+    <app-edit-grouped-message-handling-definition [formData]="dataToPatchEdit" [manualEvent]="true"
+      (closeWindow)="closeWindow()" (onClose)="closeWindow()">
+    </app-edit-grouped-message-handling-definition>
+  </ngc-window>
+  <ngc-window #addTelexSetupAdd title="set.up.message.definition.title" [width]="1300"
+    [height]="1300" [showCloseButton]="true">
+    <app-add-new-message-handling-definition [formData]="dataToPatchEdit" [manualEvent]="true"
+      (closeWindow)="closeWindow()" (onClose)="closeWindow()">
+    </app-add-new-message-handling-definition>
+  </ngc-window>
+</form>

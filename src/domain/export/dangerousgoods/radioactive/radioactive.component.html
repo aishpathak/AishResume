@@ -1,0 +1,637 @@
+<ngc-titlebar title="dangerous.goods.shipper.declaration.title" (print)="dgdReport()" (save)="onSave($event)"
+    (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="dgdRadioActiveForm">
+    <ngc-container type="header" *ngIf="!addFlag">
+        <ngc-row formGroupName="searchFormGroup">
+            <ngc-column [column]="2">
+                <ngc-label label="awb.awbnumber"></ngc-label>
+                <div>
+                    <ngc-awbinput accessEnableOn="r" required formControlName="shipmentNumber"
+                        (ngModelChange)="changeTranshipmentFlag()"></ngc-awbinput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <br>
+                <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()"></ngc-button>
+
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" *ngIf="showFlag || addFlag">
+        <ngc-row formGroupName="dgdRefernceForm">
+
+            <ngc-column [column]="2">
+                <ngc-label label="awb.awbnumber"></ngc-label>
+                <div>
+                    <ngc-awbdisplay formControlName="awbNumber"></ngc-awbdisplay>
+                </div>
+            </ngc-column>
+            <!--<ngc-column [column]="2" *ngIf="!addDGbutton &&!addFlag">-->
+            <ngc-column [column]="2" *ngIf="!dontDisplayReferenceNumber">
+                <ngc-label label="expdgd.dgdreferencename">
+                </ngc-label>
+                <div>
+                    <ngc-dropdownlist (ngModelChange)="getDGDDataByRefNo($event)" formControlName="dgdReferenceNo"
+                        [source]="dgdReferenceArray" [width]="145"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column align="right" verticalAlign="middle">
+                <ngc-button value="expdgd.dgddocs" (click)="onAddDocs()" *ngIf="!addDGbutton">
+                </ngc-button>
+
+                <ngc-button value="export.dg.eli.elm.details" (click)="addEliElmData()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" *ngIf=" addDGbutton||(!addDGbutton && addFlag)">
+        <ngc-row formGroupName="dgdDetailsForm">
+            <ngc-column [column]="6">
+
+                <ngc-container title="expdgd.shipperaddress">
+                    <ngc-row>
+                        <ngc-column [column]="2">
+                            <ngc-label label="code"></ngc-label>
+                            <div>
+                                <ngc-lov formControlName="shipperCustomerCode" [noCache]='true' upperCase='true'
+                                    sourceId='SHIPPER' title="Shipper" dataField='code'
+                                    (select)="getShipperDetailsByCode($event)" [width]="60">
+                                    <ngc-data-column text="g.companyCode" [width]="80" dataField="code">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.companyName" [width]="150" dataField="desc">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                        <ngc-column [column]="2">
+                            <ngc-label label="g.name"></ngc-label>
+                            <div>
+                                <ngc-input [width]="254" [height]="15" formControlName="shipperName"></ngc-input>
+                            </div>
+
+                        </ngc-column>
+                        <ngc-column [column]="8"></ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column [column]="12" align="left">
+                            <ngc-label label="g.address"></ngc-label>
+                        </ngc-column>
+                    </ngc-row>
+
+                    <ngc-row>
+                        <ngc-column [column]="12">
+                            <ngc-input formControlName="shipperAddress1"></ngc-input>
+                            <ngc-input formControlName="shipperAddress2"></ngc-input>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="g.place"></ngc-label>
+                            <div>
+                                <ngc-lov formControlName="shipperPlace" [noCache]='true' upperCase='true'
+                                    sourceId='CITY' title="g.city" dataField='desc'
+                                    (select)="changeShipperCityCode($event)" [width]="60">
+                                    <ngc-data-column text="g.cityCode" [width]="80" dataField="code"></ngc-data-column>
+                                    <ngc-data-column text="g.cityName" [width]="150" dataField="desc"></ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="expdgd.postcode"></ngc-label>
+                            <div>
+                                <ngc-input formControlName="shipperPostalCode"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="g.country"></ngc-label>
+                            <div>
+                                <ngc-dropdownlist formControlName="shipperCountryCode"
+                                    (ngModelChange)="getStateByShipperCountry($event)" sourceType='query'
+                                    sourceId='COUNTRYDROPDOWN' [width]="200"></ngc-dropdownlist>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="g.state"></ngc-label>
+                            <div>
+                                <!--<ngc-display formControlName="shipperStateCode"></ngc-display>-->
+                                <ngc-dropdownlist formControlName="shipperStateCode" [noCache]="true" sourceType='query'
+                                    sourceId='STATEDROPDOWN' [sourceParameters]="shpCountryCodeParam" [width]="105">
+                                </ngc-dropdownlist>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column [column]="6">
+                <ngc-container title="expdgd.consigneeaddress">
+                    <ngc-row>
+                        <ngc-column [column]="2">
+                            <ngc-label label="code"></ngc-label>
+                            <div>
+                                <ngc-lov formControlName="consigneeCustomerCode" upperCase='true'
+                                    sourceId='CONSIGNEE_DG' title="consignee.code"
+                                    (select)="getConsigneeDetailsByCode($event)" dataField='code' [width]="60">
+                                    <ngc-data-column text="g.companyCode" [width]="80" dataField="code">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.companyName" [width]="150" dataField="desc">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                        <ngc-column [column]="2">
+                            <ngc-label label="g.name"></ngc-label>
+                            <div>
+                                <ngc-input [width]="254" [height]="15" formControlName="consigneeName"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column [column]="8"></ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column [column]="12" align="left">
+                            <ngc-label label="g.address"></ngc-label>
+                        </ngc-column>
+                    </ngc-row>
+
+                    <ngc-row>
+                        <ngc-column [column]="12">
+                            <ngc-input formControlName="consigneeAddress1"></ngc-input>
+                            <ngc-input formControlName="consigneeAddress2"></ngc-input>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label="g.place"></ngc-label>
+                            <div>
+                                <ngc-lov formControlName="consigneePlace" [noCache]='true' upperCase='true'
+                                    sourceId='CITY' title="g.city" dataField='desc'
+                                    (select)="changeConsigneeCityCode($event)" [width]="60">
+                                    <ngc-data-column text="g.cityCode" [width]="80" dataField="code"></ngc-data-column>
+                                    <ngc-data-column text="g.cityName" [width]="150" dataField="desc"></ngc-data-column>
+                                </ngc-lov>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="expdgd.postcode"></ngc-label>
+                            <div>
+                                <ngc-input formControlName="consigneePostalCode"></ngc-input>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="g.country"></ngc-label>
+                            <div>
+                                <ngc-dropdownlist sourceId='consigneeCountryCode' sourceType='query'
+                                    (ngModelChange)="getStateByConsigneeCountry($event)" sourceId='COUNTRYDROPDOWN'
+                                    formControlName="consigneeCountryCode" [width]="200"></ngc-dropdownlist>
+                            </div>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label="g.state"></ngc-label>
+                            <div>
+                                <ngc-dropdownlist sourceId='consigneeStateCode' [noCache]="true" sourceType='query'
+                                    sourceId='STATEDROPDOWN' formControlName="consigneeStateCode"
+                                    [sourceParameters]="conCountryCodeParam" [width]="105"></ngc-dropdownlist>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container title="expdgd.transportdetails" type="section" *ngIf=" addDGbutton ||(!addDGbutton && addFlag)">
+        <ngc-row formGroupName="dgdDetailsForm">
+            <ngc-column [column]="2">
+                <ngc-label label="expdgd.airportofdeparture"></ngc-label>
+                <div>
+                    <ngc-input required formControlName="departureAirport"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label="expdgd.airportofdestination"></ngc-label>
+                <div>
+                    <ngc-input required formControlName="destinationAirport"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="4">
+                <ngc-label label="expdgd.aircrafttype"></ngc-label>
+                <div>
+                    <ngc-radiobutton formControlName="aircraftType1" [groupName]="'aircraftType'">
+                        <ngc-i18n value="expdgd.passengerandcargo"></ngc-i18n>
+                    </ngc-radiobutton>
+                    <ngc-radiobutton formControlName="aircraftType2" [groupName]="'aircraftType'">
+                        <ngc-i18n value="expdgd.cargoonly"></ngc-i18n>
+                    </ngc-radiobutton>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="4">
+                <ngc-label label="expdgd.shipmenttype"></ngc-label>
+                <div>
+                    <ngc-radiobutton formControlName="shipmentRadioactiveFlag1" [groupName]="'shipmentType'">
+                        <ngc-i18n value="expdgd.radioactive"></ngc-i18n>
+                    </ngc-radiobutton>
+                    <ngc-radiobutton formControlName="shipmentRadioactiveFlag2" [groupName]="'shipmentType'">
+                        <ngc-i18n value="expdgd.nonradioactive"></ngc-i18n>
+                    </ngc-radiobutton>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" *ngIf=" addDGbutton ||(!addDGbutton && addFlag)">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label id="transportHeading" label="expdgd.natureandquantity" emphasis="lg"></ngc-label>
+            </ngc-column>
+            <ngc-column align="right" *ngIf="isRow()">
+                <ngc-button value="delete" (click)="onDeleteRow($event)"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row formGroupName="dgdDetailsForm">
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <ngc-checkbox formControlName="checkAll"></ngc-checkbox>
+                            </th>
+                            <th>
+
+                                <ngc-label label="export.dg.unid.br.number"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="expdgd.psn"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="export.dg.impcode"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="export.dg.class.division"></ngc-label>
+                            </th>
+
+                            <th>
+                                <ngc-label label="export.dg.sbr1"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="export.dg.sbr2"></ngc-label>
+                            </th>
+                            <th *ngIf="shipmentFlag" [width]="25">
+                                <ngc-label label="export.dg.packing.group"></ngc-label>
+                            </th>
+                            <th *ngIf="!shipmentFlag" [width]="25">
+                                <ngc-label label="export.dg.packing.group"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="expdgd.pieces"></ngc-label>
+                            </th>
+                            <th *ngIf="!shipmentFlag">
+                                <ngc-label label="expdgd.quantity"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="export.dg.type.of.packing"></ngc-label>
+                            </th>
+                            <th *ngIf="shipmentFlag" [width]="200">
+                                <ngc-label label="expdgd.pi"></ngc-label>
+                        <tr>
+                            <th colspan="3" [width]="100">TI</th>
+                            <th colspan="2" [width]="100">Dimension</th>
+                        </tr>
+                        </th>
+                        <th *ngIf="!shipmentFlag">
+                            <ngc-label label="export.dg.packing.instruction" [width]="50"></ngc-label>
+                        </th>
+                        <th>
+                            <ngc-label label="expdgd.authorization" [width]="40"></ngc-label>
+                        </th>
+                        <th>
+                            <ngc-label label="export.dg.apio.number" [width]="50"></ngc-label>
+                        </th>
+                        <th>
+                            <ngc-label label="export.dg.overpack.number" [width]="50"></ngc-label>
+                        </th>
+                        <th [width]="400">
+
+                            <ngc-label label="g.remarks" [width]="400"></ngc-label>
+                        </th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                    <tbody formArrayName="declarationDetails">
+                        <tr *ngFor="let item of dgdRadioActiveForm.controls.dgdDetailsForm.controls.declarationDetails.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                                <ngc-checkbox formControlName="selectCheckBox"></ngc-checkbox>
+                            </td>
+                            <!--
+              <ngc-input [hidden]="true" formControlName="IMPSHC"></ngc-input>
+              -->
+                            <ngc-input [hidden]="true" formControlName="unidnumberdata"></ngc-input>
+                            <td [width]="100">
+                                <ngc-lov *ngIf="shipmentFlag" formControlName="unidnumber"
+                                    (select)="getUnidDetailsByPsn($event, index)" sourceId="UNID_PSN_DG" title="UNID"
+                                    displayField="code" dataField="param1" [width]="50" required
+                                    [displayAllInSuggestion]="true" [selectionByRowId]="true">
+                                    <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="export.proper.shipping.name" dataField="desc" [width]="500">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.tech" dataField="parameter5" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.shc" dataField="param3" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="export.dg.erg" dataField="param4" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.pg" dataField="param6" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.sbr1" dataField="param7" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.imp1" dataField="parameter3" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.sbr2" dataField="parameter2" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.imp2" dataField="parameter4" [width]="50">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                                <ngc-lov *ngIf="!shipmentFlag" formControlName="unidnumber"
+                                    (select)="getUnidDetailsByPsn($event, index)" sourceId="UNID_NONRAD_PSN"
+                                    title="UNID" displayField="code" dataField="param1" [width]="50" required
+                                    [displayAllInSuggestion]="true" [selectionByRowId]="true">
+                                    <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="export.proper.shipping.name" dataField="desc" [width]="500">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.tech" dataField="parameter5" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.shc" dataField="param3" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="export.dg.erg" dataField="param4" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.pg" dataField="param6" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.sbr1" dataField="param7" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.imp1" dataField="parameter3" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.sbr2" dataField="parameter2" [width]="50">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="export.dg.imp2" dataField="parameter4" [width]="50">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                                <psn-dtl *ngIf="item.get('dgRegulationId').value"
+                                    [searchRequest]="{ 'dgRegulationId': item.get('dgRegulationId').value}"></psn-dtl>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="properShippingName" [width]="140"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="impshc" [width]="140"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="dgclassCode"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-lov formControlName="dgSubriskCode1" sourceId="DGD_SUBRISK" title="CLASS"
+                                    dataField="code" [width]="60">
+                                    <ngc-data-column text="export.dg.class" dataField="code" [width]="80">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="g.description" dataField="deckFlag" [width]="80">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </td>
+                            <td>
+                                <ngc-lov formControlName="dgSubriskCode2" sourceId="DGD_SUBRISK" title="CLASS"
+                                    dataField="code" [width]="40">
+                                    <ngc-data-column text="export.dg.class" dataField="code" [width]="80">
+                                    </ngc-data-column>
+                                    <ngc-data-column text="g.shc" dataField="desc" [width]="50"></ngc-data-column>
+                                    <ngc-data-column text="g.description" dataField="deckFlag" [width]="80">
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </td>
+                            <td *ngIf="shipmentFlag">
+                                <ngc-input *ngIf="!item.get('categoryList')"
+                                    formControlName='packingInstructionCategory' [width]="28">
+                                </ngc-input>
+                                <ngc-dropdownlist *ngIf="item.get('categoryList')"
+                                    [source]="item.get('categoryList').value"
+                                    formControlName='packingInstructionCategory' [width]="48">
+                                </ngc-dropdownlist>
+                            </td>
+                            <td *ngIf="!shipmentFlag" [width]="24">
+                                <ngc-input *ngIf="!item.get('pgList')" formControlName='packingGroupCode' [width]="25"
+                                    required>
+                                </ngc-input>
+                                <ngc-dropdownlist *ngIf="item.get('pgList')" [source]="item.get('pgList').value"
+                                    required formControlName='packingGroupCode'
+                                    (ngModelChange)="onPackingCodeChange($event, index)" [noCache]="true" [width]="45">
+                                </ngc-dropdownlist>
+                            </td>
+                            <td>
+                                <ngc-piecesinput formControlName="packagePieces" [width]="50" maxlength="4" required>
+                                </ngc-piecesinput>
+                            </td>
+                            <td *ngIf="!shipmentFlag">
+                                <ngc-numberinput formControlName="packageQuantity" [width]="50" maxlength="7" required>
+                                </ngc-numberinput>
+                            </td>
+                            <td>
+                                <ngc-input formControlName="packingType" [width]="50"></ngc-input>
+                            </td>
+                            <td *ngIf="shipmentFlag" [width]="200">
+                        <tr>
+                            <td [width]="100">
+                                <ngc-input formControlName="transportIndex" [width]="60" maxlength="4"></ngc-input>
+                            </td>
+                            <td [width]="150">
+                                <ngc-input formControlName="packingDimension1" [width]="30"></ngc-input>
+                                <ngc-input formControlName="packingDimension2" [width]="30"></ngc-input>
+                                <ngc-input formControlName="packingDimension3" [width]="30"></ngc-input>
+                            </td>
+                        </tr>
+                        </td>
+                        <td *ngIf="!shipmentFlag">
+                            <ngc-dropdownlist *ngIf="item.get('piList')" formControlName='packingInstructions'
+                                [source]="item.get('piList').value" [width]="45"
+                                (select)="getPackingInstruction($event)" required>
+                            </ngc-dropdownlist>
+
+                            <ngc-input *ngIf="!item.get('piList')" formControlName='packingInstructions' [width]="85"
+                                required>
+                            </ngc-input>
+
+                        </td>
+                        <td [width]="100">
+                            <ngc-input formControlName="authorizationDetail"></ngc-input>
+                        </td>
+                        <td [width]="50">
+                            <ngc-numberinput formControlName="apioNumber" maxlength="4" decimalDigits="0">
+                            </ngc-numberinput>
+                        </td>
+                        <td [width]="50">
+                            <ngc-display formControlName="overPackDelimStr">></ngc-display>
+                        </td>
+
+                        <td style="width:500px">
+                            <ngc-display formControlName="remarks" [width]="240">></ngc-display>
+                        </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align="right">
+                <ngc-button value="export.addRow" (click)="onAddRow()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-label value=""></ngc-label>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="isRow()">
+            <ngc-column column="10"></ngc-column>
+            <ngc-column>
+                <ngc-button value="export.dg.apio" (click)="generateApio($event)"></ngc-button>
+            </ngc-column>
+            <ngc-column>
+                <ngc-button value="export.dg.add.overpack" [width]="110" (click)="generateOverpack($event)">
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container title="expdgd.additioninfo" type="section" *ngIf=" addDGbutton ||(!addDGbutton && addFlag)">
+        <ngc-row formGroupName="dgdDetailsForm">
+            <ngc-column>
+                <ngc-textarea width="1270" height="50" maxlength="250" formControlName="additionalHandlingInformation">
+                </ngc-textarea>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-window #overpackWindow [width]="400" [height]="300" style="top:170px !important;"
+        title="expdgd.overpack.details" [showCloseButton]="true" align="center">
+        <ngc-container formGroupName="dgdOverpackPopupForm" type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-radiobutton formControlName="generateOvp" groupName='autoManualFlag'>
+                        <ngc-i18n value="export.dg.generate.overpack"></ngc-i18n>
+                    </ngc-radiobutton>
+                    <ngc-radiobutton formControlName="manualOvp" groupName='autoManualFlag'>
+                        <ngc-i18n value="export.dg.manual.overpack"></ngc-i18n>
+                    </ngc-radiobutton>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label=""></ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-taginput formControlName="overpackNumber" pattern='^(0|[1-9][0-9]*)$' UPPERCASE="true"
+                        (input)="checkForInput($event)" [disabled]="!autoOrManualFlag"></ngc-taginput>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label=""></ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button *ngIf="autoOrManualFlag" value="g.save" [width]="110" (click)="saveOverpackWin($event)">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button *ngIf="!autoOrManualFlag" value="export.dg.generate.overpack" [width]="220"
+                        (click)="genOverpackNum($event)"></ngc-button>
+                    <ngc-button *ngIf="!autoOrManualFlag" value="g.save" [width]="110"
+                        (click)="saveOverpackWin($event)">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+
+    <ngc-window #eliElmWindow [width]="900" [height]="500" style="top:170px !important;"
+        title="export.dg.eli.elm.details" [showCloseButton]="true" align="center">
+        <ngc-container type="tab">
+            <ngc-row formGroupName="eliElmFormGroup">
+                <ngc-column>
+                    <ngc-table>
+                        <thead>
+                            <tr>
+                                <th style="width:20px!important;">
+                                    <!--<ngc-checkbox formControlName="checkAllEliElm"></ngc-checkbox>-->
+                                </th>
+                                <th style="width:120px!important;">
+                                    <ngc-label label="export.dg.eli.elm"></ngc-label>
+                                </th>
+                                <th style="width:120px!important;">
+                                    <ngc-label label="flight.flightType"></ngc-label>
+                                </th>
+                                <th style="width:120px!important;">
+                                    <ngc-label label="PI"></ngc-label>
+                                </th>
+                                <th style="display: none !important;">
+                                    <ngc-label label=""></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="export.remarks"></ngc-label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        <tbody formArrayName="eliElmFormDetails">
+                            <tr *ngFor="let item of dgdRadioActiveForm.controls.eliElmFormGroup.controls.eliElmFormDetails.controls; let index=index"
+                                [formGroupName]="index">
+                                <td>
+                                    <ngc-checkbox formControlName="selectEliCheckBox" [width]="20" align="center">
+                                    </ngc-checkbox>
+                                </td>
+                                <td>
+                                    <ngc-dropdownlist sourceId="DgImpCode$EliElmImp" formControlName="eliElm"
+                                        [width]="70" required>
+                                    </ngc-dropdownlist>
+                                </td>
+
+                                <td>
+
+                                    <ngc-dropdownlist sourceId="DG_DECLARTION_FLIGHT_TYPES" sourceType="query"
+                                        formControlName="flightType" [width]="70" required></ngc-dropdownlist>
+                                </td>
+
+                                <td>
+                                    <ngc-input formControlName="piData" [width]="70"
+                                        (ngModelChange)="getRemark(item, index)" required>
+                                    </ngc-input>
+                                </td>
+
+                                <td style="display: none !important;">
+                                    <ngc-input formControlName="forbiddenFlag"></ngc-input>
+                                </td>
+
+                                <td>
+                                    <ngc-display formControlName="remark" [disabled]="true"></ngc-display>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </ngc-table>
+                </ngc-column>
+            </ngc-row>
+
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button value="export.addRow" (click)="onAddEliRow()"></ngc-button>
+                    <ngc-button value="delete" (click)="onDeleteEliRow($event)"></ngc-button>
+                    <ngc-button value="g.save" (click)="saveEliElmDetails()"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+
+        </ngc-container>
+    </ngc-window>
+
+
+
+    <ngc-report #reportWindow title="g.report"  reportId='ShipperDeclarationForGoods_report'
+         [reportParameters]='reportParameters'></ngc-report>
+
+</form>

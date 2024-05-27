@@ -1,0 +1,397 @@
+<ngc-titlebar title='bil.counterclosureandverification' (clear)="onClear($event)" (cancel)='backToHome($event)'>
+</ngc-titlebar>
+<form [formGroup]="counterClosureVerificationForm">
+  <ngc-container formGroupName="counterClosureVerificationForSearch" type="tab">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.CollectionStatus"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" (select)="makeValueRequired($event)"
+            sourceId='Billing$Counter.CollectionStatus' formControlName="collectionStatus" [width]="120">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf='hideTransctionDate'>
+        <ngc-label label="billingverification.dateandtimefrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" formControlName="transactionDateFrom"
+            showCalendarButton="true" showTimeButton="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf='hideTransctionDate'>
+        <ngc-label label="billingverification.dateandtimeto"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" formControlName="transactionDateTo"
+            showCalendarButton="true" showTimeButton="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf='isVerifiedSelected'>
+        <ngc-label label="bil.verifiedFrom"></ngc-label>
+        <div>
+          <div>
+            <ngc-datetimeinput accessEnableOn="r" [width]="160" formControlName="verifiedFrom" showCalendarButton="true"
+              showTimeButton="true" (select)="btnVerifiedReport()"></ngc-datetimeinput>
+          </div>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf='isVerifiedSelected'>
+        <ngc-label label="bil.verifiedTo"></ngc-label>
+        <div>
+          <div>
+            <ngc-datetimeinput accessEnableOn="r" [width]="160" formControlName="verifiedTo" showCalendarButton="true"
+              showTimeButton="true" (select)="btnVerifiedReport()"></ngc-datetimeinput>
+          </div>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.counter"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" (select)='onCounterSelect($event)' [width]='100' sourceId='BILL_COUNTER'
+            sourceType='query' formControlName="counterNumber"
+            [required]="this.counterClosureVerificationForm.get(['counterClosureVerificationForSearch']).collectionStatus == 'Collected'">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.report.paymentMode"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='Billing$BillingSetup.PaymentOptions'
+            formControlName="modeOfPayment" [width]="120">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" entityAttribute="Flight.DomesticInternationalHandling">
+        <ngc-label label='dropdown.International.domestic'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="domIntl" sourceId="DomIntl$DomIntlDrop"
+            [autoSelect]="true" [width]="120"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2" *ngIf='isVerifiedSelected'>
+        <ngc-label label="bil.VerifiedBy"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]='100' sourceId='BILL_VERIFIEDBY' [noCache]='true'
+            sourceType='query' formControlName="verifiedBy" (select)="btnVerifiedReport()"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.CollectionUser"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="collectionUser"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.shipmentNumber"></ngc-label>
+        <div>
+          <ngc-shipmentinput accessEnableOn="r" formControlName="awbNumber" (ngModelChange)="onAWBChange($event)"
+            shipmentType='AWB'>
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="AWBNumber != null && AWBNumber != ''">
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [disabled]="searchFlag" formControlName='hawbNumber' upperCase='true'
+            [width]="100" sourceId='KEY_BILL_HWBNUMBER' [validOnly]="true" dataField='code' valueMember='code'
+            [noCache]="true" title="billing.hawbsbNumber" [sourceParameters]="AWBNumber">
+            <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.serviceId"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="serviceNumber">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="customerbilling.customername"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='250' formControlname="customerID" sourceId="CUSTOMER_LIST"
+            (select)="getCustomerId($event)" title="g.customer.list" dataField='desc' valueMember="desc"
+            [validOnly]='true' [width]="50">
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1" entityAttribute="Billing.CounterClosure.TruckNumber">
+        <ngc-label label="g.truck.number"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="120" formControlName="truckNumber">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1" entityAttribute="Billing.CounterClosure.UldNumber">
+        <ngc-label label="accessory.uld"></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" [width]="120" formControlName="uldNumber">
+          </ngc-uldinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.ReportNo"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="reportRef" [width]="120"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.TransactionNumberorChequeNo"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="transactionOrChequeNumber"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="6">
+        <ngc-label label=" "></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="billingverification.search"
+            (click)="searchCounterClosureVerification()"></ngc-button>
+          <ngc-button accessSectionId="GENERATE REPORT" value="bil.generateReport"
+            (click)="updateCounterClosureVerificationForReport()" *ngIf="isReportEnabled"></ngc-button>
+          <ngc-button value="bil.VerifiedShiftClosureReport" (click)="verifiedShiftClosureReport()"
+            *ngIf="isVerifiedSelected" [disabled]='btnVerifiedReportDisable'>
+          </ngc-button>
+          <ngc-button value="billing.verified.shift.closure.excel" (click)="verifiedShiftClosureReportexcel()"
+            *ngIf="isVerifiedSelected" [disabled]='btnVerifiedReportexcelDisable'>
+          </ngc-button>
+          <ngc-button value="bil.CounterBankingSlipsReport" (click)="counterBankingSlipsReport()"
+            *ngIf="isVerifiedSelected" [disabled]='btnVerifiedReportDisable'>
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isCounterClosureVerification" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table align="Center">
+          <thead>
+            <tr formGroupName="counterClosureVerificationForSearch">
+              <th>
+                <ngc-label label="bil.ReceiptNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="bil.counter"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="bil.shipmentNumber"></ngc-label>
+              </th>
+              <th entityAttribute="Gen.House.Enable">
+                <ngc-label label="g.hawb.number"></ngc-label>
+              </th>
+              <th entityAttribute="Billing.CounterClosure.ReferenceType">
+                <ngc-label label="billing.reference.type"></ngc-label>
+              </th>
+              <th entityAttribute="Billing.CounterClosure.ReferenceCode">
+                <ngc-label label="billing.reference.code"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="bil.report.paymentMode"></ngc-label>
+              </th>
+              <th entityAttribute="Flight.DomesticInternationalHandling">
+                <ngc-label label="imp.intl.dom"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="billingverification.amount"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="bil.ChequeNoOrMcoNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.date'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="billingverification.chargeadvicedt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="bil.CollectionUser"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="bil.status"></ngc-label>
+              </th>
+              <th accessSectionId="GENERATE REPORT" align="center">
+                <ngc-label label="billingverification.verified"></ngc-label>
+                <ngc-checkbox accessSectionId="MARKASVERIFIED" *ngIf="isVerifyAll" formControlName="verifyAll">
+                </ngc-checkbox>
+              </th>
+              <th>
+                <ngc-label label="billing.report.number"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody align="center" formArrayName="BillingPayment">
+            <tr *ngFor="let bill of counterClosureVerificationForm.get(['BillingPayment']).controls let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="receiptNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="counterNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="awbOrServiceRequestNumber"></ngc-display>
+              </td>
+              <td entityAttribute="Gen.House.Enable">
+                <ngc-display formControlName="hawbNumber"></ngc-display>
+              </td>
+              <td entityAttribute="Billing.CounterClosure.ReferenceType">
+                <ngc-display formControlName="additionalReferenceType"></ngc-display>
+              </td>
+              <td entityAttribute="Billing.CounterClosure.ReferenceCode">
+                <ngc-display formControlName="additionalReferenceCode"></ngc-display>
+              </td>
+              <td
+                *ngIf="this.counterClosureVerificationForm.get('counterClosureVerificationForSearch').get('collectionStatus').value != 'Reported' || bill.get('paymentMode').value == 'CASH'">
+                <ngc-display formControlName="paymentMode"></ngc-display>
+              </td>
+              <td
+                *ngIf="this.counterClosureVerificationForm.get('counterClosureVerificationForSearch').get('collectionStatus').value == 'Reported' && bill.get('paymentMode').value != 'CASH'">
+                <ngc-link (click)="changePaymentDetails(index)" formControlName="paymentMode"></ngc-link>
+              </td>
+              <td entityAttribute="Flight.DomesticInternationalHandling">
+                <ngc-display formControlName="domIntl"></ngc-display>
+              </td>
+              <td align="right">
+                <ngc-currencydisplay formControlName="paymentAmount"></ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="transactionReferenceNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="transactionReferenceDate" [onlyDate]="true"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="receiptDate"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="collectionUserCode"></ngc-display>
+              </td>
+
+              <!-- <td *ngIf="bill.get('collectionStatus').value == 'Collected'">
+                <ngc-display formControlName="collectionUserCode"></ngc-display>
+              </td>
+              <td *ngIf="bill.get('collectionStatus').value == 'Reported'">
+                <ngc-display formControlName="reportingUserCode"></ngc-display>
+              </td>
+              <td *ngIf="bill.get('collectionStatus').value == 'Verified'">
+                <ngc-display formControlName="verificationUserCode"></ngc-display>
+              </td> -->
+              <td>
+                <ngc-display formControlName="collectionStatus"></ngc-display>
+              </td>
+              <td align="center">
+                <ngc-checkbox accessSectionId="MARKASVERIFIED" formControlName="verified"
+                  *ngIf="bill.get('collectionStatus').value == 'Reported'"></ngc-checkbox>
+                <ngc-icon accessSectionId="MARKASVERIFIED" type="yesno" value="Y"
+                  *ngIf="bill.get('collectionStatus').value  == 'Verified'"></ngc-icon>
+              </td>
+              <td>
+                <ngc-link (click)="generateReport(index)" formControlName="reportRef"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+          <tfoot>
+            <tr formGroupName="counterClosureVerificationForSearch">
+              <td>
+                <ngc-label value="g.total"></ngc-label>
+              </td>
+              <td *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','cash']).value>0">
+                <ngc-label label="billing.cash"></ngc-label>
+                <ngc-currencydisplay formControlName="cash"></ngc-currencydisplay>
+              </td>
+              <td *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','mco']).value>0">
+                <ngc-label label="billing.mco"></ngc-label>
+                <ngc-display formControlName="mco"></ngc-display>
+              </td>
+              <td *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','cheque']).value>0">
+                <ngc-label label="billing.cheque"></ngc-label>
+                <ngc-currencydisplay formControlName="cheque"></ngc-currencydisplay>
+              </td>
+              <td
+                *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','cashCard']).value>0">
+                <ngc-label label="billing.cash.card"></ngc-label>
+                <ngc-display formControlName="cashCard"></ngc-display>
+              </td>
+              <td *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','nets']).value>0">
+                <ngc-label label="billing.nets"></ngc-label>
+                <ngc-display formControlName="nets"></ngc-display>
+              </td>
+              <td
+                *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','mcoPartial']).value>0">
+                <ngc-label label="billing.mco.partial"></ngc-label>
+                <ngc-display formControlName="mcoPartial"></ngc-display>
+              </td>
+              <td
+                *ngIf="counterClosureVerificationForm.get(['counterClosureVerificationForSearch','creditCard']).value>0">
+                <ngc-label label="billing.credit.card"></ngc-label>
+                <ngc-display formControlName="creditCard"></ngc-display>
+              </td>
+            </tr>
+          </tfoot>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button accessSectionId="MARKASVERIFIED" value="bil.MarkAsVerified"
+          (click)="updateCounterClosureVerification()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-report #reportWindow title="bil.counterclosureandverification" reportId='CounterClosureAndVerification'
+    [reportParameters]='reportParam'></ngc-report>
+  <ngc-report #reportWindowVerifiedShiftClosure title="billing.clouserreport" reportId='VerifiedShiftClosureReport'
+    [reportParameters]='VerifiedReportParam'></ngc-report>
+  <ngc-report format='xls' #reportWindowVerifiedShiftClosureexcel title="billing.clouserreport"
+    reportId='VerifiedShiftClosureReport' [reportParameters]='VerifiedReportParam'></ngc-report>
+  <ngc-report #counterBankingSlipsWindow title="billing.clouserreport" reportId='CounterBankingSlipsReport'
+    [reportParameters]='CounterBankingSlipsParam'></ngc-report>
+  <ngc-window #viewWindow [width]="800" [height]="160" title="billing.change.payment.details" [showCloseButton]="true">
+    <ngc-container formGroupName='updatePaymentDetails'>
+      <ngc-row>
+        <ngc-column [column]="3">
+          <ngc-label label="bil.payMode"></ngc-label>
+          <div>
+            <ngc-dropdownlist required width='150' sourceId='Update_BILL_PAYMENT_MODE' sourceType='query'
+              formControlName='paymentMode'>
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label="bil.ChequeNoOrMcoNo"></ngc-label>
+          <div>
+            <ngc-input required formControlName="transactionReferenceNumber" [width]="150"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label="g.date"></ngc-label>
+          <div>
+            <ngc-datetimeinput required formControlName="transactionReferenceDate" [width]="150"
+              [showCalendarButton]="true" [showTimeButton]="false"></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3"
+          *ngIf="this.counterClosureVerificationForm.get('updatePaymentDetails').get('paymentMode').value == 'CHEQUE'">
+          <ngc-label label="billing.bank"></ngc-label>
+          <div>
+            <ngc-dropdownlist required width='150' sourceId='BILL_BANKS' sourceType='query'
+              formControlName='issuingBank'></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+        <ngc-column [column]="3">
+          <ngc-label label=""></ngc-label>
+          <div>
+            <ngc-button (click)='updatePaymentDetails()' value='billing.update.details'></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

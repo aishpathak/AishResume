@@ -1,0 +1,203 @@
+<ngc-titlebar title="export.offload.handover.title" (cancel)="onCancel($event)" [disableClear]="disableClear"></ngc-titlebar>
+<form [formGroup]="offloadForm">
+    <ngc-container type='section'>
+        <ngc-row>
+            <ngc-column [column]='2'>
+                <ngc-label label='export.driverId'></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" formControlName="driverId" upperCase='true' required="true"
+                        [disabled]='driverDisabler && fromUldDetails' (ngModelChange)="validateDriverID($event)"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]='1'>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label>&nbsp</ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" #nextButton  (click)="onNext()" label="export.next" [disabled]='driverDisabler'></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]='6'>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type='section' *ngIf='displayFlag'>
+        <ngc-row>
+            <ngc-column [grid48]="true" column='4'>
+                <ngc-label>
+                    &nbsp
+                </ngc-label>
+                <ngc-label>&nbsp</ngc-label>
+                <ngc-checkbox formControlName='ocs'>
+                </ngc-checkbox>
+                <ngc-label label='OCS'></ngc-label>
+            </ngc-column>
+            <ngc-column [grid48]="true" column='4'>
+                <ngc-label>
+                    &nbsp
+                </ngc-label>
+                <ngc-label>&nbsp</ngc-label>
+                <ngc-checkbox formControlName='handCarry'>
+                </ngc-checkbox>
+                <ngc-label label='export.handCarry'></ngc-label>
+            </ngc-column>
+            <ngc-column [grid48]="true" column='6'>
+                <ngc-label label='export.offload.uld.number.awb.number'></ngc-label>
+                <div>
+                    <ngc-input formControlName="uldNumber" [width]="150" required="true"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [grid48]="true" column='6'>
+                <ngc-label label='flight.Flight'></ngc-label>
+              
+                <div *ngIf="toShow">
+                    <ngc-flightkeyinput formControlName="flightKey" [width]="100" required (ngModelChange)="getFlightDetails($event)"></ngc-flightkeyinput>
+                </div>
+               
+            </ngc-column>
+            <ngc-column [grid48]="true" column='6'>
+                <ngc-label label='flight.date'></ngc-label>
+                <!--<div *ngIf="!checkForTrolley">
+                    <ngc-display formControlName="flightDate" [width]="100" [onlyDate]='true'></ngc-display>
+                </div>-->
+                <!--<div *ngIf="checkForTrolley">-->
+                <div *ngIf="toShow">
+                    <ngc-datetimeinput formControlName="flightDate" [showCalendarButton]="true" required
+                        (ngModelChange)="getFlightDetails($event)">
+                    </ngc-datetimeinput>
+                </div>
+                <!--</div>-->
+            </ngc-column>
+            <ngc-column [grid48]="true" column='6' *ngIf="noOfBagsDisplayFlag">
+                <div>
+                    <ngc-label label='export.no.of.bags'></ngc-label>
+                </div>
+                <ngc-input formControlName="noOfBags" upperCase='true' [width]="100" maxLength='4'></ngc-input>
+            </ngc-column>
+            <ngc-column [grid48]="true" column='6'>
+                <ngc-label label='export.reason'></ngc-label>
+                <ngc-input formControlName="reason" upperCase='true' [width]="200" required="true"></ngc-input>
+            </ngc-column>
+            <ngc-column [grid48]="true" column='8'>
+                <ngc-button value="add" [disabled]='addDisabler' (click)="onAdd()"></ngc-button>
+            </ngc-column>
+            <ngc-column>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf='displayFlag2' type="tab">
+        <ngc-row>
+            <ngc-column align='right'>
+                <ngc-button #returnButton  (click)="onReturn()" label="export.offload" [disabled]="offlaodFlag"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf='displayFlag2' type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th [width]='50'>
+                                <ngc-label label='flight.Flight'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='flight.date'></ngc-label>
+                            </th>
+                            <th [width]='50'>
+                                <ngc-label label='flight.std'></ngc-label>
+                            </th>
+                            <th [width]='50'>
+                                <ngc-label label='flight.etd'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='export.uldNumber'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='g.shc'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='export.no.of.bags'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='export.reason'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='export.handCarry'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='export.handlingArea'></ngc-label>
+                            </th>
+                            <th [width]='100'>
+                                <ngc-label label='g.delete'></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName="tableList">
+                        <tr *ngFor="let item of offloadForm.controls.tableList.controls let index=index"
+                            [formGroupName]="index">
+                            <td>
+                                <ngc-display formControlName="flightKey"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="flightDate" [onlyDate]=true></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="std"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="etd"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="uldNumber"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="shc"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="noOfBags"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="reason"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-icon type="yesno" formControlName="handCarry"></ngc-icon>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="handlingArea"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-link (linkClick)="onDelete($event,index)" iconType="delete">
+                                    Delete
+                                </ngc-link>
+                            </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+
+<form [formGroup]='popupPrinterForm'>
+    <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="g.printer"></ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['OFFLOAD']"></ngc-printer>
+                </ngc-column>
+                <ngc-column>
+                </ngc-column>
+                <ngc-column>
+                    <ngc-button (click)="printOffload()" value="g.print"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>

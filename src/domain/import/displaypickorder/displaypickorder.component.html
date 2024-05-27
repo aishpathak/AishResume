@@ -1,0 +1,287 @@
+<form [formGroup]="displaypickorder">
+  <ngc-titlebar title='import.display.po' (save)="onSave($event)" (clear)="onClear($event)" (cancel)=onCancel()>
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='display.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminalDisplay" sourceId="TERMINAL_CODE"
+            sourceType="query" [width]='100' (select)="onChange($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label='import.display.delivery.sectors'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="core" sourceId="KEY_DELIVERY_SECTORS" sourceType="query"
+            [sourceParameters]="subMessageParameter" [width]='140' [noCache]="true"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType="{{shipmentType1}}" [width]="200" [noDN]="true" [noCBN]="true"
+            formControlName="awbNumber" (select)="onShipmentSelect($event)" accessEnableOn="r">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column feature="Imp.Bd.HAWBHandling" *ngIf="handledByMasterHouse">
+        <ngc-label label="g.hawbNumber"></ngc-label>
+        <div>
+          <ngc-lov formControlName="hawbNumber" [noCache]="true" title="g.hawbNumber" dataField='code'
+            sourceType='query' sourceId="HWBNUMBER" [width]="100"
+            [sourceParameters]="{'parameter1': displaypickorder.get(['awbNumber']).value,r:variable}" maxlength="16">
+            <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.po'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="poNumber" [width]='120'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.postatus'></ngc-label>
+        <div>
+          <ngc-dropdownlist placeHolder="display.postatus" sourceId='DisplayPo$PO_STATUS' accessEnableOn="r"
+            formControlName="poStatus" [width]='100'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.agent'></ngc-label>
+        <div>
+          <ngc-lov [width]="50" accessEnableOn="r" formControlName="agentName" sourceId="AGENT_NAME_DISPLAY_PO"
+            title="g.customer.list" dataField="code">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="import.customer.full.namee" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="dateFrom"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="dateTo" [min]="displaypickorder.get('dateFrom').value"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getDisplayPoList($event)" value="display.search"></ngc-button>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="showTable" type="tab">
+    <!-- <ngc-row>
+      <ngc-column column='11'>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="poPrint()" value="Print PO"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row> -->
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="displayPoList" (linkClick)="onEditAddLink($event)" [pageSize]=15
+          [enablePageSizeHeight]="false">
+          <ngc-data-column text="display.po" dataField="poNumber" [width]="140"></ngc-data-column>
+          <ngc-data-column text="display.awb" dataField="awbNumber" [width]="150"></ngc-data-column>
+          <ngc-data-column text="display.hawb" feature="Imp.Bd.HAWBHandling" dataField="hawbNumber" [width]="150">
+          </ngc-data-column>
+          <ngc-data-column text="display.source" dataField="source" [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.awb.pieces.weight.br" dataField="awbPiecesWeight" [width]="140" align="center"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="import.hawb.pieces.weight.br" feature="Imp.Bd.HAWBHandling"
+            dataField="hawbPiecesWeight" [width]="140" align="center" cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="display.consignee" dataField="consignee" [width]="150"></ngc-data-column>
+          <ngc-data-column text="import.clearing.agent.br" dataField="clearingAgent" [width]="110"></ngc-data-column>
+          <ngc-data-column text="display.svc" dataField="svc" [width]="50" align="center" cellsAlign="center"
+            [cellsRenderer]='svcCellsRenderer'></ngc-data-column>
+          <ngc-data-column text="display.poRequested" name="PO requested" [width]="160" align="center">
+            <ngc-data-column text="display.pieces" dataField="poPiecesWeight" [width]="130" [height]="100"
+              cellsAlign="right">
+            </ngc-data-column>
+            <ngc-data-column text="display.date" dataField="poDateTime" [width]="100" cellsAlign="center"
+              type="displayDateTime"></ngc-data-column>
+
+          </ngc-data-column>
+
+
+          <!-- <ngc-data-column text="Charges<br>Paid" dataField="chargesPaid" [width]="100" align="center" cellsAlign="center" [cellsRenderer]='chargesPaidCellsRenderer'></ngc-data-column> -->
+          <ngc-data-column text="display.postatus" dataField="poStatus" [width]="110"></ngc-data-column>
+          <ngc-data-column text="agent.issue.do.ic.airport.pass" name="AirportPass" [width]="160" align="center">
+            <ngc-data-column text="g.number" dataField="icNo" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.name" dataField="personCollect" [width]="80"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="import.cancelled.interrupt.reason.br" dataField="cancelledReason" [width]="160">
+          </ngc-data-column>
+          <ngc-data-column text="import.print.po" dataField="view" [width]="110" type="link" iconType="print"
+            align="left" cellsAlign="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #cancelDo title="import.pick.order.details" width="1000" height="400" [cancelButton]="true">
+    <ngc-container formGroupName="issuePoForm" type="tab">
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.chargeCode"></ngc-label>
+          <div>
+            <ngc-display formControlName="chargeCode"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="display.po"></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryRequestOrderNo"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="import.display.authorized.person"></ngc-label>
+          <div>
+            <ngc-display formControlName="authroizedPerson"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="import.authorized.signature"></ngc-label>
+          <div>
+            <ngc-display formControlName="authorizedSignature"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="agent.issue.do.ic.airport.pass"></ngc-label>
+          <div>
+            <ngc-display formControlName="receivingPartyIdentificationNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="g.name"></ngc-label>
+          <div>
+            <ngc-display formControlName="receivingPartyName"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="agent.comapanyName"></ngc-label>
+          <div>
+            <ngc-display formControlName="receivingPartyCompanyName"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="import.bank.endorsement.collected"></ngc-label>
+          <div>
+            <ngc-display formControlName="bankEndorsementCollected"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="import.local.authority.type"></ngc-label>
+          <div>
+            <ngc-display formControlName="type"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+
+                <th>
+                  <ngc-label label='poIssue.shipmentLoc'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='poIssue.pieces' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='g.weight' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='poIssue.warehouseLoc' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='import.truck.dock' width='20'></ngc-label>
+                </th>
+
+
+
+              </tr>
+            </thead>
+            <tbody formArrayName="inventory">
+              <tr *ngFor="let contact of displaypickorder.get(['issuePoForm', 'inventory']).controls; let index = index"
+                [formGroupName]="index">
+
+
+                <td>
+                  <ngc-display formControlName="shipmentLocationCode" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="pieces" [width]="60"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="weight" [width]="60" uppercase='true'></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName="warehouseLocationCode" [width]="60"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="targetLocationCode" [width]="60"></ngc-display>
+                </td>
+
+
+
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-window>
+  <!-- <ngc-report #reportWindow title="g.report"  reportId='PickOrder'  [reportParameters]='reportParameters'></ngc-report> -->
+
+</form>
+
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="import.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['PO']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="printPO()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report #reportWindow title="g.report" reportId='Display_P_O' [reportParameters]='reportParameters'>
+
+  </ngc-report>
+</form>

@@ -1,0 +1,285 @@
+<form [formGroup]="editServiceRequestForm">
+  <ngc-titlebar title='bil.editServiceRequest' (save)="onSave($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="3.5">
+        <ngc-label label="bil.serviceName"></ngc-label>
+        <div>
+          <ngc-display formControlName="serviceCode" [width]="300"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="3.5">
+        <ngc-label label="customerlist.cstname"></ngc-label>
+        <div>
+          <ngc-display formControlName="customerName" [width]="300"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="bil.serviceRequestNo"></ngc-label>
+        <div>
+          <ngc-display formControlName="serviceRequestNo" [width]="170"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="bil.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status" sourceCategory="dropdown" sourceId="Bil_Services$ServiceStatus"
+            [width]="170"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="3.5">
+        <ngc-label label="bil.serviceDateTime" required></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="requestedOn" required [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="3.5">
+        <ngc-label label="bil.requestedBy"></ngc-label>
+        <div>
+          <ngc-input formControlName="requestedBy" [width]="340" [maxlength]="40"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="bil.phoneNumber"></ngc-label>
+        <div>
+          <ngc-phoneinput formControlName="requestorContactNumber"></ngc-phoneinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" feature="Billing.AirlineBilling">
+        <ngc-label value="service.category"></ngc-label>
+        <div>
+          <ngc-display formControlName="serviceCategory"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="!isAWB">
+    <ngc-row>
+      <ngc-column [column]="2" *ngIf="isTruck">
+        <ngc-label label="import.truckNo"></ngc-label>
+        <div>
+          <ngc-display formControlName="truckNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="isULD">
+        <ngc-label label="imp.ULDNumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="containerNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3.5" *ngIf="showDuration">
+        <ngc-label label="g.duration"></ngc-label>
+        <div>
+          <!-- <ngc-label formControlName="durationOf" value=""></ngc-label> -->
+          <ngc-numberinput decimalDigits="0" digits="5" formControlName="duration">
+          </ngc-numberinput>
+          <ngc-display sourceCategory="dropdown" formControlName="durationUom" sourceId="Billing$Billing.DurationUom">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3.5" *ngIf="showQuantity">
+        <ngc-label label="expdgd.quantity"></ngc-label>
+        <div>
+          <!-- <ngc-label formControlName="quantityOf" value=""></ngc-label> -->
+          <ngc-numberinput decimalDigits="2" digits="5" formControlName="requestedQuantity" [disabled]="disableQuantity"
+            required></ngc-numberinput>
+          <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$UOM"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showOption">
+        <ngc-label label="billing.option.value"></ngc-label>
+        <div>
+          <ngc-display formControlName="optionName" value=" "></ngc-display>&nbsp;:&nbsp;
+          <ngc-display formControlName="optionValue"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="isAWB">
+    <ngc-row>
+      <ngc-column [column]="3.5">
+        <ngc-label label="val.no"></ngc-label>
+        <div>
+          <ngc-awbinput formControlName="shipmentNumber" (ngModelChange)="getFlightDetails($event)" required>
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3.5" *ngIf="handledbyHouse" entityAttribute='Gen.House.Enable'>
+        <ngc-label label="billing.hawbsbNumber"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="100" sourceId='HWBNUMBER'
+            dataField='code' valueMember='code' [noCache]="true" title="billing.hawbsbNumber"
+            [sourceParameters]="{'parameter1': this.editServiceRequestForm.get('shipmentNumber').value}"
+            (select)="setAWBNumber($event)">
+            <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code' required>
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3.5">
+        <ngc-label label="imp.ULDNumber"></ngc-label>
+        <div>
+          <ngc-uldinput formControlName="containerNumber"></ngc-uldinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="awb.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput width='90' formControlName="flightKey"></ngc-flightkeyinput>
+          <ngc-dateinput formControlName='flightDate'></ngc-dateinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="isAWB">
+    <ngc-row>
+      <ngc-column [column]="3.5" *ngIf="showDuration">
+        <ngc-label label="g.duration"></ngc-label>
+        <div>
+          <!-- <ngc-label formControlName="durationOf" value=""></ngc-label> -->
+          <ngc-numberinput decimalDigits="0" digits="5" formControlName="duration"></ngc-numberinput>
+          <ngc-display sourceCategory="dropdown" formControlName="durationUom" sourceId="Billing$Billing.DurationUom">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3.5" *ngIf="showQuantity">
+        <ngc-label label="expdgd.quantity"></ngc-label>
+        <div>
+          <!-- <ngc-label formControlName="quantityOf" value=""></ngc-label> -->
+          <ngc-numberinput decimalDigits="2" digits="5" formControlName="requestedQuantity" [disabled]="disableQuantity"
+            required></ngc-numberinput>
+          <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$UOM"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showOption">
+        <ngc-label label="billing.option.value"></ngc-label>
+        <div>
+          <ngc-display formControlName="optionName" value=" "></ngc-display>&nbsp;:&nbsp;
+          <ngc-display formControlName="optionValue"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="8">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="bil.requestorRemarks"></ngc-label>
+              <div>
+                <ngc-remarksinput formControlName="remarks" [width]="850"></ngc-remarksinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="bil.upload"></ngc-label>
+              <div>
+                <ngc-fileupload accept="*/*" entityType="BILLING"
+                  [entityKey]="editServiceRequestForm.get('documentReferenceId').value" associatedTo="Service"
+                  stage="BILLING" #fileUpload></ngc-fileupload>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+      <ngc-column [column]="4">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="3">
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="bil.notificationEmail"></ngc-label>
+              <div>
+                <ngc-emailinput formControlName="notificationEmailId1" [width]="250"></ngc-emailinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="3">
+            </ngc-column>
+            <ngc-column>
+              <ngc-emailinput formControlName="notificationEmailId2" [width]="250"></ngc-emailinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="3">
+            </ngc-column>
+            <ngc-column>
+              <ngc-emailinput formControlName="notificationEmailId3" [width]="250"></ngc-emailinput>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='bil.serviceExecution'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="2.5">
+        <ngc-label label="bil.service.started"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="startedOn" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2.5">
+        <ngc-label label="bil.service.completed"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="completedOn" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="2.5">
+        <ngc-label label="req.reason"></ngc-label>
+        <div>
+          <ngc-combobox [width]="250" [maxlength]="65" formControlName="rejectReason"
+            sourceId='Bil_RejReason$RejectReason' valueMember="desc" [disabled]='!showButtons'></ngc-combobox>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="bil.executorRemarks"></ngc-label>
+        <div>
+          <ngc-remarksinput formControlName="additionalRemarks" [width]="855"></ngc-remarksinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <br />
+    <ngc-row>
+      <ngc-column *ngIf='showButtons'>
+        <ngc-button label="req.reject" (click)='rejectServices($event)' priority="secondary"></ngc-button>&nbsp;&nbsp;
+        <ngc-button label="bil.request.complete" (click)='completeServiceRequest($event)'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>

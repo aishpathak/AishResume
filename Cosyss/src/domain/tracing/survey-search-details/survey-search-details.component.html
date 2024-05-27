@@ -1,0 +1,148 @@
+<form [formGroup]="surveySearchdetails" item-width="100%">
+    <ngc-titlebar title='survey.title' (cancel)="onBack($event)" (clear)="onClear($event)">
+    </ngc-titlebar>
+    <!-- search feilds -->
+    <ngc-container type="header">
+        <ngc-row>
+            <ngc-column [column]="3" [grid24]="true">
+                <ngc-label label='cargoSurvey.carrierGroup'></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGp" sourceId="CARRIER_GROUP"
+                        sourceType="query" [width]="120"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="3" [grid24]="true">
+                <ngc-label label='cargoSurvey.reference'></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" formControlName="referenceNo" [width]="120"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="3" [grid24]="true">
+                <ngc-label label='g.dateFrom'></ngc-label>
+                <div>
+                    <ngc-dateinput accessEnableOn="r" formControlName="fromDate" [width]="120"></ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="3" [grid24]="true">
+                <ngc-label label='g.dateTo'></ngc-label>
+                <div>
+                    <ngc-dateinput accessEnableOn="r" formControlName="toDate" [width]="120"></ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="3" [grid24]="true">
+                <ngc-label label='g.status'></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="surveyStatus"
+                        sourceId="SurveyStatus$CargoSurveyStatus" [noBlank]="true" [width]="120"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <br>
+                <ngc-button value='g.search' accessEnableOn="r" (click)="getsearchValues()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column column='10'>
+            </ngc-column>
+            <ngc-column align='right'>
+                <ngc-button value='tracing.create.new.survey' (click)="reDirect()"></ngc-button>
+            </ngc-column>
+            <!-- <ngc-column align='right'>
+                <ngc-button value='Print Report' (click)="onPrint()"></ngc-button>
+            </ngc-column> -->
+        </ngc-row>
+        <ngc-row *ngIf="displaySearchContainer">
+            <ngc-column>
+                <ngc-datatable formArrayName="resultList" (linkClick)="onLinkClick($event)"
+                    [rowCellsStyleRenderer]="rowCellsStyleRenderer" [groupsRenderer]="groupsRenderer"
+                    [pageable]="false">
+                    <!-- <ngc-data-column [width]="60" dataField="sel" text="select" type="check" align="center"
+                        cellsAlign="center"></ngc-data-column> -->
+                    <ngc-data-column [width]="60" dataField="surveyNo" text="cargoSurvey.surveyNumber" align="center"
+                        cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="60" dataField="startedDateTime" text="tracing.survey.start.date"
+                        type="displayDate" align="center" cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="60" dataField="endDateTime" text="tracing.survey.end.date"
+                        type="displayDate" align="center" cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="80" dataField="referenceNo" text="cargoSurvey.reference" align="center"
+                        cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="60" dataField="hawbNumber" text="cargoSurvey.hawbNumber" align="center"
+                        cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="60" dataField="flight" text="cargoSurvey.flight" align="center"
+                        cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="60" dataField="flightDate" text="cargoSurvey.date" type="displayDate"
+                        align="center" cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column [width]="60" dataField="agent" text="Agent" align="center" cellsAlign="center">
+                    </ngc-data-column>
+
+                    <ngc-data-column [width]="30" dataField="status" text="cargoSurvey.status" align="center"
+                        cellsAlign="center"></ngc-data-column>
+
+                    <ngc-data-column text="g.details" [width]="30" dataField="EDIT" type="link" iconType="edit"
+                        align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column [width]="30" text="g.print" dataField="PRINT" type="link" iconType="print"
+                        align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column [width]="30" text="g.send" dataField="SEND" type="link" iconType="edit"
+                        align="center" cellsAlign="center">
+                    </ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-window #sendemailwindow [width]="700" [height]="440" title="tracing.send.survey.report"
+        [showCloseButton]="true">
+
+        <ngc-container>
+            <ngc-row>
+                <ngc-column formArrayName="emails" [column]="9">
+                    <ngc-label label='cargoSurvey.email'></ngc-label>
+                    <div>
+                        <ngc-table>
+                            <tbody>
+                                <tr *ngFor="let item of surveySearchdetails.get('emails').controls;  let index=index"
+                                    [formGroupName]="index" [width]='376'>
+                                    <td>
+                                        <ngc-emailinput formControlName="email" maxLength='50' [width]='375'
+                                            upperCase="true">
+                                        </ngc-emailinput>
+                                    </td>
+
+                                    <td>
+                                        <ngc-link (linkClick)="deleteEmail($event, index)" iconType="delete">
+                                            <ngc-i18n value="g.delete"></ngc-i18n>
+                                        </ngc-link>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </ngc-table>
+                    </div>
+                </ngc-column>
+                <ngc-column align="right" [column]="2">
+                    <br>
+                    <ngc-button (click)="addEmail()" label="cargoSurvey.add" iconType="add"></ngc-button>
+                    <br>
+                    <br>
+                    <ngc-button (click)="sendEmail($event,index)" label="g.send" iconType="send">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+    <ngc-report #reportWindow title="g.report"  reportId='DisplayCargoSurveyDetails'
+         [reportParameters]='reportParameters'></ngc-report>
+    <ngc-report #reportWindow1 title="g.report" reportId='ConductCargoSurvey' [reportParameters]="reportParameters"
+        iconType='report'>
+    </ngc-report>
+    <!-- [showPrinters]="false" -->
+</form>

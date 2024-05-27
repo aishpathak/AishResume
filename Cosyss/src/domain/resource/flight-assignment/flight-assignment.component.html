@@ -1,0 +1,154 @@
+<ngc-titlebar title="Flight Assignment" (save)="onSave($event)" (cancel)="onCancel($event)" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="resourceFlight">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='From'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" formControlName='from' [width]="130" required='true'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='To'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" formControlName='to' [width]="130" required='true'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='IMP/EXP'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="Type$TracingType" [width]='100' formControlName="type" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='Carrier Group'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="" [width]='100' formControlName="carrierGroup" sourceType="query"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='Carrier'></ngc-label>
+        <div>
+          <ngc-lov formControlName='carrier'  width='40px'  upperCase='true'  sourceId='CARRIER'  title='Carrier Type'  dataField='code'
+            displayMember="code"  [dropDownWidth]='60'  [width]='50'>
+            <ngc-data-column text='Carrier'  dataField='code'  [width]='100'>
+            </ngc-data-column>
+            <ngc-data-column text='Description'  dataField='desc'  [width]='150'>
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='Handling Area'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="WAREHOUSE_TERMINAL" [width]='100' formControlName="handlingArea" sourceType="query" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <!--cellsAlign="right"-->
+      <ngc-column>
+        <ngc-label label='Role1'></ngc-label>
+        <div>
+          <ngc-lov [width]="100" formControlName="role1" upperCase='true' sourceId='ROLECODE' title="admin.roleCode" dataField='code'
+            [noCache]="true">
+            <ngc-data-column text="Role Code" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="Description" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='Role2'></ngc-label>
+        <div>
+          <ngc-lov [width]="100" formControlName="role2" upperCase='true' sourceId='ROLECODE' title="admin.roleCode" dataField='code'
+            [noCache]="true">
+            <ngc-data-column text="Role Code" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="Description" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='Role3'></ngc-label>
+        <div>
+          <ngc-lov [width]="100" formControlName="role3" upperCase='true' sourceId='ROLECODE' title="admin.roleCode" dataField='code'
+            [noCache]="true">
+            <ngc-data-column text="Role Code" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="Description" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button #searchButton  (click)="search()" value="Search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="staffAssign">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="flightList" (itemSelect)="onClick($event)" [pageable]="true">
+          <ngc-data-column text="Flight" dataField="flightKey"></ngc-data-column>
+          <ngc-data-column text="STD" dataField="std" type="displayTime"></ngc-data-column>
+          <ngc-data-column text="AC" dataField="ac"></ngc-data-column>
+          <ngc-data-column text="FLT CLOS" dataField="shiftStart"></ngc-data-column>
+          <ngc-data-column text="DLS" dataField="shiftEnd"></ngc-data-column>
+          <ngc-data-column text="Dest" dataField="dest"></ngc-data-column>
+          <ngc-data-column text="Bkg Wt" dataField="roleCode"></ngc-data-column>
+          <ngc-data-column text="TT Wt" dataField="TT"></ngc-data-column>
+          <ngc-data-column text="PHC" dataField="phc"></ngc-data-column>
+          <ngc-data-column text="ECC" dataField="ecc" type="displayDate"></ngc-data-column>
+          <ngc-data-column text="Remain" dataField="remain"></ngc-data-column>
+          <ngc-data-column text="No. of" dataField="noOf"></ngc-data-column>
+          <ngc-data-column text="ALI" dataField="roleCode"></ngc-data-column>
+          <ngc-data-column text="Assigned Staff">
+            <ng-template let-name="name"  let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input formControlName='staffName1'></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Shift" dataField="staffShift1"> </ngc-data-column>
+          <!--*ngIf="resourceFlight.get(['flightList', group, 'staffName1']).value == null || resourceFlight.get(['flightList', group,
+          'staffName1']).value == '' "-->
+          <ngc-data-column text="Assigned Staff">
+            <ng-template let-name="name"  let-group="group">
+              <ng-container [formGroupName]="group ">
+                <ngc-input formControlName='staffName2'></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Shift" dataField="staffShift2"> </ngc-data-column>
+
+          <ngc-data-column text="Assigned Staff">
+            <ng-template let-name="name"  let-group="group ">
+              <ng-container [formGroupName]="group ">
+                <ngc-input formControlName='staffName'></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Shift" dataField="staffShift3"> </ngc-data-column>
+
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+
+<!--<ngc-data-column>
+            <ng-template let-name="name "  let-group="group ">
+              <ng-container [formGroupName]="group ">
+                <ngc-link type="link " iconType="edit " (linkClick)="add($event,group) "></ngc-link>
+                </ng-container>
+                </ng-template>
+          </ngc-data-column>-->
+
+<!--<ngc-data-column>
+            <ng-template let-name="name "  let-group="group ">
+              <ng-container [formGroupName]="group ">
+                <ngc-link type="link " iconType="edit " (linkClick)="add($event,group) "></ngc-link>
+                </ng-container>
+                </ng-template>
+          </ngc-data-column>-->

@@ -1,0 +1,284 @@
+<form [formGroup]="arrivalCargoCollectionForm">
+    <ngc-titlebar title='import.arrival.cargo.coll.title' (save)="onSave($event)" [disableSave]="showTable==false"
+        (clear)="onClear()" (cancel)="onCancel($event)">
+    </ngc-titlebar>
+    <!-- <ngc-titlebar *ngIf="!showTable" title='import.arrival.cargo.coll.title' (clear)="onClear2()"
+        (cancel)="onCancel($event)">
+    </ngc-titlebar> -->
+    <ngc-container type="box">
+        <ngc-row>
+            <ngc-column column='3'>
+                <ngc-label label='import.truck.airside.hand'>
+                </ngc-label>
+                <div>
+                    <ngc-dropdownlist [width]="180" formControlName="truckAirsideHand"
+                        [source]="truckAirsideHandDropDown" (select)='onTruckAirsideHandSelect($event)' required>
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='import.scan.srf'></ngc-label>
+                <div>
+                    <ngc-taginput maxChars="20" regex="^[0-9]*$" maxItems="10" formControlName="issueSrfNo" width='180'
+                        required>
+                    </ngc-taginput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" [width]="120" value="g.search" iconType="search"
+                        (click)="onSearch()">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container>
+        <div height="40"> </div>
+    </ngc-container>
+    <ngc-container type="section" *ngIf="truckDisableCheck && showTable">
+        <ngc-row>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="TCSK.VEHICLE"></ngc-label>
+                </div>
+                <ngc-input [width]="180" textAlign='left' formControlName="vehicleNo" required>
+                </ngc-input>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label='import.po.truck.dock'></ngc-label>
+                <div>
+                    <ngc-input [width]="180" textAlign='left' formControlName="truckDockNo"
+                        (ngModelChange)="onChangeTruckDock($event)">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <div>
+                    <ngc-label label="g.purpose"></ngc-label>
+                </div>
+                <ngc-dropdownlist [width]="180" formControlName="purpose" [source]="purposeDropdown">
+                </ngc-dropdownlist>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-label label=""></ngc-label>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container>
+        <div height="40"> </div>
+    </ngc-container>
+    <ngc-container *ngIf="showTable" type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-edittable #mainTable formArrayName="arrivalCargoCollectionList" [pageSize]="15"
+                    [hierarchy]="[['locationInfo']]">
+                    <ngc-data-column text="g.sNo" dataField="sno" [width]="10" type="check" align="center"
+                        cellsAlign="center">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-display [formControlName]="name"></ngc-display>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="" dataField="select" [width]="10" type="check" align="center"
+                        cellsAlign="center">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-checkbox [formControlName]="name"></ngc-checkbox>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.srf.Number" dataField="deliveryRequestOrderNo" cellsAlign="center"
+                        align="center" [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-display [formControlName]="name"></ngc-display>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="center" align="center"
+                        [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-display [formControlName]="name"></ngc-display>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.cc" dataField="customsConstraintCode" cellsAlign="center" align="center"
+                        [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-display [formControlName]="name"></ngc-display>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <!-- <ngc-data-column text="Storage" name="locationInfo"> -->
+                    <ngc-data-column text="export.mll.storage.location" dataField="storageLocation" cellsAlign="center"
+                        align="center" [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <ngc-display [formControlName]="name"></ngc-display>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <!-- <ngc-data-column text="import.po.warehouse.location.br" dataField="warehouseLocation"
+                        cellsAlign="center" align="center" [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <ngc-display [formControlName]="name"></ngc-display>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column> -->
+                    <ngc-data-column text="import.retrieve" dataField="retrieve" cellsAlign="center" align="center"
+                        [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <!-- <ngc-input [formControlName]="name" ></ngc-input> -->
+                                            <ngc-dropdownlist [width]="90" formControlName="retrieve"
+                                                sourceId="General$YesNoFlag" required>
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.retrieve.party" dataField="retParty" cellsAlign="center"
+                        align="center" [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <!-- <ngc-input [formControlName]="name" ></ngc-input> -->
+                                            <ngc-dropdownlist [width]="90" formControlName="retParty"
+                                                sourceId='BDSUMMARY_SERVICEPROVIDER' sourceType='query' required>
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.online.klift.driver" dataField="onlineKliftDriver" cellsAlign="center"
+                        align="center" [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <!-- <ngc-input [formControlName]="name" ></ngc-input> -->
+                                            <ngc-dropdownlist [width]="90" formControlName="onlineKliftDriver"
+                                                sourceId='KEY_DRIVER_ID_DROP' sourceType='query'>
+                                            </ngc-dropdownlist>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.priority" dataField="priority" cellsAlign="center" align="center"
+                        [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <!-- <ngc-input [formControlName]="name" ></ngc-input> -->
+                                            <!-- <ngc-dropdownlist [width]="90" formControlName="priority" sourceId='KEY_DRIVER_ID_DROP'
+                                                sourceType='query'>
+                                            </ngc-dropdownlist> -->
+                                            <ngc-input [formControlName]="name" [width]="50" required></ngc-input>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.retrival.location" dataField="retrivalLocation" cellsAlign="center"
+                        align="center" [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <!-- <ngc-input [formControlName]="name" ></ngc-input> -->
+                                            <!-- <ngc-dropdownlist [width]="90" formControlName="onlineKliftDriver" sourceId='KEY_DRIVER_ID_DROP'
+                                                sourceType='query'>
+                                            </ngc-dropdownlist> -->
+                                            <ngc-input [formControlName]="name" [width]="100" required>
+                                            </ngc-input>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.remarks" dataField="remarks" cellsAlign="center" align="center"
+                        [width]="50">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                                <ng-container *ngIf="indexes['locationInfo'] >= 0">
+                                    <ng-container formArrayName="locationInfo">
+                                        <ng-container [formGroupName]="indexes['locationInfo']">
+                                            <!-- <ngc-input [formControlName]="name" ></ngc-input> -->
+                                            <!-- <ngc-dropdownlist [width]="90" formControlName="onlineKliftDriver" sourceId='KEY_DRIVER_ID_DROP'
+                                                sourceType='query'>
+                                            </ngc-dropdownlist> -->
+                                            <ngc-input [formControlName]="name" [width]="100"></ngc-input>
+                                        </ng-container>
+                                    </ng-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <!-- </ngc-data-column> -->
+                    <!-- <ngc-data-column text="import.priority.seq.br" dataField="priority" align="center"
+                        cellsAlign="center">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-input [formControlName]="name" [width]="50" required></ngc-input>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="import.retrival.location" dataField="retrivalLocation" align="center"
+                        cellsAlign="center">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-input [formControlName]="name" [width]="90" required></ngc-input>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.remarks" dataField="remarks" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container *ngIf="indexes['locationInfo'] == 0" [formGroupName]="indexes['root']">
+                                <ngc-input [formControlName]="name" [width]="100"></ngc-input>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column> -->
+                </ngc-edittable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>

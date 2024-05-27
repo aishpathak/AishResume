@@ -1,0 +1,154 @@
+<form [formGroup]="ReturnCargoListForm">
+  <ngc-titlebar title="Return Cargo List" (save)="onSave()" [disabled]=saveFlag (print)="print()"
+    (clear)="onClear($event)" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-dateinput required accessEnableOn="r" [width]="50" showCalendarButton="true" showTimeButton="false"
+            formControlName="fromDate" [min]="dateTo" [max]="dateToMax">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-dateinput required accessEnableOn="r" [width]="50" showCalendarButton="true" showTimeButton="false"
+            formControlName="toDate" [min]="dateTo" [max]="dateToMax">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="carrierColumn" [grid36]="true">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+             sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="100">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="agent.agent.name"></ngc-label>
+        <div>
+          <ngc-lov formControlName="agentName" placeHolder="agent.agent.name" sourceId="COMPANY_AGENT_LIST"
+            title="agent.list" dataField="desc" displayMember='desc' [width]="110" (ngModelChange)="setAgentName()">
+            <ngc-data-column text="agent.agent.name" [width]="150" dataField="desc"></ngc-data-column>
+            <ngc-data-column text="agent.agent.code" dataField="code" [width]="50"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <div>
+          <ngc-button #searchButton accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <div>
+          <ngc-button #editButton accessEnableOn="E" (click)="onEdit()" value="Edit" type="link" iconType="edit">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.printer"></ngc-label>
+        <div>
+          <ngc-printer #printerName [width]='150' formControlName="printer" [printerTypeList]="['PRINTER']">
+          </ngc-printer>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <ngc-button (click)="onDeleteButton($event)()" value="g.delete" [width]='100'>
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-row>
+  </ngc-row>
+
+  <!-- <ngc-container type="tab" *ngIf="searchResult"> -->
+  <!-- <ngc-container *ngFor="let item of ReturnCargoListForm.controls.ReturnCargoListData.controls; let index=index"
+      [formGroupName]="index"> -->
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="ReturnCargoListTableArray" [pageable]="true" [pageSize]="20" [sortable]="true">
+          <ngc-data-column text="g.sel" align="center" dataField="sel" cellsAlign="center" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox [formControlName]='sel'></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" align="center" dataField="sequenceNumber" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.carrier" align="center" dataField="carrierCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="agent.agent.name" align="center" dataField="agentName" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" align="center" dataField="awbNumber" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eawb.rcl.pcs.wgt" align="center" dataField="rclPcsWt" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="return.SRF.No" align="center" dataField="returnSRFNo" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="return.pcs.wt" align="center" dataField="returnPcsWt" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="return.date" align="center" dataField="returnDate" type="displayDate"
+            cellsAlign="center">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- edit button pop up -->
+  <ngc-window #window width="150" height="150">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-datagrid formArrayName="EditTableArray" [height]="200" (linkClick)="onLinkClick($event)">
+            <ngc-data-column text="g.sNo" dataField="sequenceNumber" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="description" dataField="description" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.outstandingAmount" dataField="outstandingAmount" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="si.waivedamount" dataField="waivedAmount" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="si.paid" dataField="paid" align="center" cellsAlign="center"></ngc-data-column>
+
+          </ngc-datagrid>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+</form>
+<ngc-footer [height]="80">
+  <ngc-row>
+    <!-- <ngc-column column="0.5"></ngc-column> -->
+    <ngc-column column="0.5"></ngc-column>
+    <ngc-column>
+      <ngc-button label="print.SRF" (click)="printSRF()">
+      </ngc-button>
+      <!-- </ngc-column>
+    <ngc-column> -->
+      <ngc-button label="freight.out" (click)="freightOut()">
+      </ngc-button>
+      <!-- </ngc-column>
+    <ngc-column> -->
+      <ngc-button label="shipment.info" (click)="shipmentInfo()">
+      </ngc-button>
+      <!-- </ngc-column>
+    <ngc-column> -->
+      <ngc-button label="reject.return.Void RCL" (click)="rejectReturnVoidRCL()">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>
+<ngc-report #reportWindow title="g.report" reportId='returnCargoListSRF' [reportParameters]='reportParameters'>
+  <!-- <ngc-report #reportWindow title="g.report" reportId='ListPrintReturnCargo' [reportParameters]='reportParameters'> -->
+</ngc-report>

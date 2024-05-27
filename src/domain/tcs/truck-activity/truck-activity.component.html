@@ -1,0 +1,120 @@
+<form [formGroup]="truckActivityHistoryForm">
+    <ngc-titlebar *ngIf="!popup" title="tcs.truckActivityHistory"> </ngc-titlebar>
+    <ng-container *ngIf="!popup" formGroupName="search">
+        <ngc-container type="section">
+            <ngc-row>
+                <ngc-column [column]="4">
+                    <ngc-label label="tcs.companyName"></ngc-label>
+                    <div>
+                        <ngc-lov formControlName="companyId" dataField="param1" displayField="desc"
+                            sourceId="COMPANY_NAME" accessEnableOn="r" [width]="300">
+                            <ngc-data-column text="tcs.companyCode" dataField="code" [width]="50"></ngc-data-column>
+                            <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="2">
+                    <ngc-label label="tcs.vehicleNo"></ngc-label>
+                    <div>
+                        <ngc-input formControlName="vehicleNo" accessEnableOn="r" sourceId="TCS_VEHICLES"
+                            patternName="alphanum" sourceCategory="dropdown" sourceType="query" [maxlength]="10"
+                            [width]="100">
+                        </ngc-input>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="2">
+                    <ngc-label label="tcs.terminalEntryFrom"></ngc-label>
+                    <div>
+                        <ngc-dateinput formControlName="terminalEntryFromDate" accessEnableOn="r"
+                            (modelChange)="onFromDateChange()">
+                        </ngc-dateinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="2">
+                    <ngc-label label="tcs.terminalEntryTo"></ngc-label>
+                    <div>
+                        <ngc-dateinput [min]="truckActivityHistoryForm.get('search.terminalEntryFromDate').value"
+                            [max]="maxDate" formControlName="terminalEntryTillDate" accessEnableOn="r">
+                        </ngc-dateinput>
+                    </div>
+                </ngc-column>
+                <ngc-column align="right" verticalAlign="bottom">
+                    <ngc-button label="search" iconType="search" accessEnableOn="r" (click)="onSearch()"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ng-container>
+    <ngc-container *ngIf="isSearch && !popup" type="section">
+        <ngc-row>
+            <ngc-column>
+                <ngc-container title="tcs.bannedTrucks">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-datatable [height]='200' formArrayName="bannedTrucks">
+                                <ngc-data-column [width]="35" text="tcs.vehicleNo" dataField="vehicleNo">
+                                </ngc-data-column>
+                                <ngc-data-column [width]="50" text="tcs.banPeriod" type="displayDateTime"
+                                    dataField="banDateTime" [cellsStyleRenderer]="cellsStyleRenderer">
+                                </ngc-data-column>
+                                <ngc-data-column [width]="35" text="tcs.banReason" dataField="banReasonCode">
+                                </ngc-data-column>
+                            </ngc-datatable>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column>
+                <ngc-container title="tcs.finedTrucks">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-datatable formArrayName="finedTrucks">
+                                <ngc-data-column [width]="35" text="tcs.vehicleNo" dataField="vehicleNo">
+                                </ngc-data-column>
+                                <ngc-data-column [width]="35" text="tcs.outstandingFine" dataField="outstandingFine"
+                                    type="displayCurrency">
+                                </ngc-data-column>
+                            </ngc-datatable>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="isSearch" title="tcs.truckActivityHistory" type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable formArrayName="truckActivityHistory" [columnsHeight]="50">
+                    <ngc-data-column text="tcs.vehicleNo" dataField="vehicleNo">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.preWaiveApplied" dataField="preWaiveApplied" cellsAlign="center"
+                        [width]="30" type="icon" iconType="yesno">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.banned" dataField="banned" cellsAlign="center" [width]="30" type="icon"
+                        iconType="yesno" [iconNegative]="true">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.bookingNo" [width]="50" dataField="bookingNo"></ngc-data-column>
+                    <ngc-data-column text="tcs.incomingPurpose" dataField="purpose">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.enterTerminalTime" type="displayDateTime"
+                        dataField="terminalEntryDateTime">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.declarePurposeTime" type="displayDateTime"
+                        dataField="declarePurposeDateTime">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.truckDockAllocationTime" type="displayDateTime"
+                        dataField="dockAllocatedDateTime">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.truckDockArrivalTime" type="displayDateTime"
+                        dataField="terminalEntryFromDate">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.truckDockLeavingTime" type="displayDateTime"
+                        dataField="dockLeaveDateTime">
+                    </ngc-data-column>
+                    <ngc-data-column text="tcs.leavingTerminalTime" type="displayDateTime"
+                        dataField="terminalExitDateTime">
+                    </ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>

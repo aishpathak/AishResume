@@ -1,0 +1,204 @@
+<form [formGroup]="captureImportDocForm">
+  <ngc-titlebar title="mail.capture.import.mail.document" (clear)='onClear($event)' (cancel)="onBack($event)"
+    (save)="onUpdate()">
+  </ngc-titlebar>
+  <ngc-container type="sectiontop "></ngc-container>
+  <ngc-container type="box" formGroupName="searchFlight">
+    <ngc-row>
+      <ngc-column [column]="1">
+        <ngc-label label='g.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" required="true"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate" [width]="98 " required="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label='g.search' iconType="search" (click)="searchFlight()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='9'></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf='searchResult'>
+    <ngc-row formGroupName="addMailBagForm">
+      <ngc-column [column]='1'>
+        <ngc-label value="import.mail.dn"></ngc-label>
+        <div>
+          <ngc-maskedinput #shipmentNumber formControlName="shipmentNumber" (ngModelChange)="appendDsn()" [width]="80"
+            mask="####" required></ngc-maskedinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label value="g.pieces"></ngc-label>
+        <div>
+          <ngc-piecesinput required formControlName='piece'></ngc-piecesinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label value="g.weight"></ngc-label>
+        <div>
+          <ngc-weightinput  formControlName="weight" required ></ngc-weightinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label value="import.mail.origin.oe"></ngc-label>
+        <div>
+          <ngc-input [width]='50' formControlName='originCountry' upperCase="true" [maxlength]="2"></ngc-input>
+          <!--<ngc-input [width]='60' formControlName='originLocation' upperCase="true " required></ngc-input>-->
+          <ngc-lov formControlName="originLocation" required (select)="getCountryCodeOrigin($event)"
+            sourceId="COUNTRY_AND_CITY" title="g.origin" dataField="code" [width]="47" [maxlength]="3">
+            <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+          </ngc-lov>
+          <ngc-input [width]='50' formControlName='originCategory' upperCase="true" [maxlength]="1"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label value="import.mail.destination.oe"></ngc-label>
+        <div>
+          <ngc-input [width]='50' formControlName='destinationCountry' upperCase="true" [maxlength]="2"></ngc-input>
+          <ngc-lov formControlName="destinationLocation" required (select)="getCountryCodeDestination($event)"
+            sourceId="COUNTRY_AND_CITY" title="g.destination" dataField="code" [width]="47" [maxlength]="3">
+            <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+          </ngc-lov>
+          <ngc-input [width]='50' formControlName='destinationCategory' upperCase="true" [maxlength]="1"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label value="g.category"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]='80' required [dropDownWidth]="80" formControlName='mailCategory'
+            sourceId="Category$Categori"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label value="import.mail.sub.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="mailSubType" sourceId='MAIL_SUBTYPE' sourceType='query' upperCase="true"
+            [width]="80" (select)="getSUbType($event)" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label value="import.mail.registered.mail"></ngc-label>
+        <div>
+          <ngc-dropdownlist required [width]='80' (select)="registeredData($event)" [dropDownWidth]="80"
+            sourceId="Mail$MailRegistered" formControlName='registered'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.year"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='MAIL_YEARS' [width]="80" sourceType='query' formControlName="dispatchYear">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf='searchResult'>
+    <ngc-row>
+      <ngc-column column="8">
+        <ngc-label value="g.remarks"></ngc-label>
+        <div>
+          <ngc-input [width]="700" formControlName='remarks'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="&nbsp"></ngc-label>
+        <div>
+          <ngc-button value="airmail.capture.addBag" (click)="onAdd()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="&nbsp"></ngc-label>
+        <div>
+          <ngc-label label="g.totalpieces" color="black"></ngc-label>: {{totalPieces}}
+          <ngc-label label="g.totalweight" color="black"></ngc-label>: {{totalWeight}}
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--Search results table -->
+  <ngc-container *ngIf='searchResult' type="tab">
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="resultData" [pageable]="false">
+          <ngc-data-column text=" " type="check" [width]="20" align="left" cellsAlign="left" dataField="check">
+          </ngc-data-column>
+          <ngc-data-column text='import.mail.dsn' [width]="60" dataField="shipmentNumber" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.mail.breakdown.pieces' [width]="60" dataField="breakDownPieces"
+            cellsAlign="center" align="center" dataType="string">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-piecesdisplay formControlName="breakDownPieces" required upperCase="true" [width]="70">
+                </ngc-piecesdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='import.mail.brakdown.weight' [width]="60" dataField="breakDownWeight"
+            cellsAlign="center" align="center" dataType="string">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightdisplay formControlName="breakDownWeight" required upperCase="true" [width]="70">
+                </ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='g.pieces' dataField="piece">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-piecesinput [width]="60" formControlName='piece'></ngc-piecesinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='g.weight' [width]="60" dataField="weight" cellsAlign="center" type="input"
+            align="center" dataType="string">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightinput formControlName="weight"></ngc-weightinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.mail.origin.oe" [width]="60" dataField="originOfficeExchange"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text="import.mail.destination.oe" [width]="60" dataField="destinationOfficeExchange"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text="g.category" [width]="30" dataField="mailCategory" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.mail.sub.type' [width]="30" dataField="mailSubCategory" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.mail.registered.mail' [width]="30" type="icon" iconType="yesno"
+            dataField="registered" cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text='g.year' [width]="30" dataField="dispatchYear" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text='g.remarks' [width]="100" dataField="remarks">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input [width]="230" formControlName='remarks'></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='' [width]="20" dataField="delete" cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onLinkClick($event, group)">
+                  <ngc-icon type="delete" value="true" true-color="grey" align="left"></ngc-icon>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

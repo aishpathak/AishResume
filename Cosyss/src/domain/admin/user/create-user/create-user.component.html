@@ -1,0 +1,277 @@
+<form [formGroup]="createUserForm">
+  <ngc-titlebar title='admin.createuser' (save)="onSave($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label value='g.applicationAccess'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="165" [dropDownWidth]="139" formControlName="userType" required
+            sourceId="User Profile$Application_Access" (select)="selectUserType($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.staffno"></ngc-label>
+        <div>
+          <ngc-input [minlength]="6" [maxlength]="10" formControlName="staffIdNumber"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.loginid"></ngc-label>
+        <div>
+          <ngc-input formControlName="loginCode" [maxlength]="8" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.section"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="165" formControlName="departmentCode" sourceId='User Profile$Section'
+            [dropDownWidth]="140" displayMember="code"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.grade"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="165" formControlName="gradeCode" sourceId='User Profile$Grade'
+            [dropDownWidth]="140" displayMember="code"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="4">
+        <ngc-label label="admin.name"></ngc-label>
+        <div>
+          <ngc-input [width]="400" formControlName="shortName" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="6">
+        <ngc-label label="admin.company"></ngc-label>
+        <div formGroupName="customer">
+          <ngc-lov formControlName="name" [maxlength]="70" sourceId="COMPANY" title="admin.company" [width]="600"
+            dataField="desc" [validOnly]="true" required (select)='onSelect($event)' valueMember="desc">
+            <ngc-data-column text="g.companyCode" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.companyName" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.w2kloginid"></ngc-label>
+        <div>
+          <ngc-input [maxlength]="60" formControlName="win2kCode"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.contactno"></ngc-label>
+        <div>
+          <ngc-numberinput [width]="100" formControlName="phoneNumber" digits="10" textAlign='left' max="9999999999"
+            decimalDigits="0" groupSize="0"></ngc-numberinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="6">
+        <ngc-label label="admin.contactemail"></ngc-label>
+        <div>
+          <ngc-input [maxlength]="50" [width]="520" formControlName="emailId"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.initial"></ngc-label>
+        <div>
+          <ngc-input formControlName="initialCode"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="admin.usecosyspassword"></ngc-label>
+        <div>
+          <ngc-passwordinput (ngModelChange)="passwordValueChange($event)" formControlName="encryptPassword"
+            accessSectionId="PASSWORD">
+          </ngc-passwordinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-row>
+          <ngc-column [column]="6">
+            <ngc-label></ngc-label>
+            <div class="form-inline">
+              <ngc-checkbox formControlName="cosysLoginFlag"></ngc-checkbox>
+              <ngc-label label="admin.create.user.change.first.login"></ngc-label>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="6">
+            <ngc-label></ngc-label>
+            <div class="form-inline">
+              <ngc-checkbox formControlName="activeFlag" accessSectionId="ACTIVE"></ngc-checkbox>
+              <ngc-label label="admin.active"></ngc-label>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="showRestrictionFlag">
+        <ngc-label label="admin.create.user.restricted.handling.area"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="handlingArea" sourceId='TERMINAL_CODE' sourceType='query'
+            [multiSelect]="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showRestriction">
+      <ngc-column column="4">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="admin.create.user.restricted.airlines"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="admin.create.user.airlines.name"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="ad.delete"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="restrictedAirlines">
+            <tr *ngFor="let item of createUserForm.controls.restrictedAirlines.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-lov formControlName="carrierCode" sourceId='CARRIER' title='admin.airline' dataField='code' [width]="50"
+                  uppercase='true' (ngModelChange)="onCarrierCode($event , index)">
+                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-label formControlName="carrierCodeName"></ngc-label>
+              </td>
+              <td>
+                <ngc-button iconType="add" priority="quaternary" (click)="addCarrierRow(index)"
+                  *ngIf="createUserForm.get(['restrictedAirlines']).length == (index + 1)"></ngc-button>
+                <ngc-link *ngIf="createUserForm.get(['restrictedAirlines']).length !== (index + 1)"
+                  (linkClick)="deleteCarrierRow(index)">
+                  <ngc-icon type="delete" value="true" true-color="black"></ngc-icon>
+                </ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="8">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="admin.assignrole">
+              </ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+              <ngc-button (click)="onAddRow($event)" value="addRow">
+              </ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="admin.roleCode"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="admin.effectivefrom"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="admin.effectiveend"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="admin.deleterole"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="userRoleAssignments">
+                  <tr *ngFor="let item of createUserForm.controls.userRoleAssignments.controls; let index=index"
+                    [formGroupName]="index">
+                    <td formGroupName="applicationRoleCode">
+                      <ngc-lov *ngIf="createUserForm.get('userType').value === 'C' || createUserForm.get('userType').value === 'Customer'
+					   || createUserForm.get('userType').value === '' || createUserForm.get('userType').value === null"
+                        formControlName="code" upperCase='true' sourceType='query'
+                        [sourceParameters]="lovForRoleCodeCustomer" [validOnly]="true" sourceId='ROLECODEFORCUSTOMER'
+                        title="admin.roleCode" dataField='code' [noCache]="true" required accessSectionId="ASSIGN_ROLE">
+                        <ngc-data-column text="g.roleCode" [width]="80" dataField="code"></ngc-data-column>
+                        <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                      </ngc-lov>
+                      <ngc-lov
+                        *ngIf="createUserForm.get('userType').value === 'Internal' || createUserForm.get('userType').value === 'I'"
+                        formControlName="code" upperCase='true' sourceType='query'
+                        [sourceParameters]="lovForRoleCodeInternal" [validOnly]="true" sourceId='ROLECODEFORINTERNAL'
+                        title="admin.roleCode" dataField='code' [noCache]="true" required accessSectionId="ASSIGN_ROLE">
+                        <ngc-data-column text="g.roleCode" [width]="80" dataField="code"></ngc-data-column>
+                        <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                      </ngc-lov>
+                      <ngc-lov
+                        *ngIf="createUserForm.get('userType').value === 'External' || createUserForm.get('userType').value === 'E'"
+                        formControlName="code" upperCase='true' sourceType='query'
+                        [sourceParameters]="lovForRoleCodeExternal" [validOnly]="true" sourceId='ROLECODEFOREXTERNAL'
+                        title="admin.roleCode" dataField='code' [noCache]="true" required accessSectionId="ASSIGN_ROLE">
+                        <ngc-data-column text="g.roleCode" [width]="80" dataField="code"></ngc-data-column>
+                        <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td>
+                      <ngc-datetimeinput [min]="minDate" formControlName="userRoleStartDate" required>
+                      </ngc-datetimeinput>
+                    </td>
+                    <td>
+                      <ngc-datetimeinput formControlName="userRoleEndDate" [min]="minDate"></ngc-datetimeinput>
+                    </td>
+                    <td>
+                      <ngc-link (linkClick)="onConfirm(index)" iconType="delete">Delete</ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=' '>
+              </ngc-label>
+              <div>
+                <ngc-signaturepad formControlName="userDigitalSignature">
+                </ngc-signaturepad>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='admin.create.user.photograph'>
+              </ngc-label>
+              <div>
+                <ngc-userphoto [width]="90" formControlName="userPhotograph"></ngc-userphoto>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.upload.document"></ngc-label>
+        <div>
+          <ngc-fileupload accept="*/*" entityType="ADMIN_USER" [entityKey]="getEntityKey()" associatedTo="USER"
+            stage="ADMIN_USER">
+          </ngc-fileupload>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

@@ -1,0 +1,508 @@
+<ngc-titlebar title='efacilitation.update' (save)="onSave()" (cancel)="onCancel($event)" (clear)="onClear($event)"
+  [disableSave]="this.form.get('status').value !== 'Approved'">
+</ngc-titlebar>
+<form [formGroup]="searchForm">
+  <ngc-container type="efacilitation.section">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label value="efacilitation.service.number"></ngc-label>
+        <div>
+          <ngc-input [width]="250" formControlName="serviceRequestNo" accessEnableOn='r'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="efacilitation.mawb.number"></ngc-label>
+        <div>
+          <ngc-awbinput formControlName="shipmentNumber" accessEnableOn='r'></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" value="g.search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="form">
+  <ngc-container type="section" *ngIf="!showFlagData">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label value="efacilitation.service.number"></ngc-label>
+        <div>
+          <ngc-display [width]="250" formControlName="serviceRequestNo"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="efacilitation.service.name"></ngc-label>
+        <div>
+          <ngc-display formControlName="serviceCode" sourceCategory="lov" sourceId="EFACILITATION"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="efacilitation.customer.name"></ngc-label>
+        <div>
+          <ngc-display formControlName="agentName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value="efacilitation.contactnumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="requestorContactNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label='efacilitation.requestTo.customs'></ngc-label>
+        <div>
+          <ngc-icon type="yesno" formControlName="customClearanceRequired"></ngc-icon>
+        </div>
+        <!-- <div
+          *ngIf="form.get('status').value !== 'Approved' && form.get('status').value !== 'Rejected' &&  form.get('status').value !== 'Completed'">
+          <ngc-checkbox formControlName="customClearanceRequired" (modelChange)="customClearanceRequired($event)">
+          </ngc-checkbox>
+        </div> -->
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="efacilitation.custom.agent"></ngc-label>
+        <div *ngIf="form.get('status').value  !== 'Submitted'">
+          <ngc-display formControlName="customBroker" sourceCategory="lov" sourceId="CUSTOMS_CUSTOMER_LIST">
+          </ngc-display>
+        </div>
+        <div *ngIf="form.get('status').value == 'Submitted'">
+          <ngc-lov [width]="250" formControlName="customBroker" sourceId="CUSTOMS_CUSTOMER_LIST"
+            title="efacilitation.custom.agent" dataField="code" displayField="desc" accessEnableOn='r'>
+            <ngc-data-column text="g.customerCode" dataField="code">
+            </ngc-data-column>
+            <ngc-data-column text="g.customer.full.name" dataField="desc">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="4" *ngIf="form.get('status').value === 'Rejected'">
+        <ngc-label value="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status" emphasis="lg" color='red'></ngc-display>&nbsp;&nbsp;
+          <ngc-display formControlName="rejectedOn"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="4" *ngIf="form.get('status').value === 'Cancelled'">
+        <ngc-label value="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status" emphasis="lg" color='red'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="4" *ngIf="form.get('status').value === 'Completed'">
+        <ngc-label value="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status" emphasis="lg" color='green'></ngc-display>&nbsp;&nbsp;
+          <ngc-display formControlName="completedOn"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="4" *ngIf="form.get('status').value === 'Approved'">
+        <ngc-label value="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status" emphasis="lg" color='green'></ngc-display>&nbsp;&nbsp;
+          <ngc-display formControlName="approvedOn"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label value="efacilitation.submitted.by"></ngc-label>
+        <div>
+          <ngc-display formControlName="requestedBy"></ngc-display>&nbsp;-&nbsp;
+          <ngc-display formControlName="requestedOn"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" *ngIf="form.get('status').value === 'Rejected'">
+        <ngc-label label="req.reason"></ngc-label>
+        <div>
+          <ngc-textarea [maxlength]="500" formControlName="rejectReason" [width]="400" [height]="50" [disabled]="true">
+          </ngc-textarea>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ng-container
+          *ngIf="form.get('status').value !== 'Completed' && form.get('status').value !== 'Approved' && form.get('status').value !== 'Rejected' && form.get('status').value !== 'Cancelled'">
+          <ngc-button accessSectionId="EFT_DM" (click)="onApproveReject('approve')" value="g.approve" iconType="submit">
+          </ngc-button>
+          <ngc-button accessSectionId="EFT_DM" (click)="onApproveReject('reject')"
+            value="admin.company.registration.approval.reject" iconType="submit">
+          </ngc-button>
+        </ng-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="shipmentList" [pageSize]="10">
+          <ngc-data-column text="efacilitation.mawb.number" dataField="shipmentNumber">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-link formControlName='shipmentNumber' required color="red" (linkClick)="onLinkClick($event)">
+                </ngc-link>
+                <br>
+                <ngc-link *ngIf="form.get(['shipmentList', group, 'flightInOrOutBound']).value == 'I'" required
+                  color="red" (linkClick)="onRedirectIssueDO(group)">
+                  <ngc-i18n value="import.title.issue.do"></ngc-i18n>
+                </ngc-link>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-link formControlName='shipmentNumber' required color="orange" (linkClick)="onLinkClick($event)">
+                </ngc-link>
+                <br>
+                <ngc-link *ngIf="form.get(['shipmentList', group, 'flightInOrOutBound']).value == 'I'" required
+                  color="orange" (linkClick)="onRedirectIssueDO(group)">
+                  <ngc-i18n value="import.title.issue.do"></ngc-i18n>
+                </ngc-link>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+
+                <ngc-link formControlName='shipmentNumber' (linkClick)="onLinkClick($event)">
+                </ngc-link>
+                <br>
+                <ngc-link *ngIf="form.get(['shipmentList', group, 'flightInOrOutBound']).value == 'I'"
+                  (linkClick)="onRedirectIssueDO(group)">
+                  <ngc-i18n value="import.title.issue.do"></ngc-i18n>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.in.out" dataField="flightInOrOutBound">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="flightInOrOutBound" sourceCategory="dropdown"
+                  sourceId="General$eFacilitationFlightType" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="flightInOrOutBound" sourceCategory="dropdown"
+                  sourceId="General$eFacilitationFlightType" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="flightInOrOutBound" sourceCategory="dropdown"
+                  sourceId="General$eFacilitationFlightType"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="customs.flight.number" dataField="flightKey">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="flightKey" required style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="flightKey" required style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="flightKey" required></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightDate" dataField="flightDate">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="flightDate" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="flightDate" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="flightDate"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.totalpieces" dataField="requestedPieces">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-piecesdisplay formControlName="requestedPieces" required style="color:rgb(255, 0, 0);">
+                </ngc-piecesdisplay>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-piecesdisplay formControlName="requestedPieces" required style="color:rgb(255, 128, 0);">
+                </ngc-piecesdisplay>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-piecesdisplay formControlName="requestedPieces" required></ngc-piecesdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="efacilitation.weight" dataField="requestedWeight">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-weightdisplay formControlName="requestedWeight" required style="color:rgb(255, 0, 0);">
+                </ngc-weightdisplay>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-weightdisplay formControlName="requestedWeight" required style="color:rgb(255, 128, 0);">
+                </ngc-weightdisplay>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-weightdisplay formControlName="requestedWeight" required></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="freightout.pieces" dataField="freightOutPieces">
+          </ngc-data-column>
+          <ngc-data-column text="freightout.weight" dataField="freightOutWeight">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remarks">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="remarks" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="remarks" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="remarks"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.custom.status" dataField="customStatus">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="customStatus" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="customStatus" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="customStatus"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.custom.remarks" dataField="customRemarks">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="customRemarks" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="customRemarks" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="customRemarks"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.permit.number" dataField="customPermitNumber">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="customPermitNumber" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="customPermitNumber" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="customPermitNumber"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.agent.status" dataField="agentStatus"
+            *ngIf="form.get('showAgentStatus').value">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display formControlName="agentStatus" style="color:rgb(255, 0, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value =='U'">
+                <ngc-display formControlName="agentStatus" style="color:rgb(255, 128, 0);"></ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get(['shipmentList', group, 'agentStatusType']).value ==''">
+                <ngc-display formControlName="agentStatus"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.actual.weight" dataField="actualWeight">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                <ngc-weightinput formControlName="actualWeight"></ngc-weightinput>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-weightdisplay formControlName="actualWeight" style="color:rgb(255, 0, 0);"></ngc-weightdisplay>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get('status').value !== 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                <ngc-weightdisplay formControlName="actualWeight"></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="efacilitation.remarks" dataField="additionalRemarks">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container
+                  *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                  <ngc-input formControlName="additionalRemarks" [maxlength]="65"></ngc-input>
+                </ng-container>
+                <ng-container
+                  *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                  <ngc-display formControlName="additionalRemarks" style="color:rgb(255, 0, 0);"></ngc-display>
+                </ng-container>
+                <ng-container
+                  *ngIf="form.get('status').value !== 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                  <ngc-display formControlName="additionalRemarks"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="awb.delivery.order.no" dataField="deliveryOrderNo">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container
+                  *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                  <ngc-display formControlName="deliveryOrderNo"></ngc-display>
+                </ng-container>
+                <ng-container
+                  *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                  <ngc-display formControlName="deliveryOrderNo" style="color:rgb(255, 0, 0);"></ngc-display>
+                </ng-container>
+                <ng-container
+                  *ngIf="form.get('status').value !== 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                  <ngc-display formControlName="deliveryOrderNo"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="efacilitation.status" dataField="satsStatus">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                <ngc-dropdownlist sourceId="General$eFacilitationSatsStatus" [width]="150" formControlName="satsStatus"
+                  required>
+                </ngc-dropdownlist>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get('status').value === 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value =='D'">
+                <ngc-display sourceId="General$eFacilitationSatsStatus" sourceCategory="dropdown"
+                  formControlName="satsStatus" style="color:rgb(255, 0, 0);">
+                </ngc-display>
+              </ng-container>
+              <ng-container [formGroupName]="group"
+                *ngIf="form.get('status').value !== 'Approved' && form.get(['shipmentList', group, 'agentStatusType']).value !='D'">
+                <ngc-display sourceId="General$eFacilitationSatsStatus" sourceCategory="dropdown"
+                  formControlName="satsStatus">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="efacilitation.sats.docs"></ngc-label>
+        <div>
+          <ng-container *ngIf="form.get('status').value === 'Rejected' || form.get('status').value === 'Cancelled'">
+            <ngc-fileupload accept="*/*" viewMode="readonly" entityType="Sats"
+              [entityKey]="this.form.get('documentReferenceId').value" associatedTo="E" stage="Facilitation">
+            </ngc-fileupload>
+          </ng-container>
+          <ng-container *ngIf="form.get('status').value !== 'Rejected' && form.get('status').value !== 'Cancelled'">
+            <ngc-fileupload accept="*/*" viewMode="list" entityType="Sats"
+              [entityKey]="this.form.get('documentReferenceId').value" associatedTo="E" stage="Facilitation">
+            </ngc-fileupload>
+          </ng-container>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="efacilitation.custom.docs"></ngc-label>
+        <div>
+          <ngc-fileupload accept="*/*" viewMode="readonly" entityType="Customs"
+            [entityKey]="this.form.get('documentReferenceId').value" associatedTo="E" stage="Facilitation">
+          </ngc-fileupload>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="form.get('showCustomerDocuments').value">>
+      <ngc-column>
+        <ngc-label label="efacilitation.agent.docs"></ngc-label>
+        <div>
+          <ngc-fileupload accept="*/*" viewMode="readonly" entityType="File"
+            [entityKey]="this.form.get('documentReferenceId').value" associatedTo="E" stage="Facilitation">
+          </ngc-fileupload>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="efacilitation.mawb.docs"></ngc-label>
+        <div>
+          <ngc-fileupload accept="*/*" viewMode="readonly" entityType="MAWB"
+            [entityKey]="this.form.get('documentReferenceId').value" associatedTo="E" stage="Facilitation">
+          </ngc-fileupload>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-window #rejectWindow (close)="onCloseWindow()" title="req.reason" [showCloseButton]="true" [width]="420"
+    height='300'>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column="11">
+          <ngc-label label="efacilitation.reject.reason"></ngc-label>
+          <div>
+            <ngc-textarea accessSectionId="EFT_DM" [maxlength]="500" formControlName="rejectReason" [width]="400"
+              [height]="50"></ngc-textarea>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="11">
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="11" align="right">
+          <ngc-button accessSectionId="EFT_DM" (click)="onRejectWindow()"
+            value="admin.company.registration.approval.reject"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

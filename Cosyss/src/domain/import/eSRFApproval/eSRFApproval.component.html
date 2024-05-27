@@ -1,0 +1,376 @@
+<form [formGroup]="eSRFApprovalForm">
+  <ngc-titlebar title="imp.title.shipments.esrf.approval" (clear)="clear($event)">
+  </ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='g.fromDate'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="fromDate" [width]='100' accessEnableOn="r" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='g.toDate'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="toDate" [width]='100' [min]="eSRFApprovalForm.controls.fromDate.value"
+            [max]="toMax" accessEnableOn="r" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.carrier'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="carrierCode" [width]='120'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.agent'></ngc-label>
+        <div>
+          <ngc-lov [width]="70" accessEnableOn="r" formControlName="agentName" sourceId="AGENT_NAME_DISPLAY_PO"
+            title="g.customer.list" dataField="code">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="import.customer.full.namee" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='admin.truckercompany'></ngc-label>
+        <div>
+          <ngc-lov [width]="150" accessEnableOn="r" formControlName="truckerCompany" title="trucker.company"
+            dataField="desc" sourceId='KEY_TRUCKER_COMPANY'>
+            <ngc-data-column text="g.Trucker.Company" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="import.customer.full.namee" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='AWB'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" [width]='120'>
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='import.vehicle.no'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="vehicleNo" [width]='120'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='imp.booking.no'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="bookingNo" [width]='120'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.booking.status'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="bookingStatus" sourceId='SRF$SRFBookingStatus'
+            [width]="140">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='doc.uploaded'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="documentUploaded"
+            sourceId='DocUploaded$DocUploadedValues' [width]="140">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)='onSearch()' iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- tableview -->
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value=' '></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label="exp.rejection.remarks"></ngc-label>&nbsp;&nbsp;&nbsp;
+          <ngc-dropdownlist lable="exp.rejection.remarks" accessEnableOn="r" formControlName="rejectionRemarks"
+            sourceId="ESRFA$REJECT__REASON" [width]="140">
+          </ngc-dropdownlist>
+          <ngc-label label=""></ngc-label>
+          <ngc-button label='imp.esrf.reject' (click)="onReject()"></ngc-button>
+          <ngc-label label=""></ngc-label>
+          <ngc-button label='imp.esrf.approve' (click)="onApprove()"></ngc-button>
+          <ngc-label label=""></ngc-label>
+          <ngc-button label='imp.auto.issue.srf' (click)="onAutoIssueSRF()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="shipmentArray" [pageable]="true" [pageSize]="10" [sortable]="false">
+          <ngc-data-column text="&nbsp" dataField="selectCheck" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="selectCheck" [width]="30"
+                  *ngIf="(this.eSRFApprovalForm.get(['shipmentArray', group,'srfNo']).value == null)">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='50' dataField="serialNo" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" [width]="110" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flt/Date" dataField="flightInfo" [width]="130" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.ata" dataField="ata" [width]="60" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.AwbPiecsWeight" dataField="awbPcsWeight" [width]="100" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="inv.pcs.wt" dataField="invPcsWt" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.agentName" dataField="agentName" [width]="110"></ngc-data-column>
+          <ngc-data-column text="import.consignee" dataField="consigneeName" [width]="110">
+          </ngc-data-column>
+          <ngc-data-column text="import.shc" dataField="shc" [width]="80" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.cc.code" dataField="ccDes" [width]="80" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="doc.Reqd" dataField="docRequired" [width]="80" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="doc.uploaded" dataField="docUploaded" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="getDocumentInfo(this.eSRFApprovalForm.get(['shipmentArray', group]).value,group)">
+                  <ngc-display formControlName="docUploaded"></ngc-display>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="doc.Approved" dataField="documentStatus" [width]="110" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.status" dataField="paymentStatus" cellsAlign="left">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="getPaymentStatus(this.eSRFApprovalForm.get(['shipmentArray', group]).value,group)"
+                  iconType="search">
+                </ngc-link>
+                <ngc-display formControlName="paymentStatus"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="req.reason" dataField="rejectionRemarks" [width]="130">
+          </ngc-data-column>
+          <ngc-data-column text="admin.truckercompany" dataField="truckerCompany" [width]="150">
+          </ngc-data-column>
+          <ngc-data-column text="import.vehicle.no" dataField="vehicleNo" [width]="110">
+          </ngc-data-column>
+          <ngc-data-column text="ecc.export.bookstatus" dataField="bkgStatus" [width]="130" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.bkg.date.time.slot" dataField="bookingDate" [width]="120" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="imp.booking.no" dataField="bookingNo" [width]="120" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="srf.no" dataField="srfNo" [width]="120" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="imp.srf.date" dataField="srfDate" [width]="120" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.additionalInfo" dataField="additionalinfo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link
+                  (click)="onAdditionalInformationPopUp(this.eSRFApprovalForm.get(['shipmentArray', group]).value,group)"
+                  iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-footer *ngIf="showTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-button class="btn btn-sm" value="import.fwb" (click)="navigateToFWB()" accessEnableOn="r"></ngc-button>
+        <ngc-button class="btn btn-sm" value="import.fhl" (click)="navigateToFHL()" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-footer>
+</form>
+<form [formGroup]="additionalInformation">
+  <ngc-window #additionalInformationWindow [width]="600" [height]="300" title='import.additionalInfo'>
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <tbody>
+              <td>
+                <ngc-label value='agent.pd'></ngc-label>
+                <ngc-display formControlName='agentPd'></ngc-display>
+              </td>
+              <td>
+                <ngc-label value='g.balance'></ngc-label>
+                <ngc-display formControlName='agentPdBalence'></ngc-display>
+              </td>
+            </tbody>
+            <tbody>
+              <td>
+                <ngc-label value='airline.pd'></ngc-label>
+                <ngc-display formControlName='airlinePd'></ngc-display>
+              </td>
+              <td>
+                <ngc-label value='g.balance'></ngc-label>
+                <ngc-display formControlName='airlinePdBalence'></ngc-display>
+              </td>
+            </tbody>
+            <tbody>
+              <td>
+                <ngc-label value='g.undertaking'></ngc-label>
+                <ngc-display formControlName='undertaking'></ngc-display>
+              </td>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+<form [formGroup]="collectionPerson">
+  <ngc-window #collectionPersonPopUp [width]="600" [height]="200" title='Collection Person'>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value='agent.appointed.agent'></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-lov accessEnableOn="r" formControlName="appointedAgent" sourceId="APPOINTED_AGENT_DATA_FOR_AWB_RELEASE"
+            title="g.customer.list" dataField="code" displayMember='code' [width]="120" required>
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value='billing.collected.by'></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-input formControlName="collectedBy" [width]='130' accessEnableOn="r" required></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value='hkid'></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-input formControlName="hkId" [width]='150' accessEnableOn="r" required></ngc-input>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=' '></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right" [width]="50" [height]="50">
+          <ngc-button label='g.save' (click)="autoIssueSRFSave()"></ngc-button>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window #docUploadWindow title="upload.view" width="1300" height="350" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="agent.awb"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.flight.no.date"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container>
+              <tr>
+                <td>
+                  <ngc-display formControlName="awbNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="fltNoDate"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            <!-- </tbody> -->
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="g.document.required"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.files"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container>
+              <tr>
+                <td>
+                  <table>
+                    <tr *ngFor="let item of this.collectionPerson.get('documentNames').controls; let index=index">
+                      <td>
+                        {{index}}
+                      </td>
+                      <td>{{item}}</td>
+                    </tr>
+                  </table>
+                </td>
+                <td>
+                  <ngc-fileupload #uploadedfiles accept="*/*" viewMode="readonly" entityType="AWB"
+                    [entityKey]="this.shipmentNumber" associatedTo="bookingDateTimeSlot" stage="bookingDateTimeSlot"
+                    type="link" icon="camera" (choose)="onChooseDocuments(uploadedfiles,$event)">
+                  </ngc-fileupload>
+                </td>
+              </tr>
+            </ng-container>
+          </ngc-table>
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+
+</form>

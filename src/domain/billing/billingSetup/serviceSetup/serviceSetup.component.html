@@ -1,0 +1,268 @@
+<ngc-titlebar title='bil.serviceSetup' (save)="onSave($event)" (cancel)="onCancel($event)" [noHistoryBack]="true"
+  [disableSave]="hasReadPermission">
+</ngc-titlebar>
+<form [formGroup]="serviceSetupForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label value="import.service.provider.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='CUSTOMER_TYPES' sourceType='query' formControlName="serviceProviderCustomerType"
+            [dropDownWidth]="150" width="150" required [disabled]="isEdit"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.serviceCode"></ngc-label>
+        <div>
+          <ngc-input *ngIf="!isEdit" formControlName="serviceCode" [width]="200" required></ngc-input>
+          <ngc-display *ngIf="isEdit" formControlName="serviceCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label value="bil.serviceName" required></ngc-label>
+        <div>
+          <ngc-input formControlName="name" [width]="400" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="columnSize">
+        <ngc-label value="bil.associatedTo"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='Services$AssociatedTo' formControlName="associatedTo" [dropDownWidth]="120"
+            width="120" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="columnSize">
+        <ngc-label value="service.category"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="ServiceCategory$ServiceCategoryValues" formControlName="serviceCategory"
+            [dropDownWidth]="120" width="120" (ngModelChange)="onChangeServiceCategory($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="adhocService"></ngc-checkbox>
+          <ngc-label label="bil.ad-hocService"></ngc-label>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="bil.paymentSettings"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="paidService"></ngc-checkbox>
+          <ngc-label label="bil.chargeable.service"></ngc-label>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" *ngIf="show">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="upfrontPayment"></ngc-checkbox>
+          <ngc-label label="bil.upfrontPayment"></ngc-label>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="3">
+        <ngc-label value="bil.chargeCodeId"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" sourceId="CHARGE_CODE_SERVICE"  title="billing.charge.code.id"
+            formControlName="chargeCodeId"  dataField="code" [width]="295">
+            <ngc-data-column text="g.code"  dataField="code"  [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container title="bil.chargingMechanism" type="square" *ngIf="show">
+    <!-- <ngc-row>
+      <ngc-column>
+        <ngc-label label="bil.chargingMechanism"></ngc-label>
+      </ngc-column>
+    </ngc-row> -->
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="duration" type="check"></ngc-checkbox>
+          <ngc-label label="bil.durationBased"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.createServiceRequest.durationOf"></ngc-label>
+        <div>
+          <ngc-input formControlName="durationOf" [width]="150" [required]="this.serviceSetupForm.get('duration').value"
+            [disabled]="!this.serviceSetupForm.get('duration').value"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.createServiceRequest.durationUom"></ngc-label>
+        <div>
+          <div>
+            <ngc-dropdownlist formControlName="durationUom" sourceId="Billing$Billing.DurationUom"
+              [sourceParameters]="serviceCategoryCriteria" [width]="100"
+              [required]="this.serviceSetupForm.get('duration').value"
+              [disabled]="!this.serviceSetupForm.get('duration').value"></ngc-dropdownlist>
+          </div>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="absoluteDuration" type="check"
+            [disabled]="!this.serviceSetupForm.get('duration').value"></ngc-checkbox>
+          <ngc-label label="bil.absolute.duration"></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="quantity" type="check"></ngc-checkbox>
+          <ngc-label label="bil.quantityBased"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.quantityOf"></ngc-label>
+        <div>
+          <ngc-input formControlName="quantityOf" [width]="150" [required]="this.serviceSetupForm.get('quantity').value"
+            [disabled]="!this.serviceSetupForm.get('quantity').value"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.uom"></ngc-label>
+        <div>
+          <div>
+            <ngc-dropdownlist formControlName="uom" sourceId="Billing$UOM" [sourceParameters]="serviceCategoryCriteria"
+              [width]="100" [required]="this.serviceSetupForm.get('quantity').value"
+              [disabled]="!this.serviceSetupForm.get('quantity').value"></ngc-dropdownlist>
+          </div>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="billing.default.value"></ngc-label>
+        <div>
+          <ngc-numberinput decimalDigits="0" [min]="1" [width]="100" formControlName="defaultQuantity">
+          </ngc-numberinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="quantityModifiable" type="check"></ngc-checkbox>
+          <ngc-label value="billing.modifiable"></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="option" type="check"></ngc-checkbox>
+          <ngc-label label="bil.optionBased"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.optionName"></ngc-label>
+        <div>
+          <ngc-input formControlName="optionName" [maxLength]='65' [width]="280"
+            [required]="this.serviceSetupForm.get('option').value"
+            [disabled]="!this.serviceSetupForm.get('option').value"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label value="bil.optionValue"></ngc-label>
+        <div>
+          <ngc-taginput formControlName="optionLov" [width]="250" [required]="this.serviceSetupForm.get('option').value"
+            [disabled]="!this.serviceSetupForm.get('option').value"></ngc-taginput>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row *ngIf="show">
+      <ngc-column column="2">
+        <ngc-label value="bil.leadTime" required></ngc-label>
+        <ngc-display value="billing.hours" [i18n]="true"></ngc-display>
+        <div>
+          <ngc-numberinput decimalDigits="0" digits="2" formControlName="leadTime" [width]="100"></ngc-numberinput>
+
+
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="bil.sla" required></ngc-label>
+        <ngc-display value="billing.hours" [i18n]="true"></ngc-display>
+        <div>
+          <ngc-numberinput decimalDigits="0" digits="2" formControlName="slaFor" [width]="100"></ngc-numberinput>
+
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="allowForAgent"></ngc-checkbox>
+          <ngc-label label="bil.allowAgentPortal"></ngc-label>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" *ngIf="showValidFlightCheck">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="attachedvalidFlight"></ngc-checkbox>
+          <ngc-label label="Validate Flight"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="showServiceAutoComplete">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="serviceAutoComplete"></ngc-checkbox>
+          <ngc-label label="Service Auto Complete"></ngc-label>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" [ngStyle]="{visibility: 'hidden'}">
+        <ngc-label value="bil.handlingArea"></ngc-label>
+        <div>
+          <div>
+            <ngc-dropdownlist formControlName="handlingArea" sourceId='HANDLINGAREA'  sourceType='query'
+              [sourceParameters]="serviceCategoryCriteria" [width]="100"></ngc-dropdownlist>
+          </div>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2" [ngStyle]="{visibility: 'hidden'}">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="attachedToCargo"></ngc-checkbox>
+          <ngc-label label="billing.attached.to.cargo"></ngc-label>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="show">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="bil.terms"></ngc-label>
+        <br />
+        <ngc-textarea [width]="1000" [height]="100" formControlName="termsAndCondition"></ngc-textarea>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

@@ -1,0 +1,1580 @@
+<ngc-titlebar title="admin.title.maintain.customer" [disableSave]="deregisterFlag" (clear)="onClear($event)"
+  (save)="onSave($event)" (cancel)="onBack($event)"></ngc-titlebar>
+<form [formGroup]="addCustomerForm">
+
+  <ngc-container type='section' *ngIf="displaySearchFlag">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="g.customerCode"></ngc-label>
+        <div>
+          <ngc-lov formControlName='customerCode' [width]='140' upperCase='true' sourceId='COMPANY_DEREGISTER'
+            title='g.customerCode' dataField='code' (select)='onCompanyLOVSelect($event)' valueMember='code'
+            accessEnableOn="r" [dropDownWidth]='60'>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label="g.customerName"></ngc-label>
+        <div>
+          <ngc-lov dataField='desc' valueMember='desc' formControlName='customerShortName' [width]='248'
+            upperCase='true' sourceId='COMPANY_DEREGISTER_NAME' title='g.customerName' accessEnableOn="r"
+            (select)='onCompanyNameLOVSelect($event)' [dropDownWidth]='60'>
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='190'></ngc-data-column>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='100'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="agent.iataAgentcode"></ngc-label>
+        </div>
+        <ngc-lov dataField='code' valueMember='code' formControlName='iataAgentCode' [width]='160' upperCase='true'
+          sourceId='IATACODE' title='g.iatacode' accessEnableOn="r" [dropDownWidth]='50'>
+          <ngc-data-column text='g.iatacode' dataField='code' [width]='70'></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="1" entityAttribute='Customer.CustomerUniqueEntityNumber'>
+        <div>
+          <ngc-label entityAttribute='Customer.CustomerUniqueEntityNumber'>
+          </ngc-label>
+        </div>
+        <ngc-input formControlName="uenNumber" entityAttribute='Customer.CustomerUniqueEntityNumber' [width]="100"
+          accessEnableOn="r"></ngc-input>
+      </ngc-column>
+      <ngc-column column="1" entityAttribute='User.LoginIdSearch'>
+        <div>
+          <ngc-label label="admin.maintain.customer.login.id.web" entityAttribute='User.LoginIdSearch'></ngc-label>
+        </div>
+        <ngc-input formControlName="adminLoginCode" [width]="100" accessEnableOn="r"
+          entityAttribute='User.LoginIdSearch'></ngc-input>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div style="margin-left: 17px;">
+          <ngc-button value="g.search" iconType="search" (click)='addSearchCustomerData($event)' accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button value="arrival.create" iconType="add" (click)='addCreateCustomerData($event)'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ng-container *ngIf="diplayAfterSearch">
+    <ngc-container type='section' title='admin.customer.information'>
+      <ngc-row>
+        <ngc-column column="1">
+          <div>
+            <ngc-label label="g.customerCode"></ngc-label>
+          </div>
+          <ngc-input formControlName="customerCode" width="100px"></ngc-input>
+        </ngc-column>
+        <ngc-column column="5">
+          <div>
+            <ngc-label label="g.customerName"></ngc-label>
+          </div>
+
+          <ngc-input #customerShortName formControlName="customerShortName" width="600px" required></ngc-input>
+        </ngc-column>
+        <ngc-column column="2">
+          <div>
+            <ngc-label label="customer.customer.type"></ngc-label>
+          </div>
+          <ngc-dropdownlist formControlName="customerTypes" [all]='false' (select)='onCustomerTypeSelect($event)'
+            sourceId='CUSTOMER_TYPES' sourceType='query' [multiSelect]="true" width="200%" required></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column column="0.5" entityAttribute="Customer.FHLValidation">
+          <div>
+            <ngc-label label="admin.fhlvalidation" entityAttribute="Customer.FHLValidation"></ngc-label>
+          </div>
+          <ngc-checkbox #checkFlag formControlName="fhlValidation" entityAttribute="Customer.FHLValidation">
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="0.5" entityAttribute="Customer.HaffaMember" align="right">
+          <div>
+            <ngc-label label="admin.haffamember" entityAttribute="Customer.HaffaMember"></ngc-label>
+          </div>
+          <ngc-checkbox #checkFlag formControlName="haffaMember" [disabled]="displayHaffaFlag">
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="0.5" entityAttribute="Customer.AISRSMember" align="right">
+          <div>
+            <ngc-label label="admin.aisrsmember" entityAttribute="Customer.AISRSMember"></ngc-label>
+          </div>
+          <ngc-checkbox #checkFlag formControlName="aisrsMember" entityAttribute="Customer.AISRSMember"
+            [disabled]="displayHaffaFlag"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="0.6" entityAttribute="Customer.AirsideAcceptanceType" align="right">
+          <div>
+            <ngc-label label="admin.airsideacceptence" entityAttribute="Customer.AirsideAcceptanceType"></ngc-label>
+          </div>
+          <ngc-dropdownlist [width]="40" formControlName="customerAcceptanceTypes" sourceId="Customer$Airside_Acc"
+            [multiSelect]="true">
+          </ngc-dropdownlist>
+        </ngc-column>
+
+        <ngc-column column="1.7" align="right">
+          <div>
+            <ngc-button value="customer.refresh" (click)='onRefresh($event)'></ngc-button>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="1" entityAttribute='Customer.ImportAuthorizationHolderFlag'>
+          <div>
+            <ngc-label label="agent.ia_Holder" entityAttribute='Customer.ImportAuthorizationHolderFlag'></ngc-label>
+          </div>
+          <ngc-dropdownlist formControlName="importAuthorizationHolderFlag"
+            entityAttribute='Customer.ImportAuthorizationHolderFlag' sourceId="Admin$AuthoriZationFlag"
+            [autoSelect]="true" [width]="90" (ngModelChange)="onChangeIaHolder($event)"></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column column="2" entityAttribute='Customer.CustomerUniqueEntityNumber'>
+          <ngc-label entityAttribute='Customer.CustomerUniqueEntityNumber'>
+          </ngc-label>
+          <div>
+            <ngc-input formControlName="uenNumber" *ngIf="diplayAfterSearch"
+              entityAttribute='Customer.CustomerUniqueEntityNumber'>
+            </ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column column="2" entityAttribute='Customer.CustomHouseAgentNumber'>
+          <ngc-label label="admin.cha.number" entityAttribute='Customer.CustomHouseAgentNumber'></ngc-label>
+          <div>
+            <ngc-input formControlName="chaNumber" entityAttribute='Customer.CustomHouseAgentNumber'
+              *ngIf="diplayAfterSearch" [width]="120">
+            </ngc-input>
+          </div>
+        </ngc-column>
+
+        <ngc-column column="2" entityAttribute='Customer.ImportAuthorizationExpiryDate'>
+          <div>
+            <ngc-label label="agent.ia_ExpiryDate"></ngc-label>
+          </div>
+          <ngc-datetimeinput formControlName="iaExpiryDate" [width]="120" *ngIf="diplayAfterSearch"></ngc-datetimeinput>
+        </ngc-column>
+        <ngc-column column="2" entityAttribute='Customer.CustomAgentNumberExpiryDate'>
+          <div>
+            <ngc-label label="admin.cha.number.expiry" entityAttribute='Customer.CustomAgentNumberExpiryDate'>
+            </ngc-label>
+          </div>
+          <ngc-dateinput formControlName="chaNumberExpiry" entityAttribute='Customer.CustomAgentNumberExpiryDate'
+            [width]="120" *ngIf="diplayAfterSearch">
+          </ngc-dateinput>
+        </ngc-column>
+
+
+        <ngc-column column="2">
+          <div>
+            <ngc-label label="admin.maintain.customer.login.id.web"></ngc-label>
+          </div>
+          <ngc-input formControlName="adminLoginCode" [disabled]="true" width="90%" *ngIf="diplayAfterSearch">
+          </ngc-input>
+        </ngc-column>
+        <ngc-column column="2" entityAttribute='Customer.TaxAccountNumber'>
+          <div>
+            <ngc-label label="admin.pan.number" entityAttribute='Customer.TaxAccountNumber'></ngc-label>
+          </div>
+          <ngc-input formControlName="panNumber" [width]="120" *ngIf="diplayAfterSearch"
+            entityAttribute='Customer.TaxAccountNumber'>
+          </ngc-input>
+        </ngc-column>
+        <ngc-column column="2">
+          <div>
+            <ngc-label label="agent.iataAgentcode"></ngc-label>
+          </div>
+          <ngc-input [width]="100" formControlName="iataAgentCode" [maxlength]="7" *ngIf="diplayAfterSearch">
+          </ngc-input>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column *ngIf="buttonFlag" column="4">
+          <div>
+            <ngc-label label="agent.formallyKnownAs"></ngc-label>
+          </div>
+          <ngc-input formControlName="formallyKnownAs" width="400px" *ngIf="diplayAfterSearch"></ngc-input>
+        </ngc-column>
+        <ngc-column *ngIf="buttonFlag" column="2">
+          <div>
+            <ngc-label label="admin.maintain.customer.shipment.assignment"></ngc-label>
+          </div>
+          <ngc-display formControlName="lastShipmentAssignment" [onlyDate]="true" width="90%"></ngc-display>
+        </ngc-column>
+        <ngc-column *ngIf="buttonFlag" column="1">
+          <div>
+            <ngc-label label="g.last.updated"></ngc-label>
+          </div>
+          <ngc-display formControlName="lastModifiedOn" [onlyDate]="true" width="90%"></ngc-display>
+        </ngc-column>
+
+        <ngc-column column="1">
+          <div>
+            <ngc-label label="admin.blacklist"></ngc-label>
+          </div>
+          <ngc-checkbox #checkFlag formControlName="blackListIndicator" width="90%" [disabled]="true"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="2" *ngIf="checkFlag.value">
+          <div>
+            <ngc-label label="admin.blacklist.reason"></ngc-label>
+          </div>
+          <ngc-display formControlName="blacklistReasonCode"></ngc-display>
+        </ngc-column>
+        <ngc-column column="1">
+          <div>
+            <ngc-label label="admin.express.service"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="expressService" width="90%"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="1">
+          <div>
+            <ngc-label label="admin.courier.service"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="courierService" width="90%"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="1" entityAttribute="Customer.ElectronicInvoice">
+          <div>
+            <ngc-label label="E-Invoice" entityAttribute="Customer.ElectronicInvoice"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="eInvoice" width="90%" entityAttribute="Customer.ElectronicInvoice">
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column column="1.5" entityAttribute="Customer.AllowEfacilitation">
+          <div>
+            <ngc-label entityAttribute="Customer.AllowEfacilitation"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="efacilitationCustomer" width="90%"
+            entityAttribute="Customer.AllowEfacilitation"></ngc-checkbox>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+
+      </ngc-row>
+
+    </ngc-container>
+    <ngc-container title="g.addresses">
+      <ngc-row>
+        <ngc-column>
+          <ngc-tabs>
+            <div ngc-tab-card title='agent.correspondence' [indicatorIconType]="correspondenceAddressIcon"
+              indicatorIconColor="red">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column column="7">
+                    <div>
+                      <ngc-label label="admin.address*"></ngc-label>
+                    </div>
+                    <ngc-input *ngIf="diplayAfterSearch" formControlName="correspondenceAddress"
+                      placeHolder="admin.correspondence.address" width="700px" required></ngc-input>
+
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="admin.place*"></ngc-label>
+                    </div>
+                    <ngc-input *ngIf="diplayAfterSearch" required formControlName="correspondencePlace" width="90%">
+                    </ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="admin.postal.code*"></ngc-label>
+                    </div>
+                    <ngc-input *ngIf="diplayAfterSearch" formControlName="correspondencePostalCode" [maxlength]="9"
+                      width="90%" entityAttribute='Customer.Address.PostalCode'>
+                    </ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.cityCode"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true" sourceId="CITY" [maxlength]="3"  title="g.city"
+                      formControlName="correspondenceCityCode"  dataField="code" (select)="onSelectCity($event)"
+                      [width]="50" entityAttribute='Customer.Address.CityCode'>
+                      <ngc-data-column text="g.city"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.cityName" [width]="90" dataField="desc"></ngc-data-column>
+                      <ngc-data-column text="g.countryCode" [width]="50" dataField="parameter1"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.countryCode"></ngc-label>
+                    </div>
+                    <ngc-lov [maxlength]="2"  required formControlName="correspondenceCountryCode" sourceId="COUNTRY"
+                      title="g.country"  dataField="code" width="50%" (select)="onSelectCountry($event)">
+                      <ngc-data-column text="g.country" dataField="code" [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.countryName" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="admin.maintain.customer.state"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true" sourceId="STATE" [sourceParameters]='stateByCountry' [maxlength]="2"
+                      title="g.state" formControlName="correspondenceStateCode"  dataField="code" width="50%"
+                      entityAttribute='Billing.CustomerState'>
+                      <ngc-data-column text="g.state"  dataField="code"  [width]="50">
+                      </ngc-data-column>
+                      <ngc-data-column text="g.stateName" [width]="150" dataField="desc">
+                      </ngc-data-column>
+
+                    </ngc-lov>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <br>
+            </div>
+            <div ngc-tab-card title='admin.maintain.customer.billing' [indicatorIconType]="billingAddressIcon"
+              indicatorIconColor="red">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-checkbox formControlName="sameAsCorrespondence"></ngc-checkbox>
+                    <ngc-label label="g._address.sameascorrespondence"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="7">
+                    <div>
+                      <ngc-label label="g.address"></ngc-label>
+                    </div>
+                    <ngc-input formControlName="billingAddress" placeHolder="Billing._address" width="700px"
+                      *ngIf="diplayAfterSearch"></ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.place"></ngc-label>
+                    </div>
+                    <ngc-input formControlName="billingPlace" width="90%" *ngIf="diplayAfterSearch"></ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.postalCode"></ngc-label>
+                    </div>
+                    <ngc-input [maxlength]="9" formControlName="billingPostalCode" width="90%"
+                      *ngIf="diplayAfterSearch"></ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.cityCode"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true" formControlName="billingCityCode" sourceId="CITY"  title="g.city"
+                      (select)="onSelectCityBill($event)"  dataField="code" width="50%">
+                      <ngc-data-column text="g.city"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.cityName" [width]="90" dataField="desc"></ngc-data-column>
+                      <ngc-data-column text="g.countryCode" [width]="50" dataField="parameter1"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.countryCode"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true"  formControlName="billingCountryCode" sourceId="COUNTRY"
+                       title="g.country"  dataField="code" width="50%" (select)="onSelectCountry($event)">
+                      <ngc-data-column text="g.country"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.countryName" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.state"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true" sourceId="STATE" title="g.state" formControlName="billingStateCode"
+                       dataField="code" width="50%" [sourceParameters]='stateByCountry'>
+                      <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.stateName" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <br>
+            </div>
+            <!-- FOR ADMINSTARATIVE OFFICE-->
+            <div ngc-tab-card title='admin.administrativedetails' [indicatorIconType]="billingAddressIcon"
+              indicatorIconColor="red" feature="Customer.AdministrativeOfficeAddress">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-checkbox formControlName="sameAsCorrespondence"></ngc-checkbox>
+                    <ngc-label label="g._address.sameascorrespondence"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="7">
+                    <div>
+                      <ngc-label label="g.address"></ngc-label>
+                    </div>
+                    <ngc-input formControlName="administrativeOfficeAddress" placeHolder="Administrator Office Address"
+                      width="700px" *ngIf="diplayAfterSearch"></ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.place"></ngc-label>
+                    </div>
+                    <ngc-input formControlName="administrativeOfficePlace" width="90%" *ngIf="diplayAfterSearch">
+                    </ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.postalCode"></ngc-label>
+                    </div>
+                    <ngc-input [maxlength]="9" formControlName="administrativeOfficePostalCode" width="90%"
+                      *ngIf="diplayAfterSearch">
+                    </ngc-input>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.cityCode"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true" formControlName="administrativeOfficeCityCode" sourceId="CITY"
+                       title="g.city" (select)="onSelectCityAdministrative($event)"  dataField="code" width="50%">
+                      <ngc-data-column text="g.city"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.cityName" [width]="90" dataField="desc"></ngc-data-column>
+                      <ngc-data-column text="g.countryCode" [width]="50" dataField="parameter1"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.countryCode"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true"  formControlName="administrativeOfficeCountryCode" sourceId="COUNTRY"
+                       title="g.country"  dataField="code" width="50%" (select)="onSelectCountry($event)">
+                      <ngc-data-column text="g.country"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.countryName" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label="g.state"></ngc-label>
+                    </div>
+                    <ngc-lov [noCache]="true" sourceId="STATE" title="g.state"
+                      formControlName="administrativeOfficeStateCode"  dataField="code" width="50%"
+                      [sourceParameters]='stateByCountry'>
+                      <ngc-data-column text="g.state"  dataField="code"  [width]="50"></ngc-data-column>
+                      <ngc-data-column text="g.stateName" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <br>
+            </div>
+          </ngc-tabs>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="6">
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="admin.maintain.customer.contact.details" emphasis=”lg”></ngc-label>
+              </ngc-column>
+              <ngc-column align="right">
+                <ngc-button value="g._add" (click)='addContact($event)'
+                  [disabled]="addCustomerForm.controls.contactDetail.length === 3" [disabled]="deregisterFlag">
+                </ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value="g.type"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.details"></ngc-label>
+                      </th>
+                      <th entityAttribute="Customer.ContactPurpose">
+                        <ngc-label value="Type Code" entityAttribute="Customer.ContactPurpose"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="admin.maintain.customer.primary.contact"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.action"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.delete"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="contactDetail" align="center">
+                    <ng-container *ngFor="let item of addCustomerForm.controls.contactDetail.controls; let index=index"
+                      [formGroupName]="index" [formGroupName]="index">
+                      <tr>
+                        <td [attr.rowspan]="item.controls.contactDetails.length + 1"
+                          entityAttribute='Customer.ContactDetailsType'>
+                          <ngc-lov [readonly]="item.get('contType').value" formControlName="contType"
+                            sourceId="LOV_CONTACTTYPE_CUSTOMER"  title="admin.contacts"  dataField="code"
+                            entityAttribute='Customer.ContactDetailsType'>
+                            <ngc-data-column text="admin.maintain.customer.contact.code" dataField="code" [width]="40">
+                            </ngc-data-column>
+                            <ngc-data-column text="admin.maintain.customer.contact.description" [width]="150"
+                              dataField="desc">
+                            </ngc-data-column>
+                          </ngc-lov>
+                        </td>
+                        <td colspan="3"
+                          [ngClass]="{ 'contact-info-blank': item.controls.contactDetails.length > 0 ? true : false }">
+                        </td>
+                        <td align="center" [attr.rowspan]="item.controls.contactDetails.length + 1">
+                          <ngc-link (linkClick)="onContactDelete(index)" iconType="delete">
+                            <ngc-i18n value="g.delete"></ngc-i18n>
+                          </ngc-link>
+                        </td>
+                      </tr>
+                      <ng-container formArrayName="contactDetails">
+                        <tr *ngFor="let sitem of item.controls.contactDetails.controls let sindex=index"
+                          [formGroupName]="sindex">
+                          <td>
+                            <ngc-input formControlName="contactTypeDetail" width="350"
+                              entityAttribute='Customer.ContactDetails'></ngc-input>
+                          </td>
+                          <td entityAttribute="Customer.ContactPurpose">
+                            <ngc-dropdownlist formControlName="typeCode" [width]="170" sourceId="Customer$TypeCode"
+                              entityAttribute="Customer.ContactPurpose">
+                            </ngc-dropdownlist>
+                          </td>
+                          <td>
+                            <ngc-radiobutton formControlName="primaryContact" [groupName]='index+1'></ngc-radiobutton>
+                          </td>
+
+                          <td>
+                            <ngc-button iconType="add" priority="quaternary" (click)="addContactRow(index , sindex)"
+                              *ngIf="addCustomerForm.get(['contactDetail',index,'contactDetails']).length == (sindex + 1)">
+                            </ngc-button>
+
+                            <ngc-link (linkClick)="onPrimaryContactDelete(index, sindex)">
+                              <ngc-icon type="delete" value="true" true-color="black"></ngc-icon>
+                            </ngc-link>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                  </tbody>
+                </ngc-table>
+
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+        <ngc-column column="6">
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="agent.notificationDetails" emphasis=”lg”></ngc-label>
+              </ngc-column>
+              <ngc-column align="right">
+                <ngc-button value="g._add" (click)='addNotificationRow($event)'
+                  [disabled]="addCustomerForm.controls.notificationDetail.length === 7" [disabled]="deregisterFlag">
+                </ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value="g.type"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="admin.add.view.email.ids"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.delete"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="notificationDetail" align="center">
+                    <tr *ngFor="let item of addCustomerForm.controls.notificationDetail.controls let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-lov [readonly]="item.get('notificationType').value" formControlName="notificationType"
+                          sourceId="NOTIFICATION"  title="admin.notification"  dataField="code">
+                          <ngc-data-column text="admin.notification.code" dataField="code" [width]="80">
+                          </ngc-data-column>
+                          <ngc-data-column text="admin.notification.description" [width]="150" dataField="desc">
+                          </ngc-data-column>
+                        </ngc-lov>
+                      </td>
+                      <td>
+                        <ngc-link (linkClick)="onNotificationEmailAdd(index)" accessEnableOn="r">
+                          <ngc-icon type="edit" value="true" true-color="grey"></ngc-icon>
+                          <p>Add/View Email Ids</p>
+                        </ngc-link>
+                      </td>
+                      <td>
+                        <ngc-link (linkClick)="onNotificationDelete(index)" iconType="delete">
+                          <ngc-i18n value="g.delete"></ngc-i18n>
+                        </ngc-link>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="6">
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="admin.address.PIMA.address" emphasis=”lg”></ngc-label>
+              </ngc-column>
+              <ngc-column align="right">
+                <ngc-button value="g._add" (click)='addPIMAAddressRow($event)' [disabled]="deregisterFlag"></ngc-button>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value=""></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="admin.address.PIMA.address"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="g.delete"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="pimaAddresses" align="center">
+                    <tr *ngFor="let item of addCustomerForm.controls.pimaAddresses.controls let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-checkbox formControlName="select"></ngc-checkbox>
+                      </td>
+                      <td>
+                        <ngc-input formControlName="address" [width]="400"></ngc-input>
+                      </td>
+                      <td>
+                        <ngc-link iconType="delete" (linkClick)="onPimaDelete(index)">
+                          Delete
+                        </ngc-link>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+        <ngc-column column="6">
+          <ngc-container *ngIf="buttonFlag">
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="agent.rcarDetails" emphasis=”lg”></ngc-label>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label=""></ngc-label>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label label="g.rcarStatus"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="admin.rcar.details"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="g.effective.date"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="g.endDate"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="rcarDetails" align="center">
+                    <tr *ngFor="let item of addCustomerForm.controls.rcarDetails.controls let index=index"
+                      [formGroupName]="index">
+                      <td>
+                        <ngc-display formControlName="status"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="number"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="effectiveDate" [onlyDate]="true"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="expiryDate" [onlyDate]="true"></ngc-display>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-accordion [width]="800" [height]="200">
+            <ngc-accordion-card accessEnableOn="r" [selected]="expandorcollapse">
+              <ngc-accordion-titlebar>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-i18n value="admin.maintain.customer.account.information"></ngc-i18n>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column column="2">
+                    <div>
+                      <ngc-label label="g.accountNumber"></ngc-label>
+                    </div>
+                    <ngc-input width="90%" formControlName="accountNumber" [maxlength]="12" *ngIf="diplayAfterSearch">
+                    </ngc-input>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <div>
+                      <ngc-label label="admin.container.freight.station"></ngc-label>
+                    </div>
+                    <ngc-input [maxlength]="1" textAlign='left' formControlName="containerFreightStationCode"
+                      upperCase="true" patternName="alpha" *ngIf="diplayAfterSearch"></ngc-input>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <div>
+                      <ngc-label label="admin.cass.code"></ngc-label>
+                    </div>
+                    <ngc-input digits="4" textAlign='left' max="9999" decimalDigits="0" groupSize="0"
+                      formControlName="cassCode" *ngIf="diplayAfterSearch"></ngc-input>
+                  </ngc-column>
+                  <ngc-column column="2">
+                    <div>
+                      <ngc-label label="admin.ams.customs.number"></ngc-label>
+                    </div>
+                    <ngc-input width="90%" formControlName="amsCustomsNo" [maxlength]="8" *ngIf="diplayAfterSearch">
+                    </ngc-input>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-card>
+          </ngc-accordion>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-accordion [width]="800" [height]="200">
+            <ngc-accordion-card accessEnableOn="r" [selected]="expandorcollapse">
+              <ngc-accordion-titlebar>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-i18n value="admin.maintain.customer.company.administrator"></ngc-i18n>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-access-control accessSectionId="COMPANY_ADMIN">
+                  <ngc-row>
+                    <ngc-column column="4">
+                      <div>
+                        <ngc-label label="admin.administrator.name"></ngc-label>
+                      </div>
+                      <ngc-input [disabled]="adminFlag" width="400px" formControlName="administratorUserProfileName"
+                        *ngIf="diplayAfterSearch">
+                      </ngc-input>
+                    </ngc-column>
+                    <ngc-column column="2">
+                      <div>
+                        <ngc-label label="agent.designation"></ngc-label>
+                      </div>
+                      <ngc-input [disabled]="adminFlag" width="100%" formControlName="designationCode"
+                        *ngIf="diplayAfterSearch"></ngc-input>
+                    </ngc-column>
+                    <ngc-column column="3">
+                      <div>
+                        <ngc-label label="admin.email.for.login.and.password.notification"></ngc-label>
+                      </div>
+                      <ngc-input [disabled]="adminFlag" width="500px" formControlName="administratorNotificationEmailId"
+                        *ngIf="diplayAfterSearch"></ngc-input>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-access-control>
+              </ngc-container>
+            </ngc-accordion-card>
+          </ngc-accordion>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-container *ngIf="buttonFlag" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-button value="customer.billConfig" (click)="openBillingConfiguration($event)"></ngc-button>
+          <ngc-button value="customer.compDeReg" (click)="openDeRegisterCustomer($event)" accessSectionId="DEREGISTER">
+          </ngc-button>
+          <ngc-button value="customer.authPersonnel" (click)="openAuthorizedPersonnel($event)" accessEnableOn="r">
+          </ngc-button>
+          <ngc-button value="customer.changeCustomerCode" (click)="openChangeOfCode($event)"
+            accessSectionId="CHANGE_CODE">
+          </ngc-button>
+          <ngc-button value="customer.appoAgent" (click)="openAppointedAgentsWindow($event)" accessEnableOn="r">
+          </ngc-button>
+          <ngc-button value="customer.exportToPDF" (click)="onExportToPDFClickCustomer($event)"></ngc-button>
+          <ngc-button *ngIf="this.addCustomerForm.get('adminLoginCode').value" value="customer.subUserProfile"
+            (click)="openSubUserProfile($event)" accessEnableOn="r"></ngc-button>
+          <ngc-button value="admin.truckercompanylistbutton" (click)="onClickTruckDetailsPopup($event)"
+            feature="Customer.CustomerTruckerCompany"></ngc-button>
+          <ngc-button value="admin.ectlocaldestination" (click)="onClickECTHandlerPopup($event)"
+            feature="Customer.CustomerECTHandler"></ngc-button>
+          <ngc-button value="admin.aliasnamebutton" (click)="onClickAliasPopup($event)"
+            feature="Customer.CustomerAliasNames"></ngc-button>
+          <ngc-button value="admin.lucagentcodebutton" (click)="onClickLucAgentPopup($event)"
+            feature="Customer.CustomerLUCAgent"></ngc-button>
+
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="!buttonFlag" type="tab">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button value="g.accountNumber" (click)="openAppointedAgentsWindow($event)"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ng-container>
+  <ngc-window #appointedAgentsWindow title="agent.appointed.agents" (Close)="onCloseAppointedAgent($event)"
+    [showCloseButton]="true" [width]="1500" height='700'>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.customerCode"></ngc-label>
+          <ngc-display width="170%" formControlName="customerCode"></ngc-display>
+
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="g.customerName"></ngc-label>
+          <ngc-display width="170%" formControlName="customerShortName"></ngc-display>
+
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button value="g._add" (click)='addAppointedAgentRow($event)' [disabled]="deregisterFlag"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <tbody formArrayName="appointedAgent">
+              <tr *ngFor="let record of addCustomerForm.controls.appointedAgent.controls; let index=index"
+                [formGroupName]="index">
+
+                <td>
+                  <ngc-container type="section">
+                    <ngc-row>
+                      <ngc-column column="2">
+                        <div>
+                          <ngc-label label="agent.agent.code"></ngc-label>
+                        </div>
+                        <ngc-lov formControlName="customerCode" placeHolder="agent.agent.code"
+                          (select)='OnSelectAppointedAgentCode($event, index)' sourceId="COMPANY_AGENT_LIST"
+                          title="agent.list" dataField="code" displayMember='code' [width]="120" required>
+                          <ngc-data-column text="agent.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                          <ngc-data-column text="agent.agent.name" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column column="3">
+                        <div>
+                          <ngc-label label="agent.agent.name"></ngc-label>
+                        </div>
+                        <!-- <ngc-display width="170%" formControlName="agentName"></ngc-display> -->
+                        <ngc-lov formControlName="agentName" placeHolder="agent.agent.name"
+                          (select)='OnSelectAppointedAgentName($event, index)' sourceId="COMPANY_AGENT_LIST"
+                          title="agent.list" dataField="desc" displayMember='desc' [width]="300" required>
+                          <ngc-data-column text="agent.agent.name" [width]="150" dataField="desc"></ngc-data-column>
+                          <ngc-data-column text="agent.agent.code" dataField="code" [width]="50"></ngc-data-column>
+
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column column="2">
+                        <div>
+                          <ngc-label label="admin.type.delegation.agreement"></ngc-label>
+                        </div>
+                        <ngc-dropdownlist formControlName="delegationAgreementType" [width]="170"
+                          sourceId="Customer$TypeOfDelegation" required></ngc-dropdownlist>
+                      </ngc-column>
+                      <ngc-column column="1">
+                        <div>
+                          <ngc-label label="g.effective.date"></ngc-label>
+                        </div>
+                        <ngc-datetimeinput formControlName="effectiveDate" [width]="92" required [onlyDate]="true"
+                          *ngIf="diplayAfterSearch">
+                        </ngc-datetimeinput>
+                      </ngc-column>
+
+                      <ngc-column column="1">
+                        <div>
+                          <ngc-label label="g.expiry.date"></ngc-label>
+                        </div>
+                        <ngc-datetimeinput [min]="min" formControlName="expiryDate"
+                          [readonly]="record.get('softDeleteFlag').value===true" [width]="92" [onlyDate]="true"
+                          *ngIf="diplayAfterSearch">
+                        </ngc-datetimeinput>
+                      </ngc-column>
+                      <ngc-column column="2">
+                        <div>
+                          <ngc-label label="g.remarks"></ngc-label>
+                        </div>
+                        <ngc-display width="100%" formControlName="remarks"></ngc-display>
+                      </ngc-column>
+
+                    </ngc-row>
+                    <ngc-row>
+                      <ngc-column column="3">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <div>
+                                <ngc-label label="admin.contract.terms"></ngc-label>
+                              </div>
+                              <ngc-textarea [width]="250" [height]="90" formControlName="contractTerms"></ngc-textarea>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-column>
+                      <ngc-column column="9">
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column column="3">
+                              <div>
+                                <ngc-label label="admin.date.of.letter"></ngc-label>
+                              </div>
+                              <ngc-datetimeinput formControlName="letterIssueDate" *ngIf="diplayAfterSearch">
+                              </ngc-datetimeinput>
+                            </ngc-column>
+                            <ngc-column column="3">
+                              <div>
+                                <ngc-label label="admin.date.of.letter.received"></ngc-label>
+                              </div>
+                              <ngc-datetimeinput formControlName="letterReceivedDate" *ngIf="diplayAfterSearch">
+                              </ngc-datetimeinput>
+                            </ngc-column>
+                            <ngc-column column="3">
+                              <div>
+                                <ngc-label label="admin.letter.signed.by.name"></ngc-label>
+                              </div>
+                              <ngc-input width="95%" formControlName="letterSignedBy" *ngIf="diplayAfterSearch">
+                              </ngc-input>
+                            </ngc-column>
+                            <ngc-column column="3">
+                              <div>
+                                <ngc-label label="agent.designation"></ngc-label>
+                              </div>
+                              <ngc-input width="95%" formControlName="designationCode" *ngIf="diplayAfterSearch">
+                              </ngc-input>
+                            </ngc-column>
+
+                          </ngc-row>
+                          <ngc-row>
+
+
+
+                            <ngc-column column="1" align="right">
+                              <div>
+                                <ngc-label label=""></ngc-label>
+                              </div>
+                              <ngc-button value="g.delete" label="g.delete" (click)='onDeleteAppointedAget(index)'>
+                              </ngc-button>
+
+                            </ngc-column>
+                            <br />
+                            <ngc-column column="3" align="right">
+                              <div>
+                                <ngc-label label="admin.staff.initial"></ngc-label>
+                              </div>
+                              <ngc-display formControlName="lastUpdateByOn"></ngc-display>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-column>
+
+
+                    </ngc-row>
+                  </ngc-container>
+
+
+                  <!-- Upload Button Function Implementation -->
+                  <ngc-row>
+                    <ngc-column [column]="1">
+                    </ngc-column>
+                    <ngc-column [column]="6">
+                      <ngc-container subTitle="poIssue.uploadTitle">
+                        <ngc-row>
+                          <ngc-column *ngIf="!record.get('expiryDate').value">
+                            <ngc-label label='poIssue.upload'></ngc-label>
+                            <div>
+                              <ngc-fileupload #upload accept="*/*" viewMode="tilesOnlyUpload"
+                                [entityType]="this.addCustomerForm.get('customerCode').value"
+                                [entityKey]="record.get('customerCode').value+record.get('delegationAgreementType').value"
+                                associatedTo="maintainance" stage="maintainance">
+                              </ngc-fileupload>
+                            </div>
+                          </ngc-column>
+                          <ng-container *ngIf="record.get('expiryDate').value">
+                            <ngc-column *ngIf="isDateDifference(record.get('expiryDate').value, index)">
+                              <ngc-label label='poIssue.upload'></ngc-label>
+                              <div>
+                                <ngc-fileupload #upload accept="*/*" viewMode="tilesOnlyUpload"
+                                  [entityType]="this.addCustomerForm.get('customerCode').value"
+                                  [entityKey]="record.get('customerCode').value+record.get('delegationAgreementType').value"
+                                  associatedTo="maintainance" stage="maintainance">
+                                </ngc-fileupload>
+                              </div>
+                            </ngc-column>
+                            <ngc-column *ngIf="isDateDifference(record.get('expiryDate').value, index)">
+                              <ngc-label label='poIssue.upload'></ngc-label>
+                              <div>
+                                <ngc-fileupload #upload accept="*/*" viewMode="readonly"
+                                  [entityType]="this.addCustomerForm.get('customerCode').value"
+                                  [entityKey]="record.get('customerCode').value+record.get('delegationAgreementType').value"
+                                  associatedTo="maintainance" stage="maintainance">
+                                </ngc-fileupload>
+                              </div>
+                            </ngc-column>
+                          </ng-container>
+                        </ngc-row>
+                      </ngc-container>
+                    </ngc-column>
+                  </ngc-row>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button value="g.save" (click)='onSaveAppointedAgent($event)' [disabled]="deregisterFlag"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #deregisterAppointedAgentsWindow title="admin.change.of.code.display.customer" [showCloseButton]="true"
+    [width]="1200" [height]='700'>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column column="8" [ngStyle]="{'color':'red'}">
+          <ngc-label label="admin.change.of.code.customer.with"></ngc-label> &nbsp;
+          <ngc-label label="admin.change.of.code.customer.name"></ngc-label> &nbsp;
+          <ngc-label formControlName="customerShortName"></ngc-label> &nbsp;
+          <ngc-label label="admin.change.of.code.customer.and"></ngc-label> &nbsp;
+          <ngc-label label="admin.change.of.code.customer.code"></ngc-label> &nbsp;
+          <ngc-label formControlName="customerCode"></ngc-label> &nbsp;
+          <ngc-label label="admin.maintain.customer.cannot.delete"></ngc-label> &nbsp;
+          <br />
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" *ngIf="showFlag1">
+      <ngc-row>
+        <ngc-column column="6">
+          <ngc-label label="admin.more.appointed.agents"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab" *ngIf="showFlag1">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="agentCustomerRelatedAgents" [pageable]="true">
+            <ngc-data-column text="g.customerName" dataField="customerShortName" [width]="100" [noWrap]="false">
+            </ngc-data-column>
+            <ngc-data-column text="g.customerCode" dataField="customerCode" [width]="50" [noWrap]="false">
+            </ngc-data-column>
+            <ngc-data-column text="DelegationAgreementType" dataField="delegationAgreementType" [width]="50"
+              [noWrap]="false"></ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" *ngIf="showFlag">
+      <ngc-row>
+        <ngc-column column="6">
+          <ngc-label label="admin.more.awbs"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab" *ngIf="showFlag">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="awbRelatedToCustomer" [pageable]="true">
+            <ngc-data-column text="awb.awbNumber" dataField="shipmentNumber" [width]="90" align="middle"
+              [noWrap]="false"></ngc-data-column>
+            <ngc-data-column text="g.origin" dataField="origin" [width]="90" [noWrap]="false"></ngc-data-column>
+            <ngc-data-column text="g.destination" dataField="destination" [width]="90" [noWrap]="false">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbDate" dataField="shipmentDate" type="displayDate" [width]="90"
+              [noWrap]="false"></ngc-data-column>
+            <ngc-data-column text="flight.number" dataField="flightNumber" [width]="90" [noWrap]="false">
+            </ngc-data-column>
+            <ngc-data-column text="flight.flightDate" dataField="flightOriginDate" [width]="90" [noWrap]="false">
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="8" align="right">
+            <ngc-button *ngIf="disableFlag" value="admin.degister.customer" (click)="onDeregisterAppointedAgent()"
+              [disabled]="deregisterFlag"></ngc-button>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="disablePDFFlag">
+            <ngc-button value="g.exportToPDF" (click)="onExportToPDFClick($event)" [disabled]="deregisterFlag">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column column="2" *ngIf="disablePDFFlag">
+            <ngc-button value="g.export.to.xls" (click)="onExportToXLSClick($event)" [disabled]="deregisterFlag">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #selectWindow [width]="50" title="admin.accounttype" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-radiobutton groupName="sel" formControlName="withPdAccount" accessSectionId="PD_ACCOUNT">
+          </ngc-radiobutton>
+          <ngc-label label="admin.withPdAccount" accessSectionId="PD_ACCOUNT"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-radiobutton groupName="sel" formControlName="withoutPdAccount"></ngc-radiobutton>
+          <ngc-label label="admin.withoutPdAccount"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="9">
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-button value="g.ok" (click)="onServiceReport($event)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <!--Alias Popup-->
+  <ngc-window #showPopUpWindow width="1100" height="500" title="admin.aliasname" [showCloseButton]="true">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column column="1.7">
+          <ngc-label value="g.companyCode"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1.7">
+          <ngc-display formControlName="customerCode"></ngc-display>
+        </ngc-column>
+        <ngc-column column="1.7">
+          <ngc-label value="g.companyName"></ngc-label>
+        </ngc-column>
+        <ngc-column column="3">
+          <ngc-display formControlName="customerShortName"></ngc-display>
+        </ngc-column>
+        <ngc-column column="1.7">
+          <ngc-label value="admin.iatacode"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1.7">
+          <ngc-display formControlName="iataAgentCode"></ngc-display>
+        </ngc-column>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g._add" (click)='addAliasRow($event)'>
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <tbody>
+            </tbody>
+            <thead align="Center">
+              <tr>
+                <th [width]="500">
+                  <ngc-label value="serial.no" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.aliasname" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.del" align="Center"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align="center" formArrayName="aliasDetails">
+              <tr *ngFor="let item of addCustomerForm.get('aliasDetails').controls; let index=index"
+                [formGroupName]="index">
+                <td align="center">
+                  <ngc-display [value]='index+1'></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="aliasName" required *ngIf="item.controls.flagCRUD.value != 'C'">
+                  </ngc-display>
+                  <ngc-input formControlName="aliasName" required *ngIf="item.controls.flagCRUD.value == 'C'">
+                  </ngc-input>
+                </td>
+                <td align="center">
+                  <ngc-link iconType="delete" (linkClick)="onDeleteAliasRow(index)"></ngc-link>
+                </td>
+              </tr>
+
+            </tbody>
+
+
+          </ngc-table>
+
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g.save" (click)='saveAliasDetails($event)' align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-window>
+  <!-- Ect Agent code-->
+
+  <ngc-window #showPopUpWindow2 width="1100" height="500" title="admin.ecthandlertitle" [showCloseButton]="true">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column column="1">
+          <ngc-label value="admin.ecthandler"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-display formControlName="customerCode"></ngc-display>
+        </ngc-column>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g._add" (click)='addECTHandlerRow($event)'>
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <tbody>
+            </tbody>
+            <thead align="Center">
+              <tr>
+                <th [width]="500">
+                  <ngc-label value="serial.no" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.localdestination" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.del" align="Center"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align="center" formArrayName="ectHandlerLocalDestination">
+              <tr *ngFor="let item of addCustomerForm.get('ectHandlerLocalDestination').controls; let index=index"
+                [formGroupName]="index">
+                <td align="center">
+                  <ngc-display [value]='index+1'></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="localDestination" *ngIf="item.controls.flagCRUD.value != 'C'">
+                  </ngc-display>
+                  <ngc-lov dataField='code' valueMember='code' formControlName='localDestination' [width]='248'
+                    upperCase='true' sourceId='KEY_AIRPORT' title='g.customerName' accessEnableOn="r"
+                    [dropDownWidth]='60' *ngIf="item.controls.flagCRUD.value == 'C'" required>
+                    <ngc-data-column text='g.companyName' dataField='desc' [width]='190'></ngc-data-column>
+                    <ngc-data-column text='g.companyCode' dataField='code' [width]='100'></ngc-data-column>
+                  </ngc-lov>
+                </td>
+                <td align="center">
+                  <ngc-link iconType="delete" (linkClick)="onDeleteECTHandlerRow(index)"></ngc-link>
+                </td>
+              </tr>
+
+            </tbody>
+
+
+          </ngc-table>
+
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g.save" (click)='saveECTHandlerDetails($event)' align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-window>
+
+  <!--Trucker Company List-->
+  <ngc-window #showPopUpWindow3 width="1100" height="500" title="admin.truckercompanylist" [showCloseButton]="true">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column column="1">
+          <ngc-label value="g.companyCode"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-display formControlName="customerCode"></ngc-display>
+        </ngc-column>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g._add" (click)='addTruckDetailsRow($event)' align="right">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <tbody>
+            </tbody>
+            <thead align="Center">
+              <tr>
+                <th [width]="500">
+                  <ngc-label value="serial.no" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.truckercompany" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="g.effective.date" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="g.endDate" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.del" align="Center"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align="center" formArrayName="truckerCompanyDetails">
+              <tr *ngFor="let item of addCustomerForm.get('truckerCompanyDetails').controls; let index=index"
+                [formGroupName]="index">
+                <td align="center">
+                  <ngc-display [value]='index+1'></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName='truckerCompany' *ngIf="item.controls.flagCRUD.value != 'C'">
+                  </ngc-display>
+                  <ngc-lov dataField='code' valueMember='code' formControlName='truckerCompany' [width]='248'
+                    upperCase='true' sourceId='KEY_TRUCKER_COMPANY' title='g.customerName' accessEnableOn="r"
+                    [dropDownWidth]='60' *ngIf="item.controls.flagCRUD.value == 'C'">
+                    <ngc-data-column text='g.companyName' dataField='desc' [width]='190'></ngc-data-column>
+                    <ngc-data-column text='g.companyCode' dataField='code' [width]='100'></ngc-data-column>
+                  </ngc-lov>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="effectiveDateFrom" *ngIf="item.controls.flagCRUD.value != 'C'">
+                  </ngc-display>
+                  <ngc-dateinput formControlName="effectiveDateFrom" *ngIf="item.controls.flagCRUD.value == 'C'"
+                    required></ngc-dateinput>
+                </td>
+                <td align="center">
+                  <ngc-dateinput formControlName="effectiveDateTo">
+                  </ngc-dateinput>
+                </td>
+                <td align="center">
+                  <ngc-link iconType="delete" (linkClick)="onDeleteTruckDetailsRow(index)"></ngc-link>
+                </td>
+              </tr>
+
+            </tbody>
+
+
+          </ngc-table>
+
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g.save" (click)='saveTruckDetails($event)' align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-window>
+
+
+</form>
+
+<form [formGroup]="emailForm">
+  <ngc-window #emailWindow title="admin.list.of.email.ids" [showCloseButton]="true" [width]="800" height='500'>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column="6">
+          <ngc-taginput formControlName="notificationEmailMultiple" *ngIf="diplayAfterSearch"></ngc-taginput>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column="10" align="right">
+          <ngc-button value="g.ok" (click)='onPopUpOKClick()'></ngc-button>
+          <ngc-button accessEnableOn="r" value="g.cancel" (click)='onPopUpCancelClick()'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<form [formGroup]="LucDetails">
+  <ngc-window #showPopUpWindow1 width="1100" height="500" title="admin.lucAgentCode.title" [showCloseButton]="true">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column column="1.5">
+          <ngc-label value="g.companyName"></ngc-label>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-display formControlName="customerShortName"></ngc-display>
+        </ngc-column>
+        <ngc-column column="1.5">
+          <ngc-label value="g.carrierCode"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-lov #carrierCode formControlName='carrierCode' [width]='50' upperCase='true' dataField="code"  
+            displayMember="code" displayMember="code" sourceId='CARRIER_OPT' maxlength='3' accessEnableOn="r">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column column="1.5">
+          <ngc-label value="g.carrier.group"></ngc-label>
+        </ngc-column>
+        <ngc-column column="1.5">
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100" [noCache]="true">
+          </ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g_search" (click)='searchLucAgent($event)'>
+          </ngc-button>
+        </ngc-column>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g._add" (click)='addLucAgent($event)'>
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column colspan="8">
+          <ngc-table *ngIf='displayLucDetailsAfterSearch'>
+            <tbody>
+            </tbody>
+            <thead align="Center">
+              <tr>
+                <th [width]="500">
+                  <ngc-label value="serial.no" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.lucagentcode" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="g.carrierCode" align="Center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="admin.del" align="Center"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align="center" formArrayName="lucAgentCodelist">
+              <tr *ngFor="let item of LucDetails.get('lucAgentCodelist').controls; let index=index"
+                [formGroupName]="index">
+                <td align="center">
+                  <ngc-display [value]='index+1'></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="lucAgentCode" *ngIf="item.controls.flagCRUD.value != 'C'"></ngc-display>
+                  <ngc-input formControlName="lucAgentCode" required *ngIf="item.controls.flagCRUD.value == 'C'">
+                  </ngc-input>
+                </td>
+                <td align="center">
+                  <ngc-lov #carrierCode formControlName='carrierCode' [width]='50' upperCase='true' dataField="code"  
+                    displayMember="code" displayMember="code" sourceId='CARRIER_OPT' maxlength='3' accessEnableOn="r"
+                    required>
+                    <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+                    <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+                  </ngc-lov>
+                </td>
+                <td align="center">
+                  <ngc-link iconType="delete" (linkClick)="onDeleteLucDetail(index)"></ngc-link>
+                </td>
+              </tr>
+
+            </tbody>
+
+
+          </ngc-table>
+
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="15" align="right">
+          <ngc-button value="g.save" (click)='saveLucInformationDetails($event)' align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+  </ngc-window>
+
+
+</form>
+
+
+<ngc-report #reportWindowMaster title="g.report" reportId='maintain_customerMaster_report'
+  [reportParameters]='reportParameters1'>
+</ngc-report>
+<ngc-report [zIndex]='18000' #reportWindow title="g.report" reportId='DisplayListOfCustomerReport'
+  [reportParameters]='reportParameters'></ngc-report>
+<ngc-report format='xls' #reportWindow1 title="g.report" reportId='DisplayListOfCustomerReport'
+  [reportParameters]='reportParameters'></ngc-report>

@@ -1,0 +1,372 @@
+<ngc-titlebar title="export.ecc.flight.planner.list.title" (print)="reportofeccplanner()" (clear)="onClear($event)" (cancel)='backToHome($event)'>
+</ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type="box" formGroupName="search">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="export.dateTimeFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" showCalendarButton="true" [showTimeButton]="true" formControlName="fromDate" ></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="export.dateTimeTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" showCalendarButton="true" [showTimeButton]="true" formControlName="toDate" ></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.carrierCode"></ngc-label>
+        <div>
+          <ngc-lov [width]="100" accessEnableOn="r" formControlName="carrierCode" sourceId="SATS_CARRIERCODE" title="export.ecc.carrier.list"
+            dataField="code">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.carrier.short.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12">&nbsp;</ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="export.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label label="export.flightDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="export.expressService"></ngc-label>
+        <div>
+          <!--<ngc-dropdownlist sourceId="EXPRESS_SERVICE" [noCache]='true' sourceType='query' formControlName="expressService" [width]="159"
+            [dropDownWidth]="159" [dropDownHeight]="100"></ngc-dropdownlist>-->
+          <ngc-dropdownlist accessEnableOn="r" sourceId="Express_Service$ExpressServiceType" [noCache]='true' formControlName="expressService"
+            [width]="159" [dropDownWidth]="159" [dropDownHeight]="100">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)='onSearch()' label='g.search' iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="box">
+    <ngc-row *ngIf="showTable">
+      <ngc-column>
+        <ngc-datatable formArrayName="resultList" [groups]="['groupField']" [groupsRenderer]="groupsRenderer" [pageable]="false"
+          (linkClick)="onLinkClick($event)" pinned="true" [showToolbar]="false">
+          <ngc-data-column text=" " dataField="selectBox" type="check" cellsAlign="center" [width]="10">
+          </ngc-data-column>
+          <!-- [cellsStyleRenderer]="cellsStyleRenderer" -->
+          <ngc-data-column text="awb.awbnumber" dataField="noShowText" type="text" [width]="120"></ngc-data-column>
+          <ngc-data-column text="export.pcswgt" dataField="pcsWgt" type="text" [width]="100"></ngc-data-column>
+          <ngc-data-column text="export.ecc.fwb.pcs.wgt" dataField="fwbPcsWgt" type="text" [width]="100"></ngc-data-column>
+          <!-- TODO -->
+          <ngc-data-column text="export.ecc.physical.acceptance" dataField="physicalPcsWgt" type="text" [width]="130">
+          </ngc-data-column>
+          <ngc-data-column text="flight.Flight" dataField="outgoingFlightNumber" type="text" [width]="80"></ngc-data-column>
+          <ngc-data-column text="flight.flightDate" dataField="dateSTD" type="displayDate" displayTime="false" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="flight.std" dataField="stdTime" type="displayTime" [width]="50"></ngc-data-column>
+
+          <ngc-data-column text="export.ecc.off" dataField="flightOffPoint" type="text" [width]="40"></ngc-data-column>
+          <!-- TODO -->
+          <ngc-data-column text="export.ecc.bkg.sts" dataField="shipmentStatus" type="text" [width]="60">
+          </ngc-data-column>
+          <ngc-data-column text="flight.bay" dataField="parkingBayDepAircraft" type="text" [width]="40"></ngc-data-column>
+          <ngc-data-column text="flight.acreg" dataField="outboundAircraftRegNo" type="text" [width]="100">
+          </ngc-data-column>
+          <!-- TODO -->
+          <!--<ngc-data-column text="Units" dataField="documentPieces" type="text" [width]="100"></ngc-data-column>-->
+          <!-- TODO -->
+          <ngc-data-column text="export.ecc.allocated.uld.bt" dataField="uldNumber" type="text" [width]="150"></ngc-data-column>
+          <ngc-data-column text="agent.agent" dataField="customerCode" type="text" [width]="60"></ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="specialHandlingCode" type="text" [width]="200"></ngc-data-column>
+          <ngc-data-column [disabled]="hasReadPermission" text="g.edit" dataField="EDIT" [width]="40" cellsAlign="center" type="link" iconType="edit">
+          </ngc-data-column>
+          <ngc-data-column [disabled]="hasReadPermission" text="g.delete" dataField="DELETE" [width]="60" cellsAlign="center" type="link" iconType="delete"></ngc-data-column>
+          <ngc-data-column text="g.print" dataField="PRINT" type="link" iconType="print" [width]="60" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text=" " [hidden]="true" dataField="groupField" [width]="1" [cellsRenderer]="cellsRenderer">
+          </ngc-data-column>
+          <ngc-data-column text=" " [hidden]="true" dataField="groupOffPoint" [width]="1" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+    <!-- -->
+    <ngc-row>
+      <ngc-column>&nbsp;</ngc-column>
+    </ngc-row>
+    
+  </ngc-container>
+
+  <ngc-footer [height]="80">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <!-- showShipmentWithoutFlightWindow -->
+          <ngc-button (click)="addplanningWindow()" label="export.ecc.add.planning.advice"></ngc-button>
+          <ngc-button (click)="addAwbWindows()" label="export.ecc.add.awb"></ngc-button>
+          <ngc-button (click)="awbDetailsWindows()" label="export.ecc.awb.details"></ngc-button>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button (click)="markAsNoShow()" label="export.ecc.mark.awb.no.show"></ngc-button>
+          <ngc-button accessEnableOn="r" (click)="onClickNavigate()" label="export.ecc.outbound"></ngc-button>
+        </ngc-column>
+      </ngc-row>  
+      <ngc-row>
+        <ngc-column>
+          <ngc-button accessEnableOn="r" (click)="loadShipment()" label="export.ecc.load.shipment"></ngc-button>
+          <ngc-button accessEnableOn="r" (click)="unloadShipment()" label="export.ecc.unload.shipment"></ngc-button>
+          <ngc-button accessEnableOn="r" (click)="updateDLS()" label="export.ecc.update.dls"></ngc-button>
+          <ngc-button accessEnableOn="r" (click)="airlineLoadingInstruction()" label="export.ecc.airline.loading.instruction">
+          </ngc-button>
+          &nbsp;&nbsp;
+          <ngc-button accessEnableOn="r" (click)="manageCargoAcceptance()" label="export.ecc.cargo.acceptance"></ngc-button>
+          <ngc-button accessEnableOn="r" (click)="manageAcceptanceWeighing()" label="export.ecc.acceptance.weighing">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" (click)="bookSingleShipment()" label="export.ecc.book.single.shipment"></ngc-button>
+          <ngc-button accessEnableOn="r" (click)="shipmentInfo()" label="import.ShipmentInformation">
+            </ngc-button>
+          <ngc-button accessEnableOn="r" (click)="maintainFWB()" label="import.maintainfwb">
+            </ngc-button>  
+          <ngc-button accessEnableOn="r" (click)="DisplayHistoryOfECC()" label="g.history"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-footer>
+
+  <ngc-window #addPlanningwindow [width]="700" [height]="440" title="export.add.planning.advice">
+    <ngc-container type="box" formGroupName="advice">
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.flight"></ngc-label>
+          <div>
+            <ngc-flightkeyinput upperCase="true" (ngModelChange)="dateChange()" formControlName="flightKey" [width]="100" required>
+            </ngc-flightkeyinput>
+
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.flightDate"></ngc-label>
+          <div>
+            <ngc-datetimeinput showCalendarButton="true" [showTimeButton]="false" formControlName="flightOriginDate" 
+              (ngModelChange)="getFlightOffPoint()"></ngc-datetimeinput>
+
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="flight.offPoint"></ngc-label>
+          <div>
+            <ngc-input *ngIf="showText" formControlName="offPoint"></ngc-input>
+            <ngc-dropdownlist *ngIf="showDropDown" formControlName="offPoint" [source]="offPointList" [valueMember]="'code'" (ngModelChange)="onOffPointChange($event)"
+              [displayMember]="'desc'" [width]="120">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <br>
+          <ngc-label label="export.ecc.planning.advice"></ngc-label>
+          <div>
+            <ngc-textarea formControlName="advice" [width]="600" [height]="200"></ngc-textarea>
+
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <br>
+          <ngc-button *ngIf="!edit" (click)="updateAdvice()" label="g.save"></ngc-button>
+          <ngc-button *ngIf="edit" (click)="editAdvice()" label="g.update"></ngc-button>
+          <ngc-button (click)="cancelWindow()" label="g.cancel"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+
+
+  <!-- <form [formGroup]="addAwbForm"> -->
+  <ngc-window #addAwbWindow [width]="1200" [height]="350" [title]="'ADD AWB'">
+    <ngc-container type="box" formGroupName="shipment">
+      <ngc-row>
+        <ngc-column column="2">
+          <ngc-label value="awb.awbnumber"></ngc-label>
+          <div style="padding-bottom:15px;">
+            <ngc-awbinput formControlName="shipmentNumber"></ngc-awbinput>
+          </div>
+        </ngc-column>
+
+        <ngc-column column="2">
+          <ngc-label value="flight.Flight"></ngc-label>
+          <div style="padding-bottom:15px;">
+            <ngc-flightkeyinput upperCase="true" (ngModelChange)="dateChange()" formControlName="outgoingFlightNumber" [width]="120"
+              required>
+            </ngc-flightkeyinput>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label value="flight.flightDate"></ngc-label>
+          <div style="padding-bottom:15px;">
+            <ngc-datetimeinput showCalendarButton="true" [showTimeButton]="false" formControlName="dateSTD"></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th>
+                    <ngc-label value="g.pieces"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="g.weight"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="g.shc"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="agent.agent"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="export.ecc.allocated.uld.bt"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="flight.std"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="flight.offPoint"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="export.booking.status"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="flight.bay"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="flight.acreg"></ngc-label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody>
+
+                <tr>
+                  <td>
+                    <ngc-piecesinput formControlName="documentPieces"></ngc-piecesinput>
+                  </td>
+                  <td>
+                    <ngc-weightinput formControlName="documentWeight"></ngc-weightinput>
+                  </td>
+                  <td>
+                    <ngc-taginput formControlName="shcHandlingGroupCode" required [width]="80"></ngc-taginput>
+                  </td>
+                  <td>
+                    <ngc-input formControlName="customerCode" [width]="100" required></ngc-input>
+                  </td>
+                  <td>
+                    <ngc-uldinput formControlName="uldNumber"></ngc-uldinput>
+                  </td>
+                  <td>
+                    <ngc-display [onlyTime]="true" formControlName="std"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display *ngIf="showText" formControlName="flightOffPoint"></ngc-display>
+                    <ngc-dropdownlist *ngIf="showDropDown" formControlName="flightOffPoint" [source]="offPointList" [valueMember]="'code'" [displayMember]="'desc'"
+                      [width]="120" required>
+                    </ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-label formControlName="shipmentStatus"></ngc-label>
+                  </td>
+                  <td>
+                    <ngc-label formControlName="parkingBayDepAircraft"></ngc-label>
+                  </td>
+                  <th>
+                    <ngc-label formControlName="outboundAircraftRegNo"></ngc-label>
+                  </th>
+                </tr>
+              </tbody>
+            </ngc-table>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button (click)="updateShipment()" label="g.save"></ngc-button>
+          <ngc-button (click)="cancelWindow()" label="g.cancel"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+
+
+
+  <ngc-window #noFlightWindow [width]="1200" [height]="500" [title]="'Shipment Without Flight'">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="resultListNoFlight" [pageable]="false" (linkClick)="onLinkClick($event)"
+            [enablePageSizeHeight]="false" [showToolbar]="false">
+            <!-- <ngc-data-column text=" " dataField="selectBox" type="check" cellsAlign="center" [width]="30"></ngc-data-column> -->
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" type="text" [width]="130"></ngc-data-column>
+            <ngc-data-column text="g.carrierCode" dataField="carrierCode" type="text" [width]="100"></ngc-data-column>
+            <ngc-data-column text="export.pcswgt" dataField="pcsWgt" type="text" [width]="80"></ngc-data-column>
+            <ngc-data-column text="export.ecc.physical.acceptance" dataField="physicalPcsWgt" type="text" [width]="150">
+            </ngc-data-column>
+            <ngc-data-column text="export.booking.status" dataField="shipmentStatus" type="text" [width]="120">
+            </ngc-data-column>
+            <ngc-data-column text="agent.agent" dataField="customerCode" type="text" [width]="70"></ngc-data-column>
+            <ngc-data-column text="g.shc" dataField="specialHandlingCode" type="text" [width]="250"></ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report #reportWindow title="g.report"  reportId='BTlabel'  [reportParameters]='reportParameters'></ngc-report>
+</form>
+
+<form [formGroup]="awbDetailsForm">
+  <ngc-window #awbDetailsWindow [width]="1200" [height]="500" title="export.awb.details">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="awbDetailsList" [pageable]="false" (linkClick)="onLinkClick($event)"
+            [enablePageSizeHeight]="false" [showToolbar]="false">
+            <ngc-data-column text="g.awb" dataField="awbNo" type="text" [width]="130"></ngc-data-column>
+            <ngc-data-column text="export.ecc.fwb.pcs" dataField="fwbpcs" type="text" [width]="80"></ngc-data-column>
+            <ngc-data-column text="export.ecc.fwb.wgt" dataField="fwbwgt" type="text" [width]="80" type="displayWeight"></ngc-data-column>
+            <ngc-data-column text="export.ecc.fwb.ready" dataField="rdy" type="text" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.fwb" dataField="fwb" type="text" [width]="80"></ngc-data-column>
+            <ngc-data-column text="export.ecc.fwb.rq" dataField="fwbrq" type="text" [width]="130"></ngc-data-column>
+            <ngc-data-column text="g.rcar" dataField="rcar" type="text" [width]="90"></ngc-data-column>
+            <ngc-data-column text="export.ecc.svc.no" dataField="svcNo" type="text" [width]="150"></ngc-data-column>
+            <ngc-data-column text="export.ecc.sc.ind" dataField="scind" type="text" [width]="130"></ngc-data-column>
+            <ngc-data-column text="export.ecc.rfid.tag" dataField="rfidTag" type="text" [width]="130"></ngc-data-column>
+            <ngc-data-column text="export.ecc.fwb.disc" dataField="fwbDisc" type="text" [width]="80"></ngc-data-column>
+            <ngc-data-column text="export.ecc.man.disc" dataField="manDisc" type="text" [width]="80"></ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+  <ngc-report  #reportWindow1 title="g.report"  reportId='ECC_Export_Flight_Planner_List_Modified'  [reportParameters]='reportParameters'></ngc-report>
+</form>

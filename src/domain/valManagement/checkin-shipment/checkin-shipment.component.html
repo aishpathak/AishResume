@@ -1,0 +1,323 @@
+<!-- Title Bar (Begin). It has the save button, clear button and the cancel button enabled -->
+<ngc-titlebar title="val.val.checkin.shipment.diplomatic.mail" (cancel)="onBack($event)" (save)="onSave($event)">
+</ngc-titlebar>
+<!-- Title Bar (End) -->
+<!-- Search Form Group (Begin) -->
+<form [formGroup]="searchForm">
+  <!-- Search Form Container (Begin) -->
+  <!-- This container contains the requirements to search a particular shipment -->
+  <ngc-container type='section'>
+
+    <ngc-row>
+      <ngc-column [column]='2'>
+        <div>
+          <ngc-label label="val.shipmentType"></ngc-label>
+        </div>
+        <div>
+          <ngc-shipmentinput [shipmentType]="searchForm.get('shipmentType').value" [width]="200" [noDN]="true"
+            [noCBV]="true" [noMAIL]="true" [noUCB]="true" required formControlName="shipmentNumber"
+            (select)="onShipmentSelect($event)" (ngModelChange)="onTabOutCheckHandledBy()">
+          </ngc-shipmentinput>
+
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1.5" *ngIf=handledbyHouse feature="Val.HAWB">
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-input formControlName="hawbNumber" [maxlength]="20" [width]='160'></ngc-input>
+
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]='2'>
+        <ngc-label label=""></ngc-label>
+        <!-- This is a Search Button -->
+        <div>
+          <ngc-button value="g.search" (click)="onSearch()" iconType="search" #searchbutton></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- Search Form Container (End) -->
+</form>
+<!-- Search Form Group (End) -->
+<!-- Fetched Shipment Form Group (Begin) -->
+<form *ngIf="flag" [formGroup]="fetchedShipment">
+  <!-- Fetched Shipment Form Container (Begin) -->
+  <!-- This container contains the fields to contain the fetched Shipment shipment -->
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-display formControlName="importExportFlag"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="val.origin"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="val.destination"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="exp.NatureOfGoods"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="val.shc"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="isAWB">
+        <div>
+          <ngc-label label="val.shipper.consignee.name"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="isAWB">
+        <div>
+          <ngc-label label="val.appointed.agent"></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-lov [disabled]="disabledCheckOut" formControlName="originAirport" sourceId="FINAL_DESTINATION"
+            title="g.origin" dataField='code' required="true" patternName="alpha" [width]="60">
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-lov [disabled]="disabledCheckOut" formControlName="destinationAirport" sourceId="FINAL_DESTINATION"
+            title="g.destination" dataField='code' required="true" patternName="alpha" [width]="60">
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-input formControlName="natureOfGoods" [maxlength]="20" upperCase='true' [width]='200'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-shcinput formControlName="specialHandlingCode" dataField="shcList"></ngc-shcinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="isAWB">
+        <div>
+          <ngc-display formControlName="consigneeName"></ngc-display>
+          <ngc-display formControlName="shipperName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="isAWB">
+        <div>
+          <ngc-display formControlName="appointedAgent"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row></ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+
+      <ngc-column align="right">
+        <div>
+          <ngc-button value="g.add" (click)=onAdd($event)></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan='2'>
+                <ngc-label label="val.s.no"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.flight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.FlightDate"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.sroPiecesIn"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.sroWeightIn"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.checkin.date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.senderName"></ngc-label>
+              </th>
+              <th *ngIf="this.fetchedShipment.get('importExportFlag').value!=='IMPORT'">
+                <ngc-label value="val.cargo.staff.id"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.ksro"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="g.remarks"></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th colspan="5">
+                <ngc-label value="val.storing.location"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.senderIdentity"></ngc-label>
+              </th>
+              <th *ngIf="this.fetchedShipment.get('importExportFlag').value!=='IMPORT'">
+                <ngc-label value="val.cargo.staff.name"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="val.fsro"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label=" "></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="flightList">
+            <ng-container *ngFor=" let item of fetchedShipment.controls.flightList.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td rowspan='2'>
+                  {{index+1}}
+                </td>
+                <td>
+                  <ngc-flightkeyinput [disabled]="disabledCheckOut" *ngIf="item.flagCRUD != 'C'"
+                    formControlName="flightKey" [width]="120"></ngc-flightkeyinput>
+                  <ngc-flightkeyinput *ngIf="item.flagCRUD == 'C'" formControlName="flightKey" [width]="120">
+                  </ngc-flightkeyinput>
+                </td>
+                <td>
+                  <ngc-datetimeinput [disabled]="disabledCheckOut" *ngIf="item.flagCRUD!='C'"
+                    formControlName="flightDate" [showCalendarButton]="true" [width]="140">
+                  </ngc-datetimeinput>
+                  <ngc-datetimeinput *ngIf="item.flagCRUD=='C'" formControlName="flightDate" [showCalendarButton]="true"
+                    [width]="140">
+                  </ngc-datetimeinput>
+                </td>
+                <td>
+                  <ngc-piecesinput [disabled]="disabledCheckOut" *ngIf="item.flagCRUD != 'C'"
+                    formControlName="sroPiecesIn" required></ngc-piecesinput>
+                  <ngc-piecesinput *ngIf="item.flagCRUD == 'C'" formControlName="sroPiecesIn" required>
+                  </ngc-piecesinput>
+                </td>
+                <td>
+                  <ngc-numberinput [disabled]="disabledCheckOut" *ngIf="item.flagCRUD!='C'"
+                    formControlName="sroWeightIn" decimalDigits="2" required></ngc-numberinput>
+                  <ngc-numberinput *ngIf="item.flagCRUD=='C'" formControlName="sroWeightIn" decimalDigits="2" required>
+                  </ngc-numberinput>
+                </td>
+                <td>
+                  <ngc-datetimeinput [disabled]="flagKsro" formControlName="checkInFlightDate" [showTimeButton]="true"
+                    [showCalendarButton]="true" required [width]="150"></ngc-datetimeinput>
+
+                </td>
+                <td>
+                  <ngc-input [disabled]="disabledCheckOut" *ngIf="item.flagCRUD != 'C'" formControlName="senderName"
+                    [width]="250" patternName='alphaspace' entityAttribute="Customer.AuthorisedPersonName"></ngc-input>
+                  <ngc-input *ngIf="item.flagCRUD=='C'" formControlName="senderName" [width]="250"
+                    patternName='alphaspace' entityAttribute="Customer.AuthorisedPersonName">
+                  </ngc-input>
+                </td>
+                <td *ngIf="this.fetchedShipment.get('importExportFlag').value!=='IMPORT'">
+                  <ngc-lov [disabled]="disabledCheckOut"
+                    *ngIf="this.fetchedShipment.get('importExportFlag').value!=='IMPORT'&&item.flagCRUD!='C'"
+                    formControlName="cargoStaffId" (select)="onChange($event,index)" sourceId="CARGO_STAFF_VAL"
+                    title="val.cargo.staff" dataField='code' [width]="100">
+                    <ngc-data-column text="val.staff.id" dataField="code" [width]="100"></ngc-data-column>
+                    <ngc-data-column text="val.staff.name" dataField="desc" [width]="150"></ngc-data-column>
+                  </ngc-lov>.
+
+                  <ngc-lov *ngIf="this.fetchedShipment.get('importExportFlag').value!=='IMPORT'&& item.flagCRUD=='C'"
+                    formControlName="cargoStaffId" (select)="onChange($event,index)" sourceId="CARGO_STAFF_VAL"
+                    title="val.cargo.staff" dataField='code' [width]="100">
+                    <ngc-data-column text="val.staff.id" dataField="code" [width]="100"></ngc-data-column>
+                    <ngc-data-column text="val.staff.name" dataField="desc" [width]="150"></ngc-data-column>
+                  </ngc-lov>
+                </td>
+                <td>
+                  <ngc-input [disabled]="flagKsro" formControlName="ksro" *ngIf="item.flagCRUD!='C'" required
+                    [width]="200"></ngc-input>
+                  <ngc-input *ngIf="item.flagCRUD=='C'" formControlName="ksro" required [width]="200"></ngc-input>
+                </td>
+                <td>
+                  <ngc-remarksinput formControlName="remark" [maxlength]="65" [width]="400" upperCase="true">
+                  </ngc-remarksinput>
+                  <ngc-remarksinput formControlName="remark1" [maxlength]="65" [width]="400" upperCase="true">
+                  </ngc-remarksinput>
+                  <ngc-remarksinput formControlName="remark2" [maxlength]="65" [width]="400" upperCase="true">
+                  </ngc-remarksinput>
+                </td>
+              </tr>
+              <tr>
+                <td colspan="5">
+                  <ngc-input [disabled]="disabledCheckOut" *ngIf="item.flagCRUD!='C'" formControlName="storingLocation"
+                    [width]="600" [maxlength]="65"></ngc-input>
+                  <ngc-input *ngIf="item.flagCRUD=='C'" formControlName="storingLocation" [width]="600"
+                    [maxlength]="65"></ngc-input>
+                </td>
+                <td>
+                  <ngc-alphanuminput [disabled]="disabledCheckOut" *ngIf="item.flagCRUD!='C'"
+                    formControlName="senderIdentity" [width]="200" [maxlength]="15" required>
+                  </ngc-alphanuminput>
+                  <ngc-alphanuminput *ngIf="item.flagCRUD=='C'" formControlName="senderIdentity" [width]="200"
+                    [maxlength]="15" required>
+                  </ngc-alphanuminput>
+                </td>
+                <td *ngIf="this.fetchedShipment.get('importExportFlag').value!=='IMPORT'">
+                  <ngc-display formControlName="staffName" [width]="200"></ngc-display>
+                </td>
+                <td>
+                  <ngc-input [disabled]="disabledCheckOut" *ngIf="item.flagCRUD!='C'" formControlName="fsro"
+                    [width]="200"></ngc-input>
+                  <ngc-input *ngIf="item.flagCRUD=='C'" formControlName="fsro" [width]="200"></ngc-input>
+                </td>
+                <td *ngIf="item.get('flagCRUD').value=='C'&& index!=0">
+                  <ngc-link iconType="delete" (click)="onDelete(index)"></ngc-link>
+                </td>
+                <td *ngIf="item.get('flagCRUD').value !== 'C'">
+                  <ngc-label label=""></ngc-label>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+
+
+  </ngc-container>
+  <ngc-fileupload accept="*/*" [entityType]="searchForm.get('shipmentType').value"
+    [entityKey]="searchForm.get('shipmentNumber').value" associatedTo="VAL" stage="VAL_CHECK_OUT_VAL_AWB_ULD">
+  </ngc-fileupload>
+</form>
+<!-- Fetched Shipment Form Group (End) -->

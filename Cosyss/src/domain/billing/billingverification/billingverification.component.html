@@ -1,0 +1,196 @@
+<ngc-titlebar title='billingverification.billingverification' (print)='onGenerateReport($event)'
+  (save)="saveBillingVerfication($event)" (clear)="onClear($event)" (cancel)='backToHome($event)'></ngc-titlebar>
+<form [formGroup]="billingVerificationForm">
+  <ngc-container type="tab" formGroupName="searchBillingVerificationForm">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="billingverification.dateandtimefrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" formControlName='transactionDateFrom' showCalendarButton="true"
+            showTimeButton="true" midnight="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="billingverification.dateandtimeto"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="160" formControlName='transactionDateTo' showCalendarButton="true"
+            showTimeButton="true" midnight="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="billingverification.customername"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='320' formControlName="customerName" sourceId="CUSTOMER_LIST"
+            (select)="getCustomerId($event)" title="g.customer.list" dataField='desc' valueMember="desc"
+            [validOnly]='true' [width]="50">
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="billingverification.chargecode"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [noCache]="true" [width]='320' formControlName="chargeCode" displayMember="code"
+            sourceId="CHARGE_CODE_WITH_FACTOR" title="g.chargeCode" dataField='desc' displayField='desc'
+            [validOnly]='true' (select)="getChargeCodeId($event)" [width]="50">
+            <ngc-data-column text="g.chargeCode" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="billingverification.awborservicenumber"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" (ngModelChange)='onAwbInput($event)' formControlName="awbOrServiceNumber"></ngc-input>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="billingverification.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="status" (select)='onStatusChange($event)'
+            sourceId='Billing$BillingVerify.PaymentStatus' [width]="120">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf='showStatusDates'>
+        <ngc-label label="billingverification.statusdataandtimefrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="190" formControlName='statusDateFrom' showCalendarButton="true"
+            showTimeButton="true" midnight="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf='showStatusDates'>
+        <ngc-label label="billingverification.statusdataandtimeto"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="180" formControlName='statusDateTo' showCalendarButton="true"
+            showTimeButton="true" midnight="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="billingverification.verificationstatus"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="verified" sourceId='Billing$BillingVerify.VerifyStatus' [width]="120">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="bil.handlingArea"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="handlingArea" (select)='onHandlingAreaSelect($event)'
+            sourceId='HANDLINGAREA' sourceType='query' [width]="120">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom" [column]="2">
+        <ngc-button accessEnableOn="r" value="billingverification.search" (click)="searchBillingVerification()"></ngc-button>
+        <ngc-button value='bil.generateReport' priority='secondary' (click)='onGenerateReport($event)'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="isBillingVerification">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="billingverification" [pageSize]="30" (linkClick)="onLinkClick($event)">
+          <ngc-data-column text="billingverification.awborservicenumber" [width]="15" dataField="awbOrServiceNumber">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display formControlName="awbOrServiceNumber"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.chargeadvicedt" [width]="15" type="displayDateTime"
+            cellsAlign="center" dataField="chargeAdviceDt">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.customer" [width]="10" cellsAlign="left" dataField="customerCode">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.chargecode" [width]="35" dataField="chargeCodeName">
+          </ngc-data-column>
+          <ngc-data-column text="g.quantity" dataField="chargeableQuantity" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="g.duration" dataField="chargeableDuration" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.flightnumberdt" [width]="10" cellsAlign="left"
+            dataField="flightKey">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.flightdate" [width]="10" cellsAlign="left"
+            dataField="flightOriginDate" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.originalamount" [width]="15" cellsAlign="right"
+            dataField="originalAmount" type="displayCurrency">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-currencydisplay formControlName="originalAmount"></ngc-currencydisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.amount" [width]="15" cellsAlign="right" dataField="amount">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="billingVerificationForm.get([ 'billingverification', group, 'flagUpdate'])">
+                  <ngc-link (click)="onClickOfLink(group)"
+                    *ngIf="billingVerificationForm.get(['billingverification', group, 'flagUpdate']).value == 'N'&& billingVerificationForm.get(['billingverification', group, 'paymentStatus']).value  != 'Posted' && billingVerificationForm.get(['billingverification',group,'paymentStatus']).value != 'Paid'&& billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  != 'Invoiced'">
+                    <ngc-currencydisplay formControlName="amount"></ngc-currencydisplay>
+                  </ngc-link>
+                  <ngc-currencyinput [min]=0 formControlName="amount"
+                    *ngIf="billingVerificationForm.get(['billingverification',group,'flagUpdate']).value  == 'Y'">
+                  </ngc-currencyinput>
+                  <ngc-currencydisplay formControlName="amount"
+                    *ngIf="billingVerificationForm.get(['billingverification', group, 'paymentStatus']).value  == 'Posted' || billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Paid' || billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Invoiced'">
+                  </ngc-currencydisplay>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.verified" [width]="5" cellsAlign="center"
+            dataField="verificationStatus" type="check" align="center" [checkAll]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="billingVerificationForm.get([ 'billingverification', group, 'flagUpdate'])">
+                  <ngc-icon type="yesno" value="Y"
+                    *ngIf="billingVerificationForm.get(['billingverification',group,'paymentStatus']).value == 'Posted' || billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Paid'||billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Invoiced'">
+                  </ngc-icon>
+                  <ngc-checkbox formControlName="verificationStatus"
+                    *ngIf="billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Void'||billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Pending'">
+                  </ngc-checkbox>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.void" [width]="5" dataField="voidStatus" cellsAlign="center"
+            type="check" align="center" [checkAll]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="billingVerificationForm.get([ 'billingverification', group, 'flagUpdate'])">
+                  <ngc-checkbox formControlName="voidStatus"
+                    *ngIf="billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Void'||billingVerificationForm.get(['billingverification',group,'paymentStatus']).value  == 'Pending'">
+                  </ngc-checkbox>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.paymentstatus" [width]="10" dataField="paymentStatus">
+          </ngc-data-column>
+          <ngc-data-column text="chargepostingconfiguration.materialCode" dataField="materialCode" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="bil.VerifiedBy" dataField="verifiedBy" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="bil.handlingArea" dataField="handlingArea" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="eq.preparation.PDNumber" dataField="pdNumber" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="bil.equipmentReleaseDate" [width]="15" type="displayDateTime" cellsAlign="left"
+            dataField="equipmentReleaseDate" align="left">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="billing.billingverification" reportId='BillingVerification' format='xls'
+    [reportParameters]='reportParam'></ngc-report>
+</form>

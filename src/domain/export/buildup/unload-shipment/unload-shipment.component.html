@@ -1,0 +1,381 @@
+<ngc-titlebar title='unloadshipment' (cancel)="onBack($event)" (clear)="onClear($event)">
+</ngc-titlebar>
+<form [formGroup]="unloadShipmentForm">
+    <ngc-container type="sectiontop">
+        <ngc-row>
+            <ngc-column column="1">
+                <ngc-label label='flight.Flight'></ngc-label>
+                <div>
+                    <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true"
+                        required>
+                    </ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label='flight.date'></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" formControlName='flightOriginDate'
+                        [width]="100" required='true'></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <br />
+                <div>
+                    <ngc-button #searchButton accessEnableOn="r" (click)="fetchFlightDetails()" value="g.search"
+                        iconType="search">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="box" *ngIf='flightInfoFlag'>
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label='flight.Flight'></ngc-label>
+                <div>
+                    <ngc-display formControlName="flightName"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='flight.date'></ngc-label>
+                <div>
+                    <ngc-display formControlName="flightOriginDate" [onlyDate]="true"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='flight.std'></ngc-label>
+                <div>
+                    <ngc-display formControlName="std"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='flight.etd'></ngc-label>
+                <div>
+                    <ngc-display formControlName="etd"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label='flight.segment'></ngc-label>
+                <div>
+                    <ngc-display formControlName="segment1" color="blue" emphasis="md"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label='g.status'></ngc-label>
+                <div>
+                    <ngc-display formControlName="status"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="6"></ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="sectiontop" *ngIf='flightInfoFlag'>
+        <ngc-row>
+            <ngc-column column="1.5">
+                <ngc-label label='unload.uld'></ngc-label>
+                <div>
+                    <ngc-dropdownlist formControlName='uldNumber' sourceId='UNLD_SHPMNT_ULD_DRPDWN' [noCache]="true"
+                        sourceType='query' (ngModelChange)="onChange($event)" [sourceParameters]="uldSourceParameter"
+                        [width]="130" [dropDownWidth]="150"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label='shpIrr.shpNumber'></ngc-label>
+                <div>
+                    <ngc-dropdownlist multiSelect="true" formControlName='shipmentNumbers'
+                        sourceId='UNLD_SHPMNT_AWB_DRPDWN' (select)="onSelectAWB($event) " [noCache]="true"
+                        sourceType='query' [width]="150" [dropDownWidth]="120" [sourceParameters]="awbSourceParameter">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column column="1" align="center">x
+                <ngc-label label=''></ngc-label>
+                <div>
+                    <ngc-label label='or'></ngc-label>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label='unload.awb'></ngc-label>
+                <div>
+                    <ngc-input formControlName='shipmentNumber' [width]="150"></ngc-input>
+                </div>
+            </ngc-column>
+            <!-- Changes for JV01-208 -->
+            <ngc-column column="3">
+                <ngc-label label='unload.reason' *ngIf="reasonlabel"></ngc-label>
+                <div>
+                    <ngc-input entityAttribute="Exp.UnloadShipmentReasonFreeForm" formControlName='reason' [width]="300"
+                        [maxlength]="65">
+                    </ngc-input>
+                    <ngc-dropdownlist entityAttribute="Exp.UnloadShipmentReasonLov" formControlName='reason'
+                        sourceId='APP_REASON' sourceType='query' [sourceParameters]="{'parameter1':'UnloadShipment'}"
+                        [width]="160">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <!-- Changes end here for JV01-208 -->
+
+
+            <!-- <ngc-column>
+                <ngc-label label='unload.customer'></ngc-label>
+                <div>
+                    <ngc-dropdownlist formControlName='contractor' sourceId='CUSTOMER_NAME' sourceType='query' [width]="160"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            -->
+            <ngc-column>
+                <ngc-label label=''></ngc-label>
+                <div>
+                    <ngc-button #reopenBuildup  (click)="fetchShipmentDetails()" value="unload.reopen"></ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="sectiontop" *ngIf='shipmentInfoFlag'>
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th [width]="20">
+                                <ngc-label label="select"></ngc-label>
+                            </th>
+                            <th [width]="70">
+                                <ngc-label label="shp.awbNumber"></ngc-label>
+                            </th>
+                            <th [width]="70">
+                                <ngc-label label="unload.uldNumber"></ngc-label>
+                            </th>
+                            <th [width]="30">
+                                <ngc-label label="unload.pieces"></ngc-label>
+                            </th>
+                            <th [width]="30">
+                                <ngc-label label="unload.weight"></ngc-label>
+                            </th>
+                            <th [width]="70">
+                                <ngc-label label="natureOfGoods"></ngc-label>
+                            </th>
+                            <th [width]="100">
+                                <ngc-label label="g.shc"></ngc-label>
+                            </th>
+                            <th [width]="100" feature="Exp.PartSuffix">
+                                <ngc-label label="awb.part.suffix"></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName="unloadShipments">
+                        <ng-container
+                            *ngFor="let item of unloadShipmentForm.get('unloadShipments').controls; let index=index"
+                            [formGroupName]="index">
+                            <tr>
+                                <td>
+                                    <ngc-checkbox formControlName="checked"> </ngc-checkbox>
+                                </td>
+                                <td [width]="70">
+                                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                                </td>
+                                <td [width]="70">
+                                    <ngc-display formControlName="assUldTrolleyNumber"></ngc-display>
+                                </td>
+                                <td [width]="30">
+                                    <ngc-piecesdisplay formControlName="loadedPieces"></ngc-piecesdisplay>
+                                </td>
+                                <td [width]="30">
+                                    <ngc-weightdisplay formControlName="loadedWeight"></ngc-weightdisplay>
+                                </td>
+                                <td [width]="70">
+                                    <ngc-display formControlName="natureOfGoods"></ngc-display>
+                                </td>
+                                <td [width]="100">
+                                    <ngc-display formControlName="shcs"></ngc-display>
+                                </td>
+                                <td [width]="100" feature="Exp.PartSuffix">
+                                    <ngc-display formControlName="partSuffixDisplay"></ngc-display>
+                                </td>
+                            </tr>
+                            <tr *ngIf="item.get('checked').value">
+                                <td colspan="4">
+                                    <ngc-table>
+                                        <thead>
+                                            <tr>
+                                                <th [width]="100">
+                                                    <ngc-label label="shipmentLocation"></ngc-label>
+                                                </th>
+                                                <th [width]="100" feature="Exp.PartSuffix">
+                                                    <ngc-label label="awb.part.suffix"></ngc-label>
+                                                </th>
+                                                <th [width]="100" feature="Exp.PartSuffix">
+                                                    <ngc-label label="awb.part.pieces"></ngc-label>
+                                                </th>
+                                                <th [width]="100" feature="Exp.PartSuffix">
+                                                    <ngc-label label="awb.part.weight"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="unload.piecestounload"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="unload.weighttounload"></ngc-label>
+                                                </th>
+                                                <th [width]="100">
+                                                    <ngc-label label="warehouseLocation"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label [width]="40" label="g.shc"> </ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="unload.houseInfo"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="g.delete"></ngc-label>
+                                                </th>
+
+                                            </tr>
+                                        </thead>
+                    <tbody formArrayName="shpmtInventoryList">
+                        <ng-container
+                            *ngFor="let subItem of item.get('shpmtInventoryList').controls; let subIndex=index"
+                            [formGroupName]="subIndex">
+                            <tr>
+
+                                <td *ngIf="!item.get('ttcase').value">
+                                    <ngc-movable-storage-location [origin]="item.get('origin').value"
+                                        [destination]="item.get('destination').value" upperCase="true" [maxlength]="12"
+                                        [minlength]="3" [width]="130" formControlName="shipmentLocation">
+                                    </ngc-movable-storage-location>
+                                </td>
+                                <td *ngIf="item.get('ttcase').value">
+                                    <ngc-display formControlName="shipmentLocation" [width]="35"> </ngc-display>
+                                </td>
+                                <td [width]='306' feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length > 1 ">
+                                    <ngc-dropdownlist width="80" formControlName="partSuffix" required="true"
+                                        [source]="item.get('partSuffixs').value" [width]="120" [minlength]="1"
+                                        (select)="onPartSuffixChange($event,index,subIndex)">
+                                    </ngc-dropdownlist>
+                                </td>
+                                <td [width]='306' feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length == 1 ">
+                                    <ngc-dropdownlist width="80" formControlName="partSuffix" required="true"
+                                        [source]="item.get('partSuffixs').value" [width]="120" [minlength]="1"
+                                        [autoSelect]="true" (select)="onPartSuffixChange($event,index,subIndex)">
+                                    </ngc-dropdownlist>
+                                </td>
+                                <!-- <td [width]='306'
+                  *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length == 1 ">
+                  {{item.get('partSuffix').value}}
+                </td> -->
+                                <td [width]='306' feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length == 0 ">
+
+                                </td>
+
+                                <td feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length >= 1 ">
+
+                                    <ngc-display ngc-form-control formControlName="partPiece"></ngc-display>
+                                </td>
+                                <td feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length >= 1 ">
+
+                                    <ngc-weightdisplay ngc-form-control formControlName="partWeight">
+                                    </ngc-weightdisplay>
+                                </td>
+                                <td feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length == 0 ">
+
+                                    <ngc-display ngc-form-control formControlName="partPiece"></ngc-display>
+                                </td>
+                                <td feature="Exp.PartSuffix"
+                                    *ngIf="item.get('partSuffixs').value != null && item.get('partSuffixs').value.length == 0 ">
+
+                                    <ngc-weightdisplay ngc-form-control formControlName="partWeight">
+                                    </ngc-weightdisplay>
+                                </td>
+                                <td>
+                                    <ngc-piecesinput formControlName="pieces" required="true"
+                                        (ngModelChange)="onPieceChange($event,index,subIndex)" required>
+                                    </ngc-piecesinput>
+                                </td>
+                                <td *ngIf="!chgWgtFlag">
+                                    <ngc-weightinput formControlName="weight" required="true"></ngc-weightinput>
+                                </td>
+                                <td *ngIf="chgWgtFlag">
+                                    <ngc-weightinput formControlName="weight" required="true"
+                                        (ngModelChange)="onWeightChange($event,index,subIndex)">
+                                    </ngc-weightinput>
+                                </td>
+                                <td *ngIf="!item.get('ttcase').value">
+
+                                    <ngc-locations-list [noTerminal]="true" [displayOnlyLocation]="true"
+                                        [locationTypeList]="['STORAGE']" formControlName="warehouseLocation"
+                                        [width]="120"
+                                        (ngModelChange)="clearErrMsgWhenEnteredWarehouseLoction($event,index,subIndex)">
+                                    </ngc-locations-list>
+
+                                </td>
+                                <td *ngIf="item.get('ttcase').value">
+                                    <ngc-display formControlName="warehouseLocation" [width]="35"> </ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-dropdownlist
+                                        *ngIf="subItem.get('shcCodeList').value != null && subItem.get('shcCodeList').value.length > 0"
+                                        multiSelect="true" formControlName='shcCodes' [autoSelect]="true"
+                                        [source]="subItem.get('shcCodeList').value" [noCache]="true" [width]="120">
+                                    </ngc-dropdownlist>
+                                    <!-- <ngc-taginput *ngIf="item.get('shcCodes').value.length == 0" formControlName='shcCodes' [maxChars]="3" [maxItems]="9" [width]="40">
+                                                        </ngc-taginput> -->
+                                    <ngc-shcinput *ngIf="item.get('shcCodes').value.length == 0"
+                                        formControlName='shcCodes' [maxChars]="3" [maxItems]="9" [width]="40">
+                                    </ngc-shcinput>
+                                </td>
+                                <td>
+                                    <ngc-dropdownlist
+                                        *ngIf="subItem.get('houseList').value != null && subItem.get('houseList').value.length > 0"
+                                        multiSelect="true" formControlName='houseNumbers' required="true"
+                                        [source]="subItem.get('houseList').value" [width]="120"></ngc-dropdownlist>
+                                </td>
+                                <td>
+                                    <ngc-link (linkClick)="deleteRow(index,subIndex)" iconType="delete"></ngc-link>
+                                </td>
+
+                            </tr>
+                        </ng-container>
+                        <tr>
+                            <td colspan="10" class="text-right">
+                                <ngc-button (click)="createNewRow($event,index)" iconType="add"></ngc-button>
+                            </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+                </td>
+                </tr>
+                </ng-container>
+                </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+
+    </ngc-container>
+    <ngc-container type="tab">
+        <ngc-row>
+            <ng-container *ngIf='!shipmentInfoFlag'>
+                <ngc-column column="10">
+                </ngc-column>
+            </ng-container>
+            <ng-container *ngIf='shipmentInfoFlag'>
+                <ngc-column column="9"></ngc-column>
+                <ngc-column>
+                    <ngc-button (click)="confirmUnload($event)" value="unload.unload"></ngc-button>
+                </ngc-column>
+            </ng-container>
+        </ngc-row>
+    </ngc-container>
+</form>
+<ngc-footer>
+    <ngc-row *ngIf='flightInfoFlag'>
+        <ngc-column>
+            <ngc-button value="ali.ecc" (click)='onClickFlightPlanner()'> </ngc-button>
+            <ngc-button accessEnableOn="r" (click)="loadshipment()" value="unload.load"></ngc-button>
+        </ngc-column>
+    </ngc-row>
+</ngc-footer>

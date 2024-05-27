@@ -1,0 +1,983 @@
+<ngc-titlebar title="export.book.single.shipment.title" (save)="onSave()" [disabled]=saveFlag (clear)="onClear()"
+  (cancel)="onCancel()"></ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-page>
+    <ngc-page-header [height]="280">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [column]="3">
+                  <ngc-label label="awb.awbnumber"></ngc-label>
+                  <div>
+                    <ngc-input accessEnableOn="r" formControlName="shipmentNumber" [autoFocus]="true" required
+                      (paste)="removeHypen($event)">
+                    </ngc-input>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                </ngc-column>
+
+                <ngc-column [column]="2">
+                  <ngc-label label="&nbsp;"></ngc-label>
+                  <div style="padding-top: 8px">
+                    <ngc-checkbox accessEnableOn="r" formControlName="blockSpace"></ngc-checkbox>
+                    <ngc-label label="awb.block.space"></ngc-label>
+                  </div>
+                </ngc-column>
+                <ngc-column [column]="2" align="center">
+                  <ngc-label label="&nbsp;"></ngc-label>
+                  <div style="padding-top: 2px">
+                    <ngc-button accessEnableOn="r" label="g.search" [height]='35' #searchButton (click)="onSearch()"
+                      [disabled]="false"></ngc-button>
+                  </div>
+                  <div style="padding-top: 2px" *ngIf="false">
+                    <ngc-button accessEnableOn="r" label="export.booking.update" [height]='35'
+                      (click)="updateBookingPcsWt()" [disabled]="false"></ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+
+          <ngc-column></ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type='square'>
+        <ngc-row>
+          <ngc-column></ngc-column>
+          <ngc-column>
+            <ngc-label label="awb.origin"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="awb.destination"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.pieces"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.weight"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="K/L"></ngc-label>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-label label="awb.natureofgoods"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="export.book.shipper"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="export.book.single.shipment.fwb.routing"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="Force Booking"></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-checkbox formControlName="serviceFlag"></ngc-checkbox>
+            <ngc-label label="g.svc"></ngc-label>
+          </ngc-column>
+          <ngc-column>
+            <ngc-lov #originLOV formControlName="origin" [maxlength]="3" required [width]="60" sourceId='APT'
+              title='Airport' dataField='code'>
+              <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+              </ngc-data-column>
+              <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+              </ngc-data-column>
+            </ngc-lov>
+          </ngc-column>
+          <ngc-column>
+            <ngc-lov formControlName="destination" [maxlength]="3" required [width]="60" sourceId='APT'
+              title='export.airport' dataField='code'>
+              <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+              </ngc-data-column>
+              <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+              </ngc-data-column>
+            </ngc-lov>
+          </ngc-column>
+          <ngc-column>
+            <ngc-piecesinput formControlName="pieces" required>
+            </ngc-piecesinput>
+          </ngc-column>
+          <ngc-column>
+            <ngc-weightinput [autoFocus]="true" formControlName="grossWeight" required></ngc-weightinput>
+          </ngc-column>
+          <ngc-column>
+            <ngc-dropdownlist [noBlank]="true" [autoFocus]="true" sourceId='EXPORT$Weight_Code'
+              formControlName="weightUnitCode" [width]="70" upperCase="true" required></ngc-dropdownlist>
+          </ngc-column>
+
+          <ngc-column [column]="2">
+            <ngc-input [width]="200" formControlName="natureOfGoodsDescription" [maxlength]="20" upperCase="true"
+              required>
+            </ngc-input>
+          </ngc-column>
+          <ngc-column>
+            <ngc-display [width]="100" upperCase="true" formControlName="shipperName"></ngc-display>
+          </ngc-column>
+          <ngc-column>
+            <ngc-display formControlName="proposedRouting"></ngc-display>
+          </ngc-column>
+          <ngc-column>
+            <ngc-checkbox accessSectionId="FORCE_BOOKING" formControlName="forceBookingFlag"></ngc-checkbox>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="4">
+            <ngc-label label="export.booking.reason.cancellation"></ngc-label>
+            <div>
+              <ngc-dropdownlist sourceType='query' sourceId='KEY_BOOKING_CANCELLATION_REMARKS' [filterable]="true"
+                formControlName="bookingCancellationReason"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-button accessEnableOn="r" entityAttribute="Export.DimensionButtonICMS" label="icms.dimension"
+              (click)="onPopup()" [disabled]="!shipmentNoExists || !searchDone"></ngc-button>
+          </ngc-column>
+          <ngc-column [column]="4">
+            <ngc-row>
+              <ngc-column [column]="4">
+                <ngc-label label="export.booking.remaining.pieces"></ngc-label>
+              </ngc-column>
+              <ngc-column [column]="4">
+                <ngc-label label="export.booking.remaining.weight"></ngc-label>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column [column]="4">
+                <ngc-display formControlName="remainingPcs"></ngc-display>
+              </ngc-column>
+              <ngc-column [column]="4">
+                <ngc-weightdisplay formControlName='remainingWt'   decimalDigits="1">
+                </ngc-weightdisplay>
+              </ngc-column>
+            </ngc-row>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button [disabled]="!shipmentNoExists || !searchDone" label="g.collapse.expand.all"
+              (click)="collapseExpandButton()">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button *ngIf="false" [disabled]="hideCreateNewBooking || !shipmentNoExists || !searchDone"
+              label="export.book.single.create.new.booking" (click)="onCreateNewBooking()">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button [disabled]="!enableAddPart" label="export.book.single.add.new.part"
+              (click)="addNewPartMethod()">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button [disabled]="!shipmentNoExists || !searchDone || noOfAccordionsSelected !== 2"
+              label="export.book.single.merge.booking" (click)="onMergeBooking()">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button accessSectionId="CANX_SHIPMENTINFO" [disabled]="!shipmentNoExists || !searchDone"
+              label="export.book.single.cancel.booking" (click)="onCancelBooking()">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-page-header>
+    <ngc-container type="header" title="" subTitle="">
+      <ngc-row>
+        <ngc-column>
+          <!-- <ngc-accordion [activeIndex]="form.controls.partBookingList.controls.length - 1" formArrayName="partBookingList"
+          (delete)="onDelete($event)"> -->
+          <ngc-accordion formArrayName="partBookingList" [multiple]="true">
+            <ngc-accordion-card [title]="" *ngFor="let item of form.controls.partBookingList.controls; let i=index"
+              [formGroupName]="i" [selected]="collapseExpand">
+              <ngc-accordion-titlebar>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column [column]="1">
+                      <ngc-i18n value="Suffix "></ngc-i18n>
+                      <ngc-display formControlName="partSuffix"></ngc-display>
+                    </ngc-column>
+                    <ngc-column [column]="2">
+                      <ngc-display formControlName="inComingFlight"></ngc-display>
+                    </ngc-column>
+                    <ngc-column [column]="2">
+                      <ngc-display formControlName="outGoingFlight"></ngc-display>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-i18n formControlName="infoValue"></ngc-i18n>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-i18n formControlName="infoVol">
+                      </ngc-i18n>
+                    </ngc-column>
+                    <ngc-column [column]="2">
+                      <ngc-i18n formControlName="infoShc">
+                      </ngc-i18n>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-checkbox [disabled]="true" formControlName="throughTransitFlag">
+                      </ngc-checkbox>
+                      <ngc-label label="TT"></ngc-label>
+                    </ngc-column>
+                    <ngc-column align="right">
+                      <div *ngIf="!(item.get('partSuffix').value!=null && item.get('partSuffix').value.length==1)">
+                        <ngc-link (linkClick)="onDelete(i)" iconType="delete"></ngc-link>
+                      </div>
+                    </ngc-column>
+
+                  </ngc-row>
+                </ngc-container>
+              </ngc-accordion-titlebar>
+              <ngc-container type="heading" *ngIf="item.get('flagDelete').value !== 'Y'">
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-checkbox formControlName="mergeSelect"></ngc-checkbox>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="export.booking.pieces"></ngc-label>
+                    <div>
+                      <ngc-piecesinput formControlName="partPieces" (modelChange)="getProportionalWeight(i)" required
+                        [disabled]="item.get('partPiecesWtFlag').value
+                       || (item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                      </ngc-piecesinput>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="export.booking.weight"></ngc-label>
+                    <div>
+                      <ngc-weightinput formControlName="partWeight" required
+                        (modelChange)="methodToCalculateRemainingPcsWt()"
+                        [disabled]="item.get('partPiecesWtFlag').value || (item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                      </ngc-weightinput>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="export.book.densitygroup"></ngc-label>
+                    <div>
+                      <ngc-lov formControlName="densityGroupCode" sourceId='KEY_DENSITYGROUPCODE' [noCache]='false'
+                        [width]="60" sourceType='query' title='g.density.group.code' dataField='code'
+                        [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                        (select)="eventCallDensity($event, i)">
+                        <ngc-data-column text="export.density.group.code" dataField="code" [width]="100">
+                        </ngc-data-column>
+                        <ngc-data-column text="export.density.group.code.description" dataField="desc" [width]="150">
+                        </ngc-data-column>
+                      </ngc-lov>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="export.booking.volume"></ngc-label>
+                    <div>
+                      <ngc-numberinput [width]="70" formControlName="volume" digits="7" decimalDigits="2" required
+                        [disabled]="item.get('volumeDisabledFlag').value==true">
+                      </ngc-numberinput>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="export.booking.volume.code"></ngc-label>
+                    <div>
+                      <ngc-dropdownlist
+                        [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                        sourceId='EXPORT$Volume_Code' formControlName="volumeUnitCode" upperCase="true" [width]="70"
+                        required (select)="eventCallForVolumeCode($event, i)">
+                      </ngc-dropdownlist>
+                    </div>
+                  </ngc-column>
+                  <ngc-column [column]="3">
+                    <ngc-label label="g.special.handling.code"></ngc-label>
+                    <div>
+                      <ngc-shcinput
+                        [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                        formArrayName="shcList" dataField="code"></ngc-shcinput>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="TT"></ngc-label>
+                    <div>
+                      <ngc-checkbox
+                        [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                        formControlName="throughTransitFlag" (ngModelChange)="validateOnUncheck($event, i)">
+                      </ngc-checkbox>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <div
+                      *ngIf="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value ) &&  !(item.get('partBookingStatusCode').value=='XX'); else loggedOut">
+                      <ngc-button [disabled]="true" label="export.book.single.add.flight" (click)="onAddFlight(i)">
+                      </ngc-button>
+                    </div>
+                    <ng-template #loggedOut>
+                      <ngc-button [disabled]="false" label="export.book.single.add.flight" (click)="onAddFlight(i)">
+                      </ngc-button>
+                    </ng-template>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-button
+                      [disabled]="item.controls.partIdentifier.value==='I' ||(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                      label="export.book.single.create.part.booking" (click)="onCreatePartBooking(i)">
+                    </ngc-button>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-table>
+                      <thead>
+                        <tr>
+                          <th>
+                            <ngc-label label="g.sNo"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="export.booking.flight.details"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="flight.date"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="flight.segment.board.point"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="flight.segment.off.point"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="flight.departureTime"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="flight.arrivalTime"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label label="g.status"></ngc-label>
+                          </th>
+                          <th *ngIf="!(item.get('partSuffix').value!=null && item.get('partSuffix').value.length==1)">
+                            <ngc-label label="g.delete"></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="singleShipmentFlightBookingList">
+                        <tr
+                          *ngFor="let flightItem of item.controls.singleShipmentFlightBookingList.controls; let subIndex=index"
+                          [formGroupName]="subIndex">
+                          <td>
+                            <ngc-display [value]="subIndex+1"></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-flightkeyinput [width]="93" upperCase="true" [maxlength]="8"
+                              formControlName="flightKey"
+                              [disabled]="flightItem.get('flagUpdate').value === 'Y' || flightItem.get('fromCreatePart').value"
+                              (ngModelChange)="onChangeFlightDetails($event, i, subIndex)" required>
+                            </ngc-flightkeyinput>
+                          </td>
+                          <td>
+                            <ngc-datetimeinput (ngModelChange)="onChangeFlightDetails($event, i, subIndex)" [width]="93"
+                              upperCase="true" formControlName="flightOriginDate"
+                              [disabled]="flightItem.get('flagUpdate').value==='Y' || flightItem.get('fromCreatePart').value"
+                              required>
+                            </ngc-datetimeinput>
+                          </td>
+                          <td>
+                            <ngc-lov [noCache]="true" formControlName="flightBoardPoint" [maxlength]="3"
+                              [disabled]="flightItem.get('flagUpdate').value === 'Y' || flightItem.get('fromCreatePart').value "
+                              required [width]="55 " sourceId='APT' title='export.airport' dataField='code'>
+                              <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                              </ngc-data-column>
+                              <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                              </ngc-data-column>
+                            </ngc-lov>
+                          </td>
+                          <td>
+                            <ngc-lov formControlName="flightOffPoint" [maxlength]="3" sourceId='APT' [width]="55"
+                              title='export.airport' dataField='code'
+                              [disabled]="flightItem.get('flagUpdate').value ==='Y' || flightItem.get('fromCreatePart').value"
+                              (select)="onOffPointSelect($event, i, subIndex)" required>
+                              <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                              </ngc-data-column>
+                              <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                              </ngc-data-column>
+                            </ngc-lov>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="dateSTD" [onlyTime]="true"></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="dateSTA" [onlyTime]="true"></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-dropdownlist
+                              [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                              sourceId='SQL_STATUS_CODE' [noCache]='false' sourceType='query'
+                              formControlName="bookingStatusCode" (select)="onselectBookingSatatuCode($event)"
+                              [width]="60"></ngc-dropdownlist>
+                          </td>
+                          <td *ngIf="!(item.get('partSuffix').value!=null && item.get('partSuffix').value.length==1)">
+                            <ngc-link [disabled]="!subIndex+1===item.controls.singleShipmentFlightBookingList.length"
+                              (linkClick)="onDeleteFlightRow(i, subIndex)" iconType="delete">
+                              <ngc-i18n value="g.delete"></ngc-i18n>
+                            </ngc-link>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <tr>
+                      <ngc-label label="export.book.workinglistremark"></ngc-label>
+                    </tr>
+                    <ngc-input
+                      [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                      pattern="^[A-Za-z0-9-. ]*$" maxlength="65" [width]="600" formControlName="workingListRemarks"
+                      upperCase="true">
+                    </ngc-input>
+                    <tr>
+                    </tr>
+                  </ngc-column>
+                  <ngc-column>
+                    <tr>
+                      <ngc-label label="export.booking.manifest.remark"></ngc-label>
+                    </tr>
+                    <tr>
+                      <ngc-input
+                        [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                        pattern="^[A-Za-z0-9-. ]*$" maxlength="65" [width]="600" upperCase="true"
+                        formControlName="manifestRemarks">
+                      </ngc-input>
+                    </tr>
+                  </ngc-column>
+                  <ngc-column>
+                    <tr>
+                      <ngc-label label="export.booking.shipment.remark"></ngc-label>
+                    </tr>
+                    <tr>
+                      <ngc-input
+                        [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                        pattern="^[A-Za-z0-9-. ]*$" maxlength="65" [width]="600" upperCase="true"
+                        formControlName="additionalRemarks">
+                      </ngc-input>
+                    </tr>
+                  </ngc-column>
+                  <!-- <ngc-column>
+                    <ngc-label label="g.special.handling.code"></ngc-label>
+                  </ngc-column> -->
+                </ngc-row>
+                <!-- <ngc-row>
+                  <ngc-column>
+                    <ngc-input
+                      [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                      pattern="^[A-Za-z0-9-. ]*$" maxlength="65" [width]="600" formControlName="workingListRemarks"
+                      upperCase="true"></ngc-input>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-input
+                      [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                      pattern="^[A-Za-z0-9-. ]*$" maxlength="65" [width]="600" upperCase="true"
+                      formControlName="manifestRemarks">
+                    </ngc-input>
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-input
+                      [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                      pattern="^[A-Za-z0-9-. ]*$" maxlength="65" [width]="600" upperCase="true"
+                      formControlName="additionalRemarks">
+                    </ngc-input>
+                  </ngc-column>
+                </ngc-row> -->
+              </ngc-container>
+              <ngc-window #window [width]="900" [height]="400" title="awb.dimension">
+                <ngc-container type="tab">
+                  <ngc-row>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="export.book.muc"></ngc-label>
+                      </div>
+                      <ngc-dropdownlist [source]='mesurementData' [autoSelect]="true" [noBlank]="true"
+                        formControlName="measurementUnitCode" (select)="eventCall($event, i)" width='80px' required>
+                      </ngc-dropdownlist>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label='export.book.volumecode'></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='EXPORT$Volume_Code' formControlName="volumeUnitCode" width='100px'
+                          (select)="eventCall($event,i)"></ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label='export.book.volume'></ngc-label>
+                      </div>
+                      <ngc-display formControlName="tempVolume" decimalDigits="2" width='100px'></ngc-display>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label=""></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.pieces"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.length"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.width"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.height"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.volume"> </ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="shipmentPartBookingDimensionList">
+                          <tr
+                            *ngFor="let bookingItem of item.controls.shipmentPartBookingDimensionList.controls; let subIndex=index"
+                            [formGroupName]="subIndex">
+                            <td>
+                              <ngc-checkbox formControlName="checkBoxFlag" [width]="73"
+                                [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                              </ngc-checkbox>
+                            </td>
+                            <td>
+                              <ngc-digitinput upperCase="true" formControlName="pieces" [maxlength]="5"
+                                (ngModelChange)="changeModel($event,0,bookingItem,subIndex,i)" groupSize="0"
+                                [width]="73"
+                                [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )"
+                                required></ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-digitinput upperCase="true" formControlName="length" [maxlength]="5"
+                                (ngModelChange)="changeModel($event,1,bookingItem,subIndex,i)" [width]="73" required
+                                [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-digitinput upperCase="true" formControlName="width" [maxlength]="5"
+                                (ngModelChange)="changeModel($event,2,bookingItem,subIndex,i)" [width]="73" required
+                                [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-digitinput upperCase="true" formControlName="height" [maxlength]="5"
+                                (ngModelChange)="changeModel($event,3,bookingItem,subIndex,i)" [width]="73" required
+                                [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-display [width]='80' formControlName="volume" decimalDigits="2"></ngc-display>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label value="export.booking.total"></ngc-label>
+                      <ngc-piecesdisplay [width]='40' formControlName="totalDimentionPieces"></ngc-piecesdisplay>
+                    </ngc-column>
+                    <ngc-column>
+
+                    </ngc-column>
+                    <ngc-column align="right">
+                      <ngc-label value="export.booking.total.volume"></ngc-label>
+                      <ngc-display [width]='40' formControlName="tempVolume" decimalDigits="2"></ngc-display>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="right">
+                      <ngc-label value="export.booking.total.volumetric.weight"></ngc-label>
+                      <ngc-weightdisplay [width]='40' formControlName="totalDimentionVolumetricWeight">
+                      </ngc-weightdisplay>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+                <ngc-window-footer>
+                  <ngc-container type="tab">
+                    <ngc-row>
+                      <ngc-column align="right">
+                        <ngc-button label="export.book.adddimension" (click)="onAddDimension(i)"
+                          [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                        </ngc-button>
+                        <ngc-button label="g.save" (click)="onClosePopUp(i)"
+                          [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                        </ngc-button>
+                        <ngc-button label="g.delete" (click)="onDeleteDimensionRow(i)"
+                          [disabled]="(item.get('isFLightDeparted').value || item.get('isFlightManifested').value )">
+                        </ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-window-footer>
+              </ngc-window>
+            </ngc-accordion-card>
+          </ngc-accordion>
+          <!--NEW*************************************************************************************-->
+          <ngc-window #windows [width]="900" [height]="400" title="awb.dimension">
+            <ngc-container type="tab">
+              <ngc-row>
+                <ngc-column>
+                  <div>
+                    <ngc-label label="export.book.muc"></ngc-label>
+                  </div>
+                  <ngc-dropdownlist [source]='mesurementData' [autoSelect]="true" [noBlank]="true"
+                    formControlName="measurementUnitCode" (select)="eventBookingCall($event)" width='80px' required>
+                  </ngc-dropdownlist>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label='export.book.volumecode'></ngc-label>
+                  <div>
+                    <ngc-dropdownlist sourceId='EXPORT$Volume_Code' formControlName="volumeUnitCode" width='100px'
+                      (select)="eventBookingCall($event)" required></ngc-dropdownlist>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <div>
+                    <ngc-label label='export.book.volume'></ngc-label>
+                  </div>
+                  <ngc-display formControlName="tempVolume" decimalDigits="2" width='100px'></ngc-display>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label=""></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.pieces"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.length"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.width"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.height"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.volume"> </ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="shipmentBookingDimensionList">
+                      <tr
+                        *ngFor="let shipItem of form.controls.shipmentBookingDimensionList.controls; let subIndex=index"
+                        [formGroupName]="subIndex">
+                        <td>
+                          <ngc-checkbox formControlName="checkBoxFlag">
+                          </ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-digitinput upperCase="true"
+                            (ngModelChange)="changeDimensionModel($event,0,shipItem,subIndex)" formControlName="pieces"
+                            [maxlength]="5" required>
+                          </ngc-digitinput>
+                        </td>
+                        <td>
+                          <ngc-digitinput upperCase="true"
+                            (ngModelChange)="changeDimensionModel($event,1,shipItem,subIndex)" formControlName="length"
+                            [maxlength]="5" required>
+                          </ngc-digitinput>
+                        </td>
+                        <td>
+                          <ngc-digitinput upperCase="true"
+                            (ngModelChange)="changeDimensionModel($event,2,shipItem,subIndex)" formControlName="width"
+                            [maxlength]="5" required>
+                          </ngc-digitinput>
+                        </td>
+                        <td>
+                          <ngc-digitinput upperCase="true"
+                            (ngModelChange)="changeDimensionModel($event,3,shipItem,subIndex)" formControlName="height"
+                            [maxlength]="5" required>
+                          </ngc-digitinput>
+                        </td>
+                        <td>
+                          <ngc-display [width]='80' formControlName="volume" decimalDigits="2"></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label value="export.booking.total"></ngc-label>
+                  <ngc-piecesdisplay [width]='40' formControlName="totalDimentionPieces"></ngc-piecesdisplay>
+                </ngc-column>
+                <ngc-column>
+
+                </ngc-column>
+                <ngc-column align="right">
+                  <ngc-label value="export.booking.total.volume"></ngc-label>
+                  <ngc-display [width]='40' formControlName="tempVolume" decimalDigits="2"></ngc-display>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-label value="export.booking.total.volumetric.weight"></ngc-label>
+                  <ngc-weightdisplay [width]='40' formControlName="totalDimentionVolumetricWeight">
+                  </ngc-weightdisplay>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-window-footer>
+              <ngc-container type="tab">
+                <ngc-row>
+                  <ngc-column align="right">
+                    <ngc-button label="export.book.adddimension" (click)="onAddShipDimension()">
+                    </ngc-button>
+                    <ngc-button label="g.save" (click)="onCloseDimPopUp()">
+                    </ngc-button>
+                    <ngc-button label="g.delete" (click)="onDeleteShipDimension()">
+                    </ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-window-footer>
+          </ngc-window>
+          <!--*******************************************************************************************-->
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-page>
+
+
+</form>
+
+<ngc-window #addNewPart title="export.book.single.add.new.part" [showCloseButton]="true"
+  (close)="closeAddNewPartWindow()" [width]="800" [height]="300">
+  <form [formGroup]="addNewPartForm">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.booking.pieces"></ngc-label>
+          <div>
+            <ngc-piecesinput formControlName="partPieces" (modelChange)="calculateProportionalWeightForAddNewPart()"
+              required></ngc-piecesinput>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.booking.weight"></ngc-label>
+          <div>
+            <ngc-weightinput formControlName="partWeight" required></ngc-weightinput>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.book.densitygroup"></ngc-label>
+          <div>
+            <ngc-lov formControlName="densityGroupCode" sourceId='KEY_DENSITYGROUPCODE' [noCache]='false' [width]="60"
+              sourceType='query' title='g.density.group.code' dataField='code'
+              (select)="eventCallDensityForAddPart($event,form.get('partBookingList').length-1)">
+              <ngc-data-column text="export.density.group.code" dataField="code" [width]="100">
+              </ngc-data-column>
+              <ngc-data-column text="export.density.group.code.description" dataField="desc" [width]="150">
+              </ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.booking.volume"></ngc-label>
+          <div>
+            <ngc-numberinput [width]="70" formControlName="volume" digits="7" decimalDigits="2" required>
+            </ngc-numberinput>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.booking.volume.code"></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId='EXPORT$Volume_Code' formControlName="volumeUnitCode" upperCase="true"
+              [width]="70" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button label="export.book.single.add.part" (click)="addPartServiceCall()">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </form>
+</ngc-window>
+<ngc-window #updateBookingWindow [showCloseButton]="true" (close)="closeUpdateBooking()" [width]="1510" [height]="600"
+  title="export.booking.update">
+  <app-update-booking [updateBookingObject]="updateBookingObject"></app-update-booking>
+</ngc-window>
+<ngc-window #bookshipment [width]="1000" [height]="400" title="Validate Booking" [showCloseButton]="true">
+  <form [formGroup]="validateBookForm">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <tr>
+              <th>
+                <ngc-label label="AWB Number"></ngc-label>
+              </th>
+            </tr>
+            <tbody>
+              <tr *ngIf="SaveClicked">
+                <td>
+                  <ngc-display formControlName="shipmentNumber"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="SVC"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Origin"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Destination"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Pieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="K/L"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Nature Of Goods"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngIf="SaveClicked">
+                <td>
+                  <ngc-checkbox formControlName="serviceFlag" [disabled]="true"></ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-display formControlName="origin"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="destination"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="pieces"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="grossWeight" decimalDigits="1"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="weightUnitCode"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="natureOfGoodsDescription"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+
+          <ngc-table>
+            <tr>
+              <th colspan="2"></th>
+              <th colspan="4">
+                <ngc-label label="Incoming Flight Booking"></ngc-label>
+              </th>
+              <th colspan="4">
+                <ngc-label label="Outgoing Flight Booking"></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th>
+                <ngc-label label="Part Suffix"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Pcs/Weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Flight Number"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Flight Date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Flight Status"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="ICMS Response"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Flight Number"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Flight Date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Flight Status"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="ICMS Response"></ngc-label>
+              </th>
+            </tr>
+            <tbody>
+              <tr *ngFor="let item of flightValueArray">
+                <td>{{item.partSuffix}}</td>
+                <td>{{item.partPieces}}</td>
+                <td>{{item.flightOffPoint =='SIN'?item.flightKey : ''}}</td>
+                <td>{{item.flightOffPoint =='SIN'?item.flightOriginDate :''}}</td>
+                <td>{{item.flightOffPoint =='SIN'?item.bookingStatusCode :''}}</td>
+                <td>{{item.flightOffPoint =='SIN'?item.flightBookingStatus : ''}}</td>
+                <td>{{item.flightBoardPoint =='SIN'?item.flightKeyTwo : ''}}</td>
+                <td>{{item.flightBoardPoint =='SIN'?item.flightOriginDateTwo : ''}}</td>
+                <td>{{item.flightBoardPoint =='SIN'?item.bookingStatusCodeTwo : ''}}</td>
+                <td>{{item.flightBoardPoint =='SIN'?item.flightBookingStatusTwo : ''}}</td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </form>
+  <ngc-window-footer>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="onSaveNew()" value="Confirm Cosys Status" iconType="confirm"
+            accessSectionId="CONFIRM_COSYS_STATUS">
+          </ngc-button>
+          <ngc-button (click)="cancel()" value="Confirm ICMS Status"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window-footer>
+</ngc-window>
+
+<ngc-footer>
+  <ngc-row>
+    <ngc-column>
+      <ngc-button label="booking.ecc" (click)='onClickFlightPlanner()'> </ngc-button>
+    </ngc-column>
+    <ngc-column>
+      <ngc-button label="icms.booking.publish" entityAttribute="Flight.IcmsBookingPublish"
+        (click)='onClickIcmsBookingPublish()'> </ngc-button>
+    </ngc-column>
+    <ngc-column>
+      <ngc-button label="Shipment Info" (click)='navToShipmentInfo()'> </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>
+
+<ngc-window #ismsBookingPublishWindow [showCloseButton]="true" [width]="2000" [height]="900"
+  title="ICMS Booking Publish">
+  <app-icms-booking-publish [icmsBookingPublishObject]="icmsBookingPublishObject"></app-icms-booking-publish>
+</ngc-window>

@@ -1,0 +1,193 @@
+<form [formGroup]="uldShipmentPriorityData">
+  <ngc-titlebar title='import.uldPriority.title' (print)='print()' (cancel)="onBack($event)" (save)="onSave()"
+    [disablePrint]="printFlag==false">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row formGroupName="searchData">
+      <ngc-column [column]="1.5">
+        <ngc-label label="g.flight">
+        </ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="100" formControlName="flightNumber" accessEnableOn="r" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]="100" formControlName="flightDate" accessEnableOn="r" required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" [width]="130"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="uld.uld.number"></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName="uldNumber" [width]="130"></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" value="display.search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-row *ngIf="displayResults">
+    <ngc-column align="right" [column]="11">
+      <ngc-button label='import.send.email' (click)="openEmailWindow()"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+  <ngc-container type="section" *ngIf="displayResults">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="shipmentHandover.shpAWBUldNumber"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.origin"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.destination"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.shipmentType"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.pieces"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.weight"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.natureOfGoods"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.shc"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.RHO.Priority"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.Breakdown.Handling.Form"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.Options"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="400">
+                <ngc-label label="import.freeText"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="uldResultList">
+            <ng-container *ngFor="let item of uldShipmentPriorityData.controls.uldResultList.controls; let index=index"
+              [formGroupName]="index">
+              <tr *ngIf="item.get('boardingPoint').value">
+                <td colspan="12">
+                  <ngc-display formControlName='boardingPoint' emphasis="md"></ngc-display>
+                </td>
+              </tr>
+              <tr *ngIf="item.get('typeOfShipment').value">
+                <td colspan="8">
+                  <ngc-display formControlName='typeOfShipment' emphasis="md"></ngc-display>
+                </td>
+                <td colspan="4" *ngIf="item.get('uldNumber').value !== 'Loose Shipment'">
+                  <ngc-dropdownlist [width]="250" formControlName="rhoTowingGroupUldPriority" [noCache]="true"
+                    sourceId="RHO_PRIORITY_MASTER" sourceType='query'>
+                  </ngc-dropdownlist>
+                </td>
+              </tr>
+              <tr>
+                <td align="center">
+                  <ngc-awbdisplay formControlName='shipmentNumber'></ngc-awbdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName='origin'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='destination'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='shipmentDescriptionCode'></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName='piece'></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName='weight'></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName='natureOfGoodsDescription'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='shcCode'></ngc-display>
+                </td>
+                <td>
+                  <ngc-dropdownlist [width]="250" formControlName="rhoTowingGroupPriority" [noCache]="true"
+                    sourceId="RHO_PRIORITY_MASTER" sourceType='query'>
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-dropdownlist [width]="250" formControlName="breakdownHandlingForm" [noCache]="true"
+                    sourceId="CARGO_HANDLING_MASTER" sourceType='query'>
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-dropdownlist [width]="250" formControlName="priorityOptions" [noCache]="true"
+                    sourceId="CARGO_HANDLING_AUTO_SELECT" sourceType='query'>
+                  </ngc-dropdownlist>
+                  <!-- <ngc-input [width]="250" formControlName="priorityOptions" sourceId="CARGO_OPTIONS_HANDLING_MASTER"
+                    maxlength="100">
+                  </ngc-input> -->
+                </td>
+                <td>
+                  <ngc-input [width]="400" formControlName="priorityRemarks" maxlength="100">
+                  </ngc-input>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" format="pdf" reportId='RHOBDPrintoutRHOStaff'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<form [formGroup]="emailFormGroup">
+  <ngc-window #emailSendingWindow [width]="1000" [height]="50" title="import.send.email" align="center">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="6">
+          <div>
+            <ngc-label label="email.group"></ngc-label>
+            &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+            <ngc-dropdownlist [width]="200" formControlName="groupCode" [noCache]="true"
+              sourceId="HandlingMaster$EmailGroup" required>
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <div>
+            <ngc-button label='g.send' accessEnableOn="r" (click)="sendEmail()"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+</form>

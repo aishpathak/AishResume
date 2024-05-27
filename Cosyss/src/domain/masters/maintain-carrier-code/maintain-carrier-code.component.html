@@ -1,0 +1,463 @@
+<form [formGroup]="carrierCodeForm" (clear)="onClear($event)">
+  <ngc-titlebar title="masters.maintainCarrierCode"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.carrierCode"></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="false" accessEnableOn="r" formControlName="carrierCodeValue" sourceId='CARRIER'
+            title='g.carrier' [width]="40" dataField='code' displayMember='code'
+            (select)='onCarrierCodeLOVSelect($event)' [sourceParameters]="parameter">
+            <ngc-data-column text="masters.carrier" dataField="code" [width]="70"></ngc-data-column>
+            <ngc-data-column text="masters.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label label="masters.carrierName"></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="false" accessEnableOn="r" formControlName="carrierName" sourceId='CARRIER'
+            title='g.carrier' [noCache]="true" [width]="370" dataField='desc' [sourceParameters]="parameter"
+            displayMember='desc' (select)='onCarrierCodeLOVSelect($event)'>
+            <ngc-data-column text="masters.description" dataField="desc" [width]="100"></ngc-data-column>
+            <ngc-data-column text="masters.carrier" dataField="code" [width]="70"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="master.awb.prefix"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [maxlength]="3" formControlName="carrierAWBPrefix" sourceId='AWBPREFIX'
+            title='master.awb.prefix' [width]="60" dataField='code' (select)="selectAwbPrefix($event)">
+            <ngc-data-column text="master.awb.prefix" dataField="code" [width]="70"></ngc-data-column>
+            <ngc-data-column text="masters.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=" ">
+        </ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onCarrierSearch($event)" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=" ">
+        </ngc-label>
+        <div>
+          <ngc-button value="g.add" (click)="onEditAddLink($event)" iconType="add">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- DataTable start here -->
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="onDeleteButtonClick($event)" value="g.delete" iconType="delete"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="carrierCodeList" [width]="'1330'" [pageable]="true"
+          (linkClick)="onEditAddLink($event)" [pageSize]="15">
+          <ngc-data-column text="g.select" dataField="select" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName='select'>
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="masters.carrierCode" dataField="carrierCode" [width]="150" align="left"
+            cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="masters.name" dataField="carrierShortName" [width]=300 align="left" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="masters.handledCarrier" dataField="assistedCarrierFlag" [width]="190"
+            cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="masters.logo" dataField="logo" [width]="150" align="left" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="Disable Auto Flight Creation" dataField="autoFlightFlag" type="icon" iconType="yesno"
+            [width]='40' cellsAlign="center">
+          </ngc-data-column>
+          <!-- <ngc-data-column text="Disable Auto Flight Creation" dataField="autoFlightFlag" [width]="150" align="left"
+            cellsAlign="left"></ngc-data-column> -->
+          <ngc-data-column text="master.dls.weight.unit" dataField="dlsWeightUnit" [width]="150" align="left"
+            cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="masters.notoc.format" [width]='100' dataField="notocFormat" cellsAlign="left">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist [readonly]='true' [width]="40" formControlName="notocFormat"
+                  sourceId="Flight$NOTOC_RPT_FORMAT">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="masters.uploadImage" dataField="imagePath" [width]="150" align="left"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.iatacode" dataField="iataFlag" type="icon" iconType="yesno" [width]='40'
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="master.ciq" dataField="cargoIqFlag" type="icon" iconType="yesno" [width]='40'
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column feature="EDI.UWS.PWGIndicator" text="uld.pwg" dataField="pwgInd" type="icon" iconType="yesno"
+            [width]='40' cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="master.include.volume.ffm" dataField="volumeFlag" type="icon" iconType="yesno"
+            [width]='40' cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="master.message.sequence.flag" dataField="messageSequenceFlag" type="icon"
+            iconType="yesno" [width]='40' cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="master.setup.part.booking" dataField="setupPartBooking" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link type="link" (click)="onClickPartBooking(group)" iconType="edit"
+                  formControlName="setupPartBooking"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="master.awb.prefix" dataField="awbPrefix" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link type="link" (click)="onClickAWBPrefix(group)" iconType="edit" formControlName="awbPrefix">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="master.awb.prefix.mod.7" dataField="awbMod7" [width]="150" align="left"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.rho" [width]='90' entityAttribute="Flight.RHO">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link type="link" (click)="RouteToMaintainServiceProvider(group)" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="flight.bubdofc.br" [width]='30' [hidden]="isBuBdOfficeHidden">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link type="link" (click)="onClickBuBdOffice(group)" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="edit" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link type="link" (click)="onClickEdit(group)" iconType="edit"
+                  *ngIf="this.carrierCodeForm.get(['carrierCodeList', group, 'carrierCode']).value !== '**'"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-window #partBookingWindow [width]="1100" [height]="300" title="master.setup.part.booking">
+    <ngc-container type="block">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="onAddPartBooking()" value="master.add.part.booking">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="g.carrier"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="master.cross.booking"></ngc-label>
+                </th>
+                <th width="100">
+                  <ngc-label value="master.airlines"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="master.start.prefix"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="master.end.prefix"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="master.primari.indentifier"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="master.exclude.prefix"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.delete"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="partBookingList">
+              <tr *ngFor="let item of carrierCodeForm.controls.partBookingList.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="partBookingCarrier"></ngc-display>
+                </td>
+                <td>
+                  <ngc-checkbox formControlName="crossBookingFlag"></ngc-checkbox>
+                </td>
+                <td width="100">
+                  <ngc-taginput width='40' formControlName="crossBookCarrier">
+                  </ngc-taginput>
+                </td>
+                <td>
+                  <ngc-input [maxlength]='1' formControlName="startPrefix"></ngc-input>
+                </td>
+                <td>
+                  <ngc-input [maxlength]='1' formControlName="endPrefix">
+                  </ngc-input>
+                </td>
+                <td>
+                  <ngc-input [maxlength]='1' formControlName="primaryIdentifier">
+                  </ngc-input>
+                </td>
+                <td>
+                  <ngc-input [maxlength]='1' formControlName="excludePrefix">
+                  </ngc-input>
+                </td>
+                <td>
+                  <ngc-link (linkClick)="deletePartBooking(index)" iconType="delete">
+                  </ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onSubmitPartBooking()" value="g.save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+
+
+  <!-- DataTable end here -->
+  <!-- Insert new record window start from here -->
+  <ngc-window #window [width]="1540" [height]="350" title="master.maintain.carrier.code">
+    <ngc-container type="block">
+      <ngc-row>
+        <ngc-column [column]="1">
+          <ngc-label label="g.carrierCode"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="6">
+          <ngc-label label="masters.name"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="masters.handledCarrier"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="masters.mailhandledCarrier"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="masters.notoc.format"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="1" *ngIf="updateFormData">
+          <ngc-display formControlName="carrierCode"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]="1" *ngIf="addFormData">
+          <ngc-input [width]="50" formControlName="carrierCode" required></ngc-input>
+        </ngc-column>
+        <ngc-column [column]="6">
+          <ngc-input [width]="600" formControlName="carrierShortName" upperCase="true" required></ngc-input>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-dropdownlist formControlName="assistedCarrierFlag" sourceId="Flight$Handler" required></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-dropdownlist formControlName="mailHandler" sourceId="Flight$Mail_Handler"></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-dropdownlist formControlName="notocFormat" sourceId="Flight$NOTOC_RPT_FORMAT"></ngc-dropdownlist>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="1">
+          <ngc-label label="masters.logo"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="masters.uploadImage"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="master.dls.weight.unit"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="master.IATA"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="Disable Auto Flight Creation"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="master.ciq"></ngc-label>
+        </ngc-column>
+
+        <ngc-column [column]="1" feature="EDI.UWS.PWGIndicator">
+          <ngc-label label="uld.pwg"></ngc-label>
+        </ngc-column>
+
+        <ngc-column [column]="2">
+          <ngc-label label="master.include.in.ffm"></ngc-label>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="master.message.sequence.japan"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="1">
+          <ngc-input [width]="100" formControlName="logo"></ngc-input>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-input [width]="100" formControlName="imagePath"></ngc-input>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-dropdownlist sourceId="General$WeightCode" formControlName="dlsWeightUnit"></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-checkbox formControlName="iataFlag"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-checkbox [width]="50" formControlName="autoFlightFlag"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-checkbox formControlName="cargoIqFlag"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="1" feature="EDI.UWS.PWGIndicator">
+          <ngc-checkbox formControlName="pwgInd"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-checkbox formControlName="volumeFlag"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-checkbox formControlName="messageSequenceFlag"></ngc-checkbox>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="onSubmitData($event)" value="Save"></ngc-button>
+          <ngc-button (click)="onWindowCancel($event)" value="Cancel">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!-- Insert new record window start from here -->
+
+  <ngc-window #awbWindow [width]="800" [height]="600" title="master.manage.awb.prefix">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="onAddRow()" value="Add" iconType="add"></ngc-button>
+          <ngc-button (click)="onPrefixDelete()" value="Delete" iconType="delete"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable #goTo formArrayName="awBPrefixList">
+            <ngc-data-column text="g.select" dataField="sel" [width]="20" type="check" iconType="yesno"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="master.awb.prefix" dataField="awbPrefix" [width]="30" cellsAlign="center">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-lov [disabled]="disableControls[group]['disableAwbFlag']" formControlName="awbPrefix"
+                    sourceId='AWBPREFIX' title='AWB Prefix' [width]="60" dataField='code'>
+                    <ngc-data-column text="master.awb.prefix" dataField="code" [width]="70"></ngc-data-column>
+                    <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+                  </ngc-lov>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="master.iata.indicator" dataField="flagIATA" [width]="30" type="check"
+              iconType="yesno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="master.mod.7.indicator" dataField="awbModelCheckFlag" [width]="30" type="check"
+              iconType="yesno" cellsAlign="center"></ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onPrefixSave()" value="g.save"></ngc-button>
+            <ngc-button (click)="onWindowCancel($event)" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #bubdOfficeWindow [width]="200" [height]="200" title="title.flight.bubdofc">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button (click)="addRowBuBdOffice()" value="g.add" iconType="add"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="bubdOfficeList" [pageable]="false">
+            <ngc-data-column text="flight.flightType" dataField="flightType" [width]="100" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dropdownlist sourceId='Flight$FlightProcessType'  [width]="100"  [dropDownWidth]="100"
+                    formControlName="flightType" (select)="onSelectFlightType()">
+                  </ngc-dropdownlist>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Flight.BuBdOffice" dataField="buBdOffice" [width]="100" cellsAlign="left">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-dropdownlist sourceId='Flight$BuBdOffice'  [width]="180"  [dropDownWidth]="180"
+                    formControlName="buBdOffice">
+                  </ngc-dropdownlist>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.delete" [width]="20" align="center" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link [formControlName]="name" (linkClick)="onDeleteBuBdOffice(group)" iconType="delete">
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onBuBdOfficeSave()" value="g.save" [disabled]="disabledBuBdOfficeSave"></ngc-button>
+            <ngc-button (click)="onBuBDCancel($event)" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

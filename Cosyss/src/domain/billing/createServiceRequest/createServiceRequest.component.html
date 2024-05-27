@@ -1,0 +1,444 @@
+<ngc-titlebar title='bil.createServiceRequest' (save)="onSave($event)" (clear)="onClear($event)"
+  (cancel)="onCancel($event)"></ngc-titlebar>
+<form [formGroup]="createServiceRequestForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="2" feature="Billing.AirlineBilling">
+        <ngc-label value="service.category"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="ServiceCategory$ServiceCategoryValues" formControlName="serviceCategory"
+            (ngModelChange)='onClickCategory($event)' [dropDownWidth]="120" width="120" [disabled]="enableService">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3.5">
+        <ngc-label value="customerlist.cstname"></ngc-label>
+        <div>
+          <ngc-lov sourceId="CUSTOMER_LIST" (select)='onClickCustomer($event)'
+            [sourceParameters]=" { 'parameter1': this.createServiceRequestForm.get('serviceCategory').value, 'para2': this.randomValue }"
+            formControlName="customerId" title="list of custumer" [validOnly]="true" dataField="param1"
+            displayField="desc" valueMember="desc" [width]="300" [disabled]="enableCustomer" required>
+            <ngc-data-column text="billing.id.lowercase"  dataField="param1" [hidden]="true"></ngc-data-column>
+            <ngc-data-column text="g.code"  dataField="code"  [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="80" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="3.5">
+        <ngc-label value="bil.serviceName"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" sourceId="SERVICE_LIST"
+            [sourceParameters]="{ 'parameter1': customerId, 'parameter2': this.createServiceRequestForm.get('serviceCategory').value }"
+             title="list of services" (select)='onClickService($event)' formControlName="serviceCode" valueMember="desc"
+             dataField="param1" displayField="desc" [width]="300" [disabled]="enableService" required>
+            <ngc-data-column text="billing.id.lowercase"  dataField="param1" [hidden]="true"></ngc-data-column>
+            <ngc-data-column text="g.code"  dataField="code"  [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="80" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value="bil.handlingArea"></ngc-label>
+        <div>
+          <ngc-dropdownlist [noCache]="true" formControlName="handlingArea" sourceId='HANDLING_AREA'  sourceType='query'
+            [sourceParameters]="serviceMasterId" [width]="150" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column align="right">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button value="bill.createServiceRequest.create" (click)='createEvent($event)' [disabled]="enableCreate">
+          </ngc-button>
+          <!-- <ngc-button entityAttribute='Billing.AcceptanceWeighingButton' value="export.acceptance.weighing.title"
+            (click)='acceptanceWeighing($event)'>
+          </ngc-button>
+          <ngc-button value="bill.create.backToCargoAcceptance" (click)='backtoCargoAcceptance($event)'>
+          </ngc-button> -->
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+
+
+
+    <ngc-row *ngIf="hideData">
+
+      <ngc-column [column]="3.5">
+
+        <ngc-label label="bil.serviceDateTime" required></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="requestedOn" [width]="160" required [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="3.5">
+        <ngc-label value="bil.requestedBy"></ngc-label>
+        <div>
+          <ngc-input formControlName="requestedBy" [width]="340" [maxlength]="40"></ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label value="bil.phoneNumber"></ngc-label>
+        <div>
+          <ngc-phoneinput formControlName="requestorContactNumber" [width]="150"></ngc-phoneinput>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+
+
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row *ngIf="hideData">
+      <ngc-column column='3.5' *ngIf="hideDuration && isGenric">
+        <ngc-label label="g.duration"></ngc-label>
+        <div>
+          <ngc-display formControlName="durationOf" value=""></ngc-display>
+          <ngc-numberinput decimalDigits="0" digits="5" formControlName="duration" required></ngc-numberinput>
+          <ngc-display sourceCategory="dropdown" formControlName="durationUom" sourceId="Billing$Billing.DurationUom">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='3.5' *ngIf="showQuantity && isGenric">
+        <ngc-label label="expdgd.quantity"></ngc-label>
+        <div>
+          <ngc-display formControlName="quantityOf" value=""></ngc-display>
+          <ngc-numberinput decimalDigits="2" digits="5" formControlName="requestedQuantity" required></ngc-numberinput>
+          <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$UOM"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='3.5' *ngIf="hideOption">
+        <ngc-label label="billing.option.value"></ngc-label>
+        <div>
+          <ngc-display formControlName="optionName" value=""></ngc-display>
+          <ngc-dropdownlist [source]="arrString" formControlName="optionValue" [dropDownWidth]="100" width="300"
+            (ngModelChange)="setChargesByOptionValue($event)" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="hideData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container *ngIf="!isGenric">
+          <ngc-row>
+            <ngc-column [column]="11" align="right">
+              <ngc-button label="g._add" (click)="onAddRowShipmentInfo($event)" iconType="add"></ngc-button>
+            </ngc-column>
+            <ngc-column [column]="1">
+
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="12">
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th entityAttribute='Billing.AcceptanceWeighingButton'>
+                    </th>
+                    <th *ngIf="isAWB">
+                      <ngc-label value="val.no"></ngc-label>
+                    </th>
+                    <th *ngIf="displayHouseDetail" entityAttribute='Gen.House.Enable'>
+                      <ngc-label value="billing.hawbsbNumber"></ngc-label>
+                    </th>
+                    <th *ngIf="isAWB">
+                      <ngc-label value="awb.flight"></ngc-label>
+                    </th>
+                    <th *ngIf="isAWB || isULD">
+                      <ngc-label value="imp.ULDNumber"></ngc-label>
+                    </th>
+                    <th *ngIf="isTruck">
+                      <ngc-label value="import.truckNo"></ngc-label>
+                    </th>
+                    <th *ngIf="isTruck">
+                      <ngc-label value="billing.truck.trip"></ngc-label>
+                    </th>
+                    <th *ngIf="hideDuration">
+                      <ngc-display formControlName="durationOf">
+                      </ngc-display>
+                      <ngc-label value="g.duration"></ngc-label>
+
+                    </th>
+                    <th *ngIf="showQuantity">
+                      <ngc-display formControlName="quantityOf">
+                      </ngc-display>
+                      <ngc-label value="expdgd.quantity"></ngc-label>
+
+                    </th>
+                    <th [width]="510">
+                      <ngc-label value="import.additionalInfo"></ngc-label>
+                    </th>
+                    <th  feature='Billing.SalesTax'>
+                      <ngc-label value="billing.br.grossAmount"></ngc-label>
+                    </th>
+                    <th entityAttribute='Billing.TaxComp1'>
+                      <ngc-label entityAttribute='Billing.TaxComp1' value="CGST"></ngc-label>
+                    </th>
+                    <th entityAttribute='Billing.TaxComp2'>
+                      <ngc-label entityAttribute='Billing.TaxComp2' value="SGST"></ngc-label>
+                    </th>
+                    <th entityAttribute='Billing.TaxComp3'>
+                      <ngc-label entityAttribute='Billing.TaxComp3' value="IGST"></ngc-label>
+                    </th>
+                    <th  feature='Billing.SalesTax'>
+                      <ngc-label value="billing.taxAmount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label value="createService.estimatedCharge"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label value=''></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="serviceRequestShipmentInfo">
+                  <tr
+                    *ngFor="let item of createServiceRequestForm.getList('serviceRequestShipmentInfo'); let index=index"
+                    [formGroupName]="index">
+                    <td entityAttribute='Billing.AcceptanceWeighingButton'>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td *ngIf="isAWB">
+                      <ngc-awbinput formControlName="shipmentNumber" (ngModelChange)="getFlightDetails($event,index)"
+                        required>
+                      </ngc-awbinput>
+                    </td>
+                    <td *ngIf="displayHouseDetail" entityAttribute='Gen.House.Enable'>
+                      <ngc-lov [validOnly]="true"
+                        *ngIf="handledbyHouse && handledbyHouse.length > 0 && handledbyHouse[index] " accessEnableOn="r"
+                        formControlName="hawbNumber" upperCase='true' [width]="100" sourceId='KEY_BILL_HWBNUMBER'
+                        dataField='code' valueMember='code' [noCache]="true" title="billing.hawbsbNumber"
+                        [sourceParameters]="{'parameter1': this.createServiceRequestForm.get(['serviceRequestShipmentInfo',index,'shipmentNumber']).value, 'parameter2': 'service'}"
+                        (select)="setAWBNumber($event, index)">
+                        <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code'>
+                        </ngc-data-column>
+                      </ngc-lov>
+                    </td>
+
+                    <td *ngIf="isAWB">
+                      <ngc-flightkeyinput width='90' formControlName="flightKey"></ngc-flightkeyinput>
+                      <ngc-dateinput formControlName='flightDate'></ngc-dateinput>
+                    </td>
+                    <td *ngIf="isAWB">
+                      <ngc-uldinput formControlName="containerNumber"></ngc-uldinput>
+                    </td>
+                    <td *ngIf="isULD">
+                      <ngc-uldinput formControlName="containerNumber" (ngModelChange)="onTabOutEntity(index)" required>
+                      </ngc-uldinput>
+                    </td>
+                    <td *ngIf="isTruck">
+                      <ngc-input formControlName="truckNumber" (ngModelChange)="onTabOutEntity(index)"
+                        sourceId='TRUCK_TRIP_ID_BY_TRUCK'
+                        [sourceParameters]="{'parameter1': this.createServiceRequestForm.get(['serviceRequestShipmentInfo',index,'truckNumber']).value}"
+                        (select)="setTruckTrip($event,index)" displayBoth="true" required>
+                      </ngc-input>
+                    </td>
+                    <td *ngIf="isTruck">
+                      <ngc-label value='billing.start.date'></ngc-label>
+                      <!-- <ngc-lov accessEnableOn="r" formControlName="truckTripId" [width]="150"
+                        sourceId='TRUCK_TRIP_ID_BY_TRUCK' dataField='code' displayField="desc" [noCache]="true"
+                        title="billing.truck.trip"
+                        [sourceParameters]="{'parameter1': this.createServiceRequestForm.get(['serviceRequestShipmentInfo',index,'truckNumber']).value}"
+                        (select)="setTruckTrip($event, index)" type="displayDateTime">
+                        <ngc-data-column text='Start Date' [width]='80' dataField='desc' type="displayDateTime">
+                        </ngc-data-column>
+                        <ngc-data-column text='End Date' [width]='80' dataField='param1' type="displayDateTime">
+                        </ngc-data-column>
+                      </ngc-lov> -->
+                      <ngc-display formControlName="tripStartDate"></ngc-display>
+                      <div>
+                        <ngc-label value=''></ngc-label>
+                      </div>
+                      <div>
+                        <ngc-label value='billing.end.date'></ngc-label>
+                        <ngc-display formControlName="tripEndDate"></ngc-display>
+                      </div>
+                    </td>
+                    <td *ngIf="hideDuration">
+                      <ngc-numberinput decimalDigits="0" digits="5" formControlName="duration"
+                        (ngModelChange)="chargeEstimation($event,index)" required width="100">
+                      </ngc-numberinput>
+                      <ngc-display sourceCategory="dropdown" formControlName="durationUom"
+                        sourceId="Billing$Billing.DurationUom">
+                      </ngc-display>
+                    </td>
+                    <td *ngIf="showQuantity">
+                      <ngc-numberinput decimalDigits="2" digits="5" formControlName="requestedQuantity"
+                        (ngModelChange)="chargeEstimation($event,index)" required width="100"
+                        [disabled]="!this.createServiceRequestForm.get('quantityModifiable').value">
+                      </ngc-numberinput>
+                      <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$UOM">
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-textarea [width]="480" [height]="50" formControlName="additionalRemarks" [maxlength]="65">
+                      </ngc-textarea>
+                    </td>
+                    <td align='right'  feature='Billing.SalesTax'>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="grossAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align='right' entityAttribute='Billing.TaxComp1'>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="taxComp1">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align='right'  entityAttribute='Billing.TaxComp2'>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="taxComp2">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align=' right' entityAttribute='Billing.TaxComp3'>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="taxComp3">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td feature='Billing.SalesTax'>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="taxAmount"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="estimatedCharges"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-link (linkClick)="onLocationLinkClick($evnet, index)"  [disabled]="formDisabled"  type="link"
+                         iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+
+                </tbody>
+
+              </ngc-table>
+
+              <ngc-label value='createService.totalCharge' style="margin-left:75%;">
+              </ngc-label>&nbsp;&nbsp;
+
+              <ngc-currencydisplay [noSymbol]="true" formControlName="totalCharges">
+              </ngc-currencydisplay>
+
+
+            </ngc-column>
+            <ngc-column [column]="1">
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="alreadyCompleted">
+            <ngc-label value="billing.already.completed"></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="hideButton">
+    <ngc-row>
+      <ngc-column [column]="3">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button value="bill.createServiceRequest.estimate" (click)='chargeEstimation($event,index)'>
+          </ngc-button>
+          <ngc-currencydisplay emphasis='md' formControlName="estimatedChargesForGeneric" value=" ">
+          </ngc-currencydisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="hideData" type="tab">
+    <ngc-row>
+      <ngc-column [column]="8">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="g.remarks"></ngc-label>
+              <div>
+                <ngc-remarksinput formControlName="remarks" [width]="855"></ngc-remarksinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="bil.upload"></ngc-label>
+              <div>
+                <ngc-fileupload accept="*/*" entityType="BILLING" [entityKey]="getReferenceId()" associatedTo="Service"
+                  stage="BILLING" #fileUpload></ngc-fileupload>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="bil.instructions"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="bil.ins.cargo.request">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="bil.ins.cargo.payment"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="SID.note"></ngc-label>
+              <div>
+                <ngc-textarea [width]="1000" [height]="100" formControlName="terms" [disabled]="true"></ngc-textarea>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column [column]="4">
+        <ngc-container>
+
+          <ngc-row>
+            <ngc-column [column]="2">
+            </ngc-column>
+            <ngc-column>
+              <ngc-label value="bil.notificationEmail"></ngc-label>
+              <div>
+                <ngc-emailinput formControlName="notificationEmailId1" [width]="250"></ngc-emailinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="2">
+            </ngc-column>
+            <ngc-column>
+
+              <ngc-emailinput formControlName="notificationEmailId2" [width]="250"></ngc-emailinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column [column]="2">
+            </ngc-column>
+            <ngc-column>
+
+              <ngc-emailinput formControlName="notificationEmailId3" [width]="250"></ngc-emailinput>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

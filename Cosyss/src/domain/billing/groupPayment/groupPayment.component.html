@@ -1,0 +1,339 @@
+<ngc-titlebar title='bil.groupPayment' (save)="onSave($event)" (clear)="onClear($event)" (cancel)='backToHome($event)'>
+</ngc-titlebar>
+<form [formGroup]='groupPaymentForm'>
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column [grid24]='true' column='5'>
+        <ngc-label value='g.shipmentType'></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType='AWB' formControlName='shipmentNum'></ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='bil.serviceId'></ngc-label>
+        <div>
+          <ngc-lov displayField='desc' [validOnly]='true' upperCase="false" [noCache]="true" [width]='150'
+            formControlName="serviceNum" [sourceParameters]="customerId" sourceId="SERVICE_CHARGE" title="g.service"
+            (select)='onClickService($event)' dataField='desc' valueMember="desc" accessEnableOn="r">
+            <ngc-data-column text="billing.service.name" dataField="code" [width]="200"></ngc-data-column>
+            <ngc-data-column text="billing.servicenumber" dataField="desc" [width]="120"></ngc-data-column>
+            <ngc-data-column text="g.customerCode" dataField="param1" [width]="110"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="deckFlag" [width]="200"></ngc-data-column>
+            <ngc-data-column text="billing.requestedby" dataField="param3" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.remarks" dataField="param4" [width]="150"></ngc-data-column>
+            <ngc-data-column text="billing.service.date" dataField="param5" [width]="140"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button value='bil.groupPayment.addToGroup' (click)='getInfo($event)'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="groupPaymentForm.getRawValue().groupAdvice.length" type="tab">
+    <ngc-row>
+      <ngc-column column='8'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value='bil.awbOrService'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.groupPayment.billAmount'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.groupPayment.collectedAmount'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.groupPayment.paidAmount'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.groupPayment.receivedAmount'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.groupPayment.balanceAmount'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.groupPayment.charges'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName='groupAdvice'>
+            <tr *ngFor="let item of groupPaymentForm.controls.groupAdvice.controls; let index=index"
+              [formGroupName]="index">
+              <td *ngIf="item.get('shipmentNumber').value && !item.get('serviceNumber').value">
+                <ngc-shipmentdisplay formControlName='shipmentNumber'></ngc-shipmentdisplay>
+              </td>
+              <td *ngIf="!item.get('shipmentNumber').value && item.get('serviceNumber').value">
+                <ngc-display formControlName='serviceNumber'></ngc-display>
+              </td>
+              <td>
+                <ngc-currencydisplay formControlName='billAmount'></ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-currencydisplay formControlName='collectAmount'></ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-currencydisplay formControlName='receivedAmount'></ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-currencyinput mandatory
+                  [max]='response.groupAdvice[index].collectAmount-response.groupAdvice[index].receivedAmount'
+                  formControlName='received'></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-currencydisplay formControlName='balanceAmount'></ngc-currencydisplay>
+              </td>
+              <td class='text-center'>
+                <ngc-link iconType="open-link" (linkClick)="onNavigateLinkClick($event, index)"></ngc-link>
+              </td>
+              <td class='text-center'>
+                <ngc-link iconType='delete' (linkClick)="onDeleteLinkClick($event, index)"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+      <ngc-column [grid48]='true' column='1'></ngc-column>
+      <ngc-column>
+        <ngc-label value='bil.totalAmount'></ngc-label>
+        <div>
+          <ngc-currencydisplay emphasis='lg' [value]='totalAmount'></ngc-currencydisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="this.groupPaymentForm.get('groupAdvice').value.length" type="tab">
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label value='bil.ic/PassNumber'></ngc-label>
+        <div>
+          <ngc-input [maxlength]="5" required formControlName='icPassNumber'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='bil.receivedFrom'></ngc-label>
+        <div>
+          <ngc-input [maxlength]="64" required formControlName='receivedFrom'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column='1'>
+        <ngc-label value='bil.counter'></ngc-label>
+        <div>
+          <ngc-locations-list (select)='onCounterSelect($event)' [typeDropDown]="true" required
+            [displayOnlyLocation]="true" [locationTypeList]="['BILLING_COUNTER']" formControlName="counter"
+            [width]="100"></ngc-locations-list>
+
+          <!-- <ngc-dropdownlist (select)='onCounterSelect($event)' required [width]='100' sourceId='BILL_COUNTER' sourceType='query' formControlName="counter"></ngc-dropdownlist> -->
+        </div>
+      </ngc-column>
+      <ngc-column column='6' align='right'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button value='g.add' (click)='addPayDetails($event)'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="this.groupPaymentForm.get('groupAdvice').value.length" type="tab">
+    <ngc-row>
+      <ngc-column column='9'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width='100'>
+                <ngc-label value='bil.payMode'></ngc-label>
+              </th>
+              <th width='175'>
+                <ngc-label value='bil.issuingBank'></ngc-label>
+              </th>
+              <th width='175'>
+                <ngc-label value='bil.transactionNumber'></ngc-label>
+                <ngc-label value='bil.referenceNumber'></ngc-label>
+              </th>
+              <th width='175'>
+                <ngc-label value='bil.groupPayment.issueDate'></ngc-label>
+              </th>
+              <th width='175'>
+                <ngc-label value='g.tenderedAmount'></ngc-label>
+              </th>
+              <th width='100'>
+                <ngc-label value='bil.paymentStatus'></ngc-label>
+              </th>
+              <th width='200'>
+                <ngc-label value='bil.paymentRemarks'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName='paymentDetails'>
+            <tr *ngFor="let item of groupPaymentForm.controls.paymentDetails.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-dropdownlist required width='100' sourceId='BILL_PAYMENT_MODE' sourceType='query'
+                  formControlName='mode'></ngc-dropdownlist>
+              </td>
+              <td *ngIf="item.get('mode').value!='CHEQUE'"></td>
+              <td *ngIf="item.get('mode').value=='CHEQUE'">
+                <ngc-dropdownlist required width='150' sourceId='BILL_BANKS' sourceType='query'
+                  formControlName='issuingBank'></ngc-dropdownlist>
+              </td>
+              <td *ngIf="item.get('mode').value=='CASH'"></td>
+              <td *ngIf="item.get('mode').value!='CASH'">
+                <ngc-alphanuminput required [width]="150" formControlName='transactionNumber'></ngc-alphanuminput>
+              </td>
+              <td *ngIf="item.get('mode').value=='CASH'"></td>
+              <td *ngIf="item.get('mode').value!='CASH'">
+                <ngc-datetimeinput required [width]="150" formControlName='date'></ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-currencyinput required formControlName='tenderedAmount'></ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-dropdownlist required [width]="100" sourceId='Billing$PaymentStatus'
+                  formControlName='paymentStatus'></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-input [width]='200' formControlName='paymentRemarks'></ngc-input>
+              </td>
+              <td *ngIf="index==0">
+              </td>
+              <td *ngIf="index!=0">
+                <ngc-link iconType='delete' (linkClick)='onPayDelete($event, index)'></ngc-link>
+              </td>
+            </tr>
+            <tr class='greyBack'>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td>
+                <ngc-label value='g.total'></ngc-label>
+              </td>
+              <td>
+                <ngc-currencydisplay [value]='totalAmt' [i18n]="true"></ngc-currencydisplay>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+      <ngc-column [grid48]='true' column='1'></ngc-column>
+      <ngc-column>
+        <ngc-label value='bil.groupPayment.paymentAmount'></ngc-label>
+        <div>
+          <ngc-currencydisplay emphasis='lg' [value]='paymentAmount'></ngc-currencydisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #enquiryWindow [width]="900" [height]="380" title="bil.groupPayment.chargeEnquiry"
+    [showCloseButton]="true">
+    <ngc-container type="tab" formGroupName="charges">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value='bil.serviceType'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='g.quantity'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='g.duration'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='g.amount'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='bil.groupPayment.paymentType'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='bil.enquireCharges.paid'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='bil.receiptNumber'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='bil.waivedAmount'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='bil.toCollect'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value='bil.toBill'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of chargeWindowData; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-display [value]='item.serviceType'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [value]='item.quantity'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [value]='item.duration'></ngc-display>
+                </td>
+                <td>
+                  <ngc-currencydisplay [value]='item.amount'></ngc-currencydisplay>
+                </td>
+                <td>
+                  <ngc-display [value]='item.paymentType'></ngc-display>
+                </td>
+                <td>
+                  <ngc-currencydisplay [value]='item.paid'></ngc-currencydisplay>
+                </td>
+                <td>
+                  <ngc-display [noWrap]='true' [value]='item.receiptNumber'></ngc-display>
+                </td>
+                <td>
+                  <ngc-currencydisplay [value]='item.waivedAmount'></ngc-currencydisplay>
+                </td>
+                <td>
+                  <ngc-currencydisplay [value]='item.toCollect'></ngc-currencydisplay>
+                </td>
+                <td>
+                  <ngc-currencydisplay [value]='item.toBill'></ngc-currencydisplay>
+                </td>
+              </tr>
+              <tr class='greyBack'>
+                <td>
+                  <ngc-label value='g.total'></ngc-label>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td>
+                  <ngc-currencydisplay emphasis='md' [value]='collectTotal'></ngc-currencydisplay>
+                </td>
+                <td>
+                  <ngc-currencydisplay emphasis='md' [value]='billTotal'></ngc-currencydisplay>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report #reportWindow dataSource='transactional' title="bil.paymentReceipt" reportId='BillingCollectPayment'
+    [reportParameters]='reportParam'></ngc-report>
+</form>

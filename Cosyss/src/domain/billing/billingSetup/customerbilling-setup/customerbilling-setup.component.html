@@ -1,0 +1,972 @@
+<ngc-titlebar title='billing.customer.billing.setup' (save)="onSave($event)" (cancel)='backToHome($event)'>
+</ngc-titlebar>
+<form [formGroup]="customerBillingSetupForm">
+    <ngc-container type="tab" formGroupName="searchCustomerBillingInfo">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="g.customerCode"></ngc-label>
+                <div>
+                    <ngc-lov accessEnableOn="r" [noCache]="true" [width]='250' formControlName="customerCode"
+                        sourceId="COMPANY_DEREGISTER" (select)="getCustomerIdByCode($event)" title="g.customer.list"
+                        dataField='code' valueMember="code" [validOnly]='true' [width]="50">
+                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+
+            </ngc-column>
+            <ngc-column column="3">
+                <ngc-label label="customerbilling.customername"></ngc-label>
+                <div>
+                    <ngc-lov accessEnableOn="r" [noCache]="true" [width]='250' formControlName="customerName"
+                        sourceId="CUSTOMER_LIST" (select)="getCustomerId($event)" title="g.customer.list"
+                        dataField='desc' valueMember="desc" [validOnly]='true' [width]="50">
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="6">
+                <ngc-label label="&nbsp;"></ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" value="customerbilling.search"
+                        (click)="searchCustomerBillingSetupInfo()"></ngc-button>
+                </div>
+
+            </ngc-column>
+
+
+
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" formGroupName="customerBillingInfo" *ngIf="isCustomer">
+        <ngc-row>
+            <ngc-column [column]="2">
+                <ngc-label label="customerbilling.customercode"></ngc-label>
+                <div>
+                    <ngc-display formControlName="customerCode"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label="customerbilling.customername"></ngc-label>
+                <div>
+                    <ngc-display formControlName="customerName"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label="customerbilling.paymenttype"></ngc-label>
+                <div>
+                    <ngc-dropdownlist #focusPaymentType formControlName="paymentType" upperCase='true'
+                        sourceId='Billing$BillingSetup.PaymentType' (select)="updateForPaymentMode()">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2" feature='Billing.SalesTax'>
+                <ngc-label label="billing.salestaxnumber"></ngc-label>
+                <div>
+                    <ngc-input formControlName="salesTaxNumber"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2" feature='Billing.SalesTax'>
+                <ngc-label label="billing.salestaxnumberapplicability"></ngc-label>
+                <div>
+                    <ngc-display formControlName="salesTaxApplicability"></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+
+    <ngc-container *ngIf="isCustomer">
+        <ngc-row>
+            <ngc-column>
+                <ngc-tabs>
+                    <div ngc-tab-card title='customerbilling.collectpaymentoptions'>
+                        <ngc-container type="section" formGroupName="customerBillingInfo">
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-container>
+                                        <ngc-row>
+                                            <ngc-column>
+                                                <ngc-label value="customerbilling.paymentoptions"></ngc-label>
+                                                <div>
+                                                    <ngc-buttoninput formControlName="paymentOptions"
+                                                        sourceId='KEY_BILLING_PAYMENT_OPTION' sourceType='query'
+                                                        multiSelect="true"></ngc-buttoninput>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="2">
+                                                <ngc-label label="&nbsp;"></ngc-label>
+                                                <div>
+                                                    <ngc-checkbox formControlName="billedByGHA">
+                                                        <ngc-label label="customerbilling.billedbysats"></ngc-label>
+                                                    </ngc-checkbox>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="2">
+                                                <ngc-label label="&nbsp;"></ngc-label>
+                                                <div>
+                                                    <ngc-checkbox formControlName="billedByAirline">
+                                                        <ngc-label label="customerbilling.billedbyairlines"></ngc-label>
+                                                    </ngc-checkbox>
+                                                </div>
+                                            </ngc-column>
+                                        </ngc-row>
+                                    </ngc-container>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-container title="billing.bill" *ngIf="isCustomer && !isCredit">
+                                        <ngc-row>
+                                            <ngc-column [column]="2">
+                                                <ngc-label value="cutomerbilling.sapcustomercode"></ngc-label>
+                                                <div>
+                                                    <ngc-lov [width]='200'
+                                                        formControlName="financeSystemIdentificationNumber"
+                                                        sourceId="FINANCE_SYSTEM_CUSTOMER"
+                                                        title="billing.sap.customer.code.list" dataField='code'
+                                                        displayMember="code" [validOnly]='true'>
+                                                        <ngc-data-column text="g.description" dataField="desc"
+                                                            [width]="150">
+                                                        </ngc-data-column>
+                                                        <ngc-data-column text="g.code" dataField="code" [width]="100">
+                                                        </ngc-data-column>
+                                                        <ngc-data-column text="billing.org" dataField="org"
+                                                            [width]="100"></ngc-data-column>
+                                                        <ngc-data-column text="billing.channel" dataField="channel"
+                                                            [width]="100">
+                                                        </ngc-data-column>
+                                                        <ngc-data-column text="billing.division" dataField="division"
+                                                            [width]="100">
+                                                        </ngc-data-column>
+                                                    </ngc-lov>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="1">
+                                                <ngc-label value="customerbilling.billingcycle"></ngc-label>
+                                                <div>
+                                                    <ngc-dropdownlist #sdCycleDropdown formControlName="sdBillingCycle"
+                                                        [source]='sdCycles' [width]="120" [noCache]='true'>
+                                                    </ngc-dropdownlist>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="1">
+                                                <ngc-label value="customerbilling.nextbillingdate"></ngc-label>
+                                                <div>
+                                                    <ngc-dateinput formControlName="nextBillingDate"></ngc-dateinput>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="5" [grid48]='true'>
+                                                <ngc-label value="customerbilling.nextpostingdate"></ngc-label>
+                                                <div>
+                                                    <ngc-dateinput formControlName="nextSDPostingDate"></ngc-dateinput>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="7" [grid24]='true' formArrayName="sdCycleList">
+                                                <ngc-row
+                                                    *ngFor="let item of customerBillingSetupForm.get('customerBillingInfo').get(['sdCycleList']).controls; let index=index"
+                                                    [formGroupName]="index">
+                                                    <ngc-column [column]='3'>
+                                                        <ngc-label value=""></ngc-label>
+                                                        <div>
+                                                            <ngc-display value='billing.cycle' [i18n]="true"
+                                                                emphasis='md'></ngc-display>
+                                                            &nbsp;
+                                                            <ngc-display formControlName='cycleCount' emphasis='md'>
+                                                            </ngc-display>&nbsp;
+                                                            <ngc-display value=':' [i18n]="true" emphasis='md'>
+                                                            </ngc-display>&nbsp;
+                                                        </div>
+                                                    </ngc-column>
+                                                    <ngc-column [column]='5'>
+                                                        <ngc-label value="bil.billrundays"></ngc-label>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('sdBillingCycle').value == (index + 1)">
+                                                            <ngc-numberinput digits="2" [min]='1' [max]='31'
+                                                                decimalDigits="0" [width]="50"
+                                                                formControlName="billGenerationDay"></ngc-numberinput>
+                                                        </div>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('sdBillingCycle').value != (index + 1)">
+                                                            <ngc-display formControlName="billGenerationDay">
+                                                            </ngc-display>
+                                                        </div>
+                                                    </ngc-column>
+                                                    <ngc-column [column]='4'>
+                                                        <ngc-label value="customerbilling.billpostdays"></ngc-label>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('sdBillingCycle').value == (index + 1)">
+                                                            <ngc-numberinput formControlName="postingDay" [min]='1'
+                                                                [max]='31' digits="2" [width]="50" decimalDigits="0">
+                                                            </ngc-numberinput>
+                                                        </div>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('sdBillingCycle').value != (index + 1)">
+                                                            <ngc-display formControlName="postingDay"></ngc-display>
+                                                        </div>
+                                                    </ngc-column>
+                                                </ngc-row>
+                                            </ngc-column>
+                                            <ngc-column [column]='2'>
+                                                <ngc-button value='billing.add.sd.cycle' (click)='onAddSDCycle($event)'
+                                                    iconType='add'>
+                                                </ngc-button>
+                                                <ngc-button value='billing.delete.sd.cycle'
+                                                    (click)='onDeleteSDCycle($event)' iconType='delete'>
+                                                </ngc-button>
+                                            </ngc-column>
+                                        </ngc-row>
+                                        <ngc-row>
+                                            <ngc-column [column]="2">
+                                                <ngc-label value="billing.ap.vendor.code"></ngc-label>
+                                                <div>
+                                                    <ngc-input [width]='240' formControlName="apVendorCode"></ngc-input>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="1">
+                                                <ngc-label value="customerbilling.apBillingcycle"></ngc-label>
+                                                <div>
+                                                    <ngc-dropdownlist #apCycleDropdown formControlName="apBillingCycle"
+                                                        [source]='apCycles' [width]="120">
+                                                    </ngc-dropdownlist>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="1">
+                                                <ngc-label value="billing.next.ap.cycle.date"></ngc-label>
+                                                <div>
+                                                    <ngc-dateinput formControlName="apNextBillingDate"></ngc-dateinput>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="5" [grid48]='true'>
+                                                <ngc-label value="customerbilling.nextpostingdate"></ngc-label>
+                                                <div>
+                                                    <ngc-dateinput formControlName="nextAPPostingDate"></ngc-dateinput>
+                                                </div>
+                                            </ngc-column>
+                                            <ngc-column [column]="7" [grid24]='true' formArrayName="apCycleList">
+                                                <ngc-row
+                                                    *ngFor="let item of customerBillingSetupForm.get('customerBillingInfo').get(['apCycleList']).controls; let index=index"
+                                                    [formGroupName]="index">
+                                                    <ngc-column [column]='3'>
+                                                        <ngc-label value=""></ngc-label>
+                                                        <div>
+                                                            <ngc-display value='billing.cycle' [i18n]="true"
+                                                                emphasis='md'></ngc-display>
+                                                            &nbsp;
+                                                            <ngc-display formControlName='cycleCount' emphasis='md'>
+                                                            </ngc-display>&nbsp;
+                                                            <ngc-display value=':' [i18n]="true" emphasis='md'>
+                                                            </ngc-display>&nbsp;
+                                                        </div>
+                                                    </ngc-column>
+                                                    <ngc-column [column]='5'>
+                                                        <ngc-label value="billing.ap.bill.run.day.days"></ngc-label>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('apBillingCycle').value == (index + 1)">
+                                                            <ngc-numberinput digits="2" [min]='1' [max]='31'
+                                                                decimalDigits="0" [width]="50"
+                                                                formControlName="billGenerationDay"></ngc-numberinput>
+                                                        </div>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('apBillingCycle').value != (index + 1)">
+                                                            <ngc-display formControlName="billGenerationDay">
+                                                            </ngc-display>
+                                                        </div>
+                                                    </ngc-column>
+                                                    <ngc-column [column]='4'>
+                                                        <ngc-label value="customerbilling.billpostdays"></ngc-label>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('apBillingCycle').value == (index + 1)">
+                                                            <ngc-numberinput formControlName="postingDay" [min]='1'
+                                                                [max]='31' digits="2" [width]="50" decimalDigits="0">
+                                                            </ngc-numberinput>
+                                                        </div>
+                                                        <div
+                                                            *ngIf="customerBillingSetupForm.get('customerBillingInfo').get('apBillingCycle').value != (index + 1)">
+                                                            <ngc-display formControlName="postingDay"></ngc-display>
+                                                        </div>
+                                                    </ngc-column>
+                                                </ngc-row>
+                                            </ngc-column>
+                                            <ngc-column [column]='2'>
+                                                <ngc-button value='billing.add.ap.cycle' (click)='onAddAPCycle($event)'
+                                                    iconType='add'>
+                                                </ngc-button>
+                                                <ngc-button value='billing.delete.ap.cycle'
+                                                    (click)='onDeleteAPCycle($event)' iconType='delete'>
+                                                </ngc-button>
+                                            </ngc-column>
+                                        </ngc-row>
+                                    </ngc-container>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title='customerbilling.billingaddresssetup'>
+                        <ngc-container formGroupName="customerBillingInfo" type="tab">
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-row>
+                                        <ngc-column>
+                                            <div>
+                                                <ngc-checkbox formControlName="sendESupportDocument"
+                                                    [disabled]="isCredit">
+                                                    <ngc-label label="customerbilling.sendesupportdocument"
+                                                        [disabled]="isCredit">
+                                                    </ngc-label>
+                                                </ngc-checkbox>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row formGroupName="customerBillingAddress">
+                                        <ngc-column [column]="5">
+                                            <ngc-label label="customerbilling.address"></ngc-label>
+                                            <div>
+                                                <ngc-input formControlName="streetAddress" [width]="700"></ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                    </ngc-row>
+                                    <ngc-row formGroupName="customerBillingAddress">
+                                        <ngc-column [column]="2">
+                                            <ngc-label label="customerbilling.place"></ngc-label>
+                                            <div>
+                                                <ngc-input [maxlength]='17' upperCase="true" formControlName="place">
+                                                </ngc-input>
+                                                <!-- <ngc-dropdownlist  formControlName="place" sourceId="CITYDROPDOWN" sourceType="query" [width]="150" [sourceParameters]="{ 'parameter1': customerBillingSetupForm.get(['customerBillingInfo','state']).value }"></ngc-dropdownlist> -->
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [grid24]="true" [column]="3">
+                                            <ngc-label label="customerbilling.postalcode"></ngc-label>
+                                            <div>
+                                                <ngc-input [maxlength]='9' formControlName="postalCode" [width]="80">
+                                                </ngc-input>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="2">
+                                            <ngc-label label="agent.city"></ngc-label>
+                                            <div>
+                                                <ngc-lov [noCache]="true" required sourceId="CITY" [maxlength]="3"
+                                                     title="g.city" formControlName="cityCode"  dataField="code"
+                                                    (select)="onSelectCity($event)" width="50%">
+                                                    <ngc-data-column text="g.city"  dataField="code"  [width]="50">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.cityName" [width]="150" dataField="desc">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="2">
+                                            <ngc-label label="agent.country"></ngc-label>
+                                            <div>
+                                                <ngc-lov [maxlength]="2"  required formControlName="countryCode"
+                                                    sourceId="COUNTRY"  title="g.country"  dataField="code" width="50%">
+                                                    <ngc-data-column text="g.country" dataField="code" [width]="50">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.countryName" [width]="150"
+                                                        dataField="desc"></ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="2">
+                                            <ngc-label label="agent.state"></ngc-label>
+                                            <div>
+                                                <ngc-lov [noCache]="true" sourceId="STATE" [maxlength]="2"
+                                                    title="g.state" formControlName="stateCode"  dataField="code"
+                                                    width="50%" entityAttribute='Billing.CustomerState'>
+                                                    <ngc-data-column text="g.state"  dataField="code"  [width]="50">
+                                                    </ngc-data-column>
+                                                    <ngc-data-column text="g.stateName" [width]="150" dataField="desc">
+                                                    </ngc-data-column>
+                                                </ngc-lov>
+                                            </div>
+                                        </ngc-column>
+                                        <ngc-column [column]="2"
+                                            entityAttribute='Customer.Billing.SpecialTaxApplicabilityType'>
+                                            <ngc-label entityAttribute='Customer.Billing.SpecialTaxApplicabilityType'>
+                                            </ngc-label>
+                                            <div>
+                                                <ngc-dropdownlist width='150'
+                                                    formControlName='specialTaxApplicabilityType'
+                                                    sourceCategory="dropdown" sourceId='Billing$SplTaxApplicabilityType'
+                                                    entityAttribute='Customer.Billing.SpecialTaxApplicabilityType'>
+                                                </ngc-dropdownlist>
+                                            </div>
+                                        </ngc-column>
+
+                                    </ngc-row>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                        <ngc-container type="section">
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-table [width]="600">
+                                        <thead>
+                                            <tr>
+                                                <th [width]="200">
+                                                    <ngc-label label="customerbilling.emailid"></ngc-label>
+                                                </th>
+                                                <th [width]="200">
+                                                    <ngc-label label="customerbilling.startdate"></ngc-label>
+                                                </th>
+                                                <th [width]="200">
+                                                    <ngc-label label="customerbilling.enddate"></ngc-label>
+                                                </th>
+                                                <th [width]="100">
+                                                    <ngc-label label=""></ngc-label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody formArrayName="customerBillingNotification">
+                                            <tr *ngFor="let ChildArray of customerBillingSetupForm.get('customerBillingNotification').controls let index=index"
+                                                [formGroupName]="index">
+                                                <td>
+                                                    <ngc-input type="email" formControlName="email" [width]="300">
+                                                    </ngc-input>
+                                                </td>
+                                                <td *ngIf="ChildArray.get('flagCRUD').value == 'C'">
+                                                    <ngc-dateinput formControlName="startDate" [min]="isMinDate">
+                                                    </ngc-dateinput>
+                                                </td>
+                                                <td *ngIf="ChildArray.get('flagCRUD').value != 'C'">
+                                                    <ngc-dateinput formControlName="startDate"></ngc-dateinput>
+                                                </td>
+                                                <td>
+                                                    <ngc-dateinput formControlName="endDate"
+                                                        [min]="ChildArray.get('startDate').value">
+                                                    </ngc-dateinput>
+                                                </td>
+                                                <td>
+                                                    <ngc-link iconType="delete" (linkClick)="onDeleteEmail(index)">
+                                                    </ngc-link>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </ngc-table>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column align="center">
+                                    <div>
+                                        <ngc-button value="customerbilling.add" (click)="onAddRowNotification($event)"
+                                            iconType="add">
+                                        </ngc-button>
+                                    </div>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title='customerbilling.blacklisteddetails'>
+                        <ngc-container formGroupName="customerBillingInfo" type="section">
+                            <ngc-row>
+                                <ngc-column [column]="2">
+                                    <div>
+                                        <ngc-checkbox formControlName="blackListed">
+                                            <ngc-label label="customerbilling.blacklisted"></ngc-label>
+                                        </ngc-checkbox>
+                                    </div>
+                                </ngc-column>
+                                <ngc-column [column]="2">
+                                    <div>
+                                        <ngc-checkbox formControlName="acceptCargo" [disabled]="isBlackListed">
+                                            <ngc-label label="customerbilling.acceptcargo"></ngc-label>
+                                        </ngc-checkbox>
+                                    </div>
+                                </ngc-column>
+                                <ngc-column [column]="2">
+                                    <div>
+                                        <ngc-checkbox formControlName="deliverCargo" [disabled]="isBlackListed">
+                                            <ngc-label label="customerbilling.delivercargo"></ngc-label>
+                                        </ngc-checkbox>
+                                    </div>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column [column]="2">
+                                    <ngc-label label="customerbilling.pendingamount"></ngc-label>
+                                    <div>
+                                        <ngc-currencyinput formControlName="pendingAmount"></ngc-currencyinput>
+                                    </div>
+                                </ngc-column>
+                                <ngc-column>
+                                    <ngc-label label="customerbilling.advicetostaff"></ngc-label>
+                                    <div>
+                                        <ngc-input formControlName="adviceToStaff" [width]="500"></ngc-input>
+                                    </div>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title='bil.customerexceptionconfiguration' *ngIf="!isCredit">
+                        <ngc-container type="tab">
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-table [width]="600">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <ngc-label label="bil.chargeCodeDescription"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="bil.defaultpaymenttype"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="bil.changedpaymenttype"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label="bil.carrierCode"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label label=""></ngc-label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody formArrayName="customerExceptionConfigurations">
+                                            <tr *ngFor="let customerExceptionConfig of customerBillingSetupForm.get('customerExceptionConfigurations').controls let index=index"
+                                                [formGroupName]="index">
+                                                <td>
+                                                    <ngc-lov upperCase="false" [noCache]="true" valueMember='desc'
+                                                        formControlName="chargeCodeDescription" sourceId="CHARGE_CODE"
+                                                        title="g.chargeCode" dataField='desc'
+                                                        (select)="assignPaymentType($event,index)" [width]="200"
+                                                        [validOnly]='true'
+                                                        *ngIf="customerExceptionConfig.get('flagCRUD').value==='C'"
+                                                        [noCache]="true">
+                                                        <ngc-data-column text="g.code" dataField="code" [width]="100">
+                                                        </ngc-data-column>
+                                                        <ngc-data-column text="g.description" dataField="desc"
+                                                            [width]="150">
+                                                        </ngc-data-column>
+                                                    </ngc-lov>
+                                                    <ngc-display width='200' formControlName="chargeCodeDescription"
+                                                        upperCase='true' sourceCategory="lov" sourceId='CHARGE_CODE'
+                                                        *ngIf="customerExceptionConfig.get('flagCRUD').value==='R'||customerExceptionConfig.get('flagCRUD').value==='U'">
+                                                    </ngc-display>
+                                                </td>
+                                                <td>
+                                                    <ngc-display width='200' formControlName="paymentType"
+                                                        upperCase='true' sourceCategory="dropdown"
+                                                        sourceId='Billing$ChargeCode.PaymentType'></ngc-display>
+                                                </td>
+                                                <td
+                                                    *ngIf="!customerExceptionConfig.get('billByAirline').value || customerExceptionConfig.get('billByAirline').value != 1">
+                                                    <ngc-display formControlName="changedPaymentType" upperCase='true'
+                                                        sourceCategory="dropdown"
+                                                        sourceId='Billing$ChargeCode.PaymentType'></ngc-display>
+                                                </td>
+                                                <td
+                                                    *ngIf="customerExceptionConfig.get('billByAirline').value && customerExceptionConfig.get('billByAirline').value == 1 && customerExceptionConfig.get('changedPaymentType').value && (customerExceptionConfig.get('changedPaymentType').value == 'BIL' || customerExceptionConfig.get('changedPaymentType').value == 'BBAB')">
+                                                    <ngc-dropdownlist (ngModelChange)='selectNoCollect($event, index)'
+                                                        required width='150' formControlName='changedPaymentType'
+                                                        sourceCategory="dropdown"
+                                                        sourceId='Billing$Enquire.BillByAirlineBIL'></ngc-dropdownlist>
+                                                </td>
+                                                <td
+                                                    *ngIf="customerExceptionConfig.get('billByAirline').value && customerExceptionConfig.get('billByAirline').value == 1 && customerExceptionConfig.get('changedPaymentType').value && (customerExceptionConfig.get('changedPaymentType').value == 'COL' || customerExceptionConfig.get('changedPaymentType').value == 'BBAC')">
+                                                    <ngc-dropdownlist (ngModelChange)='selectNoCollect($event, index)'
+                                                        required width='150' formControlName='changedPaymentType'
+                                                        sourceCategory="dropdown"
+                                                        sourceId='Billing$Enquire.BillByAirlineCOL'></ngc-dropdownlist>
+                                                </td>
+                                                <td
+                                                    *ngIf="!customerExceptionConfig.get('billByAirline').value || customerExceptionConfig.get('billByAirline').value != 1">
+                                                    <ngc-display value=''></ngc-display>
+                                                </td>
+                                                <td
+                                                    *ngIf="customerExceptionConfig.get('billByAirline').value && customerExceptionConfig.get('billByAirline').value == 1">
+                                                    <ngc-lov upperCase="false" [noCache]="true" displayField='desc'
+                                                        formControlName="carrierCode" sourceId="CARRIER"
+                                                        title="g.carrierCode" dataField='code' [width]="200"
+                                                        [validOnly]='true' [noCache]="true">
+                                                        <ngc-data-column text="g.code" dataField="code" [width]="100">
+                                                        </ngc-data-column>
+                                                        <ngc-data-column text="g.description" dataField="desc"
+                                                            [width]="150">
+                                                        </ngc-data-column>
+                                                    </ngc-lov>
+                                                </td>
+                                                <td>
+                                                    <ngc-link iconType="delete"
+                                                        (linkClick)="deleteCustomerExceptionConfiguration(index)">
+                                                    </ngc-link>
+                                                </td>
+                                            </tr>
+                                        </tbody>
+                                    </ngc-table>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column align="center">
+                                    <ngc-button value="customerbilling.addConfig" iconType="add"
+                                        (click)="addCustomerExceptionConfiguration()"></ngc-button>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                    <div ngc-tab-card title='billing.paymentaccount' *ngIf="displayPaymentAccount">
+                        <ngc-container formGroupName="customerBillingInfo" type="tab">
+                            <ngc-row>
+                                <ngc-column align="right">
+                                    <ngc-button value="billing.addnewpaymentaccount" iconType="add"
+                                        (click)="onOpenNewPaymentAccountWindow()"></ngc-button>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-table>
+                                        <tbody>
+                                        </tbody>
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <ngc-label value="billing.paymentaccountno"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="billing.paymentaccountbalance"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="billing.applicablechargecategory">
+                                                    </ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="g.edit">
+                                                    </ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="billing.paymentaccounttoptup">
+                                                    </ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="g.delete">
+                                                    </ngc-label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody formArrayName="paymentAccountList">
+                                            <tr *ngFor="let item of customerBillingSetupForm.get('customerBillingInfo').get('paymentAccountList').controls; let index=index;"
+                                                [formGroupName]="index">
+                                                <td align="left">
+                                                    {{item.controls.paymentAccountNumber.value}}
+                                                </td>
+                                                <td align="right">
+                                                    <ngc-currencydisplay
+                                                        [value]="item.controls.paymentAccountBalance.value">
+                                                    </ngc-currencydisplay>
+                                                </td>
+                                                <td align="left">
+                                                    {{item.controls.chargeCategoriesDesc.value}}
+                                                </td>
+                                                <td align="center">
+                                                    <ng-container>
+                                                        <ngc-link (linkClick)="onOpenNewPaymentAccountWindow(index)"
+                                                            iconType="edit">
+                                                        </ngc-link>
+                                                    </ng-container>
+                                                </td>
+                                                <td align="center">
+                                                    <ng-container>
+                                                        <ngc-link (linkClick)="onOpenTopupPaymentAccountWindow(index)"
+                                                            iconType="add">
+                                                        </ngc-link>
+                                                    </ng-container>
+                                                </td>
+                                                <td align="center">
+                                                    <ng-container>
+                                                        <ngc-link (linkClick)="onDeletePaymentAccount(index)"
+                                                            iconType="delete">
+                                                        </ngc-link>
+                                                    </ng-container>
+                                                </td>
+                                            </tr>
+
+                                        </tbody>
+
+
+                                    </ngc-table>
+
+                                </ngc-column>
+                            </ngc-row>
+
+                        </ngc-container>
+                    </div>
+                </ngc-tabs>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<ngc-window #addPaymentAccountWindow title="billing.paymentaccount" [showCloseButton]="true" [width]="750" height='225'>
+
+    <ngc-container type='tab' [formGroup]="customerPaymentAccountForm">
+        <ngc-row>
+            <ngc-column column="5">
+                <ngc-label label="billing.paymentaccountno"></ngc-label>
+            </ngc-column>
+            <ngc-column column="7">
+                <div *ngIf="this.showPaymentAccountNumber">
+                    <ngc-input formControlName="paymentAccountNumber" required [width]="300" maxLength="15"
+                        upperCase="true">
+                    </ngc-input>
+                </div>
+                <div *ngIf="!this.showPaymentAccountNumber">
+                    <ngc-display formControlName="paymentAccountNumber"></ngc-display>
+                </div>
+
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column column="5">
+                <ngc-label label="billing.applicablechargecategory"></ngc-label>
+            </ngc-column>
+            <ngc-column column="7">
+                <ngc-dropdownlist formControlName="chargeCategories" upperCase='true' [multiSelect]="true"
+                    sourceId='Billing$Billing.PayACApplicable' required accessEnableOn="r"></ngc-dropdownlist>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column column="5">
+                <ngc-label label="g.remarks"></ngc-label>
+            </ngc-column>
+            <ngc-column column="7">
+                <ngc-input formControlName="remarks" [width]="300" upperCase="true">
+                </ngc-input>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-window-footer>
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button value="g.save" (click)='onSavePaymentAccount($event)'></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window-footer>
+</ngc-window>
+
+
+<ngc-window #topupPaymentAccountWindow title="billing.paymentaccountbalanceupdate" [showCloseButton]="true"
+    [width]="1200" height='400'>
+
+    <ngc-container type='tab' [formGroup]="topupPaymentAccountForm">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="billing.paymentaccounttype"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-display formControlName="chargeCategoriesDesc"></ngc-display>
+            </ngc-column>
+
+            <ngc-column column="2">
+            </ngc-column>
+
+            <ngc-column column="2">
+                <ngc-label label="billing.paymentaccountmainbalance"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-currencydisplay formControlName="paymentAccountBalance"></ngc-currencydisplay>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="billing.paymentaccountnumber"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-display formControlName="paymentAccountNumber"></ngc-display>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="billing.creditordebittype"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-dropdownlist formControlName="creditOrDebitType" upperCase='true' [multiSelect]="false"
+                    sourceId='Billing$CreditOrDebitType' (select)="onSelectCDType($event)" required accessEnableOn="r">
+                </ngc-dropdownlist>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row *ngIf="showPaymentMode">
+            <ngc-column column="2">
+                <ngc-label label="bil.report.paymentMode"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-dropdownlist formControlName="paymentMode" upperCase='true' [multiSelect]="false"
+                    (select)="onSelectPM($event)" sourceId='Billing$Billing.creditdebittypes' accessEnableOn="r">
+                </ngc-dropdownlist>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row *ngIf='showPaymentMode'>
+            <ngc-column column="4" *ngIf="showNumericInputForCheque">
+                <ngc-label label="billing.reference.cheque.number"></ngc-label>
+                <div>
+                    <ngc-input decimalDigits="0" [maxlength]="150" pattern="^[0-9]*$" formControlName="referenceNumber"
+                        [width]="300" required>
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="4" *ngIf="!showNumericInputForCheque">
+                <ngc-label label="billing.reference.cheque.number"></ngc-label>
+                <div>
+                    <ngc-input [maxlength]="150" formControlName="referenceNumber" [width]="300">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="2" *ngIf="showRequired">
+                <ngc-label label="billing.chq.date"></ngc-label>
+                <div>
+                    <ngc-dateinput formControlName="chequeDate" [width]="120"></ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="4">
+                <ngc-label label="billing.bankname"></ngc-label>
+                <div>
+                    <ngc-input formControlName="bankName" [width]="300" upperCase="true">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <div>
+                    <ngc-display></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+
+
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="g.amount"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-currencyinput [width]="300" [allowNegative]="true" formControlName="amount" required>
+                </ngc-currencyinput>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="val.date.time"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-datetimeinput formControlName="dateOrTime" [separated]="true" required>
+                </ngc-datetimeinput>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="g.remarks"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-input formControlName="remarks" [maxlength]="150" [width]="300" upperCase="false" required>
+                </ngc-input>
+            </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="sap.invoice"></ngc-label>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-input formControlName="invoiceNumber" [width]="300" upperCase="true">
+                </ngc-input>
+            </ngc-column>
+        </ngc-row>
+
+    </ngc-container>
+
+    <ngc-window-footer>
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column align="right">
+                    <ngc-button value="g.save" (click)='onSaveTopupPaymentAccount($event)'></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window-footer>
+</ngc-window>

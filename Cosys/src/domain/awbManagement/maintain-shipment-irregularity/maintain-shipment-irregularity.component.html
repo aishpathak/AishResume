@@ -1,0 +1,663 @@
+<!--form control to get the  input Data-->
+<form [formGroup]="maintainIrregularityform">
+  <!-- Title Bar -->
+  <ngc-titlebar title='shpIrr.title' [disableSave]="saveFlag==false" (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)="onCancel($event)" *ngIf=!showAsPopup></ngc-titlebar>
+  <ngc-row *ngIf=showAsPopup>
+    <ngc-column align="right">
+      <ngc-button label="Save" (click)="onSave($event)"> </ngc-button>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label=""></ngc-label>
+    </ngc-column>
+  </ngc-row>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-shipmentinput #shipmentType shipmentType='AWB' formControlName="shipmentNumber" accessEnableOn="r"
+            [width]="200" [disabled]=showAsPopup (ngModelChange)="onTabOutCheckHandledBy()">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" *ngIf=handledbyHouse>
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="100" sourceId='HWBNUMBER'
+            [validOnly]="true" dataField='code' valueMember='code' [noCache]="true" title="g.hawb.number"
+            [sourceParameters]="{'parameter1': this.maintainIrregularityform.get('shipmentNumber').value}">
+            <ngc-data-column text='g.hawb.number' [width]='80' dataField='code' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getIrregularity($event)" value="search" iconType="search"
+            [disabled]=showAsPopup>
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="showButtons">
+    <ngc-row>
+      <ngc-column *ngIf="shpType == 'AWB'" [column]="6" [grid48]="true">
+        <ngc-label value="shpIrr.shpNumber"></ngc-label>
+        <div>
+          <ngc-shipmentdisplay formControlName="shipmentNumber"></ngc-shipmentdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="shpType == 'CBV'" [column]="3" [grid24]="true">
+        <ngc-label value="shpIrr.courier"></ngc-label>
+        <div>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="shpType == 'MAIL'" [column]="3" [grid24]="true">
+        <ngc-label value="shpIrr.mailBag"></ngc-label>
+        <div>
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=".5">
+        <ngc-label value="shpIrr.origin"></ngc-label>
+        <div>
+          <ngc-display formControlName="origin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4" [grid48]="true">
+        <ngc-label value="shpIrr.destination"></ngc-label>
+        <div>
+          <ngc-display formControlName="destination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value="shpIrr.pieces"></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value="shpIrr.weight"></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label="shpIrr.nature"></ngc-label>
+        <div>
+          <ngc-display formControlName="natureOfGoods"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value="shpIrr.shc"></ngc-label>
+        <div>
+          <ngc-display formControlName="specialHandlingCodes"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value="awb.console"></ngc-label>
+        <div>
+          <ngc-display *ngIf="maintainIrregularityform.get('natureOfGoods').value.includes('CONSOL')" value="Y">
+          </ngc-display>
+          <ngc-display *ngIf="!maintainIrregularityform.get('natureOfGoods').value.includes('CONSOL')" value="N">
+          </ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container formGroupName="hwbDetails" type="section" *ngIf=flagShowHAWBDetails>
+    <ngc-row>
+      <ngc-column column="1.5">
+        <div>
+          <ngc-label label="g.hawb.number"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbNumber">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.origin"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbOrigin">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.destination"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbDestination">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="customs.hawb.pieces"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbPieces">
+        </ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="customs.hawb.weight"></ngc-label>
+        </div>
+        <ngc-weightdisplay formControlName="hwbWeight">
+        </ngc-weightdisplay>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label="shp.natureofgoods"></ngc-label>
+        <div>
+          <ngc-display formControlName="hwbNatureOfGoods"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.shc"></ngc-label>
+        </div>
+        <ngc-display formControlName="hwbSHC">
+        </ngc-display>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-row>
+    <ngc-column *ngIf="handledbyHouse && flagShowHAWBDetails" align='right'>
+      <ngc-button (click)="addRowHAWB($event)" value="Add.HAWB.Irregularity" iconType="add"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+  <br>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="showButtons && handledbyHouse">
+        <strong style="color:black;">
+          <ngc-label label="AWB.Irregularity"></ngc-label>
+        </strong>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="show" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="28">
+                <ngc-label value="shpIrr.select"></ngc-label>
+              </th>
+              <th [width]="175">
+                <ngc-label value="shpIrr.irrType"></ngc-label>
+              </th>
+
+
+              <th [width]="80">
+                <ngc-label value="shpIrr.pieces"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="shpIrr.weight"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="shpIrr.flightKey"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label value="shpIrr.flightDate"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label value="flight.segment"></ngc-label>
+              </th>
+              <th [width]="100" feature="Imp.Bd.ManifestPieceWeight">
+                <ngc-label value="g.man.pcs.wts"></ngc-label>
+              </th>
+              <th [width]="100" feature="Imp.Bd.BreakdownPieceWeight">
+                <ngc-label value="g.bd.pc.wts"></ngc-label>
+              </th>
+              <th [width]="80" feature="Imp.Bd.HAWBInfo">
+                <ngc-label value="g.house"></ngc-label>
+              </th>
+              <th [width]="80" feature="Imp.Bd.IrregularityBulkWeight">
+                <ngc-label value="g.cir.bulk.wt"></ngc-label>
+              </th>
+              <th [width]="80" feature="Imp.Bd.IrregularityBUPWeight">
+                <ngc-label value="g.cir.bup.wt"></ngc-label>
+              </th>
+              <th [width]="80" entityAttribute="Imp.Bd.DocumentIrregularityRemarks">
+                <ngc-label value="g.action"></ngc-label>
+              </th>
+              <th [width]="400">
+                <ngc-label value="shpIrr.remarks"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="shpIrr.fdlSent"></ngc-label>
+              </th>
+              <th [width]="200">
+                <ngc-label value="shpIrr.user"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody align="center" formArrayName="irregularityDetails">
+            <tr *ngFor="let item of maintainIrregularityform.controls.irregularityDetails.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="select" [width]="28"></ngc-checkbox>
+              </td>
+              <td *ngIf="!handledbyHouse">
+                <ngc-dropdownlist (ngModelChange)='pieceValidCheck($event, index)' formControlName="irregularityType"
+                  required [width]="170" sourceId="CARGO_IRREGULARITIES" [sourceParameters]='irregularityType'
+                  (change)='setIrregularity($event,index)' sourceType='query' (select)='setIrregularity($event,index)'>
+                </ngc-dropdownlist>
+              </td>
+              <td *ngIf="handledbyHouse">
+                <ngc-dropdownlist (ngModelChange)=' pieceValidCheck($event, index)' formControlName="irregularityType"
+                  required [width]="170" sourceId="CARGO_IRREGULARITIES" (change)='setIrregularity($event,index)'
+                  [sourceParameters]="{ 'parameter1':maintainIrregularityform.get('shipmentType').value , 'parameter2': 'D' }"
+                  sourceType='query' (select)='setIrregularity($event,index)'>
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-piecesinput formControlName="pieces"></ngc-piecesinput>
+              </td>
+              <td>
+                <ngc-weightinput formControlName="weight"></ngc-weightinput>
+              </td>
+              <td>
+                <ngc-flightkeyinput formControlName="flightKey" upperCase='true' [width]="100"
+                  (ngModelChange)="onFlightdetailsChange(index)"></ngc-flightkeyinput>
+              </td>
+              <td>
+                <ngc-datetimeinput formControlName="flightDate" [showCalendarButton]="true" [width]="150"
+                  (ngModelChange)="onFlightdetailsChange(index)">
+                </ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName="flightSegmentId" sourceId="IRREGULARITY_SEGMENT_DETAILS"
+                  sourceType="query"
+                  [sourceParameters]="{ 'parameter1': maintainIrregularityform.get(['irregularityDetails', index, 'flightKey']).value, 'parameter2': maintainIrregularityform.get(['irregularityDetails', index, 'flightDate']).value }"
+                  [width]="90" [autoSelectOnSingle]="true">
+                </ngc-dropdownlist>
+              </td>
+              <td feature="Imp.Bd.ManifestPieceWeight">
+                <ngc-display formControlName="amPieceWeight"
+                  *ngIf="maintainIrregularityform.get(['irregularityDetails', index, 'amPieceWeight']).value!='/'">
+                </ngc-display>
+                <ngc-display value="0/0.0"
+                  *ngIf="maintainIrregularityform.get(['irregularityDetails', index, 'amPieceWeight']).value=='/'">
+                </ngc-display>
+              </td>
+              <td feature="Imp.Bd.BreakdownPieceWeight">
+                <ngc-display formControlName="bdPieceWeight"
+                  *ngIf="maintainIrregularityform.get(['irregularityDetails', index,'bdPieceWeight']).value!='/'">
+                </ngc-display>
+                <ngc-display value="0/0.0"
+                  *ngIf="maintainIrregularityform.get(['irregularityDetails', index, 'bdPieceWeight']).value=='/'">
+                </ngc-display>
+              </td>
+              <td feature="Imp.Bd.HAWBInfo">
+                <ngc-button iconType="edit"
+                  [disabled]="maintainIrregularityform.get(['irregularityDetails', index, 'irregularityType']).value==''
+                            ||maintainIrregularityform.get(['irregularityDetails', index, 'flagCRUD']).value=='D'
+                            ||maintainIrregularityform.get(['irregularityDetails', index, 'shipmentIrregularityId']).value=='0'"
+                  (click)='openMaintainHouse(index)'>
+                </ngc-button>
+              </td>
+              <td feature="Imp.Bd.IrregularityBulkWeight">
+                <ngc-weightinput formControlName="additionalBulkWeight"></ngc-weightinput>
+              </td>
+              <td feature="Imp.Bd.IrregularityBUPWeight">
+                <ngc-weightinput formControlName="additionalBupWeight"></ngc-weightinput>
+              </td>
+              <td entityAttribute="Imp.Bd.DocumentIrregularityRemarks">
+                <ngc-dropdownlist entityAttribute="Imp.Bd.DocumentIrregularityRemarks"
+                  formControlName="additionalActionRemarks" [valueMember]="'desc'" [displayMember]="'desc'"
+                  sourceId='IrDocRemarks$IrDocRemarksValues' [width]="90">
+                </ngc-dropdownlist>
+              </td>
+              <!-- <td *ngIf="importExportFlag=='IMP'">
+                <ngc-flightkeyinput required formControlName="flightKey" upperCase='true' [width]="100">
+                </ngc-flightkeyinput>
+              </td>
+              <td *ngIf="importExportFlag=='EXP'">
+                <ngc-flightkeyinput formControlName="flightKey" upperCase='true' [width]="100"></ngc-flightkeyinput>
+              </td>
+              <td *ngIf="importExportFlag=='IMP'">
+                <ngc-datetimeinput required formControlName="flightDate" [showCalendarButton]="true" [width]="150">
+                </ngc-datetimeinput>
+              </td>
+              <td *ngIf="importExportFlag=='EXP'">
+                <ngc-datetimeinput formControlName="flightDate" [showCalendarButton]="true" [width]="150">
+                </ngc-datetimeinput>
+              </td>
+              <td *ngIf="importExportFlag=='IMP'">
+                <ngc-dropdownlist formControlName="flightSegmentId" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query"
+                  [sourceParameters]="{ 'parameter1': maintainIrregularityform.get(['irregularityDetails', index, 'flightKey']).value, 'parameter2': maintainIrregularityform.get(['irregularityDetails', index, 'flightDate']).value }"
+                  [width]="90" [autoSelectOnSingle]="true" required>
+                </ngc-dropdownlist>
+              </td>
+              <td *ngIf="importExportFlag=='EXP'">
+                <ngc-dropdownlist formControlName="flightSegmentId" sourceId="FLIGHTROUTINGEXPORT" sourceType="query"
+                  [sourceParameters]="{ 'parameter1': maintainIrregularityform.get(['irregularityDetails', index, 'flightKey']).value, 'parameter2': maintainIrregularityform.get(['irregularityDetails', index, 'flightDate']).value }"
+                  [width]="90" [autoSelectOnSingle]="true">
+                </ngc-dropdownlist>
+              </td> -->
+              <td>
+                <ngc-textarea [maxlength]='65' height='35' width='400' formControlName='remark'></ngc-textarea>
+              </td>
+              <td class='text-center' [width]="80" *ngIf="importExportFlag == 'EXP'">
+                <ngc-label value=""></ngc-label>
+              </td>
+              <td class='text-center' [width]="80" *ngIf="importExportFlag == 'IMP' && item.get('fdlSentFlag').value">
+                <ngc-link value='Y' (linkClick)='onFdlSent($event, index)'></ngc-link>
+              </td>
+              <td class='text-center' [width]="80" *ngIf="importExportFlag == 'IMP' && !item.get('fdlSentFlag').value">
+                <ngc-shape value='N' type="circle" textColor="white" bgColor="red" [width]="22" [height]="20">
+                </ngc-shape>
+              </td>
+              <td>
+                <ngc-input formControlName="user" [disabled]="true" [width]="220"></ngc-input>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="showButtons" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="addRow($event)" value="shpIrr.add" iconType="add"></ngc-button>
+        <ngc-button (click)="onDelete($event)" value="shpIrr.delete" iconType="delete"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="handledbyHouse && flagShowHAWBIrr">
+    <ngc-row>
+      <ngc-column>
+        <strong style="color:black;">
+          <ngc-label label="HAWB.Irregularity"></ngc-label>
+        </strong>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="handledbyHouse && flagShowHAWBIrr" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="28">
+                <ngc-label value="shpIrr.select"></ngc-label>
+              </th>
+              <th [width]="175">
+                <ngc-label value="shpIrr.irrType"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="shpIrr.pieces"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="shpIrr.weight"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="shpIrr.flightKey"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label value="shpIrr.flightDate"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label value="flight.segment"></ngc-label>
+              </th>
+              <th [width]="400">
+                <ngc-label value="shpIrr.remarks"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="shpIrr.fdlSent"></ngc-label>
+              </th>
+              <th [width]="200">
+                <ngc-label value="shpIrr.user"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody align="center" formArrayName="irregularityDetailsHAWB">
+            <tr *ngFor="let item of maintainIrregularityform.controls.irregularityDetailsHAWB.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="select" [width]="28"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-dropdownlist (ngModelChange)='pieceValidCheckHAWB($event, index)'
+                  formControlName="irregularityType" required [width]="170" sourceId="CARGO_IRREGULARITIES"
+                  [sourceParameters]="{ 'parameter1':maintainIrregularityform.get('shipmentType').value , 'parameter2': 'C' }"
+                  sourceType='query'>
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-piecesinput formControlName="pieces"></ngc-piecesinput>
+              </td>
+              <td>
+                <ngc-weightinput formControlName="weight"></ngc-weightinput>
+              </td>
+              <td>
+                <ngc-flightkeyinput formControlName="flightKey" upperCase='true' [width]="100"
+                  (ngModelChange)="onFlightdetailsChangeHAWB(index)"></ngc-flightkeyinput>
+              </td>
+              <td>
+                <ngc-datetimeinput formControlName="flightDate" [showCalendarButton]="true" [width]="150"
+                  (ngModelChange)="onFlightdetailsChangeHAWB(index)">
+                </ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName="flightSegmentId" sourceId="IRREGULARITY_SEGMENT_DETAILS"
+                  sourceType="query"
+                  [sourceParameters]="{ 'parameter1': maintainIrregularityform.get(['irregularityDetailsHAWB', index, 'flightKey']).value, 'parameter2': maintainIrregularityform.get(['irregularityDetailsHAWB', index, 'flightDate']).value }"
+                  [width]="90" [autoSelectOnSingle]="true">
+                </ngc-dropdownlist>
+              </td>
+              <!--<td *ngIf="importExportFlag=='IMP'">
+                    <ngc-flightkeyinput required formControlName="flightKey" upperCase='true' [width]="100">
+                    </ngc-flightkeyinput>
+                  </td>
+                  <td *ngIf="importExportFlag=='EXP'">
+                    <ngc-flightkeyinput formControlName="flightKey" upperCase='true' [width]="100"></ngc-flightkeyinput>
+                  </td>
+                  <td *ngIf="importExportFlag=='IMP'">
+                    <ngc-datetimeinput required formControlName="flightDate" [showCalendarButton]="true" [width]="150">
+                    </ngc-datetimeinput>
+                  </td>
+                  <td *ngIf="importExportFlag=='EXP'">
+                    <ngc-datetimeinput formControlName="flightDate" [showCalendarButton]="true" [width]="150">
+                    </ngc-datetimeinput>
+                  </td>
+                  <td *ngIf="importExportFlag=='IMP'">
+                    <ngc-dropdownlist formControlName="flightSegmentId" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query"
+                      [sourceParameters]="{ 'parameter1': maintainIrregularityform.get(['irregularityDetails', index, 'flightKey']).value, 'parameter2': maintainIrregularityform.get(['irregularityDetails', index, 'flightDate']).value }"
+                      [width]="90" [autoSelectOnSingle]="true" required>
+                    </ngc-dropdownlist>
+                  </td>
+                  <td *ngIf="importExportFlag=='EXP'">
+                    <ngc-dropdownlist formControlName="flightSegmentId" sourceId="FLIGHTROUTINGEXPORT" sourceType="query"
+                      [sourceParameters]="{ 'parameter1': maintainIrregularityform.get(['irregularityDetails', index, 'flightKey']).value, 'parameter2': maintainIrregularityform.get(['irregularityDetails', index, 'flightDate']).value }"
+                      [width]="90" [autoSelectOnSingle]="true">
+                    </ngc-dropdownlist>
+                  </td> -->
+              <td>
+                <ngc-textarea [maxlength]='65' height='35' width='400' formControlName='remark'></ngc-textarea>
+              </td>
+              <td class='text-center' [width]="80" *ngIf="importExportFlag == 'EXP'">
+                <ngc-label value=""></ngc-label>
+              </td>
+              <td class='text-center' [width]="80" *ngIf="importExportFlag == 'IMP' && item.get('fdlSentFlag').value">
+                <ngc-link value='Y' (linkClick)='onFdlSent($event, index)'></ngc-link>
+              </td>
+              <td class='text-center' [width]="80" *ngIf="importExportFlag == 'IMP' && !item.get('fdlSentFlag').value">
+                <ngc-shape value='N' type="circle" textColor="white" bgColor="red" [width]="22" [height]="20">
+                </ngc-shape>
+              </td>
+              <td>
+                <ngc-input formControlName="user" [disabled]="true" [width]="220"></ngc-input>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="handledbyHouse && flagShowHAWBIrr" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="addRowHAWB($event)" value="Add.HAWB.Irregularity" iconType="add"></ngc-button>
+        <ngc-button (click)="onDeleteHAWB($event)" value="shpIrr.delete" iconType="delete"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='totalDamagedPieces'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='awb.damage.information' emphasis='md'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='3'>
+        <ngc-label value='awb.total.damaged.pcs'></ngc-label>
+        <ngc-display [value]='totalDamagedPieces'></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="damageDetails" [pageable]="true" [pageSize]="5" [showToolbar]="false">
+          <ngc-data-column text="g.flight" dataField="flightKey" [width]="50" align="middle" [noWrap]="false">
+          </ngc-data-column>
+          <ngc-data-column text="g.FlightDate" dataField="flightDate" [width]="50" align="middle" [noWrap]="false"
+            type="displayDate"></ngc-data-column>
+          <ngc-data-column text="awb.nature.of.damage" dataField="natureOfDamage" [width]="120" align="middle"
+            [noWrap]="false"></ngc-data-column>
+          <ngc-data-column text="awb.damaged.pieces" dataField="damagedPieces" [width]="120" align="middle"
+            [noWrap]="false"></ngc-data-column>
+          <ngc-data-column text="g.severity" dataField="severity" [width]="90" align="middle" [noWrap]="false">
+          </ngc-data-column>
+          <ngc-data-column text="g.occurrence" dataField="occurrence" [width]="90" align="middle" [noWrap]="false">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remarks" [width]="250" align="middle" [noWrap]="false">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #maintainHouse title="g.man.irregularity.house" width="1300" height="350" [cancelButton]="true">
+    <ngc-window-header>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value='Gen.HawbNo'></ngc-label>
+            <ngc-input accessEnableOn="r" formControlName="maintainhwbNumber" [width]="220"></ngc-input>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button iconType="search" value="flight.search" (click)='filterHawbListdate()'>
+            </ngc-button>
+            <ngc-button iconType="add" (click)='addHawbListRow()' value="Gen.addHawb"> </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-header>
+    <ngc-table type="tab" *ngIf="maintainIrregularityform.get('maintainHouseList').value.length!=0">
+      <thead align="left">
+        <tr>
+          <th [width]="220">
+            <ngc-label label="Gen.HawbNo"></ngc-label>
+          </th>
+          <th [width]="160">
+            <ngc-label label="Gen.housePcsWt"></ngc-label>
+          </th>
+          <th></th>
+          <th [width]="80">
+            <ngc-label label="g.bd.pcs"></ngc-label>
+          </th>
+
+          <th [width]="80">
+            <ngc-label label="g.bd.wts"></ngc-label>
+          </th>
+          <th [width]="100">
+            <ngc-label label="g.hawb.cir.pcs"></ngc-label>
+          </th>
+          <th [width]="100">
+            <ngc-label label="g.hawb.cir.wt"></ngc-label>
+          </th>
+          <th [width]="100">
+            <ngc-label label="g.irregularity"></ngc-label>
+          </th>
+          <th [width]="200">
+            <ngc-label label="awb.remarks"></ngc-label>
+          </th>
+          <th [width]="30">
+            <ngc-label label="ad.delete"></ngc-label>
+          </th>
+        </tr>
+      </thead>
+      <tbody align="center" formArrayName="maintainHouseList">
+        <tr *ngFor="let item of maintainIrregularityform.controls.maintainHouseList.controls; let index=index"
+          [formGroupName]="index">
+          <td>
+            <ngc-lov formControlName="houseNumber" [noCache]="true" title="g.hawbNumber"
+              [disabled]="maintainIrregularityform.get(['maintainHouseList', index, 'houseDisable']).value"
+              dataField='code' sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO"
+              (ngModelChange)="checkHAWBNumberExist(index)"
+              [sourceParameters]="{'parameter1': maintainIrregularityform.get('shipmentNumber').value,r:variable}"
+              (select)="setHouseInfo($event,index)" maxlength="20" [width]="220" [noValidation]="true">
+              <ngc-data-column text="g.hawbNumber" dataField="code" [width]="220">
+              </ngc-data-column>
+            </ngc-lov>
+          </td>
+          <td colspan="2">
+            <ngc-piecesinput [width]="50"
+              [disabled]="maintainIrregularityform.get(['maintainHouseList', index, 'houseDisable']).value"
+              formControlName="piece">
+            </ngc-piecesinput>
+            <ngc-weightinput [width]="50"
+              [disabled]="maintainIrregularityform.get(['maintainHouseList', index, 'houseDisable']).value"
+              formControlName="weight"></ngc-weightinput>
+          </td>
+          <td>
+            <ngc-piecesinput formControlName="breakdownPiece"></ngc-piecesinput>
+          </td>
+          <td>
+            <ngc-weightinput formControlName="breakdownWeight"></ngc-weightinput>
+          </td>
+          <td>
+            <ngc-piecesinput formControlName="irregularityPiece"></ngc-piecesinput>
+          </td>
+          <td>
+            <ngc-weightinput formControlName="irregularityWeight"></ngc-weightinput>
+          </td>
+          <td>
+            <ngc-display formControlName="irregularityType">
+            </ngc-display>
+          </td>
+          <td>
+            <ngc-input formControlName="remarks"></ngc-input>
+          </td>
+          <td>
+            <ngc-button iconType="delete" (click)='deleteHawbRow(index)'>
+            </ngc-button>
+          </td>
+        </tr>
+      </tbody>
+    </ngc-table>
+
+    <ngc-window-footer>
+      <ngc-container type="tab">
+
+
+        <ngc-row>
+          <ngc-column align="right">
+
+            <ngc-button iconType="save" (click)="saveHawbListdate()" label="cus.save">
+            </ngc-button>
+
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

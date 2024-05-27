@@ -1,0 +1,241 @@
+<form [formGroup]='roleForm'>
+    <ngc-titlebar title="admin.createRole" (save)="onCreateRole()"></ngc-titlebar>
+
+    <ngc-container type="header">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="admin.roleCode"></ngc-label>
+                <div>
+                    <ngc-input [width]="150" (ngModelChange)="searchExistingRole(event)" formControlName="code"
+                        upperCase="true" required maxlength='15'></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="8">
+                <ngc-label label="g.description"></ngc-label>
+                <div>
+                    <ngc-input [width]="850" formControlName="duties" upperCase="true" required maxlenth='65'>
+                    </ngc-input>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="admin.roleCategory"></ngc-label>
+                <div>
+                    <ngc-lov [validOnly]="true" formControlName='roleCategory' upperCase='true' [width]="140"
+                        sourceId='ROLECREATECATEGORY' title='role.rolecategory' dataField='code' required>
+                        <ngc-data-column text='role.rolecategory' [width]='80' dataField='code'></ngc-data-column>
+                        <ngc-data-column text='g.description' [width]='150' dataField='desc'></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="admin.applicationAccess"></ngc-label>
+                <div>
+                    <ngc-dropdownlist [width]="175" formControlName="applicationAccess"
+                        sourceId='User Profile$Application_Access' [dropDownWidth]="140" required
+                        (select)="onSelect($event)"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column column="4"></ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" title="admin.assignFunction">
+        <ngc-row>
+            <ngc-column column="12" align="right">
+                <ngc-button (click)="onAddRow($event)" value="g._add" iconType="add"></ngc-button>
+                <ngc-button (click)="onDelete($event)" value="g.delete" iconType="delete"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-edittable #edittable formArrayName="resultList" [pageSize]="10">
+                    <ngc-data-column text="admin.functions.required" [width]='10' align="center" dataField="functionsRequired"
+                        cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                                <ngc-lov [validOnly]="true" formControlName='functionsRequired' upperCase='true'
+                                    [width]="300" sourceId='MENUITEM' title='admin.sub.module' dataField='code'
+                                    [sourceParameters]="dropDownAny" displayField='desc' required disabled="true">
+                                    <ngc-data-column text='g.description' [width]='80' dataField='desc'></ngc-data-column>
+                                    <ngc-data-column text='g.application.type' [width]='80' dataField='param1'>
+                                    </ngc-data-column>
+                                </ngc-lov>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.application.type" dataField="applicationId" cellsAlign="center"
+                        align="center" [width]="180">
+                    </ngc-data-column>
+                    <ngc-data-column text="admim.read" dataField="read" cellsAlign="center" align="center"
+                        [width]="230">
+                        <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                                <ngc-checkbox formControlName="read" (modelChange)="changeFlagRead($event, group)">
+                                </ngc-checkbox>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="admim.write" dataField="readWrite" cellsAlign="center" align="center"
+                        [width]="230">
+                        <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group"
+                                *ngIf="roleForm.get(['resultList',group,'readOnlyModule']).value">
+                                <ngc-icon type="yesno" value="no"></ngc-icon>
+                            </ng-container>
+                            <ng-container [formGroupName]="group"
+                                *ngIf="!roleForm.get(['resultList',group,'readOnlyModule']).value ">
+                                <ngc-checkbox formControlName="readWrite"
+                                    (modelChange)="changeFlagWrite($event, group)">
+                                </ngc-checkbox>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.delete" dataField="delete" [width]="20" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                            <ng-container [formGroupName]="group">
+                                <ngc-link [formControlName]="name" (linkClick)="onDelete(group)" iconType="delete">
+                                </ngc-link>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-row>
+                        <ng-template let-parentgroup>
+                            <ng-container [formGroupName]="parentgroup" title="admin.assigned.screen.modules">
+                                <ng-container>
+                                    <ngc-edittable formArrayName="subModuleByModuleCode" height="70" [pageable]="false"
+                                        [widthInPixels]="true">
+                                        <ngc-data-column text="admin.screen.assigned" dataField="screenCode"
+                                            cellsAlign="center" align="center" [width]="100">
+                                        </ngc-data-column>
+                                        <ngc-data-column text="admim.read" dataField="read" cellsAlign="center"
+                                            align="center" [width]="230">
+                                            <ng-template let-name="name" let-group="group">
+                                                <ng-container [formGroupName]="group">
+                                                    <ngc-checkbox formControlName="read"
+                                                        (modelChange)="changeFlagReadScreen($event, parentgroup, group)">
+                                                    </ngc-checkbox>
+                                                </ng-container>
+                                            </ng-template>
+                                        </ngc-data-column>
+                                        <ngc-data-column text="admim.write" dataField="readWrite" cellsAlign="center"
+                                            align="center" [width]="230">
+                                            <ng-template let-name="name" let-group="group">
+                                                <ng-container [formGroupName]="group"
+                                                    *ngIf="roleForm.get(['resultList', parentgroup,'subModuleByModuleCode', group, 'readOnlyModule']).value">
+                                                    <ngc-icon type="yesno" value="no"></ngc-icon>
+                                                </ng-container>
+                                                <ng-container [formGroupName]="group"
+                                                    *ngIf="!roleForm.get(['resultList', parentgroup,'subModuleByModuleCode', group,'readOnlyModule']).value ">
+                                                    <ngc-checkbox formControlName="readWrite"
+                                                        (modelChange)="changeFlagWriteScreen($event, parentgroup, group)">
+                                                    </ngc-checkbox>
+                                                </ng-container>
+                                            </ng-template>
+                                        </ngc-data-column>
+                                        <ngc-data-column text="g.delete" dataField="delete" [width]="20" align="center"
+                                            cellsAlign="center">
+                                            <ng-template let-name="name" let-group="group">
+                                                <ng-container [formGroupName]="group">
+                                                    <ngc-link [formControlName]="name"
+                                                        (linkClick)="onDeleteSubModule(parentgroup, group)"
+                                                        iconType="delete">
+                                                    </ngc-link>
+                                                </ng-container>
+                                            </ng-template>
+                                        </ngc-data-column>
+
+                                    </ngc-edittable>
+                                </ng-container>
+                            </ng-container>
+                        </ng-template>
+                    </ngc-data-row>
+                </ngc-edittable>
+             
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-window #functionListWindow [width]="600" [height]="500" title="admin.sub.modules">
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="admin.menu.item"></ngc-label>
+                    <div>
+                        <ngc-lov [noList]="true" upperCase='true' [width]="250" sourceId='MENUITEM' title='admin.menu.item'
+                            dataField='desc' (modelChange)="onSelectMenu($event)">
+                            <ngc-data-column text='admin.menu.item' [width]='80' dataField='code'></ngc-data-column>
+                            <ngc-data-column text='g.description' [width]='150' dataField='desc'>
+                            </ngc-data-column>
+                        </ngc-lov>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <ngc-checkbox (modelChange)="patchAllCheckBox($event)" align="center"
+                                        formControlName="selectCheckbox">
+                                    </ngc-checkbox>
+                                    <ngc-label label="g.select"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="g.function"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label label="g.application.type"></ngc-label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="functionList">
+                            <ng-container *ngFor="let item of roleForm.controls.functionList.controls; let index=index"
+                                [formGroupName]="index">
+
+                                <tr *ngIf="item.get('parent').value" [ngStyle]="{'background-color': '#C0C0C0'}">
+                                    <!-- <td>{{item.parent | json}}</td> -->
+                                    <td>
+                                        <!-- -->
+                                        <ngc-checkbox formControlName="select"
+                                            (click)="patchAllChildCheckBox(item.value, index)"> </ngc-checkbox>
+                                    </td>
+                                    <td>
+                                        <ngc-display formControlName="desc"> </ngc-display>
+                                    </td>
+                                    <td>
+                                        <ngc-display formControlName="param1"> </ngc-display>
+                                    </td>
+
+                                </tr>
+                                <tr *ngIf="!item.get('parent').value">
+
+                                    <td>
+                                        <ngc-checkbox formControlName="select"
+                                            (click)="patchParentCheckBox(item.value, index)"> </ngc-checkbox>
+                                    </td>
+                                    <td>
+                                        <ngc-display formControlName="desc"> </ngc-display>
+                                    </td>
+                                    <td>
+                                        <ngc-display formControlName="param1"> </ngc-display>
+                                    </td>
+                                </tr>
+                            </ng-container>
+                        </tbody>
+                    </ngc-table>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column align="right">
+                        <ngc-button (click)="onButtonSave()" value="g.ok"></ngc-button>
+                        <ngc-button (click)="onButtonCancel()" value="g.cancel"></ngc-button>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+</form>

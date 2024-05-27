@@ -1,0 +1,213 @@
+<!--form control to get the  input Data-->
+<form [formGroup]="uldInventoryform">
+  <!-- Title Bar -->
+  <ngc-titlebar (cancel)="onCancel($event)" title='uld.uldinventorylist' (clear)="onClear($event)" (print)="onPrint()">
+  </ngc-titlebar>
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column [column]="1">
+        <!--<label><ngc-i18n value="carrier"></ngc-i18n></label>-->
+        <ngc-label label='uld.carrier'></ngc-label>
+        <!--LOV to select Carrier Code-->
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrierCode" sourceId='CARRIER' title='uld.carrier.type'
+            dataField='code' width='70px' upperCase='true' (select)="onSelectCarrier($event)" displayMember="code"
+             [dropDownWidth]='60' required='true'>
+            <ngc-data-column text="uld.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <!-- LOV end-->
+      <ngc-column [column]="1" *ngIf="uldGroupFeatureEnabled">
+        <ngc-label label='imp.uld.grp'></ngc-label>
+        <!--Lov to select UldGroup-->
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldGroup" sourceId='ULDGROUP' title='imp.uld.grp'
+            dataField='code' width='70px' upperCase='true' (select)="onSelectUldGroup($event)" displayMember="code"
+             [dropDownWidth]='60'>
+            <ngc-data-column text="imp.uld.grp" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='uld.uldtype'></ngc-label>
+        <!--Lov to select UldType-->
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldType" sourceId='ULDTYPE' title='uld.uld.type' dataField='code'
+            width='70px' upperCase='true' (select)="onSelectUldType($event)" displayMember="code"  [dropDownWidth]='60'>
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+        <!--LOV end-->
+      </ngc-column>
+      <!-- dropDown list to select the Uld Location,Condition type,OwnerShip,Status-->
+      <ngc-column [column]="1.25">
+        <ngc-label label='uld.location'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="ULD$INV_LOC" [width]="130" [dropDownWidth]="130"
+            formControlName="location">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.25">
+        <ngc-label label='uld.ownership'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="ULD$INV_OWNERSHIP" [width]="130" [dropDownWidth]="130"
+            formControlName="ownership" [all]='false' [noBlank]="false"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.25">
+        <ngc-label value='uld.conditiontype'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="ULD$INV_CONDITION_TYPE" [width]="130" [dropDownWidth]="130"
+            formControlName="conditionType" [all]='false' [noBlank]="false"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.25">
+        <ngc-label label='uld.status'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="ULD$INV_STATUS" [width]="130" [dropDownWidth]="130"
+            formControlName="status" align="right" [all]='false' [noBlank]="false"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.25" entityAttribute="ULD.Aging">
+        <ngc-label label='uld.aging'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="aging" align="right" entityAttribute="ULD.Aging"></ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2" *ngIf="uldMovementTypeFeatureEnabled">
+        <ngc-label label='uld.movement.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="240" [multiSelect]="true" accessEnableOn="r" [autoSelect]="true"
+            sourceId="MOVEMENTTYPEDROPDOWN" [dropDownWidth]="220" sourceType='query' formControlName="selectmovement">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button #searchButton  accessEnableOn="r" (click)="getUldList()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button [disabled]="!showTable" accessEnableOn="r" (click)='exportToExcel()' style="float:right;"
+            value="export.excel">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column *ngIf="uldInventoryform.controls.carrierName.value">
+        <ngc-label label='uld.carrier'></ngc-label>
+        <div>
+          <ngc-display class='text-uppercase' formControlName="carrierName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="uldInventoryform.controls.uldName.value">
+        <ngc-label label='uld.ulddesp'></ngc-label>
+        <div>
+          <ngc-display class='text-uppercase' formControlName="uldName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="uldInventoryform.controls.totalUld.value" align="center">
+        <!-- <ngc-container type="plain" *ngIf="uldInventoryform.controls.totalUld.value">
+          <ngc-row>
+          <ngc-column> -->
+        <ngc-label label='uld.display/totaluld'></ngc-label>
+        <div>
+          <ngc-display class='text-uppercase' formControlName="uldCount"></ngc-display>
+          {{uldInventoryform.controls.totalUld?'/':''}}
+          <ngc-display class='text-uppercase' formControlName="totalUld"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="uldInventoryform.controls.uldCount.value" align="center">
+        <ngc-label label='uld.cargoULD'></ngc-label>
+        <div>
+          <ngc-display class='text-uppercase' formControlName="cargoULDCount"></ngc-display>
+          {{uldInventoryform.controls.uldCount?'/':''}}
+          <ngc-display class='text-uppercase' formControlName="uldCount"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="uldInventoryform.controls.uldCount.value" align="center">
+        <ngc-label label='uld.apronULD'></ngc-label>
+        <div>
+          <ngc-display class='text-uppercase' formControlName="apronULDCount"></ngc-display>
+          {{uldInventoryform.controls.uldCount?'/':''}}
+          <ngc-display class='text-uppercase' formControlName="uldCount"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="uldInventoryform.controls.uldCount.value" align="center">
+        <ngc-label label='uld.agentULD'></ngc-label>
+        <div>
+          <ngc-display class='text-uppercase' formControlName="agentULDCount"></ngc-display>
+          {{uldInventoryform.controls.uldCount?'/':''}}
+          <ngc-display class='text-uppercase' formControlName="uldCount"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <!-- </ngc-row>
+        </ngc-container>
+      </ngc-column> -->
+      <ngc-column column="4"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="showTable" type="tab">
+
+    <ngc-row>
+
+
+      <ngc-column>
+        <!--ngc table to diaplay ULD Inventory List-->
+        <ngc-datatable formArrayName="uldInventoryList" (linkClick)="onLinkClick($event)" [pageable]="true"
+          [enablePageSizeHeight]="false" [showToolbar]="true" [showPrint]="false" [showXLS]="false" [showPDF]="false"
+          [showCSV]="false">
+          <ngc-data-column text="uld.s.n" on dataField="serialNumber" [width]="70" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uldnumber" type="link" on dataField="uldNumber" [width]="120" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.usedby" dataField="usedBy" [width]="80" align="left"></ngc-data-column>
+          <ngc-data-column text="uld.warehouselocation" *ngIf="!warehouseLocationFeatureEnabled"
+            dataField="destinationWhLocation" [width]="170" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="awb.whs.loc.br" *ngIf="warehouseLocationFeatureEnabled"
+            dataField="destinationWhLocation" [width]="170" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.airportpostion" dataField="airportPosition" [width]="140" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.contentcode" dataField="contentsCode" [width]="130" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.movementtype" dataField="movementType" [width]="140" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.movement.date" dataField="movementDate" [width]="140" type="displayDate"
+            *ngIf="uldMovementDateFeatureEnabled" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.movement.dwelltime" dataField="movementDwellTime" [width]="170" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.conditiontype" dataField="conditionType" [width]="130" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.agent" dataField="agent" [width]="100" align="left"></ngc-data-column>
+          <ngc-data-column text="uld.agent.dwelltime" dataField="agentDwellTime" [width]="150" align="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='uldInventoryList'  format='pdf'
+    [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report #reportWindow1 title="export.excel" reportId='ULD_Inventory_Report' [reportParameters]='reportParameters'>
+  </ngc-report>
+
+
+</form>

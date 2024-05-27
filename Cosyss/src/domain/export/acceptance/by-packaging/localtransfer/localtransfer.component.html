@@ -1,0 +1,308 @@
+<form [formGroup]="localTransferFormGroup">
+  <ngc-titlebar title="Local Transfer" (save)="onSave()" [disabled]=saveFlag (clear)="onClear($event)"
+    (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="transfer.carrier.code">
+        </ngc-label>
+        <div>
+          <ngc-lov #carrierCode formControlName='transferCarrier' required [width]='50' upperCase='true'
+            dataField="code" displayMember="code" displayMember="code" sourceId='CARRIER_OPT'
+            title='transfer.carrier.code' maxlength='3' accessEnableOn="r">
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='80'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="receiver.carrier.code">
+        </ngc-label>
+        <div>
+          <ngc-lov #carrierCode formControlName='receiveCarrier' required [width]='50' upperCase='true' dataField="code"
+            displayMember="code" displayMember="code" sourceId='CARRIER_OPT' title='receiver.carrier.code' maxlength='3'
+            accessEnableOn="r">
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='80'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="loadshipment.label.shipment">
+        </ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.uld">
+        </ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName='uldNumber'></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-radiobutton groupName="sel" checked="true" formControlName="internal"
+            (click)="changeterminal('internal')" accessEnableOn="r">
+          </ngc-radiobutton>
+          <ngc-label label="internal.code"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-radiobutton groupName="sel" formControlName="interTerminal" (click)="changeterminal('interTerminal')"
+            accessEnableOn="r">
+          </ngc-radiobutton>
+          <ngc-label label="interterminal.code"></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button #searchButton accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ng-container type="tab" *ngIf="!internalTerminalEnabled">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="transferData" [pageable]="true" [pageSize]="20" [sortable]="true">
+          <ngc-data-column text="g.sel" align="center" dataField="sel" cellsAlign="center" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox [formControlName]='name'></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="rcl" align="center" dataField="rclNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="g.shipmentNumber" align="center" dataField="shipmentNumber"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="g.uld" align="center" dataField="uldNumber" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="awb.origin" align="center" dataField="origin" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="awb.destination" align="center" dataField="destination"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="shipmentLocation" align="center" dataField="shipmentLocation"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="Gen.ActualLocation" align="center" dataField="actualLocation"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="g.warehouseLocation" align="center" dataField="whsLocation"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="Export.locationPieces" align="center" dataField="locationPieces"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name' [maxlength]="4">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="Export.locationWeight" align="center" dataField="locationWeight"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name' [maxlength]="5" decimalDigits="00">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ng-container>
+  <ng-container type="tab" *ngIf="internalTerminalEnabled">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="transferData" [pageable]="true" [pageSize]="20" [sortable]="true">
+          <ngc-data-column text="g.sel" align="center" dataField="sel" cellsAlign="center" [useNotOnDemand]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox [formControlName]='name'></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="rcl" align="center" dataField="rclNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="g.shipmentNumber" align="center" dataField="shipmentNumber"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="g.uld" align="center" dataField="uldNumber" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="awb.origin" align="center" dataField="origin" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="awb.destination" align="center" dataField="destination"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="shipmentLocation" align="center" dataField="shipmentLocation"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="Gen.ActualLocation" align="center" dataField="actualLocation"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="g.warehouseLocation" align="center" dataField="whsLocation"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name'>
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="Export.locationPieces" align="center" dataField="locationPieces"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name' [maxlength]="4">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="Export.locationWeight" align="center" dataField="locationWeight"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [formControlName]='name' [maxlength]="5" decimalDigits="00">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="awb.transferred.pieces" align="center" dataField="transferPieces"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-numberinput required [maxlength]="4" [formControlName]='name' decimalDigits="0"
+                  (ngModelChange)="onTransferPieceChange($event,group,index)">
+                </ngc-numberinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column [width]="100" text="awb.transferred.weight" align="center" dataField="transferWeight"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-numberinput required [maxlength]="5" [formControlName]='name'>
+                </ngc-numberinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ng-container>
+  <div *ngIf="this.searchResult">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.remarks"></ngc-label>
+          <div>
+            <ngc-textarea [maxlength]='65' height='35' width='800' formControlName='remark'></ngc-textarea>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+</form>

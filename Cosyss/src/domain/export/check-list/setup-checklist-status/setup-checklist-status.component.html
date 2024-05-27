@@ -1,0 +1,222 @@
+<form [formGroup]="searchForm">
+  <ngc-titlebar title="export.setup.check.list.shipment.status.title" (clear)="onClear($event)"
+    (cancel)="onCancel($event)" (save)="onSave($event)">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="export.setup.check.list.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="General$StatusType" [width]="100" [dropDownWidth]="100"
+            formControlName="status">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.setup.check.list.date.time.from"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            formControlName="acceptanceFrom" (ngModelChange)="onAcceptanceFrom($event)" [width]="160">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.setup.check.list.date.time.to"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            formControlName="acceptanceTo" (ngModelChange)="onAcceptanceTo($event)" [width]="160">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="awb.awbnumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.flightKey"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" [width]="100"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="shipmentDate" [showCalendarButton]="true"
+            [width]="110">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.setup.check.list.types"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="CHECKLIST_TYPES" formControlName="comCheckListTypesId"
+            [width]="350" sourceType='query'>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label="<br>"></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()">
+          </ngc-button>
+          <ngc-button label="g._add" (click)="onAddChecklist()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="form">
+  <ngc-container type="tab" *ngIf="showHideTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="shipmentChecklist">
+          <ngc-data-column text="g.sNo" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-label label="{{group + 1}}"></ngc-label>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display *ngIf="form.get(['shipmentChecklist', group, 'shipmentNumberData']).value"
+                    formControlName="shipmentNumber">
+                  </ngc-display>
+                  <ngc-awbinput *ngIf="!form.get(['shipmentChecklist', group, 'shipmentNumberData']).value"
+                    formControlName="shipmentNumber" required
+                    (modelChange)="onSearchAsPerShipmentNumber(form.get(['shipmentChecklist', group]).value ,group)">
+                  </ngc-awbinput>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.origin" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display [sourceId]="origin" sourceCategory="lov" formControlName="origin"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.destination" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display [sourceId]="APT" sourceCategory="lov" formControlName="destination"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.weight" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ng-container formArrayName="shcs">
+                    <ng-container
+                      *ngFor="let sitem of form.get(['shipmentChecklist', group]).controls.shcs.controls; let sindex=index"
+                      [formGroupName]="sindex">
+                      <ngc-display formControlName="specialHandlingCode">
+                      </ngc-display>
+                      <ngc-label label="&nbsp">
+                      </ngc-label>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.carrier" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display formControlName="carrierCode"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.setup.check.list.flight.date" [width]='30'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display formControlName="flightKeydate"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+         
+          <ngc-data-column text="export.check.list.types" [width]='22'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-dropdownlist *ngIf="!form.get(['shipmentChecklist', group, 'shipmentNumberData']).value"
+                    sourceId="CHECKLIST_TYPES" formControlName="comCheckListTypesId" required sourceType='query'>
+                  </ngc-dropdownlist>
+                  <ngc-display *ngIf="form.get(['shipmentChecklist', group, 'shipmentNumberData']).value"
+                    sourceCategory="dropdown" sourceType='query' formControlName="comCheckListTypesId"
+                    sourceId="CHECKLIST_TYPES"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.status" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display formControlName="status" sourceCategory="dropdown" sourceId="General$StatusType">
+                  </ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.delete" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-link (click)="deleteShipmentChecklist(group)" iconType="delete">
+                  </ngc-link>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.fill.check.list" [width]='25'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-link (linkClick)="onEditShipmentChecklist(group)" hide-value="true">
+                    <ngc-icon type="edit" value="true" true-color="grey"></ngc-icon>
+                  </ngc-link>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

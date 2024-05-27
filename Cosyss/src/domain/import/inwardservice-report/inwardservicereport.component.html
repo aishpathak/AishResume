@@ -1,0 +1,716 @@
+<form [formGroup]='inwardServiceForm' item-width="100%">
+  <ngc-titlebar title='import.title.inward.service.report' (cancel)="onBack($event)" (print)="inwardReport()"
+    (save)="onSave()" (clear)="onClear($event)"></ngc-titlebar>
+  <ngc-container type="sectiontop"></ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='airmail.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput formControlName="flightNumber" accessEnableOn="r" required="true"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='agent.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="date" (ngModelChange)=onSelectDate($event) required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" entityAttribute="Import.InwRpt.DIscrepancyList">
+        <ngc-label entityAttribute="Import.InwRpt.DIscrepancyList"></ngc-label>
+        <div>
+          <ngc-dropdownlist width="100" accessEnableOn="r" entityAttribute="Import.InwRpt.DIscrepancyList"
+            formControlName="Discrepency" sourceId="Discrepancy$DiscrepancyType"
+            (ngModelChange)="onDiscrepencyChange($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button value='terms.search' accessEnableOn="r" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4" align="right">
+        <div>
+          <ngc-display formControlName="status" color="blue" emphasis='md'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="8"></ngc-column>
+      <ngc-column [column]="4" align="right">
+        <div>
+          <ngc-display formControlName="damagestatus" color="blue" emphasis='md'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="isSearch" type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='airmail.Flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKeyValue"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='agent.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="dateValue" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="6">
+      </ngc-column>
+
+      <ngc-column [column]="4" align='right'>
+
+        <ngc-label label='import.notify.party.email.id' width='20'></ngc-label>
+        <div>
+          <ngc-taginput formArrayName="emails" dataField="toAddress" [width]="200"></ngc-taginput>
+        </div>
+
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button label='import.send.email' (click)="addEmail()"></ngc-button>
+
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="sectiontop"></ngc-container>
+
+  <ngc-container *ngIf="isSearch" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <!-- <ngc-button label=" Print Report" (click)="inwardReport()"></ngc-button> -->
+        <ngc-button (click)="expandAll()" label='inward.expand'></ngc-button>
+        <ngc-button (click)="collapseAll()" label='inward.collapse'></ngc-button>
+      </ngc-column>
+
+      <ngc-column column="1" align="center" *ngIf="finalizeflag">
+        <ngc-button label='inward.finalize' (click)="onFinalize()"></ngc-button>
+      </ngc-column>
+
+      <ngc-column column="1" align="center" *ngIf="unfinalizeflag">
+        <ngc-button label='Unfinalize' (click)="onFinalize()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="isSearch" type="tab">
+    <ngc-row>
+      <ngc-column>
+
+
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column column="1">
+              <ngc-label label='inward.origin'></ngc-label>
+
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label='inward.pages'></ngc-label>
+
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label='import.nature.of.discrepancies'></ngc-label>
+
+            </ngc-column>
+
+            <ngc-column column="7">
+              <ngc-label label='import.action.taken'></ngc-label>
+
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+
+        <ngc-container type="tab" formArrayName="segment">
+          <ngc-row *ngFor="let item of inwardServiceForm.controls.segment.controls let index=index"
+            [formGroupName]="index">
+            <ngc-column column="1">
+
+              <div>
+                <ngc-display formControlName="flightBoardPoint"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+
+              <div>
+                <ngc-numberinput formControlName="manifestedPages" decimalDigits="0" digits="2"></ngc-numberinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+
+              <div>
+                <ngc-input formControlName="natureOfDiscrepancies" [maxlength]="15"></ngc-input>
+              </div>
+            </ngc-column>
+
+            <ngc-column column="7">
+
+              <div>
+                <ngc-input [width]="710" formControlName="actionTaken" [maxlength]="65"></ngc-input>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <ngc-container *ngIf="dirDiscrepancyflag">
+          <ngc-row>
+            <ngc-column>
+              <!--Accordian start from here-->
+              <ngc-accordion>
+                <!--Accordian Part start from here-->
+                <ngc-accordion-card [title]="" [selected]="expandorcollapse">
+                  <ngc-accordion-titlebar>
+                    <ngc-label label='inward.awb'> </ngc-label>
+                  </ngc-accordion-titlebar>
+                  <ngc-container formArrayName="segmentConcatAwb">
+                    <ngc-row *ngFor="let item of inwardServiceForm.controls.segmentConcatAwb.controls let index=index"
+                      [formGroupName]="index">
+                      <ngc-column>
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-display formControlName="segmentdesc" color="blue" emphasis='md'></ngc-display>
+                            </ngc-column>
+                          </ngc-row>
+                          <ngc-row>
+                            <ngc-column align="right">
+                              <ngc-button value='inward.add' [disabled]="disableflag"
+                                (click)="addDiscrepencyRow($event,index)"></ngc-button>
+                              <ngc-button value='ad.delete' [disabled]="disableflag"
+                                (click)="deleteDiscrepencyRow($event,index)"></ngc-button>
+                            </ngc-column>
+
+                          </ngc-row>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-table>
+                                <thead>
+                                  <tr align="center">
+                                    <th rowspan="2">
+                                      <ngc-label label=""></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.searchAWB' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='inward.part' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='inward.Photocopy' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.origin' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.destination' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.createPaymentPiece' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.weight' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='inward.weightcode' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.createPaymentGoods' align="center"></ngc-label>
+                                    </th>
+                                    <th width="300" colspan="2">
+                                      <ngc-label label='inward.irr' align="center"></ngc-label>
+                                    </th>
+                                    <th [width]="300" rowspan="2">
+                                      <ngc-label label='inward.Remarks' align="center"></ngc-label>
+                                    </th>
+                                    <th width="150" rowspan="2" feature="Imp.Bd.DocumentIrregularityRemarks">
+                                      <ngc-label label='g.action' align="center"></ngc-label>
+                                    </th>
+                                  </tr>
+                                  <tr>
+                                    <th width="150">
+                                      <ngc-label label='agent.contactType' align="center"></ngc-label>
+                                    </th>
+                                    <th width="150">
+                                      <ngc-label label='inward.Remarks' align="center"></ngc-label>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody formArrayName="shipmentDiscrepancy">
+                                  <tr align="center"
+                                    *ngFor="let sitem of item.controls.shipmentDiscrepancy.controls let sindex=index"
+                                    [formGroupName]="sindex">
+                                    <td>
+                                      <ngc-checkbox *ngIf="sitem.get('manual').value == 1" formControlName="checkBox">
+                                      </ngc-checkbox>
+                                    </td>
+                                    <td>
+                                      <ngc-awbinput *ngIf="sitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="shipmentNumber"
+                                        (ngModelChange)="getShipmasterdetail($event,index,sindex)"></ngc-awbinput>
+                                      <ngc-display *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="shipmentNumber"></ngc-display>
+                                    </td>
+                                    <td align="center">
+                                      <ngc-checkbox *ngIf="sitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="partShipment"></ngc-checkbox>
+                                      <ngc-icon type="yesno" *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="partShipment"></ngc-icon>
+                                    </td>
+                                    <td align="center">
+                                      <ngc-checkbox *ngIf="sitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="photoCopy"></ngc-checkbox>
+
+                                      <ngc-icon type="yesno" *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="photoCopy"></ngc-icon>
+                                    </td>
+                                    <td>
+                                      <ngc-lov formControlName="origin" *ngIf="sitem.controls.flagCRUD.value==='C'"
+                                        [width]="45" title='g.origin' upperCase="true" dataField="code"
+                                        displayMember="code" sourceId="APT" required>
+                                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                        </ngc-data-column>
+                                      </ngc-lov>
+                                      <ngc-display *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="origin" [width]="35"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-lov formControlName="destination" *ngIf="sitem.controls.flagCRUD.value==='C'"
+                                        [width]="45" title='g.destination' upperCase="true" dataField="code"
+                                        displayMember="code" sourceId="APT" required>
+                                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                        </ngc-data-column>
+                                      </ngc-lov>
+                                      <ngc-display *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="destination" [width]="35"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-piecesinput *ngIf="sitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="piece" [width]="45"></ngc-piecesinput>
+                                      <ngc-piecesdisplay required *ngIf="((sitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="piece" [width]="35"></ngc-piecesdisplay>
+                                    </td>
+                                    <td>
+                                      <ngc-weightinput *ngIf="sitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="weight"></ngc-weightinput>
+                                      <ngc-weightdisplay *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="weight"></ngc-weightdisplay>
+                                    </td>
+                                    <td>
+                                      <ngc-dropdownlist *ngIf="sitem.controls.flagCRUD.value==='C'" [width]="45"
+                                        sourceId="General$WeightCode" formControlName="weightUnitCode" default="K">
+                                      </ngc-dropdownlist>
+                                      <ngc-display *ngIf="((sitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="weightUnitCode" [width]="40"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-input *ngIf="sitem.controls.flagCRUD.value==='C'" [maxlength]="20"
+                                        formControlName="natureOfGoodsDescription"></ngc-input>
+                                      <ngc-display *ngIf="((sitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="natureOfGoodsDescription"></ngc-display>
+                                    </td>
+                                    <td width="150">
+                                      <ngc-display *ngIf="sitem.controls.flagCRUD.value!=='C'"
+                                        formControlName="irregularityType"></ngc-display>
+                                      <ngc-dropdownlist *ngIf="((sitem.controls.flagCRUD.value==='C'))" [width]="70"
+                                        sourceId="AWBIRREGULARITY_TYPE" sourceType='query'
+                                        formControlName="irregularityType" displayMember="code"></ngc-dropdownlist>
+                                    </td>
+                                    <td width="150">
+                                      <ngc-input formControlName="irregularityDescription" [maxlength]="65"
+                                        [width]="400"></ngc-input>
+                                      <!-- <ngc-display *ngIf="((sitem.controls.flagCRUD.value!=='C'))" required formControlName="irregularityDescription"></ngc-display> -->
+                                    </td>
+                                    <td>
+                                      <ngc-textarea formControlName="remarks" [width]="350" [height]="50"
+                                        [maxlength]="65"></ngc-textarea>
+                                    </td>
+                                    <td width="150" feature="Imp.Bd.DocumentIrregularityRemarks">
+                                      <ngc-dropdownlist formControlName="additionalActionRemarks" [width]="160"
+                                        [valueMember]="'desc'" [displayMember]="'desc'"
+                                        sourceId='IrDocRemarks$IrDocRemarksValues' [width]="90"
+                                        [required]="hawbActionRemarks">
+                                      </ngc-dropdownlist>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </ngc-table>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-column>
+                    </ngc-row>
+
+                  </ngc-container>
+                </ngc-accordion-card>
+              </ngc-accordion>
+            </ngc-column>
+          </ngc-row>
+
+        </ngc-container>
+
+
+        <ngc-container *ngIf="cirDiscrepancyflag">
+          <ngc-row>
+            <ngc-column>
+              <!--Accordian start from here-->
+              <ngc-accordion>
+                <!--Accordian Part start from here-->
+                <ngc-accordion-card [title]="" [selected]="expandorcollapse">
+                  <ngc-accordion-titlebar>
+                    <ngc-label label='inward.physical'> </ngc-label>
+                  </ngc-accordion-titlebar>
+                  <ngc-container formArrayName="segmentConcatAwb">
+                    <ngc-row *ngFor="let item of inwardServiceForm.controls.segmentConcatAwb.controls let index=index"
+                      [formGroupName]="index">
+                      <ngc-column>
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-display formControlName="segmentdesc" color="blue" emphasis='md'></ngc-display>
+                            </ngc-column>
+                          </ngc-row>
+                          <ngc-row>
+                            <ngc-column align="right">
+                              <ngc-button value='inward.add' [disabled]="disableflag"
+                                (click)="addPhysicalDiscrepencyRow($event,index)"></ngc-button>
+                              <ngc-button value='ad.delete' [disabled]="disableflag"
+                                (click)="deletePhysicalDiscrepencyRow($event,index)"></ngc-button>
+                            </ngc-column>
+
+                          </ngc-row>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-table>
+                                <thead>
+                                  <tr>
+                                    <th rowspan="2">
+                                      <ngc-label label=""></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.searchAWB' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2" feature="Imp.Bd.HAWBHandling">
+                                      <ngc-label label='HAWB' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.origin' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.destination' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.createPaymentPiece' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.weight' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='inward.weightcode' align="center"></ngc-label>
+                                    </th>
+                                    <th rowspan="2">
+                                      <ngc-label label='agent.createPaymentGoods' align="center"></ngc-label>
+                                    </th>
+                                    <th width="300" colspan="4" *ngIf="hawbInfoEnabled">
+                                      <ngc-label label='inward.irr' align="center"></ngc-label>
+                                    </th>
+                                    <th width="300" colspan="3" *ngIf="!hawbInfoEnabled">
+                                      <ngc-label label='inward.irr' align="center"></ngc-label>
+                                    </th>
+                                    <th [width]="300" rowspan="2">
+                                      <ngc-label label='inward.Remarks' align="center"></ngc-label>
+                                    </th>
+                                    <th width="150" rowspan="2" entityAttribute="Gen.ACCSHandler">
+                                      <ngc-label entityAttribute="Gen.ACCSHandler" align="center"></ngc-label>
+                                    </th>
+                                    <th width="150" rowspan="2" entityAttribute="Import.ManifestPieceWeight">
+                                      <ngc-label entityAttribute="Import.ManifestPieceWeight" align="center">
+                                      </ngc-label>
+                                    </th>
+                                    <th width="150" rowspan="2" entityAttribute="Import.LocationPieceWeight">
+                                      <ngc-label entityAttribute="Import.LocationPieceWeight" align="center">
+                                      </ngc-label>
+                                    </th>
+                                  </tr>
+                                  <tr>
+                                    <th width="100">
+                                      <ngc-label label='agent.contactType' align="center"></ngc-label>
+                                    </th>
+                                    <th width="100">
+                                      <ngc-label label='agent.createPaymentPiece' align="center"></ngc-label>
+                                    </th>
+                                    <th width="100" entityAttribute="Import.IrregularityWeight">
+                                      <ngc-label entityAttribute="Import.IrregularityWeight" align="center"></ngc-label>
+                                    </th>
+                                    <th width="100">
+                                      <ngc-label label='inward.Remarks' align="center"></ngc-label>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody formArrayName="physicalDiscrepancy">
+                                  <tr align="center"
+                                    *ngFor="let pitem of item.controls.physicalDiscrepancy.controls let pindex=index"
+                                    [formGroupName]="pindex">
+                                    <td>
+                                      <ngc-checkbox *ngIf="pitem.get('manual').value == 1" formControlName="checkBox">
+                                      </ngc-checkbox>
+                                    </td>
+                                    <td>
+                                      <ngc-awbinput *ngIf="pitem.controls.flagCRUD.value ==='C'" required
+                                        formControlName="shipmentNumber"
+                                        (ngModelChange)="onTabout($event,index,pindex)"></ngc-awbinput>
+                                      <ngc-display *ngIf="((pitem.controls.flagCRUD.value !=='C'))" required
+                                        formControlName="shipmentNumber"></ngc-display>
+                                    </td>
+                                    <td feature="Imp.Bd.HAWBHandling">
+
+                                      <div *ngIf="((pitem.controls.flagCRUD.value ==='C') && handledByMasterHouse)">
+                                        <ngc-lov formControlName="hawbnumber" [noCache]="true" title="g.hawbNumber"
+                                          dataField='code' sourceType='query' sourceId="HWBNUMBER" [width]="100"
+                                          [sourceParameters]="{'parameter1': inwardServiceForm.get(['segmentConcatAwb', index, 'physicalDiscrepancy', pindex, 'shipmentNumber']).value,r:variable}"
+                                          (select)="onhawbSelect($event,index,pindex)" maxlength="16">
+                                          <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100">
+                                          </ngc-data-column>
+                                        </ngc-lov>
+                                      </div>
+                                      <ngc-display
+                                        *ngIf="((pitem.controls.flagCRUD.value !=='C') || !handledByMasterHouse )"
+                                        formControlName="hawbnumber">
+                                      </ngc-display>
+                                    </td>
+
+                                    <td>
+                                      <ngc-lov formControlName="origin" *ngIf="pitem.controls.flagCRUD.value==='C'"
+                                        [width]="45" title='g.origin' upperCase="true" dataField="code"
+                                        displayMember="code" sourceId="APT" required>
+                                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                        </ngc-data-column>
+                                      </ngc-lov>
+                                      <ngc-display *ngIf="((pitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="origin" [width]="30"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-lov formControlName="destination" *ngIf="pitem.controls.flagCRUD.value==='C'"
+                                        [width]="45" title='g.destination' upperCase="true" dataField="code"
+                                        displayMember="code" sourceId="APT" required>
+                                        <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                        </ngc-data-column>
+                                      </ngc-lov>
+
+                                      <ngc-display *ngIf="((pitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="destination" [width]="30"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-piecesinput *ngIf="pitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="piece" [width]="45"></ngc-piecesinput>
+                                      <ngc-piecesdisplay required *ngIf="((pitem.controls.flagCRUD.value!=='C'))"
+                                        required formControlName="piece" [width]="35"></ngc-piecesdisplay>
+                                    </td>
+                                    <td>
+                                      <ngc-weightinput *ngIf="pitem.controls.flagCRUD.value==='C'" required
+                                        formControlName="weight"></ngc-weightinput>
+                                      <ngc-weightdisplay *ngIf="((pitem.controls.flagCRUD.value!=='C'))" required
+                                        formControlName="weight"></ngc-weightdisplay>
+                                    </td>
+                                    <td>
+                                      <ngc-dropdownlist *ngIf="pitem.controls.flagCRUD.value==='C'" [width]="45"
+                                        sourceId="General$WeightCode" formControlName="weightUnitCode" default="K">
+                                      </ngc-dropdownlist>
+                                      <ngc-display *ngIf="((pitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="weightUnitCode" [width]="40"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-input *ngIf="pitem.controls.flagCRUD.value==='C'" [maxlength]="20"
+                                        formControlName="natureOfGoodsDescription"></ngc-input>
+                                      <ngc-display *ngIf="((pitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="natureOfGoodsDescription"></ngc-display>
+                                    </td>
+                                    <td width="100">
+                                      <ngc-display *ngIf="pitem.controls.flagCRUD.value!=='C'"
+                                        formControlName="irregularityType"></ngc-display>
+                                      <ngc-dropdownlist *ngIf="((pitem.controls.flagCRUD.value==='C'))" [width]="70"
+                                        sourceId="PHYSICALIRREGULARITY_TYPE" sourceType='query'
+                                        formControlName="irregularityType" displayMember="code"></ngc-dropdownlist>
+                                    </td>
+                                    <td width="100">
+                                      <ngc-piecesinput *ngIf="pitem.controls.flagCRUD.value==='C'"
+                                        formControlName="irregularityPieces"></ngc-piecesinput>
+                                      <ngc-piecesdisplay *ngIf="((pitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="irregularityPieces"></ngc-piecesdisplay>
+                                    </td>
+                                    <td width="100" entityAttribute="Import.IrregularityWeight">
+                                      <ngc-piecesinput *ngIf="pitem.controls.flagCRUD.value==='C'"
+                                        formControlName="irregularityWeight"
+                                        entityAttribute="Import.IrregularityWeight"></ngc-piecesinput>
+                                      <ngc-piecesdisplay *ngIf="((pitem.controls.flagCRUD.value!=='C'))"
+                                        formControlName="irregularityWeight"
+                                        entityAttribute="Import.IrregularityWeight">
+                                      </ngc-piecesdisplay>
+                                    </td>
+                                    <td width="100">
+                                      <ngc-input formControlName="irregularityDescription" [maxlength]="65"
+                                        [width]="400"></ngc-input>
+                                      <!-- <ngc-display *ngIf="((pitem.controls.flagCRUD.value!=='C'))" required formControlName="irregularityDescription"></ngc-display> -->
+                                    </td>
+                                    <td>
+                                      <ngc-textarea formControlName="remarks" [width]="350" [height]="50"
+                                        [maxlength]="65"></ngc-textarea>
+                                    </td>
+                                    <td entityAttribute="Gen.ACCSHandler">
+                                      <ngc-display formControlName="accsHandler"></ngc-display>
+                                    </td>
+                                    <td entityAttribute="Import.ManifestPieceWeight">
+                                      <ngc-display formControlName="manifestPcsWt"></ngc-display>
+                                    </td>
+                                    <td entityAttribute="Import.LocationPieceWeight">
+                                      <ngc-display formControlName="locationPcsWt"></ngc-display>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </ngc-table>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-column>
+                    </ngc-row>
+
+                  </ngc-container>
+                </ngc-accordion-card>
+              </ngc-accordion>
+            </ngc-column>
+          </ngc-row>
+
+        </ngc-container>
+
+
+        <ngc-container *ngIf="otherDiscrepancyflag">
+          <ngc-row>
+            <ngc-column>
+              <!--Accordian start from here-->
+              <ngc-accordion>
+                <!--Accordian Part start from here-->
+                <ngc-accordion-card [title]="" [selected]="expandorcollapse">
+                  <ngc-accordion-titlebar>
+                    <ngc-label label='inward.other'> </ngc-label>
+                  </ngc-accordion-titlebar>
+                  <ngc-container formArrayName="segmentConcatAwb">
+                    <ngc-row *ngFor="let item of inwardServiceForm.controls.segmentConcatAwb.controls let index=index"
+                      [formGroupName]="index">
+                      <ngc-column>
+                        <ngc-container>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-display formControlName="segmentdesc" color="blue" emphasis='md'></ngc-display>
+                            </ngc-column>
+                          </ngc-row>
+                          <ngc-row>
+                            <ngc-column align="right">
+                              <div>
+                                <ngc-button value='inward.add' [disabled]="disableflag"
+                                  (click)="addOtherDiscrepancy($event,index)"></ngc-button>
+                                <ngc-button value='ad.delete' [disabled]="disableflag"
+                                  (click)="deleteOtherDiscrepancy($event,index)"></ngc-button>
+                              </div>
+                            </ngc-column>
+                          </ngc-row>
+                          <ngc-row>
+                            <ngc-column>
+                              <ngc-table>
+                                <thead>
+                                  <tr>
+                                    <th>
+                                      <ngc-label label=""></ngc-label>
+                                    </th>
+                                    <th>
+                                      <ngc-label label='inward.user' align="center"></ngc-label>
+                                    </th>
+                                    <th>
+                                      <ngc-label label='inward.Remarks' align="center"></ngc-label>
+                                    </th>
+                                  </tr>
+                                </thead>
+                                <tbody formArrayName="otherDiscrepancy">
+                                  <tr *ngFor="let oitem of item.controls.otherDiscrepancy.controls let index=index"
+                                    [formGroupName]="index">
+                                    <td>
+                                      <ngc-checkbox formControlName="checkBox"></ngc-checkbox>
+                                    </td>
+                                    <td>
+                                      <ngc-display *ngIf="oitem.controls.flagCRUD.value!=='C'"
+                                        formControlName="createdBy"></ngc-display>
+                                    </td>
+                                    <td>
+                                      <ngc-input formControlName="remarks" [width]='750' [maxlength]="65"></ngc-input>
+                                    </td>
+                                  </tr>
+                                </tbody>
+                              </ngc-table>
+                            </ngc-column>
+                          </ngc-row>
+                        </ngc-container>
+                      </ngc-column>
+                    </ngc-row>
+
+                  </ngc-container>
+                </ngc-accordion-card>
+              </ngc-accordion>
+            </ngc-column>
+          </ngc-row>
+
+        </ngc-container>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+
+
+  <ngc-container *ngIf="isSearch" type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='inward.docs'></ngc-label>
+        <div>
+          <ngc-display formControlName="documentCompletedBy"></ngc-display>
+        </div>
+        <div>
+          <ngc-display formControlName="documentCompletedAt"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label label='inward.breakdown'></ngc-label>
+        <div>
+          <ngc-display formControlName="breakDownCompletedBy"></ngc-display>
+        </div>
+        <div>
+          <ngc-display formControlName="breakDownCompletedAt"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label label='inward.ramp'></ngc-label>
+        <div>
+          <ngc-display formControlName="rampCheckedInBy"></ngc-display>
+        </div>
+        <div>
+          <ngc-display formControlName="rampCheckedInDate"></ngc-display>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='InwardServiceReport'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

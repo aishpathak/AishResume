@@ -1,0 +1,1140 @@
+<ngc-titlebar title="billing.functiontitle" (save)="onSave()" (cancel)='onCancel()' (clear)='onClear($event)'>
+</ngc-titlebar>
+<form [formGroup]='enquireChargesForm'>
+  <ngc-container type='section' *ngIf='!changeCustomer && !searchElementsFlag'>
+    <ngc-row>
+      <ngc-column [grid24]="true" column='3'>
+        <div>
+          <ngc-radiobutton formControlName="searchModeShipment" groupName="searchMode" checked="true">
+            <ngc-label value="export.book.totalshipment" inline="true"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+        <div>
+          <ngc-radiobutton formControlName="searchModecustomer" groupName="searchMode">
+            <ngc-label value="billing.customer" inline="true"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='screenShipmentFlag'>
+        <ngc-label value='g.shipmentType'></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType='AWB' formControlName='shipment' accessEnableOn="r"
+            (ngModelChange)="onTabOutCheckHandledBy()"></ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="handledbyHouse && screenShipmentFlag">
+        <ngc-label label="billing.hawbsbNumber" entityAttribute="Gen.HAWBOrSBNumber"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="170"
+            sourceId='KEY_BILL_HWBNUMBER' dataField='code' valueMember='code' [noCache]="true"
+            title="billing.hawbsbNumber" entityAttribute="Gen.HAWBOrSBNumber"
+            [sourceParameters]="{'parameter1': this.enquireChargesForm.get('shipment').value}"
+            (select)="setAWBNumber($event)">
+            <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='!screenShipmentFlag' column="2">
+        <ngc-label value='g.customerName'></ngc-label>
+        <div>
+          <ngc-lov displayField='deckFlag' (select)='onClickCustomer($event)' [validOnly]='true' upperCase="false"
+            [noCache]="true" [width]='200' formControlName="customer" sourceId="CUSTOMER_BILL" title="billing.customer"
+            dataField='code' accessEnableOn="r">
+            <ngc-data-column text="cus.code" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="deckFlag" [width]="250"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenShipmentFlag">
+        <ngc-label value='bil.chargeCode'></ngc-label>
+        <div>
+          <ngc-lov upperCase="false" [noCache]="true" [validOnly]='true' displayField='desc' [width]='150'
+            formControlName="codeName" sourceId="CHARGE_CODE" title="g.chargeCode" dataField='param1' [width]="50"
+            accessEnableOn="r">
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenShipmentFlag">
+        <ngc-label value='bil.enquireCharges.poDoNumberFilter'></ngc-label>
+        <div>
+          <ngc-input formControlName='additionalReferenceNumber' accessEnableOn="r"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenShipmentFlag">
+        <ngc-label value='bil.serviceId'></ngc-label>
+        <div>
+          <ngc-input formControlName='service' accessEnableOn="r"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf='customerSelectionFlag && !screenShipmentFlag' [grid24]="true" column="2">
+        <ngc-label label='bil.paymentStatus'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="paymentStatus" [width]="100" [source]="['Paid', 'Pending', 'All']">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="3" *ngIf='customerSelectionFlag && !handledbyHouse && !screenShipmentFlag'>
+        <ngc-label label='billingverification.dateandtimefrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="transactionDateFrom" showTimeButton="true" [showCalendarButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="3" *ngIf='customerSelectionFlag && !handledbyHouse && !screenShipmentFlag'>
+        <ngc-label label='billingverification.dateandtimeto'></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="transactionDateTo" showTimeButton="true" [showCalendarButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="7" *ngIf='customerSelectionFlag && !handledbyHouse && !screenShipmentFlag'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-label label='enquireCharges.customerSearchNote'></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column align='right'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button value='g.search' (click)='onEnquire()' accessEnableOn="r">
+          </ngc-button>
+          <ngc-button *ngIf="!changeCustomer && showSearch" value='bill.updateCharges' (click)='onChargeUpdate($event)'
+            accessSectionId="FORCE_UPDATE">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf='changeCustomer' type='section'>
+    <ngc-row>
+      <ngc-column column='2' *ngIf="response.serviceId || response.shipmentNumber">
+        <ngc-label value='bil.altCustomer'></ngc-label>
+        <div>
+          <ngc-lov displayField='deckFlag' [validOnly]='true' upperCase="false" [noCache]="true" [width]='150'
+            formControlName="altCustomerId" sourceId="CUSTOMER_BILL" title="billing.customer" dataField='code'
+            [width]="50" valueMember="deckFlag" accessEnableOn="r" (select)='onAlternateCustomerSelect($event)'>
+            <ngc-data-column text="g.customerCode" dataField="desc" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="deckFlag" [width]="250"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type='section'
+          *ngIf="!changeCustomer && showSearch && !enquireChargesForm.get('customer').value">
+          <ngc-row>
+            <ngc-column *ngIf="response.serviceId && !response.shipmentNumber" column="1">
+              <ngc-label value='bil.serviceId'></ngc-label>
+              <div>
+                <ngc-display formControlName='service'></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" feature="Billing.PrepaidAccount"
+              *ngIf="response.serviceId && !response.shipmentNumber" column="1">
+              <ngc-label label="billing.pdAccount"></ngc-label>
+              <div>
+                <ngc-display formControlName="pdAccount"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" feature="Billing.PrepaidAccount"
+              *ngIf="response.serviceId && !response.shipmentNumber" column="1">
+              <ngc-label label="billing.pdBalance"></ngc-label>
+              <div>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="pdBalance"></ngc-currencydisplay>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="response.shipmentNumber && !response.serviceId">
+              <ngc-label value='g.awbNumber'></ngc-label>
+              <div>
+                <ngc-shipmentdisplay formControlName='shipment'></ngc-shipmentdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" *ngIf="!response.serviceId">
+              <ngc-label label="billing.org"></ngc-label> /
+              <ngc-label label="export.des"></ngc-label>
+              <div>
+                <ngc-display formControlName="origin"></ngc-display> /
+                <ngc-display formControlName="destination"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center" *ngIf="!response.serviceId">
+              <ngc-label label="display.pieces"></ngc-label>
+              <div>
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay> /
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center" entityAttribute="Gen.ChargeableWeight"
+              *ngIf="!response.serviceId">
+              <ngc-label label="g.chargeableWeight"></ngc-label>
+              <div>
+                <ngc-display formControlName="chargeableWeight" decimalDigits="2"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center" *ngIf="!response.serviceId">
+              <ngc-label label="billing.shpcne"></ngc-label>
+              <div>
+                <ngc-display formControlName="shpcne"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center" *ngIf="!response.serviceId">
+              <ngc-label label="agent"></ngc-label>
+              <div>
+                <ngc-display formControlName="agent"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="response.shipmentNumber && !response.serviceId">
+              <ngc-label value='g.shc'></ngc-label>
+              <div>
+                <ngc-display formControlName='shc'></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" entityAttribute="Awb.DomesticInternationalHandling" *ngIf="!response.serviceId">
+              <ngc-label label="imp.intl.dom"></ngc-label>
+              <div>
+                <ngc-display formControlName="domIntl" entityAttribute="Awb.DomesticInternationalHandling">
+                </ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="response.shipmentNumber && !response.serviceId">
+              <ngc-label value='g.handlingArea'></ngc-label>
+              <div>
+                <ngc-display formControlName='handlingArea'></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column *ngIf="response.shipmentNumber && !response.serviceId">
+              <ngc-label value='billing.exportImport'></ngc-label>
+              <div>
+                <ngc-display formControlName='exportImportFlag'></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" entityAttribute='Customs.CustomsAssessedValue'
+              *ngIf="enquireChargesForm.get('exportImportFlag').value == 'IMPORT'">
+              <ngc-label label="import.customs.cav"></ngc-label>
+              <div>
+                <ngc-display formControlName="cavFob"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" entityAttribute='Customs.CustomsDeclaredValue'
+              *ngIf="enquireChargesForm.get('exportImportFlag').value == 'EXPORT'">
+              <ngc-label label="import.customs.fob"></ngc-label>
+              <div>
+                <ngc-display formControlName="cavFob"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" entityAttribute='Customs.DutyAmount' *ngIf="!response.serviceId">
+              <ngc-label label="Duty"></ngc-label>
+              <div>
+                <ngc-display formControlName="duty"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" feature='Billing.SalesTax' *ngIf="!response.serviceId">
+              <ngc-label label="billing.pure.agent"></ngc-label>
+              <div>
+                <ngc-display formControlName="pureAgent"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="right" *ngIf="response.serviceId || response.shipmentNumber">
+              <ngc-label value=''></ngc-label>
+              <div>
+                <ngc-button value='bill.changeCustomer' (click)='onChangeCustomer($event)' accessEnableOn="r"
+                  feature="Billing.AllowChangeCustomer"></ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <ngc-container
+          *ngIf="handledbyHouse && !changeCustomer && showSearch && !enquireChargesForm.get('customer').value && enquireChargesForm.get('houseInformation') && enquireChargesForm.get('houseInformation.hawbNumber').value"
+          type='section' formGroupName="houseInformation">
+          <ngc-row>
+            <ngc-column [grid48]='true' entityAttribute="Gen.HAWBOrSBNumber">
+              <ngc-label label="billing.hawbsbNumber"></ngc-label>
+              <div>
+                <ngc-display formControlName="hawbNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' column='4' align="center">
+              <ngc-label label="display.pieces"></ngc-label>
+              <div>
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay> /
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center" entityAttribute="Gen.ChargeableWeight">
+              <ngc-label label="g.chargeableWeight"></ngc-label>
+              <div>
+                <ngc-display formControlName="chargeableWeight" decimalDigits="2"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center">
+              <ngc-label label="g.shc"></ngc-label>
+              <div>
+                <ngc-display formControlName="shc"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center">
+              <ngc-label label="billing.shpcne"></ngc-label>
+              <div>
+                <ngc-display formControlName="shpcne"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column [grid48]='true' align="center">
+              <ngc-label label="agent"></ngc-label>
+              <div>
+                <ngc-display formControlName="agent"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" entityAttribute='Customs.CustomsAssessedValue'
+              *ngIf="enquireChargesForm.get('exportImportFlag').value == 'IMPORT'">
+              <ngc-label label="import.customs.cav"></ngc-label>
+              <div>
+                <ngc-display formControlName="cavFob"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center" entityAttribute='Customs.CustomsDeclaredValue'
+              *ngIf="enquireChargesForm.get('exportImportFlag').value == 'EXPORT'">
+              <ngc-label label="import.customs.fob"></ngc-label>
+              <div>
+                <ngc-display formControlName="cavFob"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-label label="Duty"></ngc-label>
+              <div>
+                <ngc-display formControlName="duty"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="center">
+              <ngc-label label="billing.pure.agent"></ngc-label>
+              <div>
+                <ngc-display formControlName="pureAgent"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column feature="Billing.PrepaidAccount"
+        *ngIf="!changeCustomer && showSearch && !enquireChargesForm.get('customer').value && enquireChargesForm.get('shipment').value != null"
+        [column]="2">
+
+        <ngc-container type="squarethin" title="billing.title.payeeinformation" formGroupName="payeeInformation">
+          <ngc-row>
+            <ngc-column align="left" feature="Billing.PrepaidAccount" *ngIf="!response.serviceId">
+              <ngc-label label="report.billing.payee"></ngc-label>
+              <div>
+                <ngc-display formControlName="payeeCustomerName"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="left" feature="Billing.PrepaidAccount" *ngIf="!response.serviceId">
+              <ngc-label label="billing.pdAccount"></ngc-label>
+              <div>
+                <ngc-display formControlName="paymentAccountNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column align="left" feature="Billing.PrepaidAccount" *ngIf="!response.serviceId">
+              <ngc-label label="billing.pdBalance"></ngc-label>
+              <div>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="paymentAccountBalance"></ngc-currencydisplay>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showSearch" title="bil.enquireCharges.chargeAdvice">
+    <ngc-row>
+      <ngc-column [column]='changeCustomer ? 10 : 12'>
+        <ngc-table>
+          <thead align="Center">
+            <tr>
+              <th class='text-center' colspan='1' rowspan='2' width='10'>
+                <ngc-label value='bill.select'></ngc-label>
+              </th>
+              <th class='text-center borderZero' [attr.colspan]='colspanLength' *ngIf='!changeCustomer'>
+                <ngc-label value='g.customerName'></ngc-label>
+              </th>
+              <th class='showDetails' *ngIf='!changeCustomer'>
+                <ngc-link (linkClick)="showMore(showMoreFlag)" *ngIf="!showMoreFlag" feature='Billing.SalesTax'>
+                  <ngc-label value="More...>>" color="white"></ngc-label>
+                </ngc-link>
+                <ngc-link (linkClick)="showMore(showMoreFlag)" *ngIf="showMoreFlag" feature='Billing.SalesTax'>
+                  <ngc-label value="<< Less" color="white"> </ngc-label>
+                </ngc-link>
+              </th>
+              <th class='text-center' colspan='8' *ngIf='changeCustomer'>
+                <ngc-label value='g.customerName'></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th [noWrap]='true' width='200' class='text-center'>
+                <ngc-label value='bil.serviceType'></ngc-label>
+              </th>
+              <th class='text-center'>
+                <ngc-label value='g.quantity'></ngc-label>
+              </th>
+              <th class='text-center'>
+                <ngc-label value='g.duration'></ngc-label>
+              </th>
+              <th class='text-center'>
+                <ngc-label value='g.flight'></ngc-label>
+              </th>
+              <th class='text-center' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                <ngc-label value='Charge Amount'></ngc-label>
+              </th>
+              <!-- <th class='text-center' *ngIf='!changeCustomer && waivedStatusApproved'>
+                <ngc-label value='billing.waivedStatus'></ngc-label>
+              </th> -->
+              <th class='text-center' *ngIf='!changeCustomer && waivedStatusApproved'>
+                <ngc-label value='bil.enquire.waivedAmount'></ngc-label>
+              </th>
+              <th class='text-center' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                <ngc-label value='Gross Amount'></ngc-label>
+              </th>
+              <th class='text-center' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                <ngc-label value="CGST">
+                </ngc-label>
+              </th>
+              <th class='text-center' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                <ngc-label value="SGST">
+                </ngc-label>
+              </th>
+              <th class='text-center' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                <ngc-label value="IGST">
+                </ngc-label>
+              </th>
+              <!-- <th class='text-center' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                <ngc-label value='export.NAWB.taxes'></ngc-label>
+              </th> -->
+              <th class='text-center'>
+                <ngc-label value='bil.enquire.amount'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf='!changeCustomer'>
+                <ngc-label value='bil.enquireCharges.collectionMechanism'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf='!changeCustomer'>
+                <ngc-label value='bil.enquireCharges.paid'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf='!changeCustomer'>
+                <ngc-label value='bil.receiptNumber'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf='!changeCustomer'>
+                <ngc-label value='bil.enquire.toCollect'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf='!changeCustomer && showMoreFlag'>
+                <ngc-label value='bil.toBill'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf='!changeCustomer && showMoreFlag'>
+                <ngc-label value='bil.toBillByAirline'></ngc-label>
+              </th>
+              <th *ngIf="showMoreFlag" class='text-center'>
+                <ngc-label value='bil.enquire.awbNumber'></ngc-label>
+              </th>
+              <th class='text-center' *ngIf="handledbyHouse &&  !changeCustomer && showMoreFlag"
+                entityAttribute="Gen.HAWBOrSBNumber">
+                <ngc-label value='billing.hawbsbNumber'></ngc-label>
+              </th>
+              <th *ngIf="showMoreFlag" class='text-center'>
+                <ngc-label value='bil.enquire.serviceNumber'></ngc-label>
+              </th>
+              <th *ngIf="showMoreFlag" class='text-center'>
+                <ngc-label value='bil.enquireCharges.poDoNumber'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName='customerInfo'>
+            <ng-container *ngFor="let subitem of enquireChargesForm.controls.customerInfo.controls; let subindex=index"
+              [formGroupName]="subindex">
+              <tr>
+                <td align='center' *ngIf="!changeCustomer && !subitem.get('paidCustomer').value" colspan='1'>
+                  <ngc-radiobutton formControlName='checkCustomer' groupName="checkBoxValue"
+                    (click)="onCheckCustomer(subitem, subindex)">
+                  </ngc-radiobutton>
+                </td>
+                <td
+                  *ngIf="(changeCustomer && subitem.get('collectCustomer').value) || (!changeCustomer && subitem.get('paidCustomer').value)"
+                  colspan='1'></td>
+                <td [attr.colspan]='colspanLength+1' *ngIf="!changeCustomer">
+                  <ngc-display formControlName='customerName' style="font-size: large;">
+                  </ngc-display>
+                </td>
+                <td colspan='8' *ngIf="changeCustomer && subitem.get('collectCustomer').value">
+                  <ngc-display formControlName='customerName' style="font-size: large;">
+                  </ngc-display>
+                </td>
+              </tr>
+              <ng-container formArrayName='chargeAdvice'>
+                <tr *ngFor="let item of subitem.controls.chargeAdvice.controls; let index=index"
+                  [formGroupName]="index">
+                  <ng-container
+                    *ngIf="!changeCustomer || (item.get('paymentStatus').value == 'Pending' && !item.get('paid').value)">
+                    <td align='center' *ngIf='changeCustomer'>
+                      <ngc-checkbox formControlName='checkCharge'></ngc-checkbox>
+                    </td>
+                    <td align="center" *ngIf="!changeCustomer">
+                      <ngc-checkbox *ngIf="!changeCustomer && (item.get('toCollect').value != 0) && showCheckBox"
+                        (click)="onSelectCharge(subindex,index)" formControlName='select'>
+                      </ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='serviceType'></ngc-display>
+                    </td>
+                    <td align='center'>
+                      <ngc-display formControlName='quantity' dataType="string"></ngc-display><br>
+                      <ngc-display formControlName='quantityDesc'></ngc-display>
+                    </td>
+                    <td align='center'>
+                      <ngc-display formControlName='duration'></ngc-display>
+                    </td>
+                    <td align='center'>
+                      <ngc-display formControlName='flightKey'></ngc-display><br>
+                      <ngc-display [onlyDate]='true' type='displayDate' formControlName='flightDate'></ngc-display>
+                    </td>
+                    <td align='right' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                      <ngc-currencydisplay [noSymbol]="true" width='80' formControlName='chargeAmount'>
+                      </ngc-currencydisplay>
+                    </td>
+                    <!-- <td align='right' *ngIf='!changeCustomer && waivedStatusApproved'>
+                      <ngc-display formControlName='waivedStatus'>
+                      </ngc-display>
+                    </td> -->
+                    <td align='right' *ngIf='!changeCustomer && waivedStatusApproved'>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName='waivedAmount'>
+                      </ngc-currencydisplay>
+                      <br>
+                      <ngc-column feature="Billing.WaiverApproveOrReject"
+                        *ngIf="item.get('waivedStatus').value == 'PENDING' || item.get('waivedStatus').value == 'APPROVED'">
+                        (<ngc-display formControlName='waivedStatus'>
+                        </ngc-display>)
+                      </ngc-column>
+                    </td>
+                    <td align='right' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                      <ngc-currencydisplay [noSymbol]="true" width='80' formControlName='grossAmount'>
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align='right' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                      <ngc-currencydisplay [noSymbol]="true" width='120' formControlName='taxComp1'>
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align='right' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                      <ngc-currencydisplay [noSymbol]="true" width='120' formControlName='taxComp2'>
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align='right' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                      <ngc-currencydisplay [noSymbol]="true" width='120' formControlName='taxComp3'>
+                      </ngc-currencydisplay>
+                    </td>
+                    <!-- <td align='right' feature='Billing.SalesTax' *ngIf="!changeCustomer">
+                      <ngc-display width='150' formControlName='taxCompCode'>
+                      </ngc-display>
+                    </td> -->
+                    <td align='right' *ngIf="showChargeAmount">
+                      <ngc-currencydisplay [noSymbol]="true" width='150' formControlName='chargeAmount'>
+                      </ngc-currencydisplay>
+                    </td>
+                    <td align='right' *ngIf="!showChargeAmount">
+                      <ngc-currencydisplay [noSymbol]="true" width='150' formControlName='amount'></ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="((item.get('paymentType').value == 'Collect' && item.get('originalPaymentType').value == 'Bill/Collect') || item.get('paymentType').value == 'Bill/Collect') &&
+                (item.get('paymentStatus').value == 'Pending' ||
+                item.get('paymentStatus').value == 'Void' ) && !changeCustomer">
+                      <ngc-dropdownlist required width='80' (ngModelChange)='onChange($event, subindex, index)'
+                        formControlName='paymentType' sourceId='Billing$EnquireCharges.Collection' [noBlank]='true'>
+                      </ngc-dropdownlist>
+                    </td>
+                    <td
+                      *ngIf="((item.get('paymentType').value == 'Collect' && item.get('originalPaymentType').value == 'Collect') || item.get('paymentStatus').value == 'Paid') && !changeCustomer">
+                      <ngc-display formControlName='paymentType' sourceCategory='dropdown'
+                        sourceId='Billing$EnquireCharges.Collection'>
+                      </ngc-display>
+                    </td>
+                    <td *ngIf="item.get('paymentType').value == 'Bill By Airline' && !changeCustomer">
+                      <ngc-display formControlName='paymentType' sourceCategory='dropdown'
+                        sourceId='Billing$EnquireCharges.BillByAirline'></ngc-display>
+                    </td>
+                    <td align='right'
+                      *ngIf="item.get('paymentType').value == 'Collect' && (item.get('paymentStatus').value == 'Pending' || item.get('paymentStatus').value == 'Void') && !changeCustomer">
+                      <ngc-icon type="yesno" value='no'></ngc-icon>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName='paid'></ngc-currencydisplay>
+                    </td>
+                    <td align='right'
+                      *ngIf="item.get('paymentType').value == 'Collect' && (item.get('paymentStatus').value == 'Paid' || item.get('paymentStatus').value == 'Posted' || item.get('paymentStatus').value == 'Invoiced') && !changeCustomer">
+                      <ngc-icon type="yesno" value='yes'></ngc-icon>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName='paid'></ngc-currencydisplay>
+                    </td>
+                    <td align='right' *ngIf="item.get('paymentType').value == 'Bill/Collect' && !changeCustomer">
+                      <ngc-display value='billing.bill' [i18n]="true"></ngc-display>
+                    </td>
+                    <td align='right' *ngIf="item.get('paymentType').value == 'Bill By Airline' && !changeCustomer">
+                      <ngc-display value='billing.bill' [i18n]="true"></ngc-display>
+                    </td>
+                    <td formArrayName='receiptNumber' *ngIf='!changeCustomer'>
+                      <ng-container
+                        *ngFor="let subsubitem of resp[subindex].chargeAdvice[index].receiptNumber; let subsubindex=index">
+                        <ngc-link (linkClick)='generateChargeSlipReport($event, subindex, index, subsubindex)'
+                          [value]='subsubitem'>
+                        </ngc-link><br>
+                      </ng-container>
+                    </td>
+
+                    <td align='right'
+                      *ngIf="item.get('paymentType').value == 'Collect' && item.get('toCollect').value!=0 && item.get('toCollect').value!=null && !changeCustomer">
+                      <ngc-currencydisplay [noSymbol]="true" formControlName='toCollect'></ngc-currencydisplay>
+                    </td>
+                    <td
+                      *ngIf="item.get('paymentType').value == 'Collect' && (item.get('toCollect').value==0 || item.get('toCollect').value==null) && !changeCustomer">
+                      <ngc-display value=''></ngc-display>
+                    </td>
+                    <td *ngIf="item.get('paymentType').value != 'Collect' && !changeCustomer">
+                      <ngc-display value=''></ngc-display>
+                    </td>
+                    <td align='right' *ngIf="item.get('paymentType').value == 'Bill/Collect' && item.get('toBill').value!=0 &&
+                       item.get('toBill').value!=null && !changeCustomer && showMoreFlag">
+                      <ngc-currencydisplay [noSymbol]="true" formControlName='toBill'></ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="item.get('paymentType').value == 'Bill/Collect' && (item.get('toBill').value==0 || 
+                      !item.get('toBill').value==null) && !changeCustomer && showMoreFlag">
+                      <ngc-display value=''></ngc-display>
+                    </td>
+                    <td *ngIf="item.get('paymentType').value != 'Bill/Collect' && !changeCustomer  && showMoreFlag ">
+                      <ngc-display value=''></ngc-display>
+                    </td>
+
+                    <td align='right' *ngIf="item.get('paymentType').value == 'Bill By Airline' && item.get('toBillByAirline').value!=0 &&
+                     item.get('toBillByAirline').value!=null && !changeCustomer  && showMoreFlag">
+                      <ngc-currencydisplay [noSymbol]="true" formControlName='toBillByAirline'></ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="item.get('paymentType').value == 'Bill By Airline' && (item.get('toBillByAirline').value==0 || !item.get('toBillByAirline').value==null) && !changeCustomer
+                      && showMoreFlag">
+                      <ngc-display value=''></ngc-display>
+                    </td>
+                    <td *ngIf="item.get('paymentType').value != 'Bill By Airline' && !changeCustomer && showMoreFlag">
+                      <ngc-display value=''></ngc-display>
+                    </td>
+                    <td *ngIf="showMoreFlag" align='right'>
+                      <ngc-link formControlName='shipmentNumber'
+                        [disabled]="changeCustomer || enquireChargesForm.get('customer').value ? true : false"
+                        (linkClick)='onInvoiceLinkClick(subindex, index)'>
+                      </ngc-link>
+                    </td>
+                    <td align='right' *ngIf="handledbyHouse && !changeCustomer && showMoreFlag">
+                      <ngc-display formControlName='hawbNumber'>
+                      </ngc-display>
+                    </td>
+                    <td *ngIf="showMoreFlag" align='right'>
+                      <ngc-link formControlName='serviceNumber'
+                        [disabled]="changeCustomer || enquireChargesForm.get('customer').value ? true : false"
+                        (linkClick)='onInvoiceLinkClick(subindex, index)'>
+                      </ngc-link>
+                    </td>
+                    <td *ngIf="showMoreFlag" align='right'>
+                      <ngc-display formControlName='additionalReferenceId'></ngc-display>
+                    </td>
+                  </ng-container>
+                </tr>
+              </ng-container>
+              <tr class='greyBack' *ngIf="!changeCustomer && enquireChargesForm.get('customerInfo').length > 1">
+                <td></td>
+                <td>
+                  <ngc-label value='g.subTotal'></ngc-label>
+                </td>
+                <td></td>
+                <td></td>
+                <td></td>
+                <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+                <td *ngIf="waivedStatusApproved"></td>
+                <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+                <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+                <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+                <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+                <td align='right' *ngIf="subitem.get('amountSum').value">
+                  <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" formControlName='amountSum'>
+                  </ngc-currencydisplay>
+                </td>
+                <td align='right' *ngIf="!subitem.get('amountSum').value">
+                  <ngc-label value=''></ngc-label>
+                </td>
+                <td></td>
+                <td align='right' *ngIf="subitem.get('paidSum').value">
+                  <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" formControlName='paidSum'></ngc-currencydisplay>
+                </td>
+                <td *ngIf="!subitem.get('paidSum').value">
+                  <ngc-label value=''></ngc-label>
+                </td>
+                <td></td>
+                <td align='right' *ngIf="subitem.get('collectSum').value">
+                  <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" formControlName='collectSum'>
+                  </ngc-currencydisplay>
+                </td>
+                <td align='right' *ngIf="!subitem.get('collectSum').value">
+                  <ngc-label value=''></ngc-label>
+                </td>
+                <td align='right' *ngIf="subitem.get('billSum').value && showMoreFlag">
+                  <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" formControlName='billSum'></ngc-currencydisplay>
+                </td>
+                <td align='right' *ngIf="!subitem.get('billSum').value && showMoreFlag">
+                  <ngc-label value=''></ngc-label>
+                </td>
+                <td align='right' *ngIf="subitem.get('billByAirlineSum').value && showMoreFlag">
+                  <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" formControlName='billByAirlineSum'>
+                  </ngc-currencydisplay>
+                </td>
+                <td *ngIf="!subitem.get('billByAirlineSum').value && showMoreFlag">
+                  <ngc-label value=''></ngc-label>
+                </td>
+                <td *ngIf="showMoreFlag"></td>
+                <td *ngIf="showMoreFlag"></td>
+                <td *ngIf="showMoreFlag"></td>
+                <td *ngIf="handledbyHouse && !changeCustomer && showMoreFlag"></td>
+              </tr>
+            </ng-container>
+            <tr class='greyBack'>
+              <td></td>
+              <td>
+                <ngc-label value='g.total'></ngc-label>
+              </td>
+              <td></td>
+              <td></td>
+              <td></td>
+              <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+              <td *ngIf='!changeCustomer && waivedStatusApproved' align="right">
+                <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" [value]='response.totalWaivedAmount'>
+                </ngc-currencydisplay>
+              </td>
+              <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+              <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+              <td feature='Billing.SalesTax' *ngIf="!changeCustomer" align='right'>
+                <!-- <ngc-currencydisplay [noSymbol]="true"
+                  *ngIf="response.totalTaxAmount != null && response.totalTaxAmount != 0" emphasis="nlb"
+                  [value]='response.totalTaxAmount'>
+                </ngc-currencydisplay> -->
+              </td>
+              <td feature='Billing.SalesTax' *ngIf="!changeCustomer"></td>
+              <td align='right' *ngIf="response.totalAmount != null && response.totalAmount != 0">
+                <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" [value]='response.totalAmount'>
+                </ngc-currencydisplay>
+              </td>
+              <td align='right' *ngIf="!response.totalAmount">
+                <ngc-label value=''></ngc-label>
+              </td>
+              <td *ngIf='!changeCustomer'></td>
+              <td align='right' *ngIf="response.paidSum != null && response.paidSum != 0 && !changeCustomer">
+                <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" [value]='response.paidSum'></ngc-currencydisplay>
+              </td>
+              <td *ngIf="!response.paidSum && !changeCustomer">
+                <ngc-label value=''></ngc-label>
+              </td>
+              <td *ngIf='!changeCustomer'></td>
+              <!-- <td *ngIf='!changeCustomer && waivedStatusApproved'></td> -->
+              <td align='right' *ngIf="response.collectSum != null && response.collectSum != 0 && !changeCustomer">
+                <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" [value]='response.collectSum'>
+                </ngc-currencydisplay>
+              </td>
+              <td *ngIf="!response.collectSum && !changeCustomer">
+                <ngc-label value=''></ngc-label>
+              </td>
+              <td align='right'
+                *ngIf="response.billSum != null && response.billSum != 0 && !changeCustomer && showMoreFlag">
+                <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" [value]='response.billSum'></ngc-currencydisplay>
+              </td>
+              <td *ngIf="!response.billSum && !changeCustomer && showMoreFlag">
+                <ngc-label value=''></ngc-label>
+              </td>
+              <td align='right' *ngIf="response.billByAirlineSum != null && response.billByAirlineSum != 0 && !changeCustomer
+                && showMoreFlag">
+                <ngc-currencydisplay [noSymbol]="true" emphasis="nlb" [value]='response.billByAirlineSum'>
+                </ngc-currencydisplay>
+              </td>
+              <td *ngIf="!response.billByAirlineSum && !changeCustomer && showMoreFlag">
+                <ngc-label value=''></ngc-label>
+              </td>
+              <td *ngIf="showMoreFlag"></td>
+              <td *ngIf="showMoreFlag"></td>
+              <td *ngIf="showMoreFlag"></td>
+              <td *ngIf="handledbyHouse && showMoreFlag"></td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showSearch && !hidePayCharges && (totalAmount > 0) && !changeCustomer" title="Pay Charges"
+    type="sectiontop">
+    <ngc-row>
+      <ngc-column [grid24]="true" column="3">
+        <ngc-label value='bil.ic/PassNumber'></ngc-label>
+        <div>
+
+          <ngc-alphanuminput formControlName='icPassNumber'
+            entityAttribute="Customer.PersonalIdentificationNumberSearch" required>
+          </ngc-alphanuminput>
+
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="3">
+
+        <ngc-label value='Customer.AuthorisedPersonName'></ngc-label>
+        <div>
+
+          <ngc-input formControlName='receivedFrom' patternName='alphanumspace'
+            entityAttribute="Customer.AuthorisedPersonName" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="3">
+        <ngc-label value='bil.counter'></ngc-label>
+        <div>
+          <ngc-locations-list [typeDropDown]="true" required (select)='onCounterSelect($event)'
+            [locationTypeList]="['BILLING_COUNTER']" [displayOnlyLocation]="true" formControlName="counter"
+            [width]="100" [autoSelectOnSingle]="true">
+          </ngc-locations-list>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="3">
+        <ngc-label value='bil.actualAmount'></ngc-label>
+        <div>
+          <ngc-currencydisplay emphasis='lg' [noSymbol]="true" [value]='amountToCollect' [i18n]="true">
+          </ngc-currencydisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true" column="3">
+        <ngc-label value='bill.round.off.value'></ngc-label>
+        <div>
+          <ngc-currencydisplay emphasis='lg' [noSymbol]="true" [value]='roundOffDelta' [i18n]="true">
+          </ngc-currencydisplay>
+        </div>
+      </ngc-column>
+      <ngc-column [grid24]="true">
+        <ngc-label value='bil.totalAmount'></ngc-label>
+        <div>
+          <ngc-currencydisplay emphasis='lg' [noSymbol]="true" [value]='totalAmount' [i18n]="true">
+          </ngc-currencydisplay>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column>
+        <div align="right">
+          <ngc-button (click)='clickpdAccount()' value='Changes PD Account'></ngc-button>
+        </div>
+      </ngc-column> -->
+      <ngc-column feature="Billing.AllowMultiplePaymentMode" align="right">
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button (click)='addRow($event)' value='g.addMore'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showSearch && !hidePayCharges && (totalAmount > 0) && !changeCustomer">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width='100'>
+                <ngc-label value='bil.payMode'></ngc-label>
+              </th>
+              <th width='150' feature="Billing.PrepaidAccount"
+                *ngIf="enquireChargesForm.controls.paymentDetails && enquireChargesForm.controls.paymentDetails.controls[0] && enquireChargesForm.controls.paymentDetails.controls[0].controls['mode'].value == 'PDACCOUNT'">
+                <ngc-label value='billing.pdAccount'></ngc-label>
+              </th>
+              <th width='150' feature="Billing.PrepaidAccount"
+                *ngIf="enquireChargesForm.controls.paymentDetails && enquireChargesForm.controls.paymentDetails.controls[0] && enquireChargesForm.controls.paymentDetails.controls[0].controls['mode'].value == 'PDACCOUNT'">
+                <ngc-label value='billing.pdBalance'></ngc-label>
+              </th>
+              <th width='150'>
+                <ngc-label value='bil.issuingBank'></ngc-label>
+              </th>
+              <th width='150'>
+                <ngc-label value='bil.transactionNumber'></ngc-label>
+                <ngc-label value='bil.referenceNumber'></ngc-label>
+              </th>
+              <th width='150'>
+                <ngc-label value='g.date'></ngc-label>
+              </th>
+              <th width='150'>
+                <ngc-label value='g.tenderedAmount'></ngc-label>
+              </th>
+              <th width='100'>
+                <ngc-label value='bil.paymentStatus'></ngc-label>
+              </th>
+              <th width='200'>
+                <ngc-label value='bil.paymentRemarks'></ngc-label>
+              </th>
+              <th width='50' feature="Billing.AllowMultiplePaymentMode">
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName='paymentDetails'>
+            <tr *ngFor="let item of enquireChargesForm.controls.paymentDetails.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-dropdownlist required width='150' [autoSelect]='true' [noCache]="true"
+                  sourceId='KEY_BILLING_PAYMENT_MODE' sourceType='query' (select)="onChangeMode($event,index)"
+                  [sourceParameters]='customer' formControlName='mode'>
+                </ngc-dropdownlist>
+              </td>
+
+              <td feature="Billing.PrepaidAccount" *ngIf="item.get('mode').value == 'PDACCOUNT'">
+                <ng-container *ngIf="this.enquireChargesForm.get('shipment').value != null ;else elseBlock">
+                  <!-- {{this.enquireChargesForm.get('houseInformation.pdAccount').value}} -->
+                  <!-- <ng-container *ngIf="this.enquireChargesForm.get('pdAccount').value">
+                    {{this.enquireChargesForm.get('pdAccount').value}}
+                  </ng-container> -->
+                  <!-- <ng-container *ngIf="!this.enquireChargesForm.get('pdAccount').value"> -->
+                  <ng-container>
+                    {{this.enquireChargesForm.get('payeeInformation.paymentAccountNumber').value}}
+                  </ng-container>
+                </ng-container>
+                <ng-template #elseBlock>
+                  <!-- <ng-container *ngIf="this.enquireChargesForm.get('pdAccount').value">
+                    {{this.enquireChargesForm.get('pdAccount').value}}
+                  </ng-container>
+                  <ng-container *ngIf="!this.enquireChargesForm.get('pdAccount').value"> -->
+                  <ng-container>
+                    {{this.enquireChargesForm.get('pdAccount').value}}
+                  </ng-container>
+                </ng-template>
+              </td>
+              <td feature="Billing.PrepaidAccount" *ngIf="item.get('mode').value == 'PDACCOUNT'">
+                <ng-container *ngIf="this.enquireChargesForm.get('shipment').value != null ;else elseBlock">
+                  <!-- <ngc-currencydisplay [noSymbol]="true"
+                    [value]="this.enquireChargesForm.get('houseInformation.pdBalance').value">
+                  </ngc-currencydisplay> -->
+                  <!-- <ng-container *ngIf="!this.enquireChargesForm.get('pdAccount').value"> -->
+                  <ngc-currencydisplay [noSymbol]="true"
+                    [value]="this.enquireChargesForm.get('payeeInformation.paymentAccountBalance').value">
+                  </ngc-currencydisplay>
+                  <!-- </ng-container>
+                  <ng-container *ngIf="this.enquireChargesForm.get('pdAccount').value">
+                    <ngc-currencydisplay [noSymbol]="true" [value]="this.enquireChargesForm.get('pdBalance').value">
+                    </ngc-currencydisplay>
+                  </ng-container> -->
+                </ng-container>
+                <ng-template #elseBlock>
+                  <!-- <ng-container *ngIf="!this.enquireChargesForm.get('pdAccount').value"> -->
+                  <ng-container>
+                    <ngc-currencydisplay [noSymbol]="true" [value]="this.enquireChargesForm.get('pdBalance').value">
+                    </ngc-currencydisplay>
+                  </ng-container>
+                  <!-- <ng-container *ngIf="this.enquireChargesForm.get('pdAccount').value">
+                    <ngc-currencydisplay [noSymbol]="true" [value]="this.enquireChargesForm.get('pdBalance').value">
+                    </ngc-currencydisplay>
+                  </ng-container> -->
+                </ng-template>
+              </td>
+              <td *ngIf="item.get('mode').value!='CHEQUE'"></td>
+              <td *ngIf="item.get('mode').value=='CHEQUE'">
+                <ngc-dropdownlist width='150' sourceId='BILL_BANKS' sourceType='query' formControlName='issuingBank'>
+                </ngc-dropdownlist>
+              </td>
+              <td *ngIf="item.get('mode').value=='CHEQUE'">
+                <ngc-input decimalDigits="0" [width]="150" pattern="^[0-9]*$" formControlName='transactionNumber'
+                  required>
+                </ngc-input>
+              </td>
+              <td *ngIf="item.get('mode').value!='CHEQUE'">
+                <ngc-alphanuminput [width]="150" formControlName='transactionNumber' required>
+                </ngc-alphanuminput>
+              </td>
+              <td *ngIf="item.get('mode').value=='CASH'"></td>
+              <td *ngIf="item.get('mode').value!='CASH'">
+                <ngc-datetimeinput required [width]="150" formControlName='date'></ngc-datetimeinput>
+              </td>
+              <td>
+                <ngc-currencyinput required [width]="150" formControlName='tenderedAmount'>
+                </ngc-currencyinput>
+              </td>
+              <td>
+                <ngc-dropdownlist required [width]="100" sourceId='Billing$PaymentStatus'
+                  formControlName='paymentStatus'>
+                </ngc-dropdownlist>
+              </td>
+              <!-- <td *ngIf="item.get('paymentStatus').value!=null"> -->
+              <td>
+                <ngc-input [width]='300' [maxlength]="250" formControlName='paymentRemarks'>
+                </ngc-input>
+              </td>
+              <td *ngIf="index==0" feature="Billing.AllowMultiplePaymentMode">
+              </td>
+              <td *ngIf="index!=0" feature="Billing.AllowMultiplePaymentMode">
+                <ngc-link iconType='delete' (linkClick)='onPayDelete($event, index)'></ngc-link>
+              </td>
+
+            </tr>
+            <tr class='greyBack'>
+              <td></td>
+              <td *ngIf="enquireChargesForm.controls.paymentDetails.controls[0].controls['mode'].value == 'PDACCOUNT'"
+                feature="Billing.PrepaidAccount">
+                <ngc-label value="billing.title.changespdaccount">
+                </ngc-label>
+              </td>
+              <td *ngIf="enquireChargesForm.controls.paymentDetails.controls[0].controls['mode'].value == 'PDACCOUNT'"
+                feature="Billing.PrepaidAccount">
+                <ngc-link (linkClick)="editPDAccount()">
+                  <ngc-icon type="edit" value="true">
+                  </ngc-icon>
+                </ngc-link>
+              </td>
+              <td>
+              </td>
+              <td></td>
+              <td>
+                <ngc-label value='g.total'></ngc-label>
+              </td>
+              <td align='right'>
+                <ngc-currencydisplay [noSymbol]="true" [value]='totalAmt'></ngc-currencydisplay>
+              </td>
+              <td></td>
+              <td></td>
+              <td feature="Billing.AllowMultiplePaymentMode"></td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row feature="Billing.ShowChargeRatesPageLink">
+      <ngc-column column='7'>
+        <ngc-note>
+          Note: Check
+          <a href='http://www.satscargo.com/common/Charges.htm'>www.satscargo.com</a> for updated rates.
+        </ngc-note>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<ngc-footer *ngIf='!changeCustomer && showSearch'>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <!-- <ngc-button value='bil.enquireCharges.makePayment' (click)='onMakePayment($event)'></ngc-button> -->
+        <ngc-button value="(1) Waive Charges" (click)='onWaiveCharges($event)'>
+        </ngc-button>
+        <ngc-button [disabled]=poFlag value='bil.enquireCharges.addService' (click)='onAddService($event)'>
+        </ngc-button>
+        <!-- <ngc-button *ngIf=" enquireChargesForm.get('shipment').value" value='bill.updateCharges'
+          (click)='onChargeUpdate($event)' style="float: right;" accessSectionId="FORCE_UPDATE">
+        </ngc-button> -->
+        <ngc-button *ngIf="searchElementsFlag" value='billing.showSearch' (click)='showSearchItems(searchElementsFlag)'
+          style="float: right;">
+        </ngc-button>
+        <ngc-button *ngIf="!searchElementsFlag" value='billing.hideSearch' (click)='showSearchItems(searchElementsFlag)'
+          style="float: right;">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-footer>
+<ngc-report #reportWindow dataSource='transactional' title="bil.paymentReceipt" reportId='BillingCollectPayment'>
+</ngc-report>
+<ngc-report feature='Billing.TaxInvoice' #reportWindow1 dataSource='transactional' title="bil.paymentReceipt"
+  reportId='E_INVOICE'>
+</ngc-report>
+<ngc-report feature='Billing.TaxInvoice' #reportWindow2 dataSource='transactional' title="bil.paymentReceipt"
+  reportId='Credit_Note'>
+</ngc-report>
+<form [formGroup]='enquireChargesForm' *ngIf="showSearch">
+  <ngc-window #pdchangesAccount width="1000" [height]="400" title="billing.title.changespdaccount"
+    [showCloseButton]="true" (close)="onPayChangesCancel()">
+    <ngc-container type="tab" title="billing.title.payeeinformation">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="report.billing.payee"></ngc-label>
+          <div>
+            <ngc-display [value]="response.payee"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="billing.payeecode"></ngc-label>
+          <div>
+            <ngc-display [value]="response.payeeCustomerCode"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="billing.pdAccount"></ngc-label>
+          <div>
+            <ngc-display [value]="response.pdAccount"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="billing.pdBalance"></ngc-label>
+          <div>
+            <ngc-display [value]="response.pdBalance"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="rectangle" title="billing.title.payeechange">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="report.billing.payee"></ngc-label>
+          <div>
+            <ngc-dropdownlist width='90' sourceId='KEY_COLLECT_PAYMENT_PAYEE_ON_CHANGEPD' sourceType='query'
+              [sourceParameters]="{ 'param1': response.shipmentNumber,'param2':response.hawbNumber}"
+              formControlName='changePayee' (select)="onSelectPayee($event)">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="billing.payeecode"></ngc-label>
+          <div>
+            <ngc-display formControlName='changePayeeCode'></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="billing.payeename"></ngc-label>
+          <div>
+            <ngc-display formControlName='changePayeeName'></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row
+        *ngIf="this.enquireChargesForm.get('changePayee').value != null && this.enquireChargesForm.get('changePdAccountArray').length>0">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th width='100'>
+                  <ngc-label value='billing.pdAccount'></ngc-label>
+                </th>
+                <th width='100'>
+                  <ngc-label value='billing.pdBalance'></ngc-label>
+                </th>
+                <th width='100'>
+                  <ngc-label value='billing.applicablechargecategory'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName='changePdAccountArray'>
+              <tr *ngFor="let item of enquireChargesForm.controls.changePdAccountArray.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-link formControlName='code' (linkClick)='setPDAccount(item.value)'>
+                  </ngc-link>
+                </td>
+                <td>
+                  <ngc-display formControlName="desc"></ngc-display>
+                </td>
+                <td>
+                  <ng-container formArrayName='dataList'>
+                    <ng-container *ngFor="let subitem of item.controls.dataList.controls; let subindex=index"
+                      [formGroupName]="subindex">
+                      <ngc-display formControlName="desc"></ngc-display>
+                      <ng-container *ngIf="(subindex + 1) !== item.controls.dataList.length">,</ng-container>
+                    </ng-container>
+                  </ng-container>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

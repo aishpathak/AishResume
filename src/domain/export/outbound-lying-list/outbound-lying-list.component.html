@@ -1,0 +1,332 @@
+<form [formGroup]="outboundLyingListForm">
+  <ngc-titlebar title="export.outbound.lying.list.title" (print)="onPrint()" [disablePrint]="!flagShowData"
+    (clear)="onClear($event)" (cancel)="onCancel()"></ngc-titlebar>
+  <ngc-container type='square'>
+    <ngc-row>
+      <ngc-column>
+
+        <ngc-label label="awb.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrier" upperCase="true" dataField="code" displayMember="code"
+            [width]="100" sourceId='CARRIER' title='flight.carrierType' required>
+            <ngc-data-column text="carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awb.first.off.point"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="destination" [width]="100"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.booking.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="bookingStatus" sourceId="Lying_List$BookingStatus"
+            [width]="100" [dropDownWidth]="70"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awb.shipment.state"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="150" formControlName="shipmentState"
+            sourceId='Lying_List$Shipment' [dropDownWidth]="140" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+
+        <ngc-label label="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="230" formControlName="shipmentType"
+            sourceId='Lying_List$Shipment Type' [dropDownWidth]="140"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+
+        <ngc-label label="export.dwell.time"></ngc-label>
+        <div>
+          <ngc-digitinput accessEnableOn="r" formControlName="dwellTime" [width]="100"></ngc-digitinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="awb.awbnumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" [width]="100"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value="&nbsp"></ngc-label>
+        <div>
+          <ngc-checkbox accessEnableOn="r" formControlName="shcPriority">
+            <ngc-label label="export.outbound.lying.list.shc.priority.sort"></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" iconType="search" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="flagShowData">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="export.excel" (click)="onPrintExcel()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container header="export.outbound.lying.list.book.flight" *ngIf="flagShowData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput formControlName='flightKey' [width]="100" upperCase="true" required
+            (ngModelChange)="onFlightdetailsChange(index)"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName='date' required [width]='100' (ngModelChange)="onFlightdetailsChange(index)">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.segment'></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="FLIGHTSEGMENT" [width]='100' formControlName='flightSegmentId' [noCache]="true"
+            [sourceParameters]="{ 'parameter1': this.outboundLyingListForm.get('flightKey').value, 'parameter2':this.outboundLyingListForm.get('date').value }"
+            valueMember="desc" sourceType="query" placeHolder="Select" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="7" align="left">
+
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button (click)="validateRouting()" label="outboundList.bookFlight" accessSectionId="BOOK_FLIGHT">
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="flagShowData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="outboundLyingList" (linkClick)="showLocationData($event)">
+          <ngc-data-column text="" dataField="checkBox" [width]="5" type="check" align="center" cellsAlign="center"
+            checkAll="true"></ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]="7" dataField="sno" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.svc" [width]="5" dataField="serviceFlag" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="70">
+            <ng-template let-name="name" let-group="group" let-record="record">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-link
+                    (click)="openShipmentInfoPage(outboundLyingListForm.get(['outboundLyingList',group,'shipmentNumber']).value, outboundLyingListForm.get(['outboundLyingList',group,'shipmentType']).value)"
+                    [formControlName]="name"></ngc-link>
+                  <ngc-icon *ngIf="outboundLyingListForm.get(['outboundLyingList',group,'locked']).value"
+                    trueColor="red" type="lock" value="yes">
+                  </ngc-icon>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.ready.to.load" cellsAlign="center" [width]="10" align="center"
+            dataField="readyToLoad" iconType="yesno" type="icon"></ngc-data-column>
+          <ngc-data-column text="export.lying.list.part.shipment" cellsAlign="center" [width]="12" align="center"
+            dataField="partShipmentText" iconType="yesno"></ngc-data-column>
+          <ngc-data-column text="g.pieces" align="center" cellsAlign="right" [width]="10" dataField="displayPieces">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.total.pieces" align="center" cellsAlign="right" [width]="10"
+            dataField="totalPieces">
+          </ngc-data-column>
+          <ngc-data-column text="g.weight" align="center" cellsAlign="right" [width]="10" dataField="displayWeight"
+            type="displayWeight">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.total.weight" align="center" cellsAlign="right" [width]="10"
+            dataField="totalWeight" type="displayWeight">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.org.des" align="center" [width]="30" dataField="orgdes">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.first.off.point" align="center" [width]="10"
+            dataField="firstOffPoint">
+          </ngc-data-column>
+          <ngc-data-column text="g.natureOfGoods" cellsAlign="left" align="center" [width]="20"
+            dataField="natureOfGoodsDescription"></ngc-data-column>
+          <ngc-data-column text="export.lying.list.loc.info" cellsAlign="left" align="center" [width]="20"
+            dataField="locInfo">
+          </ngc-data-column>
+          <ngc-data-column text="export.offloaded" align="center" cellsAlign="center" [width]="12"
+            dataField="offLoaded">
+          </ngc-data-column>
+          <ngc-data-column text="export.cancelled" cellsAlign="center" cellsAlign="center" align="center" [width]="12"
+            dataField="cancelled"></ngc-data-column>
+          <ngc-data-column text="g.shc" align="center" [width]="200" dataField="shc"></ngc-data-column>
+          <ngc-data-column text="export.lying.list.agent.code" align="center" [width]="15" dataField="agentCode">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.shipper.name" align="center" [width]="100" dataField="shipperName">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.dwell.time" cellsAlign="center" align="center" [width]="14"
+            dataField="dwellTime">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.booking.flight.info" [width]="50" align="center"
+            dataField="bookingFlightInfo">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.booking.status" dataField="bookingStatus" [width]="14"
+            cellsAlign="center">
+          </ngc-data-column>
+          <!-- <ngc-data-column text="export.lying.list.loc.info" [width]="20" dataField="" align="centre">
+            <ng-template let-name="name" let-group="group" let-record="record">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-link type="link" (linkClick)="showLocationData(group)">
+                    <ngc-icon type="edit" value="true" align="centre"></ngc-icon>
+                  </ngc-link>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column> -->
+          <ngc-data-column text="g.pieces" align="center" cellsAlign="right" dataField="pieces" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.weight" align="center" cellsAlign="right" dataField="grossWeight" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="export.lying.list.part.shipment" align="center" cellsAlign="right"
+            dataField="partShipment" [hidden]="true">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <!-- <ngc-window #inventoryWindow title="export.lying.list.locations" [showCloseButton]="true" [width]="900">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+          <div>
+            <ngc-display formControlName="displayShipmentNumber"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="inventoryList">
+            <ngc-data-column text="awb.shipment.location" [width]='60' dataField="shipmentLocation" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="awb.warehouse.location" [width]='60' dataField="warehouseLocation" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="awb.pieces" [width]='20' dataField="pieces" align="center" cellsAlign="right"
+              type="displayPieces">
+            </ngc-data-column>
+            <ngc-data-column text="awb.weight" [width]='20' dataField="weight" align="center" cellsAlign="right"
+              type="displayWeight"></ngc-data-column>
+
+            <ngc-data-column text="awb.hold.reason" [width]='80' dataField="lockReason" align="center"
+              cellsAlign="left">
+              <ng-template let-data let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                  <ngc-icon *ngIf="outboundLyingListForm.get(['inventoryList',group,'locked']).value" trueColor="red"
+                    type="lock" value="yes"></ngc-icon>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window> -->
+
+  <ngc-window #routingInfoWindow title="export.routing" [showCloseButton]="true" [width]="800" [height]="500">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.lying.list.booking.update"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="outboundLyingListWithMatchingRoute" [pageable]="false">
+            <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center" [width]="5">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+            </ngc-data-column>
+            <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center" dataField="partShipment">
+            </ngc-data-column>
+            <ngc-data-column text="export.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+              cellsAlign="left">
+            </ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.lying.list.routing.mismatch"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.lying.list.flight"></ngc-label>
+          <ngc-display formControlName='flightAndSegmentForPopup'></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="outboundLyingListWithNonMatchingRoute" [pageable]="false">
+            <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center" [width]="5">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+            </ngc-data-column>
+            <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center" dataField="partShipment">
+            </ngc-data-column>
+            <ngc-data-column text="export.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+              cellsAlign="left">
+            </ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-label label='export.lying.list.proceed.booking'>
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button value="g.yes" (click)="assignToFlight()" align="left"></ngc-button>
+          <ngc-button value="g.no" (click)="closeRoutingInfoWindow()" align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-report #Report title="g.report"  reportId='Outbound_Lying_List_Report'  [reportParameters]='reportParameters'
+    dataSource='transactional'>
+  </ngc-report>
+  <ngc-report #ReportExcel title="g.report" format='xls'  reportId='Outbound_Lying_List_Xls_Report'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column column="2">
+      <ngc-button label="outbound.book" feature='Exp.Accpt.AllowBookSingleShipment' (click)="bookSingleShipment()">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

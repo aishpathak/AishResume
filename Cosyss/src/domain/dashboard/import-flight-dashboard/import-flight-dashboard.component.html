@@ -1,0 +1,247 @@
+<!--This is the search form  -->
+<ngc-titlebar title="warehouse.inbfltevm" (cancel)="onCancel()" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="searchForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.fromDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='fromDate' align="left"
+            required accessEnableOn="r"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.toDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='toDate' align="left"
+            [width]="160" [min]="this.searchForm.get('fromDate').value" align="left" required accessEnableOn="r">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov formControlName='carrierCode' [width]='50' upperCase='true' dataField="code"   displayMember="code"
+            displayMember="code" sourceId='CARRIER_OPT' title='flight.carrierType' maxlength='3' accessEnableOn="r">
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="flightStatus"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="150" accessEnableOn="r" sourceId="General$Flight_Status" [dropDownWidth]="50"
+            formControlName="flightStatusDescription">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" value="g.search" iconType="search" accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="onSuccess" verticalAlign="bottom" [column]="1" align="right">
+        <ngc-label label="val.auto.refresh"></ngc-label>
+        <div>
+          <ngc-switchbutton formControlName="auto" (ngModelChange)="onChangeData($event)" onLabel="AutoRefresh">
+          </ngc-switchbutton>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!--This is the form for the List table  -->
+<form [formGroup]="importFlightDashboardForm" *ngIf="onSuccess">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="importList" [pageSize]="20">
+          <ngc-data-column text="flight.flightNumber" [width]="10" align="center" cellsAlign="center"
+            dataField="flightKey">
+          </ngc-data-column>
+          <ngc-data-column text="export.flightDate" [width]="10" align="center" cellsAlign="center"
+            dataField="flightDate"></ngc-data-column>
+          <ngc-data-column text="flight.eta" [width]="10" align="center" cellsAlign="center" dataField="dateETA">
+          </ngc-data-column>
+          <ngc-data-column text="flight.ata" [width]="10" align="center" cellsAlign="center" dataField="dateATA">
+          </ngc-data-column>
+          <ngc-data-column text="export.ac.registration" [width]="10" align="center" cellsAlign="center"
+            dataField="aircraftRegCode">
+          </ngc-data-column>
+          <ngc-data-column text="export.ac.type" [width]="10" align="center" cellsAlign="center"
+            dataField="aircraftType">
+          </ngc-data-column>
+          <ngc-data-column text="flight.paxCao" [width]="10" align="center" cellsAlign="center" dataField="flightType">
+          </ngc-data-column>
+          <ngc-data-column text="import.total.tonnage" dataField="totalManifestWeight" [width]="10" cellsAlign="left"
+            align='center'>
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onClickFlightDetails(paramValue.totalManifestWeight.value,group)">
+                  <ngc-display formControlName='totalManifestWeight'></ngc-display>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="warehouse.ffm.caps" [width]="5" align="center" cellsAlign="center"
+            dataField="manifestedFFMShipmentTotal">
+          </ngc-data-column>
+          <ngc-data-column name="import.ids" text="import.ids" align="center" [width]="100">
+            <ngc-data-column *ngIf="impAWBDoc" text="g.awbdocument" [width]="10" align="center" cellsAlign="center"
+              dataField="totalDocumentReceived">
+              <ng-template let-name="name" let-group="group">
+                <div [ngStyle]="{
+                  'background-color': 
+                  this.importFlightDashboardForm.get(['importList',group,'awbDocReceivedDisplayColor']).value == 'GREEN'? '#62BD69':
+                  this.importFlightDashboardForm.get(['importList',group,'awbDocReceivedDisplayColor']).value == 'RED'?'#f94449':'', 
+                  'padding-left': '-2px', 
+                  'padding-right': '-2px',
+                  'padding-top': '8px'}">
+                  <ng-container [formGroupName]="group">
+                    <ngc-link (linkClick)="onClickFlightDetails(paramValue.totalDocumentReceived.value,group)">
+                      <ngc-display formControlName='totalDocumentReceived'></ngc-display>
+                    </ngc-link>
+                  </ng-container>
+                </div>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.customs.submission" [width]="17" align="center" cellsAlign="center"
+              dataField="flightCustomSubmission">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (linkClick)="onClickFlightDetails(paramValue.flightCustomSubmission.value,group)">
+                    <ngc-display formControlName='flightCustomSubmission'></ngc-display>
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column *ngIf="impConstraintCode" text="exp.constraint.code" [width]="5" align="center"
+              cellsAlign="center" dataField="ccTotalShipment">
+              <ng-template let-name="name" let-group="group">
+                <div [ngStyle]="{
+                    'background-color': 
+                    this.importFlightDashboardForm.get(['importList',group,'manifestedFFMShipmentTotal']).value >
+                    this.importFlightDashboardForm.get(['importList',group,'ccTotalShipment']).value ?'#f94449':'#62BD69', 
+                    'padding-left': '-2px', 
+                    'padding-right': '-2px',
+                    'padding-top': '8px'}">
+                  <ng-container [formGroupName]="group">
+                    <ngc-link (linkClick)="onClickFlightDetails(paramValue.ccTotalShipment.value,group)">
+                      <ngc-display formControlName='ccTotalShipment'></ngc-display>
+                    </ngc-link>
+                  </ng-container>
+                </div>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column name="import.iro" text="import.iro" align="center" [width]="80">
+            <ngc-data-column text="g.uldCheckin" [width]="12" align="center" cellsAlign="center" dataField="towinRamp">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (linkClick)="onClickFlightDetails(paramValue.towinRamp.value,group)">
+                    <ngc-display formControlName="towinRamp"></ngc-display>
+                    <ngc-display *ngIf="importFlightDashboardForm.get(['importList',group,'eicTotalUld']).value != null"
+                      value="("></ngc-display>
+                    <ngc-display formControlName="eicTotalUld"></ngc-display>
+                    <ngc-display *ngIf="importFlightDashboardForm.get(['importList',group,'eicTotalUld']).value != null"
+                      value=")"></ngc-display>
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column *ngIf="impUldCheckIn" text="import.lastCheck.time" [width]="20" align="center"
+              cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <div [ngStyle]="{
+                      'background-color': 
+                      this.importFlightDashboardForm.get(['importList',group,'uldCheckInDisplayColor']).value == 'GREEN'? '#62BD69':
+                      this.importFlightDashboardForm.get(['importList',group,'uldCheckInDisplayColor']).value == 'RED'?'#f94449':'', 
+                      'padding-left': '-2px', 
+                      'padding-right': '-2px',
+                      'padding-top': '8px'}">
+                  <ng-container [formGroupName]="group">
+                    <ngc-display formControlName='firstULDcheckinTime'></ngc-display>
+                    <ngc-display
+                      *ngIf="importFlightDashboardForm.get(['importList',group,'lastULDcheckinTime']).value != null"
+                      value="/"></ngc-display>
+                    <ngc-display formControlName='lastULDcheckinTime'></ngc-display>
+                  </ng-container>
+                </div>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column name="import.cbd" text="import.cbd" align="center" [width]="80">
+            <ngc-data-column text="import.imr" [width]="5" align="center" cellsAlign="center"
+              dataField="manifestedIMRTotal">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (linkClick)="onClickFlightDetails(paramValue.IMR.value,group)">
+                    <ngc-display formControlName="manifestedIMRTotal"></ngc-display>
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.pri" [width]="5" align="center" cellsAlign="center"
+              dataField="manifestedPRITotal">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (linkClick)="onClickFlightDetails(paramValue.PRI.value,group)">
+                    <ngc-display formControlName="manifestedPRITotal"></ngc-display>
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="export.reject.type.gen" [width]="5" align="center" cellsAlign="center"
+              dataField="manifestedGENTotal">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-link (linkClick)="onClickFlightDetails(paramValue.GEN.value,group)">
+                    <ngc-display formControlName='manifestedGENTotal'></ngc-display>
+                  </ngc-link>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column *ngIf="impECAN" text="import.ecan" [width]="7" align="center" cellsAlign="center"
+              dataField="ecanTotalShipment">
+              <ng-template let-name="name" let-group="group">
+                <div [ngStyle]="{'background-color':
+                   this.importFlightDashboardForm.get(['importList',group,'manifestedFFMShipmentTotal']).value > 
+                  this.importFlightDashboardForm.get(['importList',group,'ecanTotalShipment']).value ? '#f94449':'#62BD69',
+                  'padding-left': '-2px',
+                  'padding-right': '-2px',
+                  'padding-top': '8px'}">
+                  <ng-container [formGroupName]="group">
+                    <ngc-link (linkClick)="onClickFlightDetails(paramValue.ECAN.value,group)">
+                      <ngc-display formControlName='ecanTotalShipment'></ngc-display>
+                    </ngc-link>
+                  </ng-container>
+                </div>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="flightStatus" [width]="12" align="center" cellsAlign="center"
+            dataField="flightStatusDescription">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- This the details dashboard window -->
+<ngc-window #flightDashboardWindow [title]="title" [width]="1500" [height]="400"
+  (close)="detailsDashboardResponse($event)">
+  <app-details-fight-dashboard [detailsDashboardObject]="detailsDashboardObject"
+    (responseObject)="detailsDashboardResponse($event)"
+    *ngIf="showWindow && detailsDashboardObject && detailsDashboardObject.parameter">
+  </app-details-fight-dashboard>
+</ngc-window>

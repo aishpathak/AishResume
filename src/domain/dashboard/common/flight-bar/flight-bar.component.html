@@ -1,0 +1,39 @@
+<svg x="0" y="0" [attr.width]="width" [attr.height]="120">
+  <!-- Draw -->
+  <g fill="#D5E9F2" stroke="#111111" stroke-width="1">
+    <!-- Outer Rectangle -->
+
+    <text *ngIf="flightInfo.flightKey" [attr.x]="sx-35" y="65" text-anchor="middle" stroke="#FF851B" stroke-width="1" [innerHTML]="flightInfo.flightKey"></text>
+    <text *ngIf="flightInfo.flightDisplayTime" [attr.x]="sx-40" y="85" text-anchor="middle" stroke="#001f3f" stroke-width="1"
+      [innerHTML]="flightInfo.flightDisplayTime"></text>
+    <rect [attr.x]="sx" y="50" [attr.width]="ex - sx" [attr.height]="20" rx="5" ry="5" />
+    <rect *ngIf="actualTime" [attr.x]="dsx" y="50" [attr.width]="dex - dsx" [attr.height]="20" rx="5" ry="5" fill="gray" />
+    <text *ngIf="flightInfo.delayFlag" [attr.x]="dsx+30" y="65" text-anchor="middle" stroke="#F7FBFD" stroke-width="1">DELAYED</text>
+    <text *ngIf="flightInfo.delayFlag" [attr.x]="dsx+29" y="90" text-anchor="middle" stroke="#FF851B" stroke-width="1" [innerHTML]="flightInfo.flightDelayDisplayTime"></text>
+
+    <!-- SLA Breach -->
+    <ng-container *ngFor="let time of segmentEventTimes; let eventIndex=index">
+      <ng-container *ngFor="let event of segmentEvents(time.slaTime); let index=index">
+        <ng-container>
+          <g [attr.x]="event.x" y="50" [attr.stroke]="event.eventColor" stroke-width="1" [attr.fill]="transparent">
+            <!--[attr.transform]="'rotate(90, ' + event.x + ', 59)'">-->
+            <circle *ngIf="index == 0" [attr.cx]="event.x" cy="59" r="15.91549430918954" fill="transparent" stroke="#d2d3d4" stroke-width="10"></circle>
+            <!-- Segment -->
+            <circle *ngIf="segmentEvents(time.slaTime).length > 0" [attr.cx]="event.x" [attr.cy]="59" r="15.91549430918954" fill="transparent"
+              [attr.stroke]="event.eventColor" stroke-width="10" [attr.stroke-dasharray]="(100 / segmentEvents(time.slaTime).length) + ' ' + (100 - (100 / segmentEvents(time.slaTime).length))"
+              [attr.stroke-dashoffset]="100 - (index * (100 / segmentEvents(time.slaTime).length)) + 25"></circle>
+            <!-- Segment Divider -->
+            <line *ngIf="segmentEvents(time.slaTime).length > 0" [attr.x1]="event.x" y1="59" [attr.x2]="event.x + segmentX2(event, index)"
+              [attr.y2]="59 + segmentY2(event, index)" stroke-width="1" stroke="white" />
+            <!-- Event Name -->
+            <text *ngIf="segmentEvents(time.slaTime).length > 0" [attr.x]="event.x + segmentX(event, index)" [attr.y]="59 + segmentY(event, index)"
+              dy="2px" text-anchor="middle" style="font-size: 9px;" fill="black" stroke="black" [innerHTML]="event.eventName"></text>
+            <!-- Time -->
+            <text *ngIf="segmentEvents(time.slaTime).length > 0" [attr.x]="event.x + segmentX(event, index)" [attr.y]="59 + segmentY(event, index)"
+              dy="15px" text-anchor="middle" style="font-size: 8px;" fill="blue" stroke="red" [innerHTML]="event.eventDisplayTime"></text>
+          </g>
+        </ng-container>
+      </ng-container>
+    </ng-container>
+  </g>
+</svg>

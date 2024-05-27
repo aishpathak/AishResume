@@ -1,0 +1,2645 @@
+<ngc-titlebar [title]="titleValue"
+  [disableSave]="this.saveAcceptanceWeighing.get('finalizeWeight').value || saveAcceptanceWeighing.get('returnRequested').value"
+  (save)="onSave($event)" (clear)="onClear()" (cancel)="onBack($event)"></ngc-titlebar>
+
+<ngc-container type='section' *ngIf="searchEnableFlag">
+  <ngc-row>
+    <ngc-column column="4" [formGroup]="acceptanceWeighingForm">
+      <ngc-container>
+        <ngc-row>
+          <ngc-column column="2">
+            <div>
+              <ngc-label label="export.book.awbnumber"></ngc-label>
+            </div>
+            <ngc-awbinput *ngIf="searchEnableFlag" accessEnableOn="r" formControlName='shipmentNumber'
+              (ngModelChange)="onChangeShipmentNumber($event)" width="120" required>
+            </ngc-awbinput>
+            <ngc-awbdisplay *ngIf="!searchEnableFlag" accessEnableOn="r" formControlName='shipmentNumber'
+              (ngModelChange)="onChangeShipmentNumber($event)" required>
+            </ngc-awbdisplay>
+          </ngc-column>
+          <ngc-column *ngIf="!searchEnableFlag">
+            <div>
+              <ngc-label label="export.book.housenumber"></ngc-label>
+            </div>
+            <!-- <ngc-lov formControlName="hawbNumber"  [maxlength]="35"  accessEnableOn="r"  sourceType='query'   
+               [noValidation]="true" upperCase='true'  title="import.do.house.shipments"  datafield='code'
+              sourceId='KEY_EXPORT_SHIPMENT_HOUSE_DETAILS' valueMember="code" (select)="setHAWBNumber($event)"
+              [sourceParameters]="houseLovParameter" [noCache]="true">
+              <ngc-data-column text='HWB Number'   dataField='code'></ngc-data-column>
+            </ngc-lov> -->
+
+            <ngc-display formControlName="hawbNumber"></ngc-display>
+
+          </ngc-column>
+          <ngc-column *ngIf="searchEnableFlag" column="3" align="right">
+            <div>
+              <ngc-label> &nbsp </ngc-label>
+            </div>
+            <ngc-button label='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column *ngIf="searchEnableFlag" column="1" align="right">
+            <div>
+              <ngc-label> &nbsp </ngc-label>
+            </div>
+            <ngc-button label="export.accpt.generatedummyawb" accessEnableOn="r" (click)="generateDummyAWB()"
+              iconType="edit">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-column>
+    <!-- <ngc-column *ngIf="!displayFlag" [formGroup]="saveAcceptanceWeighing">
+      <ngc-label label="export.sendToCustom"></ngc-label>
+      <div>
+        <ngc-shape formControlName="arrivalReportSent" type="circle" textColor="white" bgColor="gray" [width]="22"
+          [height]="22">
+        </ngc-shape>
+      </div>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="!displayFlag" [formGroup]="saveAcceptanceWeighing">
+      <ngc-label label="export.CustomAcknowledgement"></ngc-label>
+      <div>
+        <ngc-shape formControlName="ackReceived" type="circle" textColor="white" bgColor="gray" [width]="22"
+          [height]="22">
+        </ngc-shape>
+      </div>
+    </ngc-column> -->
+    <ngc-column *ngIf="!displayFlag && !this.saveAcceptanceWeighing.get('hawbNumber').value"
+      [formGroup]="saveAcceptanceWeighing">
+      <ngc-container type="box">
+        <ngc-row>
+          <ngc-column column="2.5">
+            <ngc-label value='export.accpt.fwb.pieces.weight'></ngc-label>
+            <div>
+              <ngc-piecesdisplay formControlName='fwbPieces'></ngc-piecesdisplay>/<ngc-weightdisplay
+                formControlName='fwbWeight'>
+              </ngc-weightdisplay>
+            </div>
+          </ngc-column>
+          <ngc-column column="2.5">
+            <ngc-label value='export.accpt.awb.accp.pieces.weight'></ngc-label>
+            <div>
+              <ngc-piecesdisplay formControlName='acceptedPieces'></ngc-piecesdisplay>/<ngc-weightdisplay
+                formControlName='acceptedWeight'>
+              </ngc-weightdisplay>
+            </div>
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-label value='g.fwb'></ngc-label>
+            <div>
+              <ngc-shape formControlName="summaryInfoFwbReceived" type="circle" textColor="white" bgColor="gray"
+                [width]="22" [height]="22">
+              </ngc-shape>
+            </div>
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-label value='g.fhl'></ngc-label>
+            <div>
+              <ngc-shape formControlName="summaryInfoFhlReceived" type="circle" textColor="white" bgColor="gray"
+                [width]="22" [height]="22">
+              </ngc-shape>
+            </div>
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-label value='g.eawb'></ngc-label>
+            <div>
+              <ngc-shape formControlName="summaryInfoIsEAWB" type="circle" textColor="white" bgColor="gray" [width]="22"
+                [height]="22">
+              </ngc-shape>
+            </div>
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-label value='export.accpt.nawb'></ngc-label>
+            <div>
+              <ngc-shape formControlName="summaryInfoIsNAWB" type="circle" textColor="white" bgColor="gray" [width]="22"
+                [height]="22">
+              </ngc-shape>
+            </div>
+          </ngc-column>
+          <ngc-column column="2.5">
+            <ngc-label value='export.accpt.awbfinalizedby'></ngc-label>
+            <div *ngIf="this.saveAcceptanceWeighing.get('finalizeWeightInitiatedOn').value!=null">
+              <ngc-display formControlName='finalizeWeightInitiatedBy'></ngc-display>&nbsp; On &nbsp;<ngc-display
+                formControlName='finalizeWeightInitiatedOn'>
+              </ngc-display>
+            </div>
+          </ngc-column>
+
+        </ngc-row>
+      </ngc-container>
+    </ngc-column>
+  </ngc-row>
+</ngc-container>
+<!-- EDITABLE CONTAINER OF BOOKIN INFO STARTS HERE -->
+<form *ngIf="!displayFlag" [formGroup]="saveAcceptanceWeighing">
+
+  <ngc-container type="section" *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.accpt.cartingorder"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section"
+    *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value && !this.saveAcceptanceWeighing.get('finalizeWeight').value && this.saveAcceptanceWeighing.get('manualBookingInfo').value">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label value='g.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput width='90' formControlName="firstBookedFlight" (modelChange)="getFlightOffPoint($event)">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='g.date'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName='firstBookedFlightDate' (modelChange)="getFlightOffPoint($event)">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='export.accpt.flight_off_point'></ngc-label>
+        <div>
+          <ngc-dropdownlist width="80"  formControlName="firstOffPoint" [autoSelectOnSingle]="true" [noCache]="true"
+            sourceId="KEY_DROPDOWN_FLIGHTOFFPOINT_ACCPT" sourceType='query' [sourceParameters]="flightOffPointDropdownSourceParam"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='export.accpt.rcvddate'></ngc-label>
+        <div>
+          <ngc-display formControlName='firstBookingDateTime'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='export.accpt.manual_cartingorder'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="manualBookingInfo" (modelChange)='onChangeManualBookingInfo($event)'>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- EDITABLE CONTAINER OF BOOKING INFO ENDS HERE -->
+
+  <!-- DISABLED CONTAINER OF BOOKING INFO  STARTS HERE -->
+  <ngc-container type="section"
+    *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value && (this.saveAcceptanceWeighing.get('finalizeWeight').value || !this.saveAcceptanceWeighing.get('manualBookingInfo').value)">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label value='g.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="firstBookedFlight"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='g.date'></ngc-label>
+        <div>
+          <ngc-display formControlName='firstBookedFlightDate'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='export.accpt.flight_off_point'></ngc-label>
+        <div>
+          <ngc-display formControlName='firstOffPoint'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='export.accpt.rcvddate'></ngc-label>
+        <div>
+          <ngc-display formControlName='firstBookingDateTime'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='export.accpt.manual_cartingorder'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="manualBookingInfo"
+            [disabled]="this.saveAcceptanceWeighing.get('finalizeWeight').value"
+            (modelChange)='onChangeManualBookingInfo($event)'>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+
+  </ngc-container>
+  <!-- DISABLED CONTAINER OF BOOKING INFO  ENDS HERE -->
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.accpt.awb_info"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container
+    *ngIf="saveAcceptanceWeighing.get('documentInformationId').value!=null && saveAcceptanceWeighing.get('houseInformationId').value==null && saveAcceptanceWeighing.get('dummyAWB').value && !saveAcceptanceWeighing.get('returnRequested').value">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button label='export.accpt.replace_dummy_awb' (click)="replaceDummyAWB()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <!-- EDITABLE CONTAINER OF MASTER STARTS HERE -->
+  <ngc-container type="section" *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label value='AWB Number'></ngc-label>
+        <div>
+          <ngc-awbdisplay formControlName='shipmentNumber' style="font-size: 16px; color:rgb(141, 5, 5);">
+          </ngc-awbdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='origin'></ngc-label>
+        <div>
+          <ngc-lov formControlName='origin' accessEnableOn="r" [width]='50' upperCase='true'
+            sourceId='KEY_AUTOCOMPLETE_APT' title='destination' dataField="code" displayMember="code" required>
+            <ngc-data-column text='City/Airport Code' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value">
+        <ngc-label value='flight.destination'></ngc-label>
+        <div>
+          <ngc-lov formControlName='destination' accessEnableOn="r" [width]='50' upperCase='true'
+            sourceId='KEY_AUTOCOMPLETE_APT' title='destination' dataField="code" displayMember="code" required>
+            <ngc-data-column text='City/Airport Code' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value">
+        <ngc-label value='flight.destination'></ngc-label>
+        <div>
+          <ngc-lov formControlName='destination' accessEnableOn="r" [width]='50' upperCase='true'
+            sourceId='KEY_AUTOCOMPLETE_APT_DOM' title='destination' dataField="code" displayMember="code"
+            [sourceParameters]="{ 'parameter1': tenantCountryCode}" required>
+            <ngc-data-column text='City/Airport Code' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='g.pieces'></ngc-label>
+        <div>
+          <ngc-piecesinput formControlName="pieces" required></ngc-piecesinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="awb.natureofgoods"></ngc-label>
+        <div>
+          <ngc-input [width]='270' formControlName="natureOfGoodsDescription" uppercase='true' [maxlength]="20"
+            required>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.shc"></ngc-label>
+        </div>
+        <div>
+          <ngc-shcinput formControlName="awbShc" (ngModelChange)="onChangeAwbShc($event)"></ngc-shcinput>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='g.weight'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column   column="1">
+        <ngc-label label='chargeable.weight'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="chargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="export.volume"></ngc-label>
+        </div>
+        <ngc-display formControlName='totalVol'  [width]='100' decimalDigits="2"></ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='export.accpt.volume_weight'></ngc-label>
+        <div>
+          <ngc-display formControlName="totalVolWeight" decimalDigits="2"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value">
+      <ngc-column column="1">
+        <ngc-label value='g.agentCode'></ngc-label>
+        <div>
+          <ngc-lov required (select)="onAgentNameAutoFill($event)" formControlName="customerCode"
+            sourceId="COMPANY_AGENT_LIST" title="g.customer.list" dataField="code" [width]="100"
+            [disabled]="agentCodeFlag">
+            <ngc-data-column text="agent.agentCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="agent.agentName" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label value='g.agentName'></ngc-label>
+        <div>
+          <ngc-display formControlName="customerName">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='g.rcar'></ngc-label>
+        <div>
+          <ngc-dropdownlist width="80" displayMember="code" formControlName="rcarStatus" [autoSelectOnSingle]="true"
+            sourceId='RCAR_CODE_WITH_FILTER' sourceType='query' [dropDownWidth]="80" [sourceParameters]="customerCode"
+            required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='export.accpt.temperaturerange'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="requestedTemperatureRange" sourceId="Admin$TemperatureRange"
+            [dropDownWidth]="160"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- EDITABLE CONTAINER OF MASTER ENDS HERE -->
+
+  <!-- DISABLED CONTAINER OF MASTER STARTS HERE -->
+  <ngc-container type="section" *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label value='AWB Number'></ngc-label>
+        <div>
+          <ngc-awbdisplay formControlName='shipmentNumber' style="font-size: 16px; color:rgb(141, 5, 5);">
+          </ngc-awbdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='Origin'></ngc-label>
+        <div>
+          <ngc-display formControlName='origin'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='flight.destination'></ngc-label>
+        <div>
+          <ngc-display formControlName='destination'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1"  >
+        <ngc-label label='g.pieces'></ngc-label>
+        <div>
+          <ngc-display formControlName="pieces" required></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="awb.natureofgoods"></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName='natureOfGoodsDescription'></ngc-piecesdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.shc"></ngc-label>
+        </div>
+        <div>
+          <ngc-shcinput formControlName="awbShc" disabled="true"></ngc-shcinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1"   >
+        <ngc-label label='g.weight'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column   column="1">
+        <ngc-label label='chargeable.weight'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="chargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column="1"  >
+        <div>
+          <ngc-label label="export.volume"></ngc-label>
+        </div>
+        <ngc-display formControlName='totalVol'  [width]='100' decimalDigits="2"></ngc-display>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='export.accpt.volume_weight'></ngc-label>
+        <div>
+          <ngc-display formControlName="totalVolWeight" decimalDigits="2"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value">
+      <ngc-column column="1">
+        <ngc-label value='g.agentCode'></ngc-label>
+        <div>
+          <ngc-display formControlName="customerCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label value='g.agentName'>
+        </ngc-label>
+        <div>
+          <ngc-display formControlName="customerName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='g.rcar'></ngc-label>
+        <div>
+          <ngc-display formControlName="rcarStatus"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='export.accpt.temperaturerange'></ngc-label>
+        <div>
+          <ngc-display formControlName="requestedTemperatureRange" sourceCategory="dropdown"
+            sourceId="Admin$TemperatureRange"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- DISABLED CONTAINER OF MASTER ENDS HERE -->
+  <ngc-container>
+    <ngc-row>
+      <ngc-column align="right">
+        &nbsp;
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.accpt.house_info"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <!-- EDITABLE CONTAINER OF HOUSE STARTS HERE -->
+  <ngc-container type="section" *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value &&
+  !this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value">
+    <ngc-row>
+      <ngc-column column="2">
+        &nbsp;
+      </ngc-column>
+      <ngc-column column="3">
+        <div style="text-align: center;font-size: small">
+          <ngc-label label="Declared Weight"></ngc-label>
+          <hr>
+        </div>
+      </ngc-column>
+      <ngc-column column="0.5">
+        &nbsp;
+      </ngc-column>
+      <ngc-column column="3">
+        <div style="text-align: center;font-size: small;">
+          <ngc-label label="Actual Weight"></ngc-label>
+          <hr>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <ngc-label value='export.accpt.carr'></ngc-label>
+        <div>
+          <ngc-shape formControlName="hawbArrivalReportSent" type="circle" textColor="white" bgColor="gray" [width]="22"
+            [height]="22">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <ngc-label value='export.accpt.leo'></ngc-label>
+        <div>
+          <ngc-shape formControlName="hawbAckReceived" type="circle" textColor="white" bgColor="gray" [width]="22"
+            [height]="22">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="export.book.housenumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='g.pieces'></ngc-label>
+        <div>
+          <ngc-piecesinput formControlName="hawbPieces" required></ngc-piecesinput>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.gross'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="hawbDeclaredWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.volumetric'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbDeclaredVolumetricWeight" decimalDigits="2"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1.5">
+        <ngc-label label='bil.chargeCodeSetup.chargeable'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="hawbDeclaredChargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.gross'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="hawbWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.volumetric'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbTotalVolWeight" decimalDigits="2"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='bil.chargeCodeSetup.chargeable'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="hawbChargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label value='g.agentCode'></ngc-label>
+        <div>
+          <ngc-lov required (select)="onAgentNameAutoFillHawb($event)" formControlName="hawbCustomerCode"
+            sourceId="COMPANY_AGENT_LIST" title="g.customer.list" dataField="code" [width]="100"
+            [disabled]="agentCodeFlag">
+            <ngc-data-column text="agent.agentCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="agent.agentName" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label value='g.agentName'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbCustomerName">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2.5">
+        <ngc-label label='awb.natureofgoods'></ngc-label>
+        <div>
+          <ngc-input [width]='270' formControlName="hawbNatureOfGoodsDescription" uppercase='true' [maxlength]="50"
+            required>
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.shc"></ngc-label>
+        </div>
+        <div>
+          <ngc-shcinput formControlName="hawbShc" (ngModelChange)="onChangeHawbShc($event)">></ngc-shcinput>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+  <!-- EDITABLE CONTAINER OF HOUSE ENDS HERE -->
+
+  <!-- DISABLED CONTAINER OF HOUSE STARTS HERE -->
+  <ngc-container type="section" *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value &&
+  this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value">
+    <ngc-row>
+      <ngc-column column="2">
+        &nbsp;
+      </ngc-column>
+      <ngc-column column="3">
+        <div style="text-align: center;font-size: small">
+          <ngc-label label="Declared Weight"></ngc-label>
+          <hr>
+        </div>
+      </ngc-column>
+      <ngc-column column="0.5">
+        &nbsp;
+      </ngc-column>
+      <ngc-column column="3">
+        <div style="text-align: center;font-size: small;">
+          <ngc-label label="Actual Weight"></ngc-label>
+          <hr>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <ngc-label value='export.accpt.carr'></ngc-label>
+        <div>
+          <ngc-shape formControlName="hawbArrivalReportSent" type="circle" textColor="white" bgColor="gray" [width]="22"
+            [height]="22">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="right">
+        <ngc-label value='export.accpt.leo'></ngc-label>
+        <div>
+          <ngc-shape formControlName="hawbAckReceived" type="circle" textColor="white" bgColor="gray" [width]="22"
+            [height]="22">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="export.book.housenumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='g.pieces'></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="hawbPieces"></ngc-piecesdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.gross'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="hawbDeclaredWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.volumetric'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbDeclaredVolumetricWeight" decimalDigits="2"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1.5">
+        <ngc-label label='bil.chargeCodeSetup.chargeable'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="hawbDeclaredChargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.gross'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="hawbWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='export.accpt.volumetric'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbTotalVolWeight" decimalDigits="2"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column  column="1">
+        <ngc-label label='bil.chargeCodeSetup.chargeable'></ngc-label>
+        <div>
+          <ngc-chargeableweightdisplay formControlName="hawbChargeableWeight"></ngc-chargeableweightdisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label value='g.agentCode'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbCustomerCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label value='g.agentName'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbCustomerName">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2.5">
+        <ngc-label label='awb.natureofgoods'></ngc-label>
+        <div>
+          <ngc-display formControlName="hawbNatureOfGoodsDescription">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.shc"></ngc-label>
+        </div>
+        <div>
+          <ngc-shcinput formControlName="hawbShc" disabled="true"></ngc-shcinput>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+  <!-- DISABLED CONTAINER OF HOUSE ENDS HERE -->
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column='1'>
+        <ngc-label label='export.weighingscale'></ngc-label>
+      </ngc-column>
+      <ngc-column column='1' align="right">
+        <ngc-weighing-scale [width]="100" formControlName="weighingScaleId" (select)="onSelectScale($event)"
+          [autoSelectOnSingle]="true">
+        </ngc-weighing-scale>
+      </ngc-column>
+
+      <!-- ENABLED BUTTON CONTAINER STARTS HERE MASTERS-->
+      <ngc-column align="right" *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value &&
+       !this.saveAcceptanceWeighing.get('hawbNumber').value && !saveAcceptanceWeighing.get('returnRequested').value">
+        <ngc-button
+          *ngIf="this.saveAcceptanceWeighing.get('documentInformationId').value!==null && !saveAcceptanceWeighing.get('showReturnSection').value"
+          label='export.accpt.returncargo' accessEnableOn="r" (click)="onReturnCargo()">
+        </ngc-button> &nbsp;
+        <ngc-button label='export.accpt.calculate' (click)="onCalculation()"></ngc-button>
+        <ngc-button label='export.finalizeWeight' (click)="onFinalizeWeight()"></ngc-button>
+        <!-- <ngc-button label='export.Material' (click)="onClickMaterial()"></ngc-button> -->
+      </ngc-column>
+      <!-- ENABLED BUTTON CONTAINER ENDS HERE MASTERS-->
+
+      <!-- DISABLED BUTTON CONTAINER STARTS HERE MASTERS -->
+      <ngc-column align="right"
+        *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value &&
+             !this.saveAcceptanceWeighing.get('hawbNumber').value && !saveAcceptanceWeighing.get('returnRequested').value">
+        <ng-container *ngIf="this.saveAcceptanceWeighing.get('documentAccepted').value">
+          <ngc-button label='export.printWeighingSlip' (click)="onPrintViewingSlip()"></ngc-button>
+        </ng-container>
+        <ng-container *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value">
+          <ngc-button
+            *ngIf="this.saveAcceptanceWeighing.get('documentInformationId').value!==null && !saveAcceptanceWeighing.get('showReturnSection').value"
+            label='export.accpt.returncargo' accessEnableOn="r" (click)="onReturnCargo()">
+          </ngc-button> &nbsp;
+          <ngc-button label="export.accpt.reopenfinalize" *ngIf="!saveAcceptanceWeighing.get('returnRequested').value"
+            (click)="unfinalize()"></ngc-button>
+
+          <ngc-button label='export.printWeighingSlip' (click)="onPrintViewingSlip()"></ngc-button>
+        </ng-container>
+      </ngc-column>
+      <!-- DISABLED BUTTON CONTAINER ENDS HERE MASTERS -->
+
+      <!-- ENABLED BUTTON CONTAINER STARTS HERE HOUSE -->
+      <ngc-column align="right" *ngIf="!this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value &&
+       this.saveAcceptanceWeighing.get('hawbNumber').value">
+        <ngc-button label='export.accpt.calculate' (click)="onCalculation()"></ngc-button>
+        <ngc-button *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value"
+          label='export.acceptanceweighing.finalizehouseweight' (click)="onFinalizeWeight()"></ngc-button>
+      </ngc-column>
+      <!-- ENABLED BUTTON CONTAINER ENDS HERE HOUSE-->
+
+      <!-- DISABLED BUTTON CONTAINER STARTS HERE HOUSE-->
+      <ngc-column align="right" *ngIf="this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value &&
+             this.saveAcceptanceWeighing.get('hawbNumber').value">
+        <!-- <ng-container *ngIf="this.saveAcceptanceWeighing.get('documentAccepted').value">
+          <ngc-button *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value" label='export.printWeighingSlip'
+            (click)="onPrintViewingSlip()"></ngc-button>
+          <ngc-button label='export.Material' (click)="onClickMaterial()"></ngc-button>
+          <ngc-button label='export.DGDetails' (click)="onDgDetailNavigate()"></ngc-button>
+        </ng-container> -->
+        <!-- <ng-container *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value"> -->
+        <ngc-button *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value"
+          label="export.acceptanceweighing.reopenfinalizehouse" (click)="unfinalize()"></ngc-button>
+        <!-- <ng-container *ngIf="this.saveAcceptanceWeighing.get('allHawbArrivalSent').value">
+          <ngc-button
+            *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value && showSendArrivalReportButtonHOuse"
+            label='exp.sendExpArrivalMaster' (click)="sendExportArrivalHouse()"></ngc-button>
+        </ng-container> -->
+        <ngc-button *ngIf="this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value"
+          label='export.printHawbWeighingSlip' (click)="onPrintHawbWighingSlip()"></ngc-button>
+        <!-- </ng-container> -->
+
+      </ngc-column>
+      <!-- DISABLED BUTTON CONTAINER ENDS HERE HOUSE-->
+    </ngc-row>
+  </ngc-container>
+
+  <!-- Container for Return Cargo STARTS HERE -->
+  <ngc-container type="section"
+    *ngIf="saveAcceptanceWeighing.get('showReturnSection').value || saveAcceptanceWeighing.get('returnRequested').value">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="Return Cargo"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+
+      <ngc-column>
+        <ngc-label value='Remarks'></ngc-label>
+        <div>
+          <ngc-input formControlName='returnRemarks' [maxlength]="60" [width]='500'>
+          </ngc-input>
+        </div>
+      </ngc-column>
+
+      <ngc-column align="right">
+        <div>
+          <ngc-label value=''></ngc-label>
+        </div>
+        <div>
+          <ngc-button label='export.accpt.return.request' *ngIf="!saveAcceptanceWeighing.get('returnRequested').value"
+            (click)="returnCargo()">
+          </ngc-button> &nbsp;
+
+          <ngc-button label='export.accpt.confirmReturn' accessEnableOn="r"
+            *ngIf="saveAcceptanceWeighing.get('returnRequested').value" (click)="returnCargo()">
+          </ngc-button> &nbsp;
+
+          <ngc-button label='export.accpt.enquirecharges' *ngIf="saveAcceptanceWeighing.get('returnRequested').value"
+            (click)="onEnquireCharges()">
+          </ngc-button> &nbsp;
+
+          <ngc-button label='export.accpt.cancelReturn' accessEnableOn="r" (click)="cancelReturn()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- Container for Return Cargo ENDS HERE -->
+
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs (select)="releaseEvent($event)">
+          <div ngc-tab-card title='export.cargoWeighing' [indicatorIconType]="cargoIndicator" indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value">
+                  <!-- NOT YET FINALIZE TABLE STARTS HERE -->
+                  <ngc-table *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value">
+                    <thead>
+                      <tr>
+                        <th width="1%">
+                          <ngc-label label='g.sNo'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.uld'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.grossWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.netWeight'></ngc-label>
+                        </th>
+                        <!-- <th>
+                          <ngc-label label='export.dolleyWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.skidUldWeight'></ngc-label>
+                        </th>
+                        <!-- <th>
+                          <ngc-label label='export.skidTareWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.weighing.number.of.skids'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.skid.height'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.shipmentLocation'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.accceptance.warehouseLocation'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.dryIceWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.shc'></ngc-label>
+                        </th>
+                        <th>
+                        </th>
+                        <th>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="weighingList">
+                      <ng-container
+                        *ngFor="let item of saveAcceptanceWeighing.get('weighingList').controls; let index=index"
+                        [formGroupName]="index">
+                        <ng-container *ngIf="item !== null">
+                          <tr [crud]="item.get('flagCRUD').value">
+                            <td width="1%">
+                              {{index+1}}
+                            </td>
+                            <td>
+                              <ngc-uldinput formControlName='uldNumber' (modelChange)="onChangeULD($event,index)">
+                              </ngc-uldinput>
+                            </td>
+                            <td>
+                              <ngc-piecesinput formControlName='pieces' [autoFocus]="true" [width]='60'
+                                (modelChange)="onChangeGrossPieces($event,index,item)" required></ngc-piecesinput>
+                            </td>
+                            <td width='15'>
+                              <div>
+                                <ngc-weightinput formControlName='grossWeight' [width]='70' decimalDigits="1"
+                                  (modelChange)="onChangeGrossWeight($event,index,item)"
+                                  [disabled]="wighingScaleAvailable" required>
+                                </ngc-weightinput>
+                              </div>
+                              <div>
+                                <ngc-button label='export.accpt.getweight' iconType="scale"
+                                  *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value"
+                                  (click)="onGetWeight($event, index)" [disabled]="!wighingScaleAvailable"></ngc-button>
+                              </div>
+                            </td>
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName='netWeight' [width]='70'></ngc-weightdisplay>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-weightinput [disabled]="!item.get('uldNumber').value"
+                                formControlName="dolleyTareWeight" [width]='70' decimalDigits="1"
+                                (ngModelChange)="onChangeDolley($event,index)"></ngc-weightinput>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-weightinput formControlName="tareWeight" [width]='70' decimalDigits="1"
+                                (modelChange)="onChangeDolley($event,index)"></ngc-weightinput>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-weightinput formControlName='skidTareWeight' [width]='70'
+                                (ngModelChange)="onChangeDolley($event,index)"></ngc-weightinput>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-piecesinput formControlName='noOfSkids' [width]='70'
+                                (modelChange)="onChangeDolley($event,index)"></ngc-piecesinput>
+                            </td>
+                            <td width='10'>
+                              <ngc-dropdownlist formControlName='skidHeight' sourceId="Skid_Height$Skid_Values"
+                                [width]="70">
+                              </ngc-dropdownlist>
+                            </td>
+
+                            <ng-container formArrayName="locationList">
+                              <ng-container
+                                *ngFor="let subItem of item.controls.locationList.controls | page :1 :1; let sindex=index"
+                                [formGroupName]="0">
+                                <td width='25'>
+                                  <ngc-movable-storage-location [origin]="'BLR'"
+                                    [destination]="this.saveAcceptanceWeighing.get('destination').value"
+                                    upperCase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                                    (modelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="shipmentLocation">
+                                  </ngc-movable-storage-location>
+                                </td>
+                                <td width='25'>
+                                  <ngc-locations-list [displayOnlyLocation]="true"
+                                    (modelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="wareHouseLocation">
+                                  </ngc-locations-list>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesinput formControlName='pieces'
+                                    (modelChange)="onGetProportionateWeight(index,sindex,$event)" [autoFocus]="false"
+                                    [width]='60' decimalDigits="0" required>
+                                  </ngc-piecesinput>
+                                </td>
+                                <td width='80' *ngIf="!item.controls.manualWeightEntry.value">
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20' *ngIf="item.controls.manualWeightEntry.value">
+                                  <ngc-weightinput formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='dryIceWeight' [width]='70' decimalDigits="1">
+                                  </ngc-numberinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc"></ngc-shcinput>
+                                </td>
+                              </ng-container>
+                            </ng-container>
+                            <td width='40'>
+                              <ngc-button label='awb.add.location' (click)="onAddLocation(index)"></ngc-button>
+                              <ngc-label label='Manual Entry'></ngc-label>
+                              <ngc-checkbox label='Manual Entry' formControlName="manualWeightEntry"
+                                (click)="onManualWeightEntry(index,$event)">
+                              </ngc-checkbox>
+
+                            </td>
+                            <td width='5'>
+                              <ngc-link (linkClick)="onDeleteRow(index)" iconType="delete"></ngc-link>
+                            </td>
+                          </tr>
+                          <ng-container formArrayName="locationList">
+                            <ng-container
+                              *ngFor="let subItem of item.controls.locationList.controls ; let subIndex=index"
+                              [formGroupName]="subIndex">
+                              <tr [crud]="subItem.get('flagCRUD').value" *ngIf="subIndex > 0">
+                                <td colspan="8">
+                                </td>
+                                <td width='25'>
+                                  <ngc-movable-storage-location
+                                    [origin]="this.saveAcceptanceWeighing.get('origin').value"
+                                    (modelChange)="onChangeShipmentLocation(index,subIndex,$event)"
+                                    [destination]="this.saveAcceptanceWeighing.get('destination').value"
+                                    upperCase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                                    formControlName="shipmentLocation">
+                                  </ngc-movable-storage-location>
+                                </td>
+                                <td width='25'>
+                                  <ngc-locations-list [displayOnlyLocation]="true"
+                                    (modelChange)="onChangeShipmentLocation(index,subIndex,$event)"
+                                    formControlName="wareHouseLocation">
+                                  </ngc-locations-list>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesinput formControlName='pieces' [width]='60'
+                                    (modelChange)="onGetProportionateWeight(index,subIndex,$event)" required>
+                                  </ngc-piecesinput>
+                                </td>
+                                <td width='20' *ngIf="!item.controls.manualWeightEntry.value">
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20' *ngIf="item.controls.manualWeightEntry.value">
+                                  <ngc-weightinput formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='dryIceWeight' [width]='70' decimalDigits="1">
+                                  </ngc-numberinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc"></ngc-shcinput>
+                                </td>
+                                <td>
+                                </td>
+                                <td width='20'>
+                                  <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" iconType="delete">
+                                  </ngc-link>
+                                </td>
+                              </tr>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                  <!-- NOT YET FINALIZE TABLE ENDS HERE -->
+                  <!-- FINALIZE TABLE ENDS HERE -->
+                  <ngc-table *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value">
+                    <thead>
+                      <tr>
+                        <th width="1%">
+                          <ngc-label label='g.sNo'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.uld'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.grossWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.netWeight'></ngc-label>
+                        </th>
+                        <!-- <th>
+                          <ngc-label label='export.dolleyWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.skidUldWeight'></ngc-label>
+                        </th>
+                        <!-- <th>
+                          <ngc-label label='export.skidTareWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.weighing.number.of.skids'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.skid.height'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.shipmentLocation'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.accceptance.warehouseLocation'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.dryIceWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.shc'></ngc-label>
+                        </th>
+                        <th>
+                        </th>
+                        <th>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="weighingList">
+                      <ng-container
+                        *ngFor="let item of saveAcceptanceWeighing.get('weighingList').controls; let index=index"
+                        [formGroupName]="index">
+                        <ng-container *ngIf="item !== null">
+                          <tr [crud]="item.get('flagCRUD').value">
+                            <td width="1%">
+                              {{index+1}}
+                            </td>
+                            <td>
+                              <ngc-display formControlName='uldNumber'>
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-piecesdisplay formControlName='pieces'>
+                              </ngc-piecesdisplay>
+                            </td>
+                            <td width='15'>
+                              <div>
+                                <ngc-weightdisplay formControlName='grossWeight'>
+                                </ngc-weightdisplay>
+                              </div>
+                              <!-- <div>
+                                <ngc-button label='export.accpt.getweight' iconType="scale"
+                                  *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value"
+                                  (click)="onGetWeight($event, index)"></ngc-button>
+                              </div> -->
+                            </td>
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName='netWeight' [width]='70'></ngc-weightdisplay>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-display formControlName="dolleyTareWeight">
+                              </ngc-display>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName="tareWeight"></ngc-weightdisplay>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-display formControlName='skidTareWeight'></ngc-display>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-piecesdisplay formControlName='noOfSkids'>
+                              </ngc-piecesdisplay>
+                            </td>
+                            <td width='10'>
+                              <ngc-display formControlName='skidHeight' sourceId="Skid_Height$Skid_Values"
+                                sourceCategory="dropdown">
+                              </ngc-display>
+                            </td>
+                            <ng-container formArrayName="locationList">
+                              <ng-container
+                                *ngFor="let subItem of saveAcceptanceWeighing.get(['weighingList', index, 'locationList']).controls| page :1 :1; let sindex=index"
+                                [formGroupName]="0">
+                                <td width='25'>
+                                  <ngc-display formControlName="shipmentLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='25'>
+                                  <ngc-display formControlName="wareHouseLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesdisplay formControlName='pieces'>
+                                  </ngc-piecesdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='dryIceWeight'>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc" disabled="true"></ngc-shcinput>
+                                </td>
+                              </ng-container>
+                            </ng-container>
+                            <td width='20'>
+                              <ngc-button label='awb.add.location' disabled="true" (click)="onAddLocation(index)">
+                              </ngc-button>
+                              <ngc-label label='Manual Entry'></ngc-label>
+                              <ngc-checkbox label='Manual Entry' formControlName="manualWeightEntry" disabled="true">
+                              </ngc-checkbox>
+                            </td>
+                            <td width='5'>
+                              <ngc-link (linkClick)="onDeleteRow(index)" iconType="delete" disabled="true"></ngc-link>
+                            </td>
+                          </tr>
+                          <ng-container formArrayName="locationList">
+                            <ng-container
+                              *ngFor="let subItem of saveAcceptanceWeighing.get(['weighingList', index, 'locationList']).controls; let subIndex=index"
+                              [formGroupName]="subIndex">
+                              <tr [crud]="subItem.get('flagCRUD').value" *ngIf="subIndex > 0">
+                                <td colspan="8">
+                                </td>
+                                <td width='25'>
+                                  <ngc-display formControlName="shipmentLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='25'>
+                                  <ngc-display formControlName="wareHouseLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesdisplay formControlName='pieces'>
+                                  </ngc-piecesdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='dryIceWeight'>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc" disabled="true"></ngc-shcinput>
+                                </td>
+                                <td>
+                                </td>
+                                <td width='20'>
+                                  <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" disabled="true"
+                                    iconType="delete">
+                                  </ngc-link>
+                                </td>
+                              </tr>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                  <!-- FINALIZE TABLE ENDS HERE -->
+                </ngc-column>
+                <ngc-column *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value">
+                  <!-- NOT YET FINALIZE TABLE STARTS HERE -->
+                  <ngc-table *ngIf="!this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value">
+                    <thead>
+                      <tr>
+                        <th width="1%">
+                          <ngc-label label='g.sNo'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.uld'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.grossWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.netWeight'></ngc-label>
+                        </th>
+                        <!-- <th>
+                          <ngc-label label='export.dolleyWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.skidUldWeight'></ngc-label>
+                        </th>
+                        <!-- <th>
+                          <ngc-label label='export.skidTareWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.weighing.number.of.skids'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.skid.height'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.shipmentLocation'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.accceptance.warehouseLocation'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='val.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.dryIceWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.shc'></ngc-label>
+                        </th>
+                        <th>
+                        </th>
+                        <th>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="weighingList">
+                      <ng-container
+                        *ngFor="let item of saveAcceptanceWeighing.get('weighingList').controls; let index=index"
+                        [formGroupName]="index">
+                        <ng-container *ngIf="item !== null">
+                          <tr [crud]="item.get('flagCRUD').value">
+                            <td width="1%">
+                              {{index+1}}
+                            </td>
+                            <td>
+                              <ngc-uldinput formControlName='uldNumber' (ngModelChange)="onChangeULD($event,index)">
+                              </ngc-uldinput>
+                            </td>
+                            <td>
+                              <ngc-piecesinput formControlName='pieces' [autoFocus]="true" [width]='60'
+                                (ngModelChange)="onChangeGrossPieces($event,index,item)" required></ngc-piecesinput>
+                            </td>
+                            <td width='15'>
+                              <div>
+                                <!-- <ngc-weightinput formControlName='grossWeight' [width]='70' decimalDigits="1" [disabled]="IsinputgrossWeight"  // wu.yu modefied on 25Feb2021 by user of BCS required  -->
+                                <ngc-weightinput formControlName='grossWeight' [width]='70' decimalDigits="1"
+                                  (ngModelChange)="onChangeGrossWeight($event,index,item)"
+                                  [disabled]="wighingScaleAvailable" required>
+                                </ngc-weightinput>
+                              </div>
+                              <div>
+                                <ngc-button label='export.accpt.getweight' iconType="scale"
+                                  *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value"
+                                  (click)="onGetWeight($event, index)" [disabled]="!wighingScaleAvailable"></ngc-button>
+                              </div>
+                            </td>
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName='netWeight' [width]='70'></ngc-weightdisplay>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-weightinput [disabled]="!item.get('uldNumber').value"
+                                formControlName="dolleyTareWeight" [width]='70' decimalDigits="1"
+                                (ngModelChange)="onChangeDolley($event,index)"></ngc-weightinput>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-weightinput formControlName="tareWeight" [width]='70' decimalDigits="1"
+                                (ngModelChange)="onChangeDolley($event,index)"></ngc-weightinput>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-weightinput formControlName='skidTareWeight' [width]='70'
+                                (ngModelChange)="onChangeDolley($event,index)"></ngc-weightinput>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-piecesinput formControlName='noOfSkids' [width]='70'
+                                (ngModelChange)="onChangeDolley($event,index)">
+                              </ngc-piecesinput>
+                            </td>
+                            <td width='10'>
+                              <ngc-dropdownlist formControlName='skidHeight' sourceId="Skid_Height$Skid_Values"
+                                [width]="70">
+                              </ngc-dropdownlist>
+                            </td>
+                            <ng-container formArrayName="locationList">
+                              <ng-container
+                                *ngFor="let subItem of saveAcceptanceWeighing.get(['weighingList', index, 'locationList']).controls| page :1 :1; let sindex=index"
+                                [formGroupName]="0">
+                                <td width='25'>
+                                  <ngc-movable-storage-location [origin]="'BLR'"
+                                    [destination]="this.saveAcceptanceWeighing.get('destination').value"
+                                    upperCase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                                    (modelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="shipmentLocation">
+                                  </ngc-movable-storage-location>
+                                </td>
+                                <td width='25'>
+                                  <ngc-locations-list [displayOnlyLocation]="true"
+                                    (modelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="wareHouseLocation">
+                                  </ngc-locations-list>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesinput formControlName='pieces' [autoFocus]="false" [width]='60'
+                                    (modelChange)="onGetProportionateWeight(index,sindex,$event)" decimalDigits="0"
+                                    required>
+                                  </ngc-piecesinput>
+                                </td>
+                                <td width='80' *ngIf="!item.controls.manualWeightEntry.value">
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20' *ngIf="item.controls.manualWeightEntry.value">
+                                  <ngc-weightinput formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='dryIceWeight' [width]='70' decimalDigits="1">
+                                  </ngc-numberinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc"></ngc-shcinput>
+                                </td>
+                              </ng-container>
+                            </ng-container>
+                            <td width='20'>
+                              <ngc-button label='awb.add.location' (click)="onAddLocation(index)"></ngc-button>
+                              <ngc-label label='Manual Entry'></ngc-label>
+                              <ngc-checkbox label='Manual Entry' formControlName="manualWeightEntry"
+                                (click)="onManualWeightEntry(index,$event)">
+                              </ngc-checkbox>
+                            </td>
+                            <td width='5'>
+                              <ngc-link (linkClick)="onDeleteRow(index)" iconType="delete"></ngc-link>
+                            </td>
+                          </tr>
+                          <ng-container formArrayName="locationList">
+                            <ng-container
+                              *ngFor="let subItem of saveAcceptanceWeighing.get(['weighingList', index, 'locationList']).controls; let subIndex=index"
+                              [formGroupName]="subIndex">
+                              <tr [crud]="subItem.get('flagCRUD').value" *ngIf="subIndex > 0">
+                                <td colspan="8">
+                                </td>
+                                <td width='25'>
+                                  <ngc-movable-storage-location
+                                    [origin]="this.saveAcceptanceWeighing.get('origin').value"
+                                    (ngModelChange)="onChangeShipmentLocation(index,subIndex,$event)"
+                                    [destination]="this.saveAcceptanceWeighing.get('destination').value"
+                                    upperCase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                                    formControlName="shipmentLocation">
+                                  </ngc-movable-storage-location>
+                                </td>
+                                <td width='25'>
+                                  <ngc-locations-list [displayOnlyLocation]="true"
+                                    (ngModelChange)="onChangeShipmentLocation(index,subIndex,$event)"
+                                    formControlName="wareHouseLocation">
+                                  </ngc-locations-list>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesinput formControlName='pieces' [width]='60'
+                                    (modelChange)="onGetProportionateWeight(index,subIndex,$event)" required>
+                                  </ngc-piecesinput>
+                                </td>
+                                <td width='80' *ngIf="!item.controls.manualWeightEntry.value">
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20' *ngIf="item.controls.manualWeightEntry.value">
+                                  <ngc-weightinput formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='dryIceWeight' [width]='70' decimalDigits="1">
+                                  </ngc-numberinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc"></ngc-shcinput>
+                                </td>
+                                <td>
+                                </td>
+                                <td width='20'>
+                                  <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" iconType="delete">
+                                  </ngc-link>
+                                </td>
+                              </tr>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                  <!-- NOT YET FINALIZE TABLE ENDS HERE -->
+                  <!-- FINALIZE TABLE ENDS HERE -->
+                  <ngc-table *ngIf="this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value">
+                    <thead>
+                      <tr>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='g.sNo'></ngc-label>
+                        </th>
+                        <th width="10%">
+                          <ngc-label [width]="20" label='g.uld'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='val.pieces'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.grossWeight'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.netWeight'></ngc-label>
+                        </th>
+                        <!-- <th width="1%">
+                          <ngc-label [width]="20" label='export.dolleyWeight'></ngc-label>
+                        </th> -->
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.skidUldWeight'></ngc-label>
+                        </th>
+                        <!-- <th width="1%">
+                          <ngc-label [width]="20" label='export.skidTareWeight'></ngc-label>
+                        </th> -->
+                        <th>
+                          <ngc-label label='export.weighing.number.of.skids'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.skid.height'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.weighing.shipmentLocation'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.accceptance.warehouseLocation'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='val.pieces'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='val.weight'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.dryIceWeight'></ngc-label>
+                        </th>
+                        <th width="1%">
+                          <ngc-label [width]="20" label='export.shc'></ngc-label>
+                        </th>
+                        <th>
+                        </th>
+                        <th>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="weighingList">
+                      <ng-container
+                        *ngFor="let item of saveAcceptanceWeighing.get('weighingList').controls; let index=index"
+                        [formGroupName]="index">
+                        <ng-container *ngIf="item !== null">
+                          <tr [crud]="item.get('flagCRUD').value">
+                            <td width="1%">
+                              {{index+1}}
+                            </td>
+                            <td width="10%">
+                              <ngc-display formControlName='uldNumber'>
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-piecesdisplay formControlName='pieces'></ngc-piecesdisplay>
+                            </td>
+                            <td width='15'>
+                              <div>
+                                <ngc-weightdisplay formControlName='grossWeight'></ngc-weightdisplay>
+                              </div>
+                              <!-- <div>
+                                <ngc-button label='export.accpt.getweight' iconType="scale"
+                                  *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value"
+                                  (click)="onGetWeight($event, index)"></ngc-button>
+                              </div> -->
+                            </td>
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName='netWeight' [width]='70'></ngc-weightdisplay>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-display formControlName="dolleyTareWeight">
+                              </ngc-display>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName="tareWeight"></ngc-weightdisplay>
+                            </td>
+                            <!-- <td width='10'>
+                              <ngc-display formControlName='skidTareWeight'></ngc-display>
+                            </td> -->
+                            <td width='10'>
+                              <ngc-piecesdisplay formControlName='noOfSkids'>
+                              </ngc-piecesdisplay>
+                            </td>
+                            <td width='10'>
+                              <ngc-display formControlName='skidHeight' sourceId="Skid_Height$Skid_Values"
+                                sourceCategory="dropdown">
+                              </ngc-display>
+                            </td>
+                            <ng-container formArrayName="locationList">
+                              <ng-container
+                                *ngFor="let subItem of saveAcceptanceWeighing.get(['weighingList', index, 'locationList']).controls| page :1 :1; let sindex=index"
+                                [formGroupName]="0">
+                                <td width='25'>
+                                  <ngc-display formControlName="shipmentLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='25'>
+                                  <ngc-display formControlName="wareHouseLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesdisplay formControlName='pieces'>
+                                  </ngc-piecesdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='dryIceWeight'>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc" disabled="true"></ngc-shcinput>
+                                </td>
+                              </ng-container>
+                            </ng-container>
+                            <td width='20'>
+                              <ngc-button label='awb.add.location' disabled="true" (click)="onAddLocation(index)">
+                                <ngc-label label='Manual Entry'></ngc-label>
+                                <ngc-checkbox label='Manual Entry' formControlName="manualWeightEntry" disabled="true">
+                                </ngc-checkbox>
+                              </ngc-button>
+                            </td>
+                            <td width='5'>
+                              <ngc-link (linkClick)="onDeleteRow(index)" iconType="delete" disabled="true"></ngc-link>
+                            </td>
+                          </tr>
+                          <ng-container formArrayName="locationList">
+                            <ng-container
+                              *ngFor="let subItem of saveAcceptanceWeighing.get(['weighingList', index, 'locationList']).controls; let subIndex=index"
+                              [formGroupName]="subIndex">
+                              <tr [crud]="subItem.get('flagCRUD').value" *ngIf="subIndex > 0">
+                                <td colspan="8">
+                                </td>
+                                <td width='25'>
+                                  <ngc-display formControlName="shipmentLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='25'>
+                                  <ngc-display formControlName="wareHouseLocation">
+                                  </ngc-display>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesdisplay formControlName='pieces'>
+                                  </ngc-piecesdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='weight' [width]='70' decimalDigits="1" required>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-weightdisplay formControlName='dryIceWeight'>
+                                  </ngc-weightdisplay>
+                                </td>
+                                <td width='20'>
+                                  <ngc-shcinput formControlName="locShc" disabled="true"></ngc-shcinput>
+                                </td>
+                                <td>
+                                </td>
+                                <td width='20'>
+                                  <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" disabled="true"
+                                    iconType="delete">
+                                  </ngc-link>
+                                </td>
+                              </tr>
+                            </ng-container>
+                          </ng-container>
+                        </ng-container>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                  <!-- FINALIZE TABLE ENDS HERE -->
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="9" align='right'>
+                  <ngc-label emphasis='md' value="export.working.list.accepted"></ngc-label> :
+                  <ngc-display emphasis='md' formControlName="totalAcceptedPiecesSum"></ngc-display>/
+                  <ngc-weightdisplay emphasis='md' formControlName="totalAcceptedWeightSum"></ngc-weightdisplay>
+                </ngc-column>
+                <ngc-column align='right'>
+                  <ngc-label emphasis='md' value="g.remaining"></ngc-label> :
+                  <ngc-display emphasis='md' formControlName="differencePcs"></ngc-display>/[
+                  <ngc-weightdisplay emphasis='md' formControlName="differencePercentage"></ngc-weightdisplay>%]
+                </ngc-column>
+                <ngc-column align='right' *ngIf="!this.saveAcceptanceWeighing.get('hawbNumber').value">
+                  <ngc-button label="addRow" [disabled]="this.saveAcceptanceWeighing.get('finalizeWeight').value"
+                    (click)="onAddRow()">
+                  </ngc-button>
+                </ngc-column>
+                <ngc-column align='right' *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value">
+                  <ngc-button label="addRow" [disabled]="this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value"
+                    (click)="onAddRow()">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title='dimension' [indicatorIconType]="dimensionIndicator" indicatorIconColor="red">
+            <!--UNFINALIZED MASTER DIM STARTS-->
+            <ngc-container
+              *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value && !this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value ">
+
+              <ngc-row>
+                <ngc-column [column]='5'>
+                  <ngc-label label='export.fwbDetails'></ngc-label>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label='export.actualDetails'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align='right'>
+                  <ngc-button label='export.accpt.addrow' (click)="onDetailsAddRow()" #addRowButton></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]='4'>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-datatable formArrayName="fwbDimensionList" #releasedtable>
+                          <ngc-data-column text="g.pieces" height='40' cellsAlign="left" dataField="pieces"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.length" height='40' cellsAlign="left" dataField="length"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.width" height='40' cellsAlign="left" dataField="width"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.height" height='40' cellsAlign="left" dataField="height"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.volume" height='40' cellsAlign="left" dataField="volume"
+                            [width]="20">
+                          </ngc-data-column>
+                        </ngc-datatable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]='1'>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.manual.scan.reason'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.book.pieces'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='length'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.book.width'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='height'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.vol.wt'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.multiplier'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.total.pcs'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.total.vol.wt'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label=''></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container formArrayName="dimensionList">
+                        <tr *ngFor="let item of saveAcceptanceWeighing.controls.dimensionList.controls; let index=index"
+                          [formGroupName]="index">
+                          <td>
+
+                            <div>
+                              <ngc-dropdownlist sourceId="Admin$ManualScanReason"
+                                (select)="onSelectManualScanReason(index,$event)" [width]="150" [dropDownWidth]="150"
+                                formControlName="reason" required></ngc-dropdownlist>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='pieces' [width]='100' decimalDigits="0" required>
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='length' [width]='100' decimalDigits="0" required>
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='width' [width]='100' decimalDigits="0" required>
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='height' [width]='100' decimalDigits="0" required>
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-display formControlName='volumetricWeight' [width]='100' decimalDigits="2">
+                              </ngc-display>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='multiplier' (ngModelChange)="onChangeMultiplier(index)"
+                                decimalDigits="0" [width]='100'>
+                              </ngc-numberinput>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='totalPieces' [width]='100' decimalDigits="0">
+                              </ngc-piecesdisplay>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-display formControlName='totalVolumetricWeight' [width]='100' decimalDigits="2">
+                              </ngc-display>
+                            </div>
+                          </td>
+
+
+                          <td [width]='50'>
+                            <ngc-link (linkClick)="onDeleteDimension(index,item)" iconType="delete"></ngc-link>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+
+            </ngc-container>
+            <!--UNFINALIZED MASTER DIM ENDS-->
+            <!--FINALIZED MASTER DIM STARTS-->
+
+            <ngc-container
+              *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value || this.saveAcceptanceWeighing.get('hawbfinalizeWeight').value ">
+
+              <ngc-row>
+                <ngc-column [column]='5'>
+                  <ngc-label label='export.fwbDetails'></ngc-label>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label='export.actualDetails'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <!-- <ngc-row>
+                <ngc-column align='right'>
+                  <ngc-button label='export.addRow' (click)="onDetailsAddRow()" #addRowButton></ngc-button>
+                </ngc-column>
+              </ngc-row> -->
+              <ngc-row>
+                <ngc-column [column]='4'>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-datatable formArrayName="fwbDimensionList" #releasedtable>
+                          <ngc-data-column text="g.pieces" height='40' cellsAlign="left" dataField="pieces"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.length" height='40' cellsAlign="left" dataField="length"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.width" height='40' cellsAlign="left" dataField="width"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.height" height='40' cellsAlign="left" dataField="height"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.volume" height='40' cellsAlign="left" dataField="volume"
+                            [width]="20">
+                          </ngc-data-column>
+                        </ngc-datatable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]='1'>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.manual.scan.reason'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.book.pieces'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='length'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.book.width'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='height'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.vol.wt'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.multiplier'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.total.pcs'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.total.vol.wt'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container formArrayName="dimensionList">
+                        <tr *ngFor="let item of saveAcceptanceWeighing.controls.dimensionList.controls; let index=index"
+                          [formGroupName]="index">
+                          <td>
+                            <div>
+                              <ngc-display sourceId="Admin$ManualScanReason" sourceCategory="dropdown"
+                                formControlName="reason"></ngc-display>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='pieces' [width]='100' decimalDigits="0">
+                              </ngc-piecesdisplay>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='length' [width]='100' decimalDigits="0">
+                              </ngc-piecesdisplay>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='width' [width]='100' decimalDigits="0">
+                              </ngc-piecesdisplay>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='height' [width]='100' decimalDigits="0">
+                              </ngc-piecesdisplay>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-display formControlName='volumetricWeight' [width]='100' decimalDigits="2">
+                              </ngc-display>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='multiplier' decimalDigits="0" [width]='100'>
+                              </ngc-piecesdisplay>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-piecesdisplay formControlName='totalPieces' [width]='100' decimalDigits="0">
+                              </ngc-piecesdisplay>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-display formControlName='totalVolumetricWeight' [width]='100' decimalDigits="2">
+                              </ngc-display>
+                            </div>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+
+            </ngc-container>
+            <!--FINALIZED MASTER DIM ENDS-->
+
+          </div>
+          <div ngc-tab-card title='g.remarks' [indicatorIconType]="remarksIndicator" indicatorIconColor="red">
+            <!-- REMARKS NOT YET FINALIZED STARS HERE -->
+            <ngc-container *ngIf="!this.saveAcceptanceWeighing.get('finalizeWeight').value">
+              <ngc-row>
+                <ngc-column [column]='10' align="right">
+                  <ngc-button label='export.acceptanceweighing.addremark' (click)="onAddRemark()"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]='10'>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]='100'>
+                          <ngc-label label='awb.remarkType'></ngc-label>
+                        </th>
+                        <th [width]='700'>
+                          <ngc-label label='export.details'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='g.delete'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="remarksList">
+                      <tr *ngFor="let item of saveAcceptanceWeighing.controls.remarksList.controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+
+                          <ngc-dropdownlist formControlName="remarkType" sourceId="Cargo_Handling$RemarkType">
+                          </ngc-dropdownlist>
+
+                        </td>
+                        <td>
+                          <ngc-input formControlName='remarkDetails' [maxlength]="130" [width]='900'
+                            [disabled]="finalizeButtonDisableFlag" required>
+                          </ngc-input>
+                        </td>
+                        <td [width]='100'>
+                          <ngc-link formControlName='deleteRemark' [width]='80' (linkClick)="onDelete($event, index)"
+                            iconType="delete" [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag">
+                            <ngc-i18n value="Delete"></ngc-i18n>
+                          </ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <!-- REMARKS NOT YET FINALIZED ENDS HERE -->
+
+            <!-- REMARKS FINALIZED STARS HERE -->
+            <ngc-container *ngIf="this.saveAcceptanceWeighing.get('finalizeWeight').value">
+              <ngc-row>
+                <ngc-column [column]='10' align="right">
+                  <ngc-button label='export.acceptanceweighing.addremark' (click)="onAddRemark()" [disabled]="true">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]='10'>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]='100'>
+                          <ngc-label label='awb.remarkType'></ngc-label>
+                        </th>
+                        <th [width]='700'>
+                          <ngc-label label='export.details'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='g.delete'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="remarksList">
+                      <tr *ngFor="let item of saveAcceptanceWeighing.controls.remarksList.controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+                          <ngc-display formControlName="remarkType">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName='remarkDetails'>
+                          </ngc-display>
+                        </td>
+                        <td [width]='100'>
+                          <ngc-link [disabled]="true" formControlName='deleteRemark' [width]='80'
+                            (linkClick)="onDelete($event, index)" iconType="delete"
+                            [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag">
+                            <ngc-i18n value="Delete"></ngc-i18n>
+                          </ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <!-- REMARKS FINALIZED ENDS HERE -->
+          </div>
+
+          <!-- <div ngc-tab-card *ngIf="this.saveAcceptanceWeighing.get('hawbNumber').value" title='HWB Summary'
+            [indicatorIconType]="hawbListIndicator" indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label='Total Hawb Pcs/Awb Pcs : '></ngc-label>
+                  <ngc-display formControlName="totalHawbAcceptedPcs"></ngc-display>/
+                  <ngc-display formControlName="pieces"></ngc-display>
+                  &nbsp;
+                  <ngc-label label='uld.finalized'></ngc-label> : 
+                  <ngc-display formControlName="totalFinalizedHawb"></ngc-display>/
+                  <ngc-display formControlName="totalAcceptedHawb"></ngc-display>
+                  &nbsp;
+                  <ngc-label label=' Ack Reveiced/Arrival Report Sent : '></ngc-label>
+                  <ngc-display formControlName="totalHawbAckReceived"></ngc-display>/
+                  <ngc-display formControlName="totalHawbArrivalReportSent"></ngc-display>
+                </ngc-column>
+                <ngc-column align="right"
+                  *ngIf="this.saveAcceptanceWeighing.get(['hawbListFinalizedState']).value === 'N'">
+                  <ngc-button iconType="refresh" (click)="refreshHawbList()"></ngc-button>
+                  <ngc-button *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value"
+                    label='export.finalizeWeight' (click)="onFinalizeWeightHouseList()"></ngc-button>
+                </ngc-column>
+                <ngc-column align="right"
+                  *ngIf="this.saveAcceptanceWeighing.get(['hawbListFinalizedState']).value === 'P'">
+                  <ngc-button iconType="refresh" (click)="refreshHawbList()"></ngc-button>
+                  <ngc-button label='export.finalizeWeight' (click)="onFinalizeWeightHouseList()"></ngc-button>
+                  <ngc-button label='exp.sendExpArrival' (click)="sendExportHWBArrivalHouseMaster()"></ngc-button>
+                  <ngc-button label='exp.hwbtotalweightprint' (click)="onTotalWeightPrint()"></ngc-button>
+                </ngc-column>
+                <ngc-column align="right"
+                  *ngIf="this.saveAcceptanceWeighing.get(['hawbListFinalizedState']).value === 'F'">
+                  <ngc-button iconType="refresh" (click)="refreshHawbList()"></ngc-button>
+                  <ngc-button *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value"
+                    label='Re-Open Finalize' (click)="unfinalizeShipmentHouseList()"></ngc-button>
+                  <ngc-button *ngIf='userAccessType' label='exp.sendExpArrival'
+                    (click)="sendExportHWBArrivalHouseMaster()"></ngc-button>
+                  <ngc-button label='exp.hwbtotalweightprint' (click)="onTotalWeightPrint()"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="hawbList">
+                    <ngc-data-column text="" dataField="select" [width]="60" type="check" cellsAlign="center"
+                      align="center" checkAll="true"></ngc-data-column>
+                    <ngc-data-column text="export.book.housenumber" dataField="hwbAckReceived" [width]='100'
+                      cellsAlign="center">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-link [width]="200" (linkClick)="onSearchHawb(group)" formControlName="hawbNumber">
+                          </ngc-link>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" [width]="50" dataField="hawbPcs"></ngc-data-column>
+                    <ngc-data-column text="export.warehouse.pieces" [width]="50" dataField="hawbLocPieces">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.warehouse.weight" [width]="50" dataField="hawbLocWeight">
+                    </ngc-data-column>
+                    <ngc-data-column text="natureOfGoods" [width]="300" dataField="hawbNatureOfGoodsDescription">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.sendToCustom" dataField="hwbArrivalReportSent" [width]='100'>
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-shape formControlName="hwbArrivalReportSent" type="circle" textColor="white"
+                            bgColor="gray" [width]="22" [height]="22">
+                          </ngc-shape>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.CustomAcknowledgement" dataField="hwbAckReceived" [width]='100'>
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-shape formControlName="hwbAckReceived" type="circle" textColor="white" bgColor="gray"
+                            [width]="22" [height]="22">
+                          </ngc-shape>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="exp.finalizeHouseWeight" [width]='100'
+                      *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button label='exp.finalizeHouseWeight' (click)="onFinalizeHouseWeight(group)"
+                            [disabled]="this.saveAcceptanceWeighing.get(['hawbList',group,'hawbfinalizeWeight']).value">
+                          </ngc-button>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="Re-Open Finalize House" [width]='100'
+                      *ngIf="!this.saveAcceptanceWeighing.get('documentAccepted').value">
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button label="Re-Open Finalize House" (click)="unfinalizeHawb(group)"
+                            [disabled]="!this.saveAcceptanceWeighing.get(['hawbList',group,'hawbfinalizeWeight']).value">
+                          </ngc-button>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="exp.sendExpArrival" [width]='100' *ngIf='userAccessType'>
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button label='exp.sendExpArrival' (click)="sendExportHWBArrival(group)"
+                            [disabled]="!this.saveAcceptanceWeighing.get(['hawbList',group,'hawbfinalizeWeight']).value">
+                          </ngc-button>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="exp.hwbweightslip" [width]='100'>
+                      <ng-template let-data let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button label='exp.hwbweightslip' (click)="onHwbWeightSlip(group)"
+                            [disabled]="!this.saveAcceptanceWeighing.get(['hawbList',group,'hawbfinalizeWeight']).value">
+                          </ngc-button>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div> -->
+          <div ngc-tab-card title='exp.acceptance.action.list' [indicatorIconType]="actionlistindicator"
+            indicatorIconColor="red">
+            <ngc-container type="heading" formGroupName="ruleShipmentExecutionDetails">
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-label label=' '></ngc-label>
+                  <div>
+                    <ngc-button (click)="onCloseFailureData()" value="export.closeFailure"></ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-container type="box" title="awb.cpe.info.check">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.sNo"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.processName"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.triggerPoint"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.message"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.status"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.closedDate"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.closedBy"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.acknowledge"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="execInfoList">
+                            <tr
+                              *ngFor="let item of saveAcceptanceWeighing.getList(['ruleShipmentExecutionDetails','execInfoList']); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-label label={{index+1}}></ngc-label>
+                              </td>
+                              <ngc-label formControlName="processAreaName"></ngc-label>
+                              <td>
+                                <ng-container formGroupName="triggerPoint">
+                                  <ngc-display formControlName="triggerPointName"></ngc-display>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="failureMessage"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="status"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedOn"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedBy"></ngc-display>
+                              </td>
+                              <td>
+                                <ng-container
+                                  *ngIf="saveAcceptanceWeighing.get(['ruleShipmentExecutionDetails','execInfoList', index, 'status']).value === 'CLOSED'">
+                                  <ngc-icon align="center" value="true" type="yesno" formControlName="acknowledge"
+                                    true-color="grey">
+                                  </ngc-icon>
+                                </ng-container>
+                                <ng-container
+                                  *ngIf="saveAcceptanceWeighing.get(['ruleShipmentExecutionDetails','execInfoList', index, 'status']).value !== 'CLOSED'">
+                                  <ngc-checkbox formControlName="acknowledge">
+                                  </ngc-checkbox>
+                                </ng-container>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container type="box" title="awb.cpe.warning.check">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.sNo"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.processName"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.triggerPoint"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.message"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.status"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.closedDate"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.closedBy"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.acknowledge"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="execWarnList">
+                            <tr
+                              *ngFor="let item of saveAcceptanceWeighing.getList(['ruleShipmentExecutionDetails','execWarnList']); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-label label={{index+1}}></ngc-label>
+                              </td>
+                              <td>
+                                <ngc-label formControlName="processAreaName"></ngc-label>
+                              </td>
+                              <td>
+                                <ng-container formGroupName="triggerPoint">
+                                  <ngc-display formControlName="triggerPointName"></ngc-display>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="failureMessage"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="status"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedOn"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedBy"></ngc-display>
+                              </td>
+                              <td>
+                                <ng-container
+                                  *ngIf="saveAcceptanceWeighing.get(['ruleShipmentExecutionDetails','execWarnList', index, 'status']).value === 'CLOSED'">
+                                  <ngc-icon align="center" value="true" type="yesno" formControlName="acknowledge"
+                                    true-color="grey">
+                                  </ngc-icon>
+                                </ng-container>
+                                <ng-container
+                                  *ngIf="saveAcceptanceWeighing.get(['ruleShipmentExecutionDetails','execWarnList', index, 'status']).value !== 'CLOSED'">
+                                  <ngc-checkbox formControlName="acknowledge">
+                                  </ngc-checkbox>
+                                </ng-container>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container type="box" title="awb.cpe.error.check">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.sNo"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.manualScanReason"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.triggerPoint"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.message"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.status"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.closedDate"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.closedBy"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="export.acknowledge"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="execErrorList">
+                            <tr
+                              *ngFor="let item of saveAcceptanceWeighing.getList(['ruleShipmentExecutionDetails','execErrorList']); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-label label={{index+1}}></ngc-label>
+                              </td>
+                              <ngc-label formControlName="processAreaName"></ngc-label>
+                              <td>
+                                <ng-container formGroupName="triggerPoint">
+                                  <ngc-display formControlName="triggerPointName"></ngc-display>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="failureMessage"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="status"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedOn"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedBy"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-icon align="center" value="true" type="yesno" formControlName="acknowledge"
+                                  true-color="grey">
+                                </ngc-icon>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-report #reportWindowHwbWeightSlip title="g.report"  reportId='AcceptanceWeighingNewHwbWeightSlipNewDesign'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindowHwbTotalWeightSlip title="g.report"
+     reportId='AcceptanceWeighingNewHwbTotalWeightSlipNewDesign'  [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <!--<ngc-report #reportWindow title="g.report"  reportId='AcceptanceWeighingNewMasterWeighingSlipNewDesign'
+     [reportParameters]='reportParameters'>-->
+  <ngc-report #reportWindow title="g.report"  reportId='acceptance_house_weight_without_sb_number'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindow1 title="g.report"  reportId='acceptance_house_weight_withsbnumber'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-report #reportWindow2 title="g.report" reportId='gate_pass' [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <ngc-footer>
+    <ngc-row>
+      <ngc-column>
+        <ngc-button label="export.accpt.checklist" (click)='onChecklist()'> </ngc-button>
+        <ngc-button label='export.accpt.DGDetails' (click)="onDgDetailNavigate()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-footer>
+</form>
+
+<!-- Reaplace Dummy AWB Number Group Window -->
+
+<form [formGroup]="replaceDummyAWBGroup">
+  <ngc-window #replaceDummyAWBWindow width="600" height="80" title="export.accpt.replace_dummy_awb"
+    [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="left" [column]="6">
+          <ngc-label label="export.accpt.dummyawb"></ngc-label>
+        </ngc-column>
+        <ngc-column align="left" [column]="6">
+          <ngc-display formControlName="shipmentNumber"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="left" [column]="6">
+          <ngc-label label="g.awbNumber"></ngc-label>
+        </ngc-column>
+        <ngc-column align="left" [column]="6">
+          <ngc-awbinput formControlName='newShipmentNumber' required></ngc-awbinput>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="left" [column]="6">
+          <ngc-label label="g.remarks"></ngc-label>
+        </ngc-column>
+        <ngc-column align="left" [column]="6">
+          <ngc-input [width]='270' formControlName="remarks" uppercase='true'></ngc-input>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-display value=""></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button value="cus.save" (click)="onSaveReplaceDummyAwb()"></ngc-button>
+          <ngc-button value="cancel" (click)="onCancelReplaceDummyAwb()"></ngc-button>
+        </ngc-column>
+        <ngc-column column="1"></ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

@@ -1,0 +1,152 @@
+<ngc-titlebar title="bil.waiveApprovalList" (save)="onSave($event)" (clear)="onClear($event)"
+  (cancel)='backToHome($event)'></ngc-titlebar>
+<form [formGroup]="waiveApprovalListForm">
+  <ngc-container type="section" formGroupName="searchWaiveApprovalListForm">
+    <ngc-row>
+      <ngc-column column='5' [grid24]='true'>
+        <ngc-label label="bil.waiverRequestFromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName='wavierRequestFromDate' showCalendarButton="true" showTimeButton="true"
+            midnight="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='5' [grid24]='true'>
+        <ngc-label label="bil.waiverRequestToDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName='wavierRequestToDate' showCalendarButton="true" showTimeButton="true"
+            midnight="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='5' [grid24]='true'>
+        <ngc-label label="bil.shipmentNumber"></ngc-label>
+        <div>
+          <ngc-shipmentinput accessEnableOn="r" formControlName="awbNumber" (ngModelChange)="onTabOutCheckHandledBy()"></ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='5' [grid24]='true' *ngIf="handledbyHouse">
+        <ngc-label label="billing.hawbsbNumber"></ngc-label>
+        <br>
+        <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="180"
+          sourceId='KEY_BILL_HWBNUMBER' dataField='code' valueMember='code' [noCache]="true"
+          title="billing.hawbsbNumber"
+          [sourceParameters]="{'parameter1': this.waiveApprovalListForm.controls.searchWaiveApprovalListForm.get('awbNumber').value}"
+          (select)="setAWBNumber($event)">
+          <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code'></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='5' [grid24]='true' entityAttribute="Flight.DomesticInternationalHandling">
+        <ngc-label label='dropdown.International.domestic'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="handledByDomIntl" sourceId="DomIntl$DomIntlDrop"
+            [autoSelect]="true" width='180'>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column='5' [grid24]='true'>
+        <ngc-label label="billing.service.id"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="serviceNumber" width='180'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column='5' [grid24]='true'>
+        <ngc-label label="billingverification.customername">
+        </ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='200' formControlName="customerName" sourceId="CUSTOMER_LIST"
+            (select)="getCustomerId($event)" title="g.customer.list" dataField='desc' valueMember="desc"
+            [validOnly]='true' [width]="50">
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column='5' [grid24]='true'>
+        <ngc-label label="bil.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="status" sourceId='Billing$WaiveApprovalList.Status'>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column align='right'>
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="billingverification.search" (click)="searchwaiveApprovalList()"></ngc-button>
+          <ngc-button feature="Billing.WaiverApproveOrReject" *ngIf="isWaiveApprovalList"
+            value="billing.waiver.list.approve.reject" (click)="openApprovalOrRejectPopup(null, 'direct')">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isWaiveApprovalList" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="waiverApproval" (linkClick)="openApprovalOrRejectPopup($event, 'table')"
+          [enablePageSizeHeight]="false" [columnsHeight]="50">
+          <ngc-data-column feature="Billing.WaiverApproveOrReject" text='g.check' type='check' dataField="select"
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.waiverShipmentOrServiceId" dataField="awbOrServiceNumber" [width]='140'
+            cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.hawbsbNumber" entityAttribute='Gen.HAWBOrSBNumber' dataField="hawbNumber"
+            [width]='140' align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.domint" entityAttribute="Flight.DomesticInternationalHandling"
+            dataField="handledByDomIntl" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.actualAmount" [width]='120' type='displayCurrency' dataField="originalAmount"
+            align="center" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="bil.waivedAmount" [width]='120' type='displayCurrency' dataField="waivedTotalAmount"
+            align="center" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="bil.requestorRemarks" [width]='100' dataField="waivedReason" align="center"
+            cellsAlign=" center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.waivedBy" dataField="waivedBy" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.waivedDate" dataField="waiverOn" align="center" type="displayDateTime"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.approver" dataField="waiverApprover" Field="waiverApprover" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.br.approvalorrejectdate" [width]="100" dataField="waiverApprovalStatusDate"
+            align="center" cellsAlign="center" type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="bil.status" dataField="waiverApprovalStatus" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="bil.approverremark" dataField="waiverApprovalRejectReason" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column feature="Billing.WaiverApproveOrReject" text="billing.waiver.list.br.approve.reject"
+            align="center" cellsAlign="center" type="link" iconType="edit"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-window #showPopUpWindow width='500' [height]='90' title="billing.approverejectpopuptitle">
+  <form [formGroup]="waiverRejectReturnForm">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column="7">
+          <ngc-label label='reason'></ngc-label>
+          <div>
+            <ngc-input required [maxlength]='65' width='250' formControlName='waiverApprovalRejectReason'>
+            </ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column align='right'>
+          <ngc-label label=''></ngc-label>
+          <div>
+            <ngc-button value="Approve" (click)="rejectApproveRequest('APPROVED')"></ngc-button>
+            <ngc-button value="Reject" (click)="rejectApproveRequest('REJECTED')"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </form>
+</ngc-window>

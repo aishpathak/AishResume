@@ -1,0 +1,440 @@
+<form [formGroup]="equipmentForm">
+  <ngc-titlebar title="equipment.create.newequipmentrequest" (save)="OnSave($event)" (clear)="onClear($event)"
+    (cancel)="onBack($event)"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="byFlightMode" groupName="searchMode" checked="checked"
+            [disabled]="disablecreate">
+            <ngc-label label="equipment.byflight" inline="true"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="byAwbMode" (ngModelChange)="disableDate($event)"
+            groupName="searchMode" [disabled]="disablecreate">
+            <ngc-label label="equipment.byawb" inline="true"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="equipment.export.import"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" formControlName="requestfor" required
+            sourceId="Equipment$RequestedFor" [disabled]="disablecreate"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="equipment.carrier.flight"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="flightKey" [width]="180" required placeHolder="g.flight"
+            [disabled]="disablecreate"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate" [disabled]="disablecreate">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="equipment.requested.customercode"></ngc-label>
+        <div>
+          <ngc-lov [validOnly]="true" accessEnableOn="r" formControlName='agentCustomerCode' width='150px'
+            upperCase='true' required sourceId='EQUIPMENT_CUSTOMERLIST' title='billing.customer' dataField='code'
+            displayMember="code" [dropDownWidth]='60'>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label label=""> </ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onCreate()" [disabled]="disablecreate"></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showDetails">
+
+    <ngc-row *ngIf="equipmentForm.controls.byFlightMode.value">
+      <ngc-column column="1">
+        <ngc-label label="equipment.export.import"></ngc-label>
+        <div>
+          <ngc-display formControlName="requestforDisp"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDisp"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDateDisp" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="equipment.typeof.collection"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" sourceId='Equipment$TypeOfCollection'
+            (ngModelChange)="onTypeOfCollection($event)" required formControlName="typeofcollection"  >
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="equipment.blocktime"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" sourceId='BLOCKTIME' required sourceType='query' [disabled]="disableblock"
+             formControlName="blocktime"  ></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label formControlName="DateLabel"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="collectiondatetime" required [showCalendarButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.terminal"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" sourceId="WAREHOUSE_TERMINAL"  sourceType='query'
+             formControlName="handlingarea"  required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="equipment.pd.count"></ngc-label>
+        <div>
+          <ngc-input [width]="60" maxlength='3' formControlName="estimatedpdfortowing"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="equipmentForm.controls.byFlightMode.value">
+      <ngc-column column="10">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="4">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column align="center">
+                    <ngc-display value="equipment.awbs" [i18n]="true"></ngc-display>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column align="top">
+                    <ngc-table>
+                      <thead align="left">
+                        <tr>
+                          <th>
+                            <ngc-label value="g.sNo"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value="g.awbNumber"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value=""></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="reqShipmets">
+                        <tr *ngFor="let item of equipmentForm.controls.reqShipmets.controls let index=index"
+                          [formGroupName]="index">
+                          <td>
+                            <ngc-display value={{index+1}}></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-awbinput *ngIf="equipmentForm.get('requestfor').value === 'IMPORT'"
+                              formControlName="shipmentNumber" required></ngc-awbinput>
+                            <ngc-awbinput *ngIf="equipmentForm.get('requestfor').value !== 'IMPORT'"
+                              formControlName="shipmentNumber"></ngc-awbinput>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-link (click)="onConfirm($event, index)" type="link" iconType="delete"></ngc-link>
+                            </div>
+                          </td>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column align="top">
+                    <ngc-button value="g._add" (click)="addAwb()"></ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+            <ngc-column column="5">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column align="center">
+                    <ngc-display value="equipment.required.ulds" [i18n]="true"></ngc-display>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-table>
+                      <thead align="left">
+                        <tr>
+                          <th>
+                            <ngc-label value="equipment.uldtype"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value="equipment.numbers"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value=""></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="reqContainers">
+                        <tr *ngFor="let item of equipmentForm.controls.reqContainers.controls let index=index"
+                          [formGroupName]="index">
+                          <td>
+                            <ngc-input maxlength='3' formControlName="uldType"></ngc-input>
+                          </td>
+                          <td>
+                            <ngc-input maxlength='3' formControlName="qty"></ngc-input>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-link (click)="deleteUld($event, index)" type="link" iconType="delete"></ngc-link>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-button value="g._add" (click)="addRowUld()"></ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="equipmentForm.controls.byFlightMode.value">
+      <ngc-column column="5">
+        <ngc-label label="equipment.specialinstruction.remarks"></ngc-label>
+        <div>
+          <ngc-input width="600" formControlName="specialinstruction" maxlength="100"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="5">
+        <ngc-label label="g.address"></ngc-label>
+        <div>
+          <ngc-input width="600" formControlName="deliveryaddress" maxlength="100"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="equipmentForm.controls.byAwbMode.value">
+      <ngc-column column="1">
+        <ngc-label label="equipment.export.import"></ngc-label>
+        <div>
+          <ngc-display formControlName="requestforDisp"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDisp"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDateDisp" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="equipment.typeof.collection"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" sourceId='Equipment$TypeOfCollection'
+            (ngModelChange)="onTypeOfCollection($event)" required formControlName="typeofcollection"  >
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="equipment.blocktime"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" sourceId='BLOCKTIME' required sourceType='query' [disabled]="disableblock"
+             formControlName="blocktime"  ></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label formControlName="DateLabel"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="collectiondatetime" required [showCalendarButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.terminal"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="175" sourceId="WAREHOUSE_TERMINAL"  sourceType='query'
+             formControlName="handlingarea"  required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="equipment.pd.count"></ngc-label>
+        <div>
+          <ngc-input [width]="60" maxlength='3' formControlName="estimatedpdfortowing"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="equipmentForm.controls.byAwbMode.value">
+      <ngc-column column="10">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="4">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column align="center">
+                    <ngc-label value="equipment.awbs"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column align="top">
+                    <ngc-table>
+                      <thead align="left">
+                        <tr>
+                          <th>
+                            <ngc-label value="g.sNo"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value="g.awbNumber"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value="g.flight"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value="g.date"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value=""></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="reqShipmets">
+                        <tr *ngFor="let item of equipmentForm.controls.reqShipmets.controls let index=index"
+                          [formGroupName]="index">
+                          <td>
+                            <ngc-display value={{index+1}}></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-awbinput *ngIf="equipmentForm.get('requestfor').value === 'IMPORT'"
+                              (ngModelChange)="onAwbNumber(index, $event)" formControlName="shipmentNumber" required>
+                            </ngc-awbinput>
+                            <ngc-awbinput *ngIf="equipmentForm.get('requestfor').value !== 'IMPORT'"
+                              (ngModelChange)="onAwbNumber(index, $event)" formControlName="shipmentNumber">
+                            </ngc-awbinput>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="flightKey"></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="flightDate" type="displayDate"></ngc-display>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-link (click)="onConfirm($event, index)" type="link" iconType="delete"></ngc-link>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column align="top">
+                    <ngc-button value="g._add" (click)="addAwb()"></ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+            <ngc-column column="5">
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column align="center">
+                    <ngc-label value="equipment.required.ulds"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-table>
+                      <thead align="left">
+                        <tr>
+                          <th>
+                            <ngc-label value="equipment.uldtype"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value="equipment.numbers"></ngc-label>
+                          </th>
+                          <th>
+                            <ngc-label value=""></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="reqContainers">
+                        <tr *ngFor="let item of equipmentForm.controls.reqContainers.controls let index=index"
+                          [formGroupName]="index">
+                          <td>
+                            <ngc-input maxlength='3' formControlName="uldType"></ngc-input>
+                          </td>
+                          <td>
+                            <ngc-input maxlength='2' formControlName="qty"></ngc-input>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-link (click)="deleteUld($event, index)" type="link" iconType="delete"></ngc-link>
+                            </div>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-button value="g._add" (click)="addRowUld()"></ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="equipmentForm.controls.byAwbMode.value">
+      <ngc-column column="5">
+        <ngc-label label="equipment.specialinstruction.remarks"></ngc-label>
+        <div>
+          <ngc-input width="600" formControlName="specialinstruction" maxlength="100"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="5">
+        <ngc-label label="g.address"></ngc-label>
+        <div>
+          <ngc-input width="600" formControlName="deliveryaddress" maxlength="100"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>
+<ngc-footer>
+  <ngc-column column="1">
+    <ngc-button value="eqp.tasklist" (click)="onTaskList()"></ngc-button>
+  </ngc-column>
+</ngc-footer>

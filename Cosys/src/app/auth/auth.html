@@ -1,0 +1,123 @@
+<form [formGroup]="loginForm" [allowSubmission]="true" *ngIf="!isAuthorized()">
+  <div class="container-signin-outer">
+    <div class="container-signin-middle">
+      <div class="container-signin-inner" *ngIf="!isSSO">
+        <ngc-container *ngIf="!isNewWindow()">
+          <ngc-row>
+            <ngc-column align="center">
+              <img src="assets/images/logo.png" height="50" />
+            </ngc-column>
+          </ngc-row>
+          <ng-container *ngIf="isShowMultiTenant">
+            <ngc-row>
+              <ngc-column align="center">
+                <ngc-label label=""></ngc-label>
+              </ngc-column>
+            </ngc-row>
+            <ng-container *ngFor="let item of objectWithUrl">
+              <ngc-row>
+                <ngc-column align="center">
+                  <ngc-logo [maxWidth]="240" [maxHeight]="100" [height]="120" [src]="item.logo"
+                    (click)="showSingleTenant(item)"></ngc-logo>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align="center">
+                  <ngc-label label=""></ngc-label>
+                </ngc-column>
+              </ngc-row>
+            </ng-container>
+          </ng-container>
+          <ng-container *ngIf="!isShowMultiTenant">
+            <ngc-row>
+              <ngc-column align="center">
+                <ngc-logo [maxWidth]="240" [maxHeight]="100" [height]="120"></ngc-logo>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-container type="tab">
+                  <ngc-row *ngIf="isArchival">
+                    <ngc-column align="center">
+                      <kbd><code><ngc-label label="ARCHIVAL"></ngc-label></code></kbd>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="center">
+                      <!-- <ngc-column align="center">
+                      <ngc-label label="Tenant"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist formControlName="tenantId" [width]="100" sourceType='config'
+                          [sourceId]="isArchival ? 'ARCHIVAL_TENANTS' : 'TENANTS'">
+                        </ngc-dropdownlist>
+                      </div>
+                      </ngc-column> -->
+                      <ngc-label label="Language"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist formControlName="locale" [width]="100" sourceId="TENANT_LANGUAGES"
+                          sourceType='config' [sourceParameters]="{ tenantId: getAuthTenantId() }" [i18n]="false">
+                        </ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="center">
+                      <div>
+                        <ngc-labelinput label="Login Id" formControlName="userId" [width]="250"></ngc-labelinput>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="center">
+                      <div>
+                        <ngc-labelpasswordinput label="Password" (enterKey)="onLogin($event)" formControlName="password"
+                          [width]="250">
+                        </ngc-labelpasswordinput>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+                <ngc-container type="tab">
+                  <ngc-row>
+                    <ngc-column align="center">
+                      <ngc-button label="Login" [width]="140" (click)="onLogin($event)"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="left">
+                      <a class="login-style" href="javascript:void(0)" (click)="forgotPassword()">
+                        <ngc-i18n value="Forgot Password"></ngc-i18n>
+                      </a>
+                    </ngc-column>
+                    <!-- <ngc-column align="right">
+                      <div>
+                        <a class="login-style" href="javascript:void(0)" (click)="showAllTenantsLogo()">
+                          <ngc-i18n value="All Tenants"></ngc-i18n>
+                        </a>
+                      </div>
+                    </ngc-column> -->
+                  </ngc-row>
+                </ngc-container>
+              </ngc-column>
+            </ngc-row>
+          </ng-container>
+        </ngc-container>
+      </div>
+    </div>
+  </div>
+  <ngc-window #forgotPass title="Forgot Password - Staff users" [showCloseButton]="true" [width]="500" height='300'
+    (close)="onForgotCloseWindow()">
+    <app-forgotpassword *ngIf="!forgotWindowCloseFlag" (closewindow)="closeForgetPassworkWindow($event)"
+      (saveForgotPassData)="onForgotPasswordSave($event)" (forgetpasswordSubmitted)="forgetpasswordSubmitted($event)"
+      (staffId)="staffId($event)"></app-forgotpassword>
+  </ngc-window>
+
+  <ngc-window #changePass title="Change Password - Staff users" [showCloseButton]="true" [width]="500" height='580'
+    (close)="onChangePWDCloseWindow()">
+    <app-changepassword #changePassScreen [userId]="this.loginForm.get('userId').value"
+      (closewindow)="closeChangePassworkWindow($event)">
+    </app-changepassword>
+    <!-- <app-changepassword *ngIf="!changePWDWindowCloseFlag" (closewindow)="closeChangePassworkWindow($event)"
+      [staffIdFromfp]="this.loginForm.get('userName').value"></app-changepassword> -->
+  </ngc-window>
+</form>

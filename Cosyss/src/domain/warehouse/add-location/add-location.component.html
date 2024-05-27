@@ -1,0 +1,122 @@
+<form [formGroup]="form">
+
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label="g.terminal"></ngc-label>
+                <div>
+                    {{rootTerminal}}
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="g.sector" *ngIf="parentSectors.length"></ngc-label>
+                <div *ngFor="let sector of parentSectors">
+                    {{sector}}
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="g.location"></ngc-label>
+                <div>
+                    <!-- <ngc-input formControlName="locationType"></ngc-input> -->
+                    <ngc-dropdownlist [noCache]="true" [disabled]="searchDone" sourceType='query' [width]="300"
+                        [noBlank]="true" formControlName="locationType" sourceId='whsLocationType'></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1"></ngc-column>
+            <ngc-column>
+                <ngc-label label=" "></ngc-label>
+                <div>
+                    <ngc-button label="g.search" (click)="onSearch()"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label=" "></ngc-label>
+                <div>
+                    <ngc-button label="splcargo.clear" (click)="onClear()"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="5"></ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ng-container *ngIf="searchDone" type="tab">
+        <ngc-container>
+            <ngc-row>
+                <ngc-column [column]="1.5">
+                    <ngc-label label="warehouse.locationfrom"></ngc-label>
+                    <div>
+                        <!-- <ngc-input [width]="100" #noOfRows></ngc-input> -->
+                        <ngc-numberinput [width]="80" decimalDigits="0" #locationFrom></ngc-numberinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="1.5">
+                    <ngc-label label="warehouse.locationto"></ngc-label>
+                    <div>
+                        <!-- <ngc-input [width]="100" #noOfRows></ngc-input> -->
+                        <ngc-numberinput [width]="80" decimalDigits="0" #locationTo></ngc-numberinput>
+                    </div>
+                </ngc-column>
+                <ngc-column align="right">
+                    <ngc-label label=" "></ngc-label>
+                    <div>
+                        <ngc-button label="warehouse.generate.mulitplelocations"
+                            (click)="onGenerateMultipleLocations(locationFrom, locationTo)"></ngc-button>
+                        <ngc-button label="add" (click)="onAddLocation()"></ngc-button>
+                        <ngc-button label="uld.Save" (click)="onSave()"></ngc-button>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container>
+            <ngc-row>
+                <ngc-column>
+                    <div>
+                        <ngc-edittable formArrayName="locationsList" [pageable]="true">
+                            <ngc-data-column text="warehouse.column" dataField="whColumn">
+                                <ng-template let-name="name" let-group="group">
+                                    <ng-container [formGroupName]="group">
+                                        <ngc-input [width]="70" formControlName="whColumn" [maxLength]="4">
+                                        </ngc-input>
+                                    </ng-container>
+                                </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="warehouse.row" dataField="whRow">
+                                <ng-template let-name="name" let-group="group">
+                                    <ng-container [formGroupName]="group">
+                                        <ngc-input [width]="100" formControlName="whRow" [maxLength]="8" required>
+                                        </ngc-input>
+                                    </ng-container>
+                                </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.description" dataField="locationDescription">
+                                <ng-template let-name="name" let-group="group">
+                                    <ng-container [formGroupName]="group">
+                                        <ngc-input [width]="200" formControlName="locationDescription">
+                                        </ngc-input>
+                                    </ng-container>
+                                </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="g.code" dataField="code">
+                                <ng-template let-name="name" let-group="group">
+                                    <ng-container [formGroupName]="group">
+                                        <ngc-label [width]="100"
+                                            [label]="(this.form.get(['locationsList', group, 'whColumn']).value?this.form.get(['locationsList', group, 'whColumn']).value:'') + (this.form.get(['locationsList', group, 'whRow']).value?this.form.get(['locationsList', group, 'whRow']).value:'')">
+                                        </ngc-label>
+                                    </ng-container>
+                                </ng-template>
+                            </ngc-data-column>
+                            <ngc-data-column text="" dataField="delete">
+                                <ng-template let-name="name" let-group="group">
+                                    <ng-container [formGroupName]="group">
+                                        <ngc-link (linkClick)="onDeleteLocation(group)" iconType="delete">
+                                            <ngc-i18n value="g.delete"></ngc-i18n>
+                                        </ngc-link>
+                                    </ng-container>
+                                </ng-template>
+                            </ngc-data-column>
+                        </ngc-edittable>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ng-container>
+</form>

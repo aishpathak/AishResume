@@ -1,0 +1,526 @@
+<ngc-titlebar title="export.title.through.transit.advice" (save)="validatePreExistingShift()" (clear)="onClear()" (cancel)="onCancel()"
+  [disabled]=saveFlag></ngc-titlebar>
+<ngc-container type="header">
+  <ngc-row>
+    <ng-container [formGroup]="ttwaformSearch">
+      <ngc-column column="1">
+        <ngc-label label='transhipment.flight.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='Flight$Flight_Type' formControlName="flightType" [width]="80" upperCase="true"
+            [disabled]="headerFlag" required (select)="onChangeClearForm(ttwaformSearch.get('flightType').value, ttwaformSearch )"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='transhipment.shift'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='EXPORT$SHIFT' formControlName="shift" [width]="100" [disabled]="headerFlag || ttwaformSearch.get('flightType').value === 'C'"
+            [required]="ttwaformSearch.get('flightType').value === 'P'">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" upperCase="true" formControlName="adviceDate" 
+            [disabled]="headerFlag  || ttwaformSearch.get('flightType').value === 'C'" [required]="ttwaformSearch.get('flightType').value === 'P'"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='transhipment.sequence'></ngc-label>
+        <div>
+          <ngc-numberinput accessEnableOn="r" [width]="50" upperCase="true" decimalDigits="0" formControlName="flightPairSequence">
+          </ngc-numberinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='transhipment.outbound.flight' [width]="130"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="80" formControlName="outboundFlight" upperCase="true" [required]="!this.ttwaformSearch.get('flightPairSequence').value"
+            (ngModelChange)="createSourceParameterForFlightSegment()"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" upperCase="true" formControlName="outboundFlightDate"
+            [required]="!this.ttwaformSearch.get('flightPairSequence').value" (ngModelChange)="createSourceParameterForFlightSegment()">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='export.TTA.off.point'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='ONWARD_FLT_SEG' sourceType='query' [width]="80" [dropDownWidth]="75" upperCase="true"
+            formControlName="outboundFlightSegmentId" [sourceParameters]="sourceParameterForSegment" [noCache]="true" [required]="!this.ttwaformSearch.get('flightPairSequence').value"
+            (select)="getOutgoingFlightOffPoint($event)" [autoSelectOnSingle]="true" [noBlank]="true" [noCache]="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch('search')"></ngc-button>
+        </div>
+      </ngc-column>
+    </ng-container>
+    <ng-container [formGroup]="ttwaform">
+      <ngc-column column="1">
+        <ngc-label label='flight.std'></ngc-label>
+        <div>
+          <ngc-display formControlName="dateSTD"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='export.TTA.incoming.flights'></ngc-label>
+        <ngc-label label="" [width]="20">
+        </ngc-label>
+        <ngc-dropdownlist [source]='incomingFlights' *ngIf="incomingFlightsDropDown" formControlName="selectedInboundFlight" [width]="350"
+          (select)="onFlightSelect($event)"></ngc-dropdownlist>
+        <ngc-dropdownlist *ngIf=" incomingFlightsEmptyDropDown" [width]="350"></ngc-dropdownlist>
+        <ngc-label label="" [width]="20">
+        </ngc-label>
+      </ngc-column>
+    </ng-container>
+    <!--  -->
+  </ngc-row>
+</ngc-container>
+<form [formGroup]="ttwaform">
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <!--Accordian start from here-->
+        <ngc-accordion formArrayName="connectingFlights" [activeIndex]="0">
+          <!--Accordian Part start from here-->
+          <ngc-accordion-card [title]="" *ngFor="let item of ttwaform.controls.connectingFlights.controls; let i=index" [formGroupName]="i">
+            <ngc-accordion-titlebar>
+              <ngc-label label="export.TTA.flight.pair.sequence"> </ngc-label>
+              <ngc-display formControlName="flightPairSequence"></ngc-display>
+              <ngc-link *ngIf="showDeleteIcon" type="link" iconType="delete" align="right" (click)="deleteFlightPair(item.value)"></ngc-link>
+            </ngc-accordion-titlebar>
+            <!-- Bulk Shipment Table start from here-->
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column='1.5'>
+                  <ngc-label label='transhipment.inbound.flight' align="right" width="250"></ngc-label>
+                  <ngc-label label='  :  '></ngc-label>
+                  <ngc-flightkeyinput [width]="80" formControlName="inboundFlight" upperCase="true" required>
+                  </ngc-flightkeyinput>
+                </ngc-column>
+                <ngc-column column='1.5'>
+                  <ngc-label label='g.date'></ngc-label>
+                  <ngc-label label='  :  '></ngc-label>
+                  <ngc-datetimeinput [width]="93" formControlName="inboundFlightDate"  required>
+                  </ngc-datetimeinput>
+                </ngc-column>
+                <ngc-column column='1.5'>
+                  <ngc-label label='export.TTA.board.point'></ngc-label>
+                  <ngc-label label='  :  '></ngc-label>
+                  <ngc-dropdownlist sourceId='INWARD_FLI_SEG' sourceType='query' formControlName="inboundFlightSegmentId" [width]="80" [dropDownWidth]="75"
+                    upperCase="true" [sourceParameters]="{ 'parameter1': this.ttwaform.get(['connectingFlights', 0]).get('inboundFlight').value,
+                     'parameter2': this.ttwaform.get(['connectingFlights', 0]).get('inboundFlightDate').value}" [noCache]="true"
+                    (select)="getIncomingFlightBoardPoint($event)" [autoSelectOnSingle]="true" [noBlank]="true" required>
+                  </ngc-dropdownlist>
+                </ngc-column>
+                <ngc-column column='1.5'>
+                  <ngc-label label='flight.sta'></ngc-label>
+                  <ngc-label label='  :  '></ngc-label>
+                  <ngc-display formControlName="dateSTA"></ngc-display>
+                </ngc-column>
+                <ngc-column align="right">
+                  <ngc-button label="export.TTWA.add.bulk.btn" (click)="onBulk(i)" align="right"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="g.sel"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.awbnumber"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.location"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.pieces"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.weight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.book.weightcode"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="exp.NatureOfGoods"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="import.specialHandling"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="handellingregulation.imp"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="transferType"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.remarks"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.TTA.remarks"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label=""></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="bulkShipments">
+                      <tr *ngFor="let bulkItem of item.controls.bulkShipments.controls; let j=index" [formGroupName]="j">
+                        <td>
+                          <ngc-checkbox formControlName="select" [width]="10"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-awbinput formControlName="shipmentNumber" required></ngc-awbinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist sourceId='EXPORT$Location' formControlName="location" [width]="100">
+                          </ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-piecesinput [digits]="4" formControlName="pieces" required></ngc-piecesinput>
+                        </td>
+                        <td>
+                          <ngc-weightinput [digits]="10" decimalDigits="1" formControlName="weight" required>
+                          </ngc-weightinput>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist sourceId='EXPORT$Weight_Code' formControlName="weightUnitCode" [width]="60" required></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="natureOfGoods" [maxLength]=20 pattern="^[A-Za-z0-9-. ]*$" [width]="150" required></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-shcinput formArrayName="shcList" dataField="code"></ngc-shcinput>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="impFlag" [width]="20"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-dropdownlist sourceId='SQL_ADVICE_TRANSFER_TYPE' [noCache]='false' sourceType='query' formControlName="transferType"
+                            [width]="70" required></ngc-dropdownlist>
+                        </td>
+                        <td>
+                          <ngc-remarksinput formControlName="remarks" uppercase="true" pattern="^[A-Za-z0-9-. ]*$" [maxlength]="65" [width]="250"></ngc-remarksinput>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="tttRemarks" [width]="20"></ngc-checkbox>
+                        </td>
+                        <td>
+                          <ngc-link (linkClick)="onBulkDelete(i,j)" iconType="delete" [width]="10"></ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button label="export.TTA.add.uld" (click)="onUld(i)"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <!-- Bulk Shipment Table end here-->
+              <!--Uld details table start from here-->
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="uld.Number"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="grossweight"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.book.weightcode"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="exp.NatureOfGoods"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="import.specialhandlingcode"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="transhipment.contour"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="handellingregulation.imp"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="transferType"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.remarks"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.TTA.remarks"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="transhipment.piggyback"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label=""></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="uldWithShipments">
+                      <ng-container *ngFor="let uldItem of item.get('uldWithShipments').controls; let k=index">
+                        <tr [formGroupName]="k">
+                          <td>
+                            <ngc-uldinput formControlName="uldNumber" (ngModelChange)="getContourCode($event,uldItem,k,i)" required></ngc-uldinput>
+                          </td>
+                          <td>
+                            <ngc-weightinput [digits]="10" decimalDigits="1" formControlName="weight" required>
+                            </ngc-weightinput>
+                          </td>
+                          <td>
+                            <ngc-dropdownlist sourceId='EXPORT$Weight_Code' formControlName="weightUnitCode" [width]="70" required></ngc-dropdownlist>
+                          </td>
+                          <td>
+                            <ngc-input formControlName="natureOfGoods" [maxLength]=20 pattern="^[A-Za-z0-9-. ]*$" [width]="150" required></ngc-input>
+                          </td>
+                          <td>
+                            <ngc-shcinput formArrayName="shcList" dataField="code"></ngc-shcinput>
+                          </td>
+                          <td>
+                            <ngc-input formControlName="contourCode" pattern="^[A-Za-z0-9]*$" [maxlength]="3" [width]="50" required></ngc-input>
+                          </td>
+                          <td>
+                            <ngc-checkbox formControlName="impFlag" [width]="20"></ngc-checkbox>
+                          </td>
+                          <td>
+                            <ngc-dropdownlist sourceId='SQL_ADVICE_TRANSFER_TYPE' [noCache]='false' sourceType='query' formControlName="transferType"
+                              [width]="70" required></ngc-dropdownlist>
+                          </td>
+                          <td>
+                            <ngc-remarksinput formControlName="remarks" uppercase="true" pattern="^[A-Za-z0-9-. ]*$" [maxlength]="65" [width]="250"></ngc-remarksinput>
+                          </td>
+                          <td>
+                            <ngc-checkbox formControlName="tttRemarks" [width]="20"></ngc-checkbox>
+                          </td>
+                          <td>
+                            <ngc-link (linkClick)="onPiggyback(i,k)" iconType="edit" [width]="60"></ngc-link>
+                          </td>
+                          <td>
+                            <ngc-link (linkClick)="onUldDelete(i, k)" iconType="delete" [width]="60"></ngc-link>
+                          </td>
+                        </tr>
+
+                        <!--Uld Shipment table start from here-->
+                        <ng-container [formGroupName]="k">
+                          <ng-container formArrayName="shipments">
+                            <tr *ngFor="let uldShipmentItem of uldItem.get('shipments').controls; let l=index" [formGroupName]="l">
+                              <td>
+                                <ngc-checkbox formControlName="select" [width]="10"></ngc-checkbox>
+                                <ngc-awbinput formControlName="shipmentNumber" placeHolder="awb.awbnumber" required>
+                                </ngc-awbinput>
+                                <ngc-label label=" "> </ngc-label>
+                                <ngc-piecesinput formControlName="pieces" [digits]="4" [width]="55" placeHolder="placeholder.pieces" required>
+                                </ngc-piecesinput>
+                              </td>
+                              <td>
+                                <ngc-weightinput formControlName="weight" required></ngc-weightinput>
+                              </td>
+                              <td>
+                                <ngc-dropdownlist sourceId='EXPORT$Weight_Code' formControlName="weightUnitCode" [width]="70" required></ngc-dropdownlist>
+                              </td>
+                              <td>
+                                <ngc-input formControlName="natureOfGoods" [width]="100" [maxLength]=20 pattern="^[A-Za-z0-9-. ]*$" required></ngc-input>
+                              </td>
+                              <td>
+                                <ngc-shcinput formArrayName="shcList" dataField="code"></ngc-shcinput>
+                              </td>
+                              <td>
+                                <ngc-link (linkClick)="onUldShipmentDelete(i, k, l)" iconType="delete" [width]="60">
+                                </ngc-link>
+                              </td>
+                            </tr>
+                          </ng-container>
+                        </ng-container>
+                        <tr>
+                          <td colspan="12">
+                            <ngc-container>
+                              <ngc-row>
+                                <ngc-column align="right">
+                                  <ngc-button label="export.TTA.add.shipment" (click)="onShipment(i,k)"></ngc-button>
+                                </ngc-column>
+                              </ngc-row>
+                            </ngc-container>
+                          </td>
+                        </tr>
+                      </ng-container>
+
+                      <!--Uld Shipment table end here-->
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <!-- Uld details table end here-->
+          </ngc-accordion-card>
+          <!--Accordian Part end here-->
+        </ngc-accordion>
+        <!--Accordian end here-->
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--Piggyback ULD window Starts here -->
+  <ngc-window #piggyBackWindow [width]="500" [height]="300" title="export.TTA.piggyback">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="piggybackULD" width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label=""> </ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="piggyBackUlds">
+              <tr *ngFor="let item of ttwaform.get(['piggyBackUlds']).controls; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-input formControlName="piggyNumber" [maxlength]="11" required> </ngc-input>
+                </td>
+                <td>
+                  <ngc-link (linkClick)="onPiggyBackDelete(index)" iconType="delete" [width]="60"></ngc-link>
+                </td>
+              </tr>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button (click)="onAddRow()" value="g._add" iconType="add"> </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onOK()" value="g.ok"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <!--Piggyback ULD window ends here -->
+
+  <!-- Display difference window start here -->
+  <ngc-window #displayDifferenceWindow [width]="1200" [height]="600" title="export.Tta.display.difference">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <!-- table head start here -->
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="uld.uldNumber" width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="uld.new.uld.number"> </ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.awbnumber" width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="uld.gross.weight" width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="uld.actual.gross.weight"> </ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.pieces"> </ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.weight" width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.actual.pieces"> </ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.actual.weight"> </ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.TTA.undo"> </ngc-label>
+                </th>
+                <th>
+                  <ngc-label label=""> </ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <!-- table head end here -->
+            <!-- table body start here -->
+            <tbody formArrayName="displayDifferenceArray">
+              <tr *ngFor="let item of ttwaform.get(['displayDifferenceArray']).controls; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="deltaUldNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="uldNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="number"></ngc-display>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="deltaGrossWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="uldGrossWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="deltaPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="deltaWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="shipmentPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="shipmentWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-link (linkClick)="onUndoDifference()" iconType="edit" formControlName="undoFlag"></ngc-link>
+                </td>
+                <td>
+                  <ngc-link (linkClick)="onDifferenceDelete()" iconType="edit" [width]="60"></ngc-link>
+                </td>
+              </tr>
+            </tbody>
+            <!-- table body ends here -->
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!-- Display difference window end here -->
+
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column align="center">
+      <ngc-button label="export.TTA.next.flight.button" (click)="onEnableNextFlight()"></ngc-button>
+      <ngc-button accessEnableOn="r" label="export.TTA.send.TTA.button" (click)="onTransitAdvice()"></ngc-button>
+      <ngc-button accessEnableOn="r" label="export.TTA.book.single.shipment.button" (click)="onBookSingleShipment()"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

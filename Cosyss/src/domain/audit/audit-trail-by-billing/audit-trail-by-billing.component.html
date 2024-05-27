@@ -1,0 +1,170 @@
+<ngc-titlebar title="audit.title.billing" (cancel)="onCancel()" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="auditForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="2.5">
+        <ngc-label label='g.shipmentNumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" [width]="150"
+            (ngModelChange)="onTabOutCheckHandledBy()"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2.5" *ngIf=handledbyHouse>
+        <ngc-label label="billing.hawbsbNumber"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="150" sourceId='HWBNUMBER'
+            [validOnly]="true" dataField='code' valueMember='code' [noCache]="true" title="g.hawb.number"
+            [sourceParameters]="{'parameter1': this.auditForm.get('shipmentNumber').value}">
+            <ngc-data-column text='g.hawb.number' [width]='80' dataField='code' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2.5">
+        <ngc-label label='billing.servicenumber'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="serviceNumber" [width]="150"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label value="g.customerCode"></ngc-label>
+        <div>
+          <ngc-lov formControlName="customerCode" sourceId="COMPANY_LIST" title="g.customerCode" dataField="code"
+            [width]="250" valueMember="code" (select)='onCompanyLOVSelect($event)' accessEnableOn="r">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.customerName" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="g.pdNumber"></ngc-label>
+        </div>
+        <ngc-input formControlName="pdNumber" [width]="150" accessEnableOn="r"></ngc-input>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2.5">
+        <ngc-label label='g.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            formControlName='fromDate' [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2.5">
+        <ngc-label label='g.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            formControlName='toDate' [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label='g.audit.EventType'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [dropDownWidth]=" 250" sourceId="AUDIT_EVENT_TYPE" sourceType="query"
+            [sourceParameters]="{ 'parameter1': 'BILLING' }" formControlName="eventType" upperCase='true' [width]="250">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom" [column]="2">
+        <ngc-button accessEnableOn="r" label='g.search' (click)="onSearch()" #searchButton></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="flagToDisplayData">
+      <ngc-column>
+        <ngc-datatable formArrayName="auditList" [pageSize]=10 [enablePageSizeHeight]="false"
+          (linkClick)="detailsInformationNew($event)" [showToolbar]="true">
+          <ngc-data-column text="export.sno" [width]="20" emphasis='md' dataField="sno" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.event" [width]="200" emphasis='md' dataField="eventName" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.user" [width]="50" emphasis='md' dataField="actor" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="shp.datetime" [width]="80" emphasis='md' type="displayDateTime"
+            dataField="eventDateTime" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.action" [width]="50" emphasis='md' dataField="eventAction" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.eventValue" [width]="490" emphasis='md' dataField="eventValue" [html]="true">
+          </ngc-data-column>
+          <ngc-data-column dataField="attibutesLst" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text="g.info" [width]="30" emphasis='md' dataField="info" align="center" iconType='edit'
+            type="link" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ng-container>
+    <ngc-window #windowComponent title="g.audit.details" [cancelButton]="true" [width]="1200" [height]="600">
+      <ngc-container type="square">
+        <ngc-row>
+          <ngc-column column="11" align="right">
+            <ngc-button accessEnableOn="r" (click)="onPrevious()" priority="quaternary" [disabled]="indexnumber == 0" height="30"
+              width="50" iconType="previous-simple">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column align="left">
+            <ngc-button accessEnableOn="r" (click)="onNext()" width="50" height="30" priority="quaternary"
+              [disabled]="indexnumber == auditForm.get('entityDataArray').length-1" iconType="next-simple">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.audit.event"></ngc-label>
+                <ngc-display formControlName="popupevents"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.audit.user"></ngc-label>
+                <ngc-display formControlName="popupusers"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.audit.dateTime"></ngc-label>
+                <ngc-display formControlName="popupdatetime"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th>
+                    <ngc-label value="g.audit.fieldName"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="g.audit.value"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="g.audit.oldValue"></ngc-label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="entityDataArray">
+                <tr *ngFor="let item of auditForm.controls.entityDataArray.controls; let index=index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-display formControlName="label"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="value"></ngc-display>
+                  </td>
+                  <td *ngIf="item.get('changedValue').value">
+                    <ngc-display color="blue" emphasis="md" formControlName="changedValue">
+                    </ngc-display>
+                  </td>
+                  <td *ngIf="!item.get('changedValue').value">
+                    <ngc-display></ngc-display>
+                  </td>
+                </tr>
+              </tbody>
+            </ngc-table>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+  </ng-container>
+</form>

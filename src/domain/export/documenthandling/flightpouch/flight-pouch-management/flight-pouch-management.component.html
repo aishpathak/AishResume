@@ -1,0 +1,558 @@
+<form [formGroup]='flightPouch'>
+    <ngc-titlebar title="fltpouch.fltpouchmgnt"></ngc-titlebar>
+    <ngc-container type="box">
+        <ngc-row>
+            <ngc-column column="1">
+                <ngc-label label="fltpouch.flight"></ngc-label>
+                <div>
+                    <!-- (blur)="fltMasking()" -->
+                    <!--<ngc-input accessEnableOn="r" #flightNo formControlName="flightNumber" [maxLength]="8"
+                        upperCase="true"></ngc-input>-->
+                    <ngc-flightkeyinput accessEnableOn="r" formControlName="flightNumber" maxlength="7" [width]="100"
+                        required>
+                    </ngc-flightkeyinput>
+                    <!-- <ngc-flightinput formControlName="flightNumber" flightType="ALL" (select)="onFlightSelect($event)"></ngc-flightinput> -->
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="fltpouch.date"></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" #flightOriDate formControlName="flightOriDate" required>
+                    </ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="1" align="center">
+                <ngc-label label=''></ngc-label>
+                <div>
+                    <ngc-label value='g.or'></ngc-label>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="fltpouch.pouch"></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" #pouchId formControlName="pouchId" (blur)="pouchTrimming()"
+                        upperCase="true" [maxLength]="25" [width]="200" required></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="fltpouch.ecc"></ngc-label>
+                <div style="height:10px; width:10px; padding-top:5px">
+                    <ngc-checkbox accessEnableOn="r" formControlName="ecc" (click)="onSearch($event)"></ngc-checkbox>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <br>
+                <ngc-button accessEnableOn="r" (click)="onSearch($event)" iconType="search" value="g.search">
+                </ngc-button>
+            </ngc-column>
+            <ngc-column column="6">
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container *ngIf='displayFlag'>
+        <ngc-row>
+            <ngc-column column="9.5">
+                <ngc-container type="square">
+                    <ngc-row formGroupName="flightInfo">
+                        <ngc-column column="2">
+                            <ngc-label label="fltpouch.flight"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="flightKey"></ngc-display>
+                                <!-- <ngc-display formControlName="flightId"></ngc-display> -->
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="fltpouch.date"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="flightOriDate" [onlyDate]="true"></ngc-display>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="fltpouch.std"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="dateSTD"></ngc-display>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="2">
+                            <ngc-label label="fltpouch.etd"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="dateETD"></ngc-display>
+                            </div>
+                        </ngc-column>
+                        <ngc-column column="1.5">
+                            <ngc-label label="fltpouch.status"></ngc-label>
+                            <div>
+                                <ngc-display formControlName="status"></ngc-display>
+                                <!-- <ngc-display formControlName="carrierCode"></ngc-display> -->
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-container type="box">
+                    <ngc-row>
+                        <ngc-column column="2">
+                            <ngc-label label="fltpouch.printer"></ngc-label>
+                            <div>
+                                <!-- <ngc-dropdownlist sourceId='CDH_PRINTER'  [sourceParameters]="printerDropdownPouch"  [displayBoth]="false" (ngModelChange)="getSelectedPrinter($event)"
+                                                        [noBlank]="true" [noCache]='true'  sourceType='query' formControlName="printerdropdown"  width='200px'></ngc-dropdownlist> -->
+                                <ngc-printer [width]='200' formControlName="printerdropdown"
+                                    [printerTypeList]="['POUCH']" (ngModelChange)="getSelectedPrinter($event)">
+                                </ngc-printer>
+                            </div>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container *ngIf='displayFlag' type="box">
+        <ngc-row>
+            <ngc-column>
+                <ngc-tabs formArrayName="legList" [activeIndex]="activeTabIndex">
+                    <div ngc-tab-card [title]="item.controls['legId'].value"
+                        *ngFor="let item of flightPouch.controls.legList.controls; let index=index"
+                        [formGroupName]="index">
+                        <div type="box"
+                            style="border: 1px solid #ddd; padding: 3px 0px 2px 0px!important; margin-bottom: 5px !important;">
+                            <ngc-row formGroupName="summary">
+                                <ngc-column>
+                                    <ngc-row>
+                                        <ngc-column>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label value="fltpouch.summary"
+                                                style="color: #C60C30; font-weight: bold"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="fltpouch.total"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-display formControlName="total"></ngc-display>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="fltpouch.expected"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-display formControlName="expected"></ngc-display>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="fltpouch.inpouch"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-display formControlName="inPouch"></ngc-display>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-label label="fltpouch.status"></ngc-label>
+                                        </ngc-column>
+                                        <ngc-column>
+                                            <ngc-display formControlName="status"></ngc-display>
+                                        </ngc-column>
+                                        <ngc-column [column]="5">
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-column>
+                            </ngc-row>
+                        </div>
+
+                        <ngc-container class="inner" type="box">
+                            <ngc-row>
+                                <ngc-column [column]="1">
+                                    <ngc-label emphasis="md" label="fltpouch.pouches"></ngc-label>
+                                </ngc-column>
+                                <ngc-column [column]="4" formArrayName="pouches">
+                                    <ngc-row *ngFor="let pouch of item.controls.pouches.controls; let index=index"
+                                        [formGroupName]="index">
+                                        <ngc-column [column]="1">
+                                            {{index + 1}}
+                                        </ngc-column>
+                                        <ngc-column [column]="4">
+                                            <ngc-display formControlName="pouchId"></ngc-display>
+                                        </ngc-column>
+                                        <ngc-column [column]="1">
+                                            <ngc-display formControlName="pouchLbl"></ngc-display>
+                                        </ngc-column>
+                                        <ngc-column [column]="3">
+                                            {{pouch.controls.phlocId.value}}
+                                        </ngc-column>
+                                    </ngc-row>
+                                </ngc-column>
+                                <ngc-column>
+                                    <ngc-button (click)="createPouch(item.controls.legId.value, index)"
+                                        value="fltpouch.createpouch"></ngc-button>
+                                </ngc-column>
+                                <ngc-column>
+                                    <ngc-button (click)="onUpdatePouchOpen(item.controls.legId.value)"
+                                        value="fltpouch.updatepouch"></ngc-button>
+                                </ngc-column>
+                                <ngc-column>
+                                    <ngc-button (click)="navigateAddDoc(item.controls.legId.value)"
+                                        value="fltpouch.adddoc"></ngc-button>
+                                </ngc-column>
+                                <ngc-column>
+                                    <ngc-button (click)="navigateFinalize(item.controls.legId.value)"
+                                        value="fltpouch.verifyfinalize"></ngc-button>
+                                </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                                <ngc-column>
+                                    <ngc-table class="table-responsive">
+                                        <thead>
+                                            <tr>
+                                                <th>
+                                                    <ngc-label value="fltpouch.sno"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.awbno"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.copy"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.status"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.document"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.location"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.pouch"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <!-- fltpouch.documenttype -->
+                                                    <ngc-label value="fltpouch.doc.type"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.copy.req"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.remove"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.shc"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.import.flight"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <!-- fltpouch.discrepancy -->
+                                                    <ngc-label value="Disc"></ngc-label>
+                                                </th>
+                                                <th>
+                                                    <ngc-label value="fltpouch.remarks"></ngc-label>
+                                                </th>
+                                            </tr>
+                                        </thead>
+                                        <tbody class="tableBody" formArrayName="pouchDetails">
+                                            <ng-container
+                                                *ngFor="let awbDetails of item.controls.pouchDetails.controls; let index=index"
+                                                [formGroupName]="index">
+                                                <tr
+                                                    [ngStyle]="{'backgroundColor': (awbDetails.controls.bookingCancelFlag.value === 'Y' 
+                                                    && awbDetails.controls.docStatus.value=='In Pouch') ? 'orange' : 'white'}">
+                                                    <td width="3%">
+                                                        {{index + 1}}
+                                                    </td>
+                                                    <td>
+                                                        <ngc-link
+                                                            *ngIf="awbDetails.controls.docStatus.value != 'Not Received'"
+                                                            (linkClick)="onAWBClick(awbDetails.controls)">
+                                                            <ngc-awbdisplay formControlName="awbNum"></ngc-awbdisplay>
+                                                        </ngc-link>
+                                                        <ngc-awbdisplay
+                                                            *ngIf="awbDetails.controls.docStatus.value === 'Not Received'"
+                                                            formControlName="awbNum"></ngc-awbdisplay>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="copyNum"></ngc-display>
+                                                    </td>
+                                                    <td>
+                                                        <i *ngIf="(awbDetails.controls.docStatus.value=='In Pouch' ||
+                                                            awbDetails.controls.docStatus.value=='Verified' ||
+                                                            awbDetails.controls.docStatus.value=='Finalized' )"
+                                                            style="color: green" class="fa fa-check"
+                                                            aria-hidden="true"></i>
+                                                        <i *ngIf="awbDetails.controls.docStatus.value=='Not Received'"
+                                                            style="color: red" class="fa fa-times"
+                                                            aria-hidden="true"></i>
+                                                        <i *ngIf="(awbDetails.controls.docStatus.value == 'EAW' || awbDetails.controls.docStatus.value == 'ECC' || awbDetails.controls.docStatus.value == 'TTC')"
+                                                            class="fa fa-window-minimize" aria-hidden="true"></i>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="docStatus"></ngc-display>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="locationName"></ngc-display>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="pouchId"></ngc-display>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="docType"></ngc-display>
+                                                    </td>
+                                                    <td (click)="navigateUpdateDocument(awbDetails.controls)">
+                                                        <i *ngIf='awbDetails.controls.copyReq.value === "Y"'
+                                                            class="fa fa-clipboard" aria-hidden="true"></i>
+                                                    </td>
+                                                    <td (click)="deleteAwb(awbDetails.controls)">
+                                                        <ngc-link>
+                                                            <i *ngIf="awbDetails.controls.docStatus.value==='In Pouch'"
+                                                                style="
+                                                                color: red" class="fa fa-times" aria-hidden="true"></i>
+                                                        </ngc-link>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="shc"></ngc-display>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="impFltDate"></ngc-display>
+                                                    </td>
+                                                    <td
+                                                        (click)="onPopupDiscrepancy(awbDetails.controls.awbNum.value, awbDetails.controls.copyNum.value, awbDetails.controls.disc.value,  awbDetails.controls.remark.value, item.controls.legId.value, awbDetails.controls.shipmentId.value, awbDetails.controls.discId.value);">
+                                                        <ngc-link>
+                                                            <i *ngIf='awbDetails.controls.disc.value != null'
+                                                                class="fa fa-exclamation" style="color: red"
+                                                                aria-hidden="true"></i>
+                                                            <!-- && awbDetails.controls.shipmentId.value != null -->
+                                                            <i *ngIf='awbDetails.controls.disc.value === null'
+                                                                class="fa fa-plus" style="color: green"
+                                                                aria-hidden="true"></i>&nbsp;
+                                                            <!-- && awbDetails.controls.shipmentId.value != null -->
+                                                            <ngc-display formControlName="disc"></ngc-display>
+                                                        </ngc-link>
+                                                    </td>
+                                                    <td>
+                                                        <ngc-display formControlName="remark"></ngc-display>
+                                                    </td>
+                                                </tr>
+                                            </ng-container>
+                                        </tbody>
+                                    </ngc-table>
+                                </ngc-column>
+                            </ngc-row>
+                        </ngc-container>
+                    </div>
+                </ngc-tabs>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>
+
+<form [formGroup]='popupPouchForm'>
+    <ngc-window #windowPouch width="1300" [height]="450" [position]="{ x: 100, y: 180 }"
+        [title]="'Update Pouch Location'">
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column [column]="1">
+                    <br>
+                    <ngc-label formControlName="flightNumber"></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="1">
+                    <br>
+                    <ngc-label formControlName="flightDateOri"></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="1">
+                    <br>
+                    <ngc-label formControlName="leg"></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="2">
+                    <ngc-label label="g.user"></ngc-label>
+                    <div>
+                        <ngc-lov [noCache]="true" [validOnly]="true" sourceId="USERS" formControlName="userId"
+                             dataField="desc" title="g.users" (input)="onUserLOVSelect($event)"
+                            (select)="onUserLOVSelect($event)" required>
+                            <ngc-data-column text="user.code"  dataField="code"  [width]="50"></ngc-data-column>
+                            <ngc-data-column text="user.userName" [width]="150" dataField="desc"></ngc-data-column>
+                        </ngc-lov>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="2">
+                    <ngc-label label="g.location"></ngc-label>
+                    <ngc-lov [noCache]="true" [validOnly]="true" sourceId="LOCATIONS" formControlName="phlocId"
+                        dataField="desc" title="g.locations" [sourceParameters]="locationLovParameters"
+                        (input)="onLocationLOVSelect($event)" (select)="onLocationLOVSelect($event)" required>
+                        <ngc-data-column text="g.location.id"  dataField="code"  [width]="50"></ngc-data-column>
+                        <ngc-data-column text="g.location.name" [width]="150" dataField="desc"></ngc-data-column>
+                    </ngc-lov>
+                </ngc-column>
+                <ngc-column [column]="2">
+                    <br>
+                    <ngc-button (click)="updatePouch()" value="fltpouch.updatepouches" [disabled]='isPouchFinalized'>
+                    </ngc-button>
+                </ngc-column>
+                <ngc-column>
+                </ngc-column>
+                <ngc-column>
+                    <ngc-label label="g.printer"></ngc-label>
+                    <ngc-printer [width]='200' formControlName="pouchRePrint" [printerTypeList]="['POUCH']"
+                        (ngModelChange)="getSelectedPrinter($event)">
+                    </ngc-printer>
+                </ngc-column>
+
+                <!-- <ngc-column [column]="2">
+                    <br>
+                    <ngc-button (click)="onPopupClose()" value="fltpouch.cancel"></ngc-button>
+                </ngc-column> -->
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <ngc-label value="fltpouch.sno"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.pouch"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.status"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.user"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.location"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.deletereason"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.remarks"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.delete"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.reprint"></ngc-label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="popupPouchList">
+                            <tr *ngFor="let model of popupPouchForm.controls.popupPouchList.controls; let index=index"
+                                [formGroupName]="index">
+                                <td width="5%">
+                                    {{index + 1}}
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="popPouchId"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="status"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="userId"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="locationName"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-dropdownlist sourceId="Delete_Reasons$AWB_Delete_Reasons"
+                                        formControlName="delReason" [width]="170" [dropDownWidth]="170">
+                                    </ngc-dropdownlist>
+                                </td>
+                                <td>
+                                    <ngc-input formControlName="remark"></ngc-input>
+                                </td>
+                                <td>
+                                    <ngc-link>
+                                        <i (click)="deletePouch(model.controls.popPouchId.value,
+                                            model.controls.fltPouchId.value, model.controls.delReason.value,
+                                            model.controls.remark.value, model.controls.latestLocId.value,
+                                            model.controls.pouchType.value)" style="color: red" class="fa fa-times"
+                                            aria-hidden="true"></i>
+                                    </ngc-link>
+                                </td>
+                                <td>
+                                    <ngc-link>
+                                        <ngc-input formControlName="pouchLbl" hidden></ngc-input>
+                                        <i (click)="rePrintPouch(model.controls.popPouchId.value, model.controls.locationName.value)"
+                                            class="fa fa-clipboard" aria-hidden="true"></i>
+                                    </ngc-link>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </ngc-table>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>
+
+<form [formGroup]='popupDiscForm'>
+    <ngc-window #window width="500" [height]="340" title="fltpouch.capturefltawbdiscrepancy">
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="fltpouch.awb.no"></ngc-label>
+                    <ngc-awbdisplay formControlName="awbNum"></ngc-awbdisplay>
+                    <br>
+                </ngc-column>
+            </ngc-row>
+
+            <ngc-row>
+                <ngc-column>
+                    <label>
+                        <ngc-label value="fltpouch.flight.no.date"></ngc-label>
+                    </label>
+                    <ngc-display formControlName="flightNumber"></ngc-display>/
+                    <ngc-display formControlName="flightDateOri"></ngc-display>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <label>
+                        <ngc-label value="fltpouch.sector"></ngc-label>
+                    </label>
+                    <ngc-display formControlName="sector"></ngc-display>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="fltpouch.discrepancy"></ngc-label>
+                    <div>
+                        <ngc-dropdownlist sourceId="Discrepancies$AWB_Discrepancies"
+                            formControlName="discrepencydropdown" [width]="170" [dropDownWidth]="170">
+                        </ngc-dropdownlist>
+                    </div>
+                </ngc-column>
+                <ngc-column>
+                    <ngc-label label="fltpouch.remarks"></ngc-label>
+                    <div>
+                        <ngc-input formControlName="remarks"></ngc-input>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-button *ngIf="!isPouchFinalized" (click)="saveDiscrepancy()" value="fltpouch.save">
+                    </ngc-button>
+                </ngc-column>
+                <ngc-column>
+                    <ngc-button *ngIf="!isPouchFinalized" (click)="deleteDiscrepancy()" value="fltpouch.delete">
+                    </ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>
+
+
+
+<ngc-window #UpdateDocument [width]="1300" [height]="450" [position]="{ x: 50, y: 180 }"
+    title="export.view.update.awb.document" (close)="onSearch()">
+    <ngc-container type="box">
+        <ngc-row>
+            <ngc-column>
+                <app-updatedocument (closeWindow)="closeWindow()" (openWindow)='openWindow()'></app-updatedocument>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</ngc-window>

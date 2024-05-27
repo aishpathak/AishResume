@@ -1,0 +1,163 @@
+<ngc-page>
+  <ngc-titlebar title="billing.charge.calculator"></ngc-titlebar>
+  <form [formGroup]="chargeModelForm">
+    <ngc-container type="tab" title="billing.api.parameters">
+    </ngc-container>
+    <ngc-container type="section" title="billing.event.process">
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label="billing.process"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="processType" sourceId='Billing$Event.Process'
+              (ngModelChange)="onProcessChange($event)"></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="g.event"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="eventType" [sourceId]='eventSourceId'></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" title="billing.shipment.service">
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label="billing.shipment.service"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="shipmentService" [source]='shipmentServiceList'></ngc-dropdownlist>
+          </div>
+          <div>
+            <ngc-shipmentinput *ngIf="chargeModelForm.get('shipmentService').value == 'Shipment'"
+              formControlName="shipmentId"></ngc-shipmentinput>
+            <ngc-input *ngIf="chargeModelForm.get('shipmentService').value == 'Service'" formControlName="serviceId">
+            </ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="billing.factors" emphasis="lg"></ngc-label>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button label="g._add" iconType="add" (click)="onAddFactors()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row formArrayName="factors">
+        <ngc-column [column]="2" *ngFor="let factor of chargeModelForm.getList('factors'); let index=index"
+          [formGroupName]="index">
+          <ngc-label label="Factor"></ngc-label>
+          <ngc-label [label]="index + 1"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="factorType" sourceId='Billing$ChargeCode.ChargeFactor'>
+            </ngc-dropdownlist>
+          </div>
+          <div [ngSwitch]="factor.get('factorType').value">
+            <ngc-numberinput *ngSwitchCase="'AGT'" formControlName="factor" [decimalDigits]="0"></ngc-numberinput>
+            <ngc-numberinput *ngSwitchCase="'CARG'" formControlName="factor" [decimalDigits]="0"></ngc-numberinput>
+            <ngc-alphanuminput *ngSwitchDefault formControlName="factor"></ngc-alphanuminput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="billing.durations" emphasis="lg"></ngc-label>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button label="g._add" iconType="add" (click)="onAddDurations()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row formArrayName="durations">
+        <ngc-column [column]="2" *ngFor="let duration of chargeModelForm.getList('durations'); let index=index"
+          [formGroupName]="index">
+          <ngc-label label="g.duration"></ngc-label>
+          <ngc-label [label]="index + 1"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="durationType" sourceId='Billing$ChargeCode.QuantityDateParam'>
+            </ngc-dropdownlist>
+          </div>
+          <div>
+            <ngc-datetimeinput formControlName="duration" [showCalendarButton]="true" [showTimeButton]="true">
+            </ngc-datetimeinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="billing.quantitys" emphasis="lg"></ngc-label>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button label="g._add" iconType="add" (click)="onAddQuantities()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row formArrayName="quantities">
+        <ngc-column [column]="2" *ngFor="let quantity of chargeModelForm.getList('quantities'); let index=index"
+          [formGroupName]="index">
+          <ngc-label label="g.quantity"></ngc-label>
+          <ngc-label [label]="index + 1"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="quantityType" sourceId='Billing$ChargeCode.QuantityParameters'>
+            </ngc-dropdownlist>
+          </div>
+          <div [ngSwitch]="quantity.get('quantityType').value">
+            <ngc-piecesinput *ngSwitchCase="'PCS'" formControlName="quantity"></ngc-piecesinput>
+            <ngc-weightinput *ngSwitchCase="'WGT'" formControlName="quantity"></ngc-weightinput>
+            <ngc-weightinput *ngSwitchCase="'DGW'" formControlName="quantity"></ngc-weightinput>
+            <ngc-numberinput *ngSwitchCase="'QTY'" formControlName="quantity"></ngc-numberinput>
+            <ngc-numberinput *ngSwitchDefault formControlName="quantity" [decimalDigits]="0"></ngc-numberinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </form>
+  <ngc-page-footer [height]="200">
+    <form [formGroup]="chargeModelForm">
+      <ngc-container type="sectiontop" formGroupName="responses">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="g.remarks"></ngc-label>
+            <div>
+              <ngc-display formControlName="remarks"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-edittable formArrayName="responseList" [pageable]="false">
+              <ngc-data-column text="g.status" dataField="success" cellsAlign="center">
+                <ng-template let-name="name" let-group="group">
+                  <ng-container [formGroupName]="group">
+                    <ngc-icon [formControlName]="name" type="yesno"></ngc-icon>
+                  </ng-container>
+                </ng-template>
+              </ngc-data-column>
+              <ngc-data-column text="billing.available.code.id" dataField="billingChargeCodeId"></ngc-data-column>
+              <ngc-data-column text="billing.model.charge.code" dataField="chargeCode"></ngc-data-column>
+              <ngc-data-column text="billing.chargeable.duration" dataField="chargeableDuration" cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="billing.chargeable.quantity.one" dataField="chargeableQuantity1"
+                cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="billing.chargeable.quantity.two" dataField="chargeableQuantity2"
+                cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="g.amount" dataField="chargeAmount" cellsAlign="right"></ngc-data-column>
+              <ngc-data-column text="g.remarks" dataField="remarks"></ngc-data-column>
+            </ngc-edittable>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="billing.calculate" (click)="onCalculate()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+  </ngc-page-footer>
+</ngc-page>

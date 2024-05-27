@@ -1,0 +1,285 @@
+<form [formGroup]="importAwbNotificationForm">
+  <ngc-titlebar title='awb.awbNotification' (print)="onPrint()"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="1">
+        <ngc-label label='awb.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="80" accessEnableOn="r" formControlName="terminal" sourceId="WAREHOUSE_TERMINAL"
+            sourceType="query" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='awb.carrierGroup  '></ngc-label>
+
+        <!-- <ngc-dropdownlist [width]="80" formControlName="carrierGroup" accessEnableOn="r" sourceId="CARRIER_GROUP" sourceType="query"></ngc-dropdownlist> -->
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrierGroup" [width]="45" title='g.carrier' upperCase="true"
+            dataField="code" displayMember="code" sourceId="CARRIER">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='awb.contactMode	'></ngc-label>
+        <div>
+          <!--<ngc-dropdownlist [width]="80" formControlName="contactMode" [source]="contactModeList"></ngc-dropdownlist>-->
+          <ngc-dropdownlist [placeHolder]="" [width]='80' [dropDownWidth]='70' accessEnableOn="r"
+            [source]='contactModeList' formControlName='contactMode' required></ngc-dropdownlist>
+
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='g.shipmentNumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="awbNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label='g.flightKey'></ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]='84' accessEnableOn="r" formControlName='flightNumber'></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label='g.FlightDate'></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName='flightDate'></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='g.status'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="status" sourceId="MessageStatus$IvrsStatus"
+            [width]="90"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="requestedFrom"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='g.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="requestedTo"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <br>
+        <ngc-button label="g.search" accessEnableOn="r" [disabled]="isDisabled" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="awbNotificationInfo" (linkClick)="onLinkClick($event)" *ngIf="showTable"
+          [showToolbar]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text="&nbsp;" type="check" dataField="selectCheck" align="center" cellsAlign="center"
+            [width]="40" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.shipmentNumber" dataField="awbNumber" [width]="200" align="center"
+            cellsAlign="center" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.flight" dataField="flightNumber" [width]="100" align="center" cellsAlign="center"
+            [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.date" dataField="flightDate" [width]="150" align="center" cellsAlign="center"
+            [pinned]="true" type="displayDate" formatString="ddMMMyy"></ngc-data-column>
+          <ngc-data-column text="g.eawb" dataField="eawb" [width]="80" align="center" cellsAlign="center"
+            [cellsRenderer]='eawdCellsRenderer'></ngc-data-column>
+          <ngc-data-column text="g.fwb" dataField="fwb" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="cne.agt" dataField="cneAgt" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.ready.for.delivery.br" dataField="delivery" [width]="150" align="center"
+            cellsAlign="center" type="icon" iconType="yesno"></ngc-data-column>
+          <ngc-data-column text="import.primary.contact.br" dataField="primaryContact" [width]="150" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.awb.trigger.time" dataField="triggerTime" [width]="150" align="center"
+            cellsAlign="center" type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="import.contactinformation" name="contactInfo" align="center">
+            <ngc-data-column text="g.email" dataField="email" [width]="150" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="ivrs.fax" dataField="fax" [width]="150" align="center" cellsAlign="center"
+              [cellsStyleRenderer]='faxCellsRenderer'></ngc-data-column>
+            <ngc-data-column text="ivrs.SMS" dataField="sms" [width]="150" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="agent.telephone" dataField="telephone" [width]="150" align="center"
+              cellsAlign="center" [cellsStyleRenderer]='phoneCellsRenderer'></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="import.awb.ivrs.response" name="ivrs" align="center">
+            <ngc-data-column text="ivrs.fax" dataField="isFax" [width]="150" align="center" cellsAlign="center"
+              type="icon" iconType="yesno"></ngc-data-column>
+            <ngc-data-column text="ivrs.SMS" dataField="ivrs.sms" [width]="150" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="agent.telephone" dataField="isPhone" [width]="150" align="center" cellsAlign="center"
+              type="icon" iconType="yesno"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remarks" [width]="150" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.resend" dataField="resend" iconType="phone" type="link" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.awb.history" dataField="history" iconType="history" type="link" [width]="100"
+            align="center" cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #resendIvrsRqst title="import.awb.resend.ivrs.request" [width]="800" [height]="300">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label width="100" label="g.shipmentNumber"></ngc-label> : {{awbNumber}}
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row align="center">
+        <ngc-column [column]="3">
+          <ngc-checkbox formControlName="emailFlag">
+            <ngc-label label="ivrs.email"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-checkbox formControlName="faxFlag">
+            <ngc-label label="ivrs.fax"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-checkbox formControlName="smsFlag">
+            <ngc-label label="ivrs.SMS"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-checkbox formControlName="phoneFlag">
+            <ngc-label label="ivrs.phone"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+      </ngc-row>
+
+    </ngc-container>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column [column]="3">
+          <div>
+            <ngc-input accessEnableOn="r" formControlName="emailToSend" [width]='150'></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <div>
+            <ngc-input accessEnableOn="r" formControlName="faxToSend" [width]='100'></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <div>
+            <ngc-input accessEnableOn="r" formControlName="smsToSend" [width]='100'></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <div>
+            <ngc-input accessEnableOn="r" formControlName="phoneToSend" [width]='100'></ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button priority="primary" (click)="closeWindow()" value="Cancel"></ngc-button>
+            <ngc-button priority="primary" (click)="sendIvrsRequest()" value="Send"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #showHistory title="import.awb.ivrs.response.history" [width]="800" [height]="300">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label width="100" label="g.shipmentNumber"></ngc-label> : {{awbNumber}}
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th width="10%">
+                  &nbsp;
+                </th>
+                <th width="20%">
+                  <ngc-label width="100" label="g.contact.type"></ngc-label>
+                </th>
+                <th width="20%">
+                  <ngc-label width="100" label='efacilitation.contactnumber'></ngc-label>
+                </th>
+                <th width="40%">
+                  <ngc-label width="100" label="ivrs.responseDateTime"></ngc-label>
+                </th>
+                <th width="10%">
+                  <ngc-label width="100" label="ivrs.responseMessage"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="history">
+              <ng-container *ngFor="let item of importAwbNotificationForm.get('history').controls; let index =index"
+                [formGroupName]="index">
+                <tr>
+                  <td width="10%">
+                    <ngc-display formControlName="type"></ngc-display>
+                  </td>
+                  <td width="20%">
+                    <ngc-display formControlName="contactType"></ngc-display>
+                  </td>
+                  <td width="20%">
+                    <ngc-display formControlName="contactNumber"></ngc-display>
+                  </td>
+                  <td width="40%">
+                    <ngc-display formControlName="responseDateTime"></ngc-display>
+                  </td>
+                  <td width="10%">
+                    <ngc-display formControlName="responseMessage"></ngc-display>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button priority="primary" (click)="oncloseWindow()" value="Close"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-container type="tab" *ngIf="showTable">
+    <ngc-row>
+
+      <ngc-column [column]="8.5">
+      </ngc-column>
+      <ngc-column>
+        <ngc-button value="Resend Notification" (click)="reSendNotification()"></ngc-button>
+      </ngc-column>
+      <ngc-column>
+        <ngc-button value="1awb" (click)="openAwbDocumentPage()" accessEnableOn="r"></ngc-button>
+      </ngc-column>
+      <ngc-column>
+        <ngc-button label='2shipInfo' (click)=" openShipmentInfoPage()" accessEnableOn="r"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" reportId='importAwbNotification' [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

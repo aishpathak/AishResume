@@ -1,0 +1,306 @@
+<ngc-titlebar title='amend.Amend' (clear)="onClear($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+<form [formGroup]='form'>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column='1'>
+        <ngc-label value='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" onlyDate='true' required [width]="100"
+            formControlName="flightOriginDate"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <br>
+        <ngc-button value='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container align='left' *ngIf="flightSearchFlag" type="tab">
+    <ngc-row>
+      <ngc-column column='1'>
+        <ngc-label value='flight.Flight'></ngc-label>
+        <div>
+          <ngc-display formControlName='flightKey'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='1'>
+        <ngc-label value='flight.date'></ngc-label>
+        <div>
+          <ngc-display [onlyDate]="true" formControlName='flightOriginDate'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='1'>
+        <ngc-label value='flight.std'></ngc-label>
+        <div>
+          <ngc-display formControlName='std'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column='1'>
+        <ngc-label value='flight.etd'></ngc-label>
+        <div>
+          <ngc-display formControlName='dateEtd'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='flight.aircraftType'></ngc-label>
+        <div>
+          <ngc-display formControlName='aircraftType'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='export.amend.aircraftRegn'></ngc-label>
+        <div>
+          <ngc-display formControlName='aircraftRegistration'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='g.status'></ngc-label>
+        <div>
+          <ngc-display [onlyTime]="true" formControlName='status'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column *ngIf="toBeLoadFlag">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-datatable formArrayName="toBeLoadedList" [enablePageSizeHeight]="false"
+                (itemSelect)="onSelectCheckBox($event)">
+                <ngc-data-column text="g.select" dataField="select" type="check" [width]="100" cellsAlign="center">
+                </ngc-data-column>
+                <ngc-data-column text="flight.segment" dataField="segment" [width]="120"></ngc-data-column>
+                <ngc-data-column text="uld.uldnumber" dataField="uldTrolleyNumber" [width]="200"></ngc-data-column>
+                <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="200"></ngc-data-column>
+                <ngc-data-column text="awb.part.suffix" dataField="partSuffix" [width]="150"></ngc-data-column>
+                <ngc-data-column text="g.pieces" dataField="pieces" [width]="100" cellsAlign="right"
+                  type="displayPieces">
+                </ngc-data-column>
+                <ngc-data-column text="g.weight" dataField="weight" [width]="150" cellsAlign="right"
+                  type="displayWeight"></ngc-data-column>
+                <ngc-data-column text="awb.nog" dataField="natureOfGoodsDescription" [width]="150"></ngc-data-column>
+                <ngc-data-column text="g.shc" dataField="shcs" [width]="150"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <!-- <ngc-container>
+        <ngc-row>
+          <ngc-column column="12">
+            <br>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container> -->
+      <ngc-column>
+
+        <ngc-container *ngIf="ULDFlag">
+          <!-- // move to uld -->
+          <ngc-row>
+            <ngc-column *ngIf="ULDFlag">
+              <ngc-container type="box" header="uld.trolley.move">
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="g.uldTrolleyNumber"></ngc-label>
+                    <div>
+                      <!-- <ngc-input width='130px' required formControlName="uldTrolleyNumber" upperCase='true'> </ngc-input> -->
+                      <ngc-lov formControlName="uldNumber" sourceId='ULD_TROLLEY_NO' title='uld.uldNumbers'
+                        [width]="100" dataField='code' (select)="onSelect($event)"
+                        [sourceParameters]="uldSourceParameter" [noCache]="true" required>
+                        <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </div>&nbsp;&nbsp;
+
+                  </ngc-column>
+                  <ngc-column>
+                    <div *ngIf="displaytareWtFlag">
+                      <ngc-label label="uld.heightcode" [width]="120"></ngc-label>
+                    </div>
+                    <div *ngIf="displaytareWtFlag">
+                      <ngc-display formControlName="heightCode" [width]="120"></ngc-display>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <div *ngIf="displaytareWtFlag">
+                      <ngc-label label="uld.tare.weight"></ngc-label>
+                    </div>
+                    <div *ngIf="displaytareWtFlag">
+                      <ngc-weightdisplay formControlName='tareWeight'  decimalDigits="2">
+                      </ngc-weightdisplay>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+
+                  <ngc-column>
+                    <div *ngIf="disablePiecesWeightFlag">
+                      <ngc-label label="g.pieces"></ngc-label>
+                      <div>
+                        <ngc-piecesinput formControlName="piecesToMove" (ngModelChange)="onPiecesChangeEvent($event)"
+                          [width]="120">
+                        </ngc-piecesinput>
+                      </div>
+                    </div>
+                  </ngc-column>
+                  <ngc-column>
+                    <div *ngIf="disablePiecesWeightFlag">
+                      <ngc-label label="g.weight"></ngc-label>
+                      <div>
+                        <ngc-weightinput formControlName="weightToMove" [width]="120"></ngc-weightinput>
+                      </div>
+                    </div>
+                  </ngc-column>
+                  <ngc-column align='right'>
+                    <br>
+                    <ngc-button value='amendULD.moveToULDTrolley' (click)="onMoveToULD()" [disabled]="movetrolleyFlag"
+                      accessSectionId="MOVE_TO_ULD_TROLLEY">
+                    </ngc-button>
+                  </ngc-column>
+                </ngc-row>
+
+              </ngc-container>
+
+            </ngc-column>
+
+          </ngc-row>
+
+          <br><br>
+          <!-- // move to flight -->
+          <ngc-row>
+            <ngc-column *ngIf="FlightFlag">
+
+              <ngc-container type="box" header="Move to Flight">
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="flight.flightNumber"></ngc-label>
+                    <div>
+                      <ngc-flightkeyinput upperCase="true" formControlName="newflightKey" [width]="120" required>
+                      </ngc-flightkeyinput>
+                    </div>
+
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="flight.date"></ngc-label>
+                    <div>
+                      <ngc-datetimeinput onlyDate='true' required [width]="120" formControlName="newflightOriginDate">
+                      </ngc-datetimeinput>
+                    </div>
+
+                  </ngc-column>
+                  <ngc-column>
+                    <ngc-label label="flight.segment"></ngc-label>
+                    <div>
+                      <!-- <ngc-input width='100px' required formControlName="segment" upperCase='true'> </ngc-input> -->
+                      <!-- <ngc-dropdownlist (select)="onSegmentChange($event)" formControlName="segment" sourceId="FLIGHTSEGMENT" [width]='100' [noCache]="true"
+                         sourceType="query" required></ngc-dropdownlist> -->
+                      <ngc-dropdownlist #ID formControlName="newsegment" valueMember="desc" sourceId="FLIGHTSEGMENT"
+                        [width]='120' [sourceParameters]="flightId" sourceType="query" [autoSelect]="true"
+                        [noCache]="true" required></ngc-dropdownlist>
+                    </div>
+
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+
+                  <ngc-column align='right'>
+                    <br>
+                    <ngc-button value='amendULD.moveToFlight' (click)="validateRouting()" [disabled]="moveFlightFlag"
+                      accessSectionId="MOVE_TO_FLIGHT">
+                    </ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+
+
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #routingInfoWindow title="awb.routing" [showCloseButton]="true" [width]="800" [height]="500">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.amend.booking.update.label"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="toBeLoadedListWithMatchingRoutes" [pageable]="false">
+            <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center" [width]="5">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+            </ngc-data-column>
+            <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center" dataField="partSuffix">
+            </ngc-data-column>
+            <ngc-data-column text="awb.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+              cellsAlign="left">
+            </ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.amend.routing.mismatch.label"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.amend.flight.label"></ngc-label>
+          <ngc-display formControlName='flightToDisplay'></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="toBeLoadedListWithNonMatchingRoutes" [pageable]="false">
+            <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center" [width]="5">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+            </ngc-data-column>
+            <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center" dataField="partSuffix">
+            </ngc-data-column>
+            <ngc-data-column text="awb.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+              cellsAlign="left">
+            </ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-label label='export.amend.proceed.booking'>
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button value="g.yes" (click)="onAmendFlight()" align="left"></ngc-button>
+          <ngc-button value="g.no" (click)="closeRoutingInfoWindow()" align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+</form>

@@ -1,0 +1,280 @@
+import { Component, ElementRef, NgZone, OnInit, ViewChild, ViewContainerRef } from '@angular/core';
+import { NgcPage, NgcFormGroup, NgcFormArray, NgcFormControl, NgcButtonComponent, PageConfiguration, NgcReportComponent, ReportFormat, NgcWindowComponent } from 'ngc-framework';
+import { ActivatedRoute, Router } from '@angular/router';
+import { UldService } from '../uld.service';
+import { UldInventoryDetailsRequest } from '../uld.shared';
+@Component({
+  selector: 'app-uld-inventory-details',
+  templateUrl: './uld-inventory-details.component.html',
+  styleUrls: ['./uld-inventory-details.component.scss']
+})
+@PageConfiguration({
+  trackInit: true,
+  autoBackNavigation: true,
+  restorePageOnBack: true,
+  callNgOnInitOnClear: true
+})
+export class UldInventoryDetailsComponent extends NgcPage implements OnInit {
+  @ViewChild('uldEnquireWindow') uldEnquireWindow: NgcWindowComponent;
+  showWindow: boolean = false;
+  uldEnquireObject: any = {};
+  reportParameters: any;
+  @ViewChild('searchButton') searchButton: NgcButtonComponent;
+  @ViewChild("reportWindow")
+  reportWindow: NgcReportComponent;
+  uldInvList: any[];
+  resp: any;
+  uldList: any = {};
+  selectCarrier: any;
+  selectCarrierGroup: any;
+  selectUldName: any;
+  selectContentCode: any;
+  selectheightCode: any;
+  private sectorId: any = '';
+  showTable: boolean;
+  cCode: any;
+  forwardedData: any;
+
+  // ngc form input and output controls
+  private uldInventoryDetailsform: NgcFormGroup = new NgcFormGroup
+    ({
+      uldCount: new NgcFormControl(),
+      carrierCode: new NgcFormControl(),
+      carrierGroup: new NgcFormControl(),
+      uldType: new NgcFormControl(),
+      uldGroup: new NgcFormControl(),
+      displayflag: new NgcFormControl(false),
+      carrierName: new NgcFormControl(),
+      uldName: new NgcFormControl(''),
+      location: new NgcFormControl('AP1'),
+      ownership: new NgcFormControl('Both'),
+      conditionType: new NgcFormControl('Both'),
+      status: new NgcFormControl(),
+      totalUld: new NgcFormControl(),
+      uldInventoryList: new NgcFormArray([]),
+      apronULDCount: new NgcFormControl(),
+      cargoULDCount: new NgcFormControl(),
+      agentULDCount: new NgcFormControl(),
+      emptyULDCount: new NgcFormControl(),
+      selectmovement: new NgcFormControl(),
+      contentCode: new NgcFormControl(),
+      heightCode: new NgcFormControl(),
+      awbLoaded: new NgcFormControl(),
+      destinationWhLocation: new NgcFormControl(),
+      warehouseActualLocation: new NgcFormControl(),
+      unConfirmed: new NgcFormControl(),
+      unReserved: new NgcFormControl(),
+      ppkLoaded: new NgcFormControl(),
+      mixLoaded: new NgcFormControl(),
+      missing: new NgcFormControl(),
+      onHand: new NgcFormControl(),
+    });
+
+  constructor(appZone: NgZone, appElement: ElementRef,
+    appContainerElement: ViewContainerRef, private router: Router,
+    private activatedRoute: ActivatedRoute,
+    private uldService: UldService) {
+    super(appZone, appElement, appContainerElement);
+  }
+
+  ngOnInit() {
+    super.ngOnInit();
+    this.showTable = false;
+    this.forwardedData = this.getNavigateData(this.activatedRoute);
+
+    if (this.uldService.uldinventoryData) {
+      this.uldInventoryDetailsform.get('carrierCode').setValue(this.uldService.uldinventoryData.carrierCode);
+      this.uldInventoryDetailsform.get('carrierGroup').setValue(this.uldService.uldinventoryData.carrierGroup);
+      this.uldInventoryDetailsform.get('uldType').setValue(this.uldService.uldinventoryData.uldType);
+      this.uldInventoryDetailsform.get('uldGroup').setValue(this.uldService.uldinventoryData.uldGroup);
+      this.uldInventoryDetailsform.get('location').setValue(this.uldService.uldinventoryData.location);
+      this.uldInventoryDetailsform.get('ownership').setValue(this.uldService.uldinventoryData.ownership);
+      this.uldInventoryDetailsform.get('awbLoaded').setValue(this.uldService.uldinventoryData.awbLoaded);
+      this.uldInventoryDetailsform.get('conditionType').setValue(this.uldService.uldinventoryData.conditionType);
+      this.uldInventoryDetailsform.get('status').setValue(this.uldService.uldinventoryData.status);
+      this.uldInventoryDetailsform.get('contentCode').setValue(this.uldService.uldinventoryData.contentCode);
+      this.uldInventoryDetailsform.get('heightCode').setValue(this.uldService.uldinventoryData.heightCode);
+      this.uldInventoryDetailsform.get('destinationWhLocation').setValue(this.uldService.uldinventoryData.destinationWhLocation);
+      this.uldInventoryDetailsform.get('warehouseActualLocation').setValue(this.uldService.uldinventoryData.warehouseActualLocation);
+      this.uldInventoryDetailsform.get('unConfirmed').setValue(this.uldService.uldinventoryData.unConfirmed);
+      this.uldInventoryDetailsform.get('unReserved').setValue(this.uldService.uldinventoryData.unReserved);
+      this.uldInventoryDetailsform.get('ppkLoaded').setValue(this.uldService.uldinventoryData.ppkLoaded);
+      this.uldInventoryDetailsform.get('mixLoaded').setValue(this.uldService.uldinventoryData.mixLoaded);
+      this.uldInventoryDetailsform.get('missing').setValue(this.uldService.uldinventoryData.missing);
+      this.uldInventoryDetailsform.get('onHand').setValue(this.uldService.uldinventoryData.onHand);
+      this.getUldList();
+    }
+  }
+  public getUldList() {
+    this.showTable = false;
+    const displayUldList: any[] = [];
+    let formData = this.uldInventoryDetailsform.getRawValue();
+    this.uldInventoryDetailsform.get('totalUld').setValue('');
+    this.uldInventoryDetailsform.get('uldCount').setValue('');
+    this.uldInventoryDetailsform.get('uldName').setValue('');
+    this.uldInventoryDetailsform.get('carrierName').setValue('');
+
+    const uldInventoryDetailsrequest: UldInventoryDetailsRequest = new UldInventoryDetailsRequest();
+    uldInventoryDetailsrequest.carrierCode = this.uldInventoryDetailsform.get('carrierCode').value;
+    this.cCode = this.uldInventoryDetailsform.get('carrierCode').value;
+    uldInventoryDetailsrequest.carrierGroup = this.uldInventoryDetailsform.get('carrierGroup').value;
+    uldInventoryDetailsrequest.uldType = this.uldInventoryDetailsform.get('uldType').value;
+    uldInventoryDetailsrequest.uldGroup = this.uldInventoryDetailsform.get('uldGroup').value;
+    if (this.uldInventoryDetailsform.get('location').value == 'AP1') {
+      uldInventoryDetailsrequest.airportPosition = 'ALL';
+    } else if (this.uldInventoryDetailsform.get('location').value == 'AP2') {
+      uldInventoryDetailsrequest.airportPosition = 'AGT';
+    } else {
+      uldInventoryDetailsrequest.airportPosition = this.uldInventoryDetailsform.get('location').value;
+    }
+    uldInventoryDetailsrequest.uldOwnership = this.uldInventoryDetailsform.get('ownership').value;
+    uldInventoryDetailsrequest.awbLoaded = this.uldInventoryDetailsform.get('awbLoaded').value;
+    uldInventoryDetailsrequest.uldCondition = this.uldInventoryDetailsform.get('conditionType').value;
+    uldInventoryDetailsrequest.contentCode = this.uldInventoryDetailsform.get('contentCode').value;
+    uldInventoryDetailsrequest.heightCode = this.uldInventoryDetailsform.get('heightCode').value;
+    uldInventoryDetailsrequest.destinationWhLocation = this.uldInventoryDetailsform.get('destinationWhLocation').value;
+    uldInventoryDetailsrequest.warehouseActualLocation = this.uldInventoryDetailsform.get('warehouseActualLocation').value;
+    uldInventoryDetailsrequest.unConfirmed = this.uldInventoryDetailsform.get('unConfirmed').value;
+    uldInventoryDetailsrequest.unReserved = this.uldInventoryDetailsform.get('unReserved').value;
+    uldInventoryDetailsrequest.ppkLoaded = this.uldInventoryDetailsform.get('ppkLoaded').value;
+    uldInventoryDetailsrequest.mixLoaded = this.uldInventoryDetailsform.get('mixLoaded').value;
+    uldInventoryDetailsrequest.missing = this.uldInventoryDetailsform.get('missing').value;
+    uldInventoryDetailsrequest.onHand = this.uldInventoryDetailsform.get('onHand').value;
+    uldInventoryDetailsrequest.uldGroup = this.uldInventoryDetailsform.get('uldGroup').value;
+    uldInventoryDetailsrequest.movmentTypeList = this.uldInventoryDetailsform.get('selectmovement').value;
+
+    this.searchButton.disabled = true;
+    this.uldService.getUldInventoryDetailsInfo(uldInventoryDetailsrequest).subscribe(data => {
+      this.refreshFormMessages(data);
+      this.resp = data;
+      if (!this.showResponseErrorMessages(data)) {
+        if (this.resp.data) {
+          this.uldInventoryDetailsform.get('totalUld').setValue(this.resp.data.uldCount);
+          this.uldInventoryDetailsform.get('uldName').setValue(this.selectUldName);
+          this.uldInventoryDetailsform.get('carrierName').setValue(this.selectCarrier);
+          this.uldInvList = this.resp.data.uldList;
+          if (this.uldInvList.length > 0) {
+            this.uldInventoryDetailsform.get('uldCount').setValue(this.uldInvList.length);
+            this.uldInventoryDetailsform.get('apronULDCount').setValue(this.resp.data.apronULDCount);
+            this.uldInventoryDetailsform.get('cargoULDCount').setValue(this.resp.data.cargoULDCount);
+            this.uldInventoryDetailsform.get('agentULDCount').setValue(this.resp.data.agentULDCount);
+            this.uldInventoryDetailsform.get('emptyULDCount').setValue(this.resp.data.emptyULDCount);
+
+            this.showTable = true;
+            let i = 1;
+            this.uldInvList.forEach(element => {
+              element.serialNumber = i;
+              i++;
+            });
+            (<NgcFormArray>this.uldInventoryDetailsform.controls['uldInventoryList']).patchValue(this.uldInvList);
+            this.searchButton.disabled = true;
+          }
+
+        } else {
+          this.uldInventoryDetailsform.get('uldCount').setValue(0);
+        }
+
+      }
+      this.searchButton.disabled = false;
+    }, error => {
+      this.showErrorStatus('uld.an.error.occured.please.try.again!!');
+      this.searchButton.disabled = false;
+    });
+  }
+
+  public onSelectCarrier(object) {
+    this.uldInventoryDetailsform.get('carrierCode').setValue(object.code);
+    this.selectCarrier = object.desc;
+  }
+
+  public onSelectCarrierGroup(object) {
+    this.uldInventoryDetailsform.get('carrierGroup').setValue(object.code);
+    this.selectCarrierGroup = object.desc;
+  }
+
+  public onSelectUldType(object) {
+
+    this.uldInventoryDetailsform.get('uldType').setValue(object.code);
+    this.selectUldName = object.desc;
+  }
+  onLinkClick = event => {
+    this.showWindow = true;
+    this.uldEnquireObject.parameter = 'ULD Number';
+    this.uldEnquireObject.parameter1 = event.record.uldNumber;
+    this.uldEnquireWindow.open();
+  }
+
+  uldEnquireResposne = event => {
+    this.showWindow = false;
+    this.uldEnquireObject = {};
+  }
+
+  public onSelectUldGroup(object) {
+
+    this.uldInventoryDetailsform.get('uldGroup').setValue(object.code);
+    this.selectUldName = object.desc;
+  }
+  public onSelectContentCode(object) {
+
+    this.uldInventoryDetailsform.get('contentCode').setValue(object.code);
+    this.selectContentCode = object.desc;
+  }
+  public onSelectheightCode(object) {
+
+    this.uldInventoryDetailsform.get('heightCode').setValue(object.code);
+    this.selectheightCode = object.desc;
+  }
+  onLocationChange(data, index) {
+    this.sectorId = data.parameter2;
+  }
+  onCancel(event) {
+    this.resetFormMessages();
+    this.uldInventoryDetailsform.reset();
+    this.navigateTo(this.router, '/', null);
+  }
+  exportToExcel() {
+    let str = "";
+    if (this.uldInventoryDetailsform.get('selectmovement').value) {
+      this.uldInventoryDetailsform.get('selectmovement').value.forEach(element => {
+        if (element != "%")
+          str = str + "'" + element + "'" + " ,"
+      });
+      str = str.substring(0, str.lastIndexOf(","));
+    }
+    if (str != "")
+      str = "( " + str + " )"
+
+    this.reportParameters = new Object();
+    this.reportParameters.carrierCode = this.uldInventoryDetailsform.get('carrierCode').value;
+    this.reportParameters.carrierGroup = this.uldInventoryDetailsform.get('carrierGroup').value;
+    this.reportParameters.uldType = this.uldInventoryDetailsform.get('uldType').value;
+    this.reportParameters.uldGroup = this.uldInventoryDetailsform.get('uldGroup').value;
+    if (this.uldInventoryDetailsform.get('location').value == 'AP1') {
+      this.reportParameters.airportPosition = 'ALL';
+    } else if (this.uldInventoryDetailsform.get('location').value == 'AP2') {
+      this.reportParameters.airportPosition = 'AGT';
+    } else {
+      this.reportParameters.airportPosition = this.uldInventoryDetailsform.get('location').value;
+    }
+    this.reportParameters.uldOwnership = this.uldInventoryDetailsform.get('ownership').value;
+    this.reportParameters.awbLoaded = this.uldInventoryDetailsform.get('awbLoaded').value;
+    this.reportParameters.uldCondition = this.uldInventoryDetailsform.get('conditionType').value;
+    this.reportParameters.contentCode = this.uldInventoryDetailsform.get('contentCode').value;
+    this.reportParameters.heightCode = this.uldInventoryDetailsform.get('heightCode').value;
+    this.reportParameters.destinationWhLocation = this.uldInventoryDetailsform.get('destinationWhLocation').value;
+    this.reportParameters.warehouseActualLocation = this.uldInventoryDetailsform.get('warehouseActualLocation').value;
+    this.reportParameters.unConfirmed = this.uldInventoryDetailsform.get('unConfirmed').value;
+    this.reportParameters.unReserved = this.uldInventoryDetailsform.get('unReserved').value;
+    this.reportParameters.ppkLoaded = this.uldInventoryDetailsform.get('ppkLoaded').value;
+    this.reportParameters.mixLoaded = this.uldInventoryDetailsform.get('mixLoaded').value;
+    this.reportParameters.missing = this.uldInventoryDetailsform.get('missing').value;
+    this.reportParameters.onHand = this.uldInventoryDetailsform.get('onHand').value;
+    this.reportParameters.uldGroup = this.uldInventoryDetailsform.get('uldGroup').value;
+    this.reportParameters.movmentTypeList = str;
+    this.reportParameters.login = this.getUserProfile().userLoginCode;
+    this.reportWindow.format = ReportFormat.XLS;
+    this.reportWindow.downloadReport();
+
+  }
+
+}

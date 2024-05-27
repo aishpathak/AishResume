@@ -1,0 +1,387 @@
+<ngc-titlebar title='export.load.mail.to.container.title' (save)="insertRecord()" (cancel)="onBack($event)"
+  (clear)="clear()"></ngc-titlebar>
+<form [formGroup]="loadForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='uld.Number'></ngc-label>
+        <div>
+          <ngc-alphanuminput accessEnableOn="r" formControlName='uldNumber' [disabled]="uldDisabled"
+            (ngModelChange)="uldMaskingForBTandMT($event)" upperCase='true' required [maxlength]="11">
+          </ngc-alphanuminput>
+        </div>
+      </ngc-column>
+      <ngc-column column='10' align='left'>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label='g.next' [disabled]="uldDisabled" (click)='checkAssignedUldTrolleyToFight()'></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column></ngc-column>
+      <ngc-column></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row *ngIf="isULDflg">
+      <ngc-column>
+        <ngc-label label='uld.Number'></ngc-label>
+        <div>
+          <ngc-display formControlName='uldNumber'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKey"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightOriginDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.segment'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightOffPoint"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.mls.dls.complete"></ngc-label>
+        <div>
+          <ngc-icon type="yesno" formControlName="dlsCompleted"></ngc-icon>
+        </div>
+      </ngc-column>
+      <ngc-column></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isULDflg" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs [width]="800" [height]="200">
+          <ngc-tab-card title="mailbag.number">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="3">
+                  <ngc-label label="export.mls.bag.number"></ngc-label>
+                  <ngc-input formControlName="mailBagNumber" upperCase="true" [width]="300" [maxlength]="29" required>
+                  </ngc-input>
+                </ngc-column>
+                <ngc-column column="2">
+                  <ngc-label label=""></ngc-label>
+                  <div>
+                    <ngc-button value="airmail.exportLoad.addMailBag" (click)="onAdd($event)" iconType="add">
+                    </ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <!---->
+          <ngc-tab-card title="mailbag.details">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column column="2">
+                  <ngc-label label="export.mail.origin.oe"></ngc-label>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column column="3">
+                        <ngc-input formControlName="originOe1" upperCase="true" [width]="50"></ngc-input>
+                      </ngc-column>
+                      <ngc-column column="4">
+                        <ngc-lov formControlName="originOe2" (select)="getCountryCodeOrigin($event)" required
+                          sourceId="COUNTRY_AND_CITY" title="g.origin" dataField="code" [width]="47" [maxlength]="3">
+                          <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+                        </ngc-lov>
+                      </ngc-column>
+                      <ngc-column column="1"></ngc-column>
+                      <ngc-column column="2">
+                        <ngc-input formControlName="originOe3" required upperCase="true" [width]="50"></ngc-input>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column column="2">
+                  <ngc-label label="export.mail.destination.oe"></ngc-label>
+                  <div>
+                    <ngc-container>
+                      <ngc-row>
+                        <ngc-column column="3">
+                          <div>
+                            <ngc-input formControlName="destinationOe1" upperCase="true" [width]="50"></ngc-input>
+                          </div>
+                        </ngc-column>
+                        <ngc-column column="4">
+                          <div>
+                            <ngc-lov formControlName="destinationOe2" required
+                              (select)="getCountryCodeDestination($event)" sourceId="COUNTRY_AND_CITY"
+                              title="g.destination" dataField="code" [width]="47" [maxlength]="3">
+                              <ngc-data-column text="flight.airportCode" dataField="code" [width]="30">
+                              </ngc-data-column>
+                            </ngc-lov>
+                          </div>
+                        </ngc-column>
+                        <ngc-column column="1"></ngc-column>
+                        <ngc-column column="2">
+                          <div>
+                            <ngc-input formControlName="destinationOe3" required upperCase="true" [width]="50">
+                            </ngc-input>
+                          </div>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </div>
+                </ngc-column>
+                <ngc-column column="8">
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-label label="g.category"></ngc-label>
+                        <ngc-dropdownlist sourceId='Mail$MailCategory' [width]="80" formControlName="category">
+                        </ngc-dropdownlist>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="mailbag.mail.type"></ngc-label>
+                        <ngc-dropdownlist sourceId='MAIL_SUBTYPE' [width]="80" sourceType='query'
+                          formControlName="mailType"></ngc-dropdownlist>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="mailbag.year"></ngc-label>
+                        <ngc-dropdownlist sourceId='MAIL_YEARS' [width]="80" sourceType='query' formControlName="year">
+                        </ngc-dropdownlist>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="mailbag.dsn"></ngc-label>
+                        <div>
+                          <ngc-maskedinput formControlName="dsn" (ngModelChange)="appendDsnNumber()" upperCase="true"
+                            [width]="80" mask="####" required></ngc-maskedinput>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="mailbag.rsn"></ngc-label>
+                        <div>
+                          <ngc-maskedinput formControlName="rsn" (ngModelChange)="appendRsnNumber()" upperCase="true"
+                            [width]="80" mask="###" required></ngc-maskedinput>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="export.mls.lastbag"></ngc-label>
+                        <div>
+                          <ngc-dropdownlist sourceId='Mail$MailLastBag' (select)="onLastBag($event)" [width]="80"
+                            formControlName="lastBag"></ngc-dropdownlist>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="export.mls.register.mail"></ngc-label>
+                        <div>
+                          <ngc-dropdownlist sourceId='Mail$MailRegistered' (select)="onRegisteredBag($event)"
+                            [width]="80" formControlName="registerMail"></ngc-dropdownlist>
+                        </div>
+                      </ngc-column>
+                      <ngc-column>
+                        <ngc-label label="g.weight"></ngc-label>
+                        <div>
+                          <ngc-weightinput formControlName="weight" required></ngc-weightinput>
+                        </div>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="11"></ngc-column>
+                <ngc-column column="1">
+                  <ngc-button value="airmail.exportLoad.addMailBag2" (click)="onMailbagAdd($event)" iconType="add">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="isULDflg" type="tab">
+    <ngc-row>
+      <ngc-column [column]="34" [grid72]="true">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="export.mls.prebooked.mailbags"></ngc-label>
+              <ngc-label label="export.mls.total.pieces"></ngc-label>
+              <ngc-display formControlName='prebookTotalPieces'></ngc-display>
+              <ngc-label label="export.mls.total.weight"></ngc-label>
+              <ngc-weightdisplay formControlName='prebookTotalWeight'></ngc-weightdisplay>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-datatable formArrayName="preBookedList" [height]="200">
+                <ngc-data-column checkAll="false" text="g.select" type="check" [width]="12" align="left"
+                  cellsAlign="center" dataField="check"></ngc-data-column>
+                <ngc-data-column text="mb.dispatchno" [width]="50" align="left" cellsAlign="left"
+                  dataField="dispatchSeries"></ngc-data-column>
+                <ngc-data-column text="g.totalpieces" [width]="20" align="left" cellsAlign="left" dataField="pieces"
+                  type="displayPieces"></ngc-data-column>
+                <ngc-data-column text="g.totalweight" [width]="20" align="left" cellsAlign="left" dataField="weight"
+                  type="displayWeight"></ngc-data-column>
+                <ngc-data-row-childs>
+                  <ngc-data-row-child *ngFor="let item of loadForm.controls.preBookedList.controls; let index=index"
+                    [formGroupName]="index" [row]="index">
+                    <ngc-table>
+                      <thead>
+                        <tr>
+                          <th>
+                            <ngc-label value="mailbag.number"></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="mailbags">
+                        <tr [formGroupName]="subIndex"
+                          *ngFor="let mailbagItem of item.controls.mailbags.controls; let subIndex=index">
+                          <td>
+                            <ngc-display formControlName="number"></ngc-display>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-data-row-child>
+                </ngc-data-row-childs>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="export.mls.mailbags.in.container"></ngc-label>
+              <ngc-display formControlName='uldNumber'></ngc-display>
+              <ngc-label label="export.mls.total.pieces"></ngc-label>
+              <ngc-display formControlName='containerTotalPieces'></ngc-display>
+              <ngc-label label="export.mls.total.weight"></ngc-label>
+              <ngc-weightdisplay formControlName='containerTotalWeight'></ngc-weightdisplay>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-datatable formArrayName="containerList" [height]="200">
+                <ngc-data-column checkAll="true" text="g.select" type="check" [width]="12" align="left"
+                  cellsAlign="center" dataField="check"></ngc-data-column>
+                <ngc-data-column text="mb.dispatchno" [width]="50" align="left" cellsAlign="left"
+                  dataField="dispatchSeries"></ngc-data-column>
+                <ngc-data-column text="g.totalpieces" [width]="20" align="left" cellsAlign="left" dataField="pieces"
+                  type="displayPieces"></ngc-data-column>
+                <ngc-data-column text="g.totalweight" [width]="20" align="left" cellsAlign="left" dataField="weight"
+                  type="displayWeight"></ngc-data-column>
+                <ngc-data-row-childs>
+                  <ngc-data-row-child *ngFor="let item of loadForm.controls.containerList.controls; let index=index"
+                    [formGroupName]="index" [row]="index">
+                    <ngc-table>
+                      <thead>
+                        <tr>
+                          <th>
+                            <ngc-label value="mailbag.number"></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="mailbags">
+                        <tr [formGroupName]="subIndex"
+                          *ngFor="let mailbagItem of item.controls.mailbags.controls; let subIndex=index">
+                          <td>
+                            <ngc-display formControlName="number"></ngc-display>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-data-row-child>
+                </ngc-data-row-childs>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+      <ngc-column verticalAlign="middle" [column]="4" [grid72]="true">
+        <ngc-row>
+          <ngc-column>
+            <ngc-button value=">>" (click)="onTransferMailbag($event)"></ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button value="<<" (click)="onTransferMailbagReverse($event)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+
+      </ngc-column>
+      <!--<ngc-column verticalAlign="middle" [column]="4" [grid72]="true">
+        <ngc-button value="<<" (click)="onTransferMailbagReverse($event)"></ngc-button>
+      </ngc-column>-->
+      <ngc-column [column]="34" [grid72]="true">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="export.mls.mailbags.loaded.in.container"></ngc-label>
+              <ngc-display formControlName='uldNumber'></ngc-display>
+              <ngc-label label="export.mls.total.pieces"></ngc-label>
+              <ngc-display formControlName='loadedContainerTotalPieces'></ngc-display>
+              <ngc-label label="export.mls.total.weight"></ngc-label>
+              <ngc-weightdisplay formControlName='loadedContainerTotalWeight'></ngc-weightdisplay>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+
+              <ngc-datatable formArrayName="dispatchList" [height]="400">
+                <ngc-data-column text="g.select" type="check" [width]="10" align="left" cellsAlign="left"
+                  dataField="check"></ngc-data-column>
+                <ngc-data-column text="mb.dispatchno" [width]="50" align="left" cellsAlign="left"
+                  dataField="dispatchSeries"></ngc-data-column>
+                <ngc-data-column text="g.totalpieces" [width]="20" align="left" cellsAlign="left" dataField="pieces"
+                  type="displayPieces"></ngc-data-column>
+                <ngc-data-column text="g.totalweight" [width]="20" align="left" cellsAlign="left" dataField="weight"
+                  type="displayWeight"></ngc-data-column>
+
+
+                <ngc-data-row-childs>
+                  <ngc-data-row-child *ngFor="let item of loadForm.controls.dispatchList.controls; let index=index"
+                    [formGroupName]="index" [row]="index">
+                    <ngc-table>
+                      <thead>
+                        <tr>
+                          <th [width]='400'>
+                            <ngc-label value="mailbag.number"></ngc-label>
+                          </th>
+                          <th [width]='10'>
+                            <ngc-label value="export.capture.damage"></ngc-label>
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody formArrayName="mailbags">
+                        <tr [formGroupName]="subIndex"
+                          *ngFor="let mailbagItem of item.controls.mailbags.controls; let subIndex=index">
+                          <td>
+                            <ngc-display formControlName="number" [width]='400'></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-icon
+                              *ngIf="loadForm.get(['dispatchList', index, 'mailbags' , subIndex, 'damage']).value"
+                              type="yesno" formControlName="damage"></ngc-icon>
+                            <ngc-button
+                              *ngIf="!loadForm.get(['dispatchList', index, 'mailbags' , subIndex, 'damage']).value"
+                              value="Capture" (click)="captureDamage(index,subIndex)"></ngc-button>
+                          </td>
+                        </tr>
+                      </tbody>
+                    </ngc-table>
+                  </ngc-data-row-child>
+                </ngc-data-row-childs>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+</form>

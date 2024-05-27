@@ -1,0 +1,267 @@
+<form [formGroup]="maintainBanInfoForm">
+  <ngc-titlebar title="Maintain Ban Information" (onClear)="onClear($event)" (cancel)="cancel()">
+  </ngc-titlebar>
+  <ng-container type="tab" formGroupName="search">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.companyName"></ngc-label>
+          <div>
+            <ngc-lov formControlName="companyId" patternName="alphanum" dataField="param1" displayField="desc"
+              sourceId="COMPANY_NAME" accessEnableOn="r" [width]="200">
+              <ngc-data-column text="tcs.companyCode" dataField="code" [width]="50"></ngc-data-column>
+              <ngc-data-column text="tcs.companyName" [width]="150" dataField="desc"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banStatus"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="banStatus" width="200" sourceId="TCS$BAN_STATUS" type="query">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.vehicleNo"></ngc-label>
+          <div>
+            <ngc-input [maxlength]="10" patternName="alphanum" formControlName="vehicleNo" accessEnableOn="r"
+              sourceId="TCS_VEHICLES" sourceCategory="dropdown" sourceType="query"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="tcs.banType"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="banType" width="200" sourceId="TCS$BAN_TYPE">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banPeriodDateRangeFrom"></ngc-label>
+          <div>
+            <ngc-dateinput formControlName="banPeriodFrom" (modelChange)="banPeriodFromDate($event)" accessEnableOn="r">
+            </ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banPeriodDateRangeTo"></ngc-label>
+          <div>
+            <ngc-dateinput [min]="maintainBanInfoForm.get('search.banPeriodFrom').value"
+              (modelChange)="banPeriodTillDate($event)" formControlName="banPeriodTill" accessEnableOn="r">
+            </ngc-dateinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banCreateRangeFrom"></ngc-label>
+          <div>
+            <ngc-dateinput formControlName="banCreateFrom" (modelChange)="banCreateFromDate($event)" accessEnableOn="r">
+            </ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banCreateRangeTo"></ngc-label>
+          <div>
+            <ngc-dateinput [min]="maintainBanInfoForm.get('search.banCreateFrom').value"
+              (modelChange)="banCreateToDate($event)" formControlName="banCreateTo" accessEnableOn="r">
+            </ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banReleaseDateRange"></ngc-label>
+          <div>
+            <ngc-dateinput formControlName="banReleaseFrom" accessEnableOn="r"></ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.banReleaseDateRangeTo"></ngc-label>
+          <div>
+            <ngc-dateinput [min]="maintainBanInfoForm.get('search.banReleaseFrom').value"
+              formControlName="banReleaseTill" accessEnableOn="r"></ngc-dateinput>
+          </div>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-label label=""></ngc-label>
+          <div>
+            <ngc-button label="awb.search" (click)="onSearch()"></ngc-button>
+            <ngc-button label="arrival.create" accessEnableOn="r" (click)="open(createWindow)"></ngc-button>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+  <ngc-container *ngIf="isSearch">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="searchResults"
+          *ngFor="let item of maintainBanInfoForm.get('searchResults').controls; let index=index"
+          (linkClick)="onDataTableClick($event, updateWindow, releaseBanWindow, banHistoryWindow)" [columnsHeight]="50">
+          <ngc-data-column type="serialNo" text="tcs.serialNo" [width]="40">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.vehicleNo" dataField="vehicleNo"></ngc-data-column>
+          <ngc-data-column text="tcs.companyName" dataField="companyName" [width]="120"></ngc-data-column>
+          <ngc-data-column text="tcs.vehicleType" dataField="vehicleType" [width]="100"></ngc-data-column>
+          <ngc-data-column text="tcs.banStatus" dataField="banStatusDesc" [width]="90"></ngc-data-column>
+          <ngc-data-column text="tcs.banType" dataField="banType" [width]="80"></ngc-data-column>
+          <ngc-data-column [width]="100" text="tcs.banDate" dataField="banDateTime" type="displayDateTime">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.banPeriod" dataField="banPeriodFrom" dataType="date" [width]="100"
+            [cellsStyleRenderer]="cellsStyleRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.banReason" dataField="banReasonDesc" [width]="100"></ngc-data-column>
+          <ngc-data-column text="tcs.banReleaseRemark" dataField="releaseRemarks" [width]="120"></ngc-data-column>
+          <ngc-data-column text="tcs.penalty" dataField="penaltyDesc">
+          </ngc-data-column>
+          <ngc-data-column [width]="95" text="tcs.outstandingFineAmount" dataField="fine" type="displayCurrency"
+            cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.remarks" dataField="remarks"></ngc-data-column>
+          <ngc-data-column [disabled]="this.maintainBanInfoForm.get('searchResults').value[index].banStatusDisable"
+            text="tcs.update" dataField="banUpdate" type="link" iconType="edit" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column [disabled]="this.maintainBanInfoForm.get('searchResults').value[index].banStatusDisable"
+            text="tcs.release" dataField="banRelease" type="link" iconType="edit" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="tcs.banHistory" dataField="banHistory" type="link" iconType="edit" [width]="100"
+            cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!----------------------------------Update -->
+  <ng-container formGroupName="updatebaninfo">
+    <ngc-window #updateWindow title="tcs.updateBanRecord" [width]="800" [height]="400">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.vehicleNo"></ngc-label>
+            <div>
+              <ngc-display formControlName="vehicleNo"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.banReason"></ngc-label>
+            <div>
+              <ngc-dropdownlist [disabled]="maintainBanInfoForm.get('updatebaninfo.banPeriodStarted').value"
+                formControlName="banReasonDesc" sourceId="BAN_REASON_BY_TYPE" sourceType='query'
+                (select)="onBanReason($event)">
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.penalty"></ngc-label>
+            <div>
+              <ngc-display formControlName="penalty" sourceId="TCS$PENALTY">
+              </ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.banStatus"></ngc-label>
+            <div>
+              <ngc-display formControlName="banStatusDesc"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.fine"></ngc-label>
+            <div>
+              <ngc-currencyinput formControlName="fine" [disabled]="selectedBanReason"></ngc-currencyinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.remarks"></ngc-label>
+            <div>
+              <ngc-remarksinput [disabled]="maintainBanInfoForm.get('updatebaninfo.banPeriodStarted').value"
+                [maxlength]="65" patternName="alphanum" formControlName="remarks">
+              </ngc-remarksinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.banPeriodDateRangeFrom"></ngc-label>
+            <div>
+              <ngc-dateinput [disabled]="maintainBanInfoForm.get('updatebaninfo.banPeriodStarted').value"
+                formControlName="banPeriodFrom">
+              </ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.banPeriodDateRangeTo"></ngc-label>
+            <div>
+              <ngc-dateinput [disabled]="maintainBanInfoForm.get('updatebaninfo.banPeriodStarted').value"
+                [min]="this.maintainBanInfoForm.get('updatebaninfo')['controls']['banPeriodFrom'].value" required
+                formControlName="banPeriodTill">
+              </ngc-dateinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="sectiontop">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button [disabled]="maintainBanInfoForm.get('updatebaninfo.banPeriodStarted').value" label="g.save.e"
+                (click)="onUpdateSave()"></ngc-button>
+              <ngc-button label="cancel" (click)="cancel(updateWindow)"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </ng-container>
+  <ngc-window #banHistoryWindow title="tcs.banHistory" [width]="1350" [height]="500">
+    <app-ban-history #historyScreen [vehicleNo]="vehicleNo" [companyId]="companyId" [banType]="banType"
+      [banPeriodFrom]="banperiodDateRange" [outstandingAmount]="outstandingFine" [banReasonDesc]="banReasonDesc"
+      [banStatusDesc]="banStatusDesc">
+    </app-ban-history>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.cancel" (click)="cancel(banHistoryWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #createWindow title="tcs.createBanRecord" [width]="800" [height]="400">
+    <app-create-ban #createRecordScreen>
+    </app-create-ban>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onCreateRecord(createRecordScreen, createWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(createWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #releaseBanWindow title="tcs.releaseBanRecord" [width]="600" [height]="300">
+    <app-release-ban #releaseRecordScreen [vehicleNo]="vehicleNo">
+    </app-release-ban>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="g.save.e" (click)="onReleaseRecord(releaseRecordScreen, releaseBanWindow)"></ngc-button>
+            <ngc-button label="cancel" (click)="cancel(releaseBanWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

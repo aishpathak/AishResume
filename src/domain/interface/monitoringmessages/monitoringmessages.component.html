@@ -1,0 +1,185 @@
+<form [formGroup]="searchMessageForm">
+  <ngc-titlebar title='message.log.details.title' (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)="onCancel()"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.carrierCode'></ngc-label>
+        <div>
+          <ngc-lov [width]="50" accessEnableOn="r" formControlName="carrierCode" sourceId="SATS_CARRIERCODE"
+            title="g.carrier.list" dataField="code">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.carrier.short.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.fromDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput [max]="maxDate" [showTimeButton]="true" [showCalendarButton]="true" accessEnableOn="r"
+            formControlName="flightFromDate" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='g.toDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput [max]="maxDate" [showTimeButton]="true" [showCalendarButton]="true" accessEnableOn="r"
+            formControlName="flightToDate" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <div>
+          <ngc-label></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" label="search" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="monitoringMessageForm">
+  <ngc-container *ngIf="showDataFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable (itemSelect)="onClick($event)" formArrayName="flightDetail" [pageSize]="10">
+          <ngc-data-column text="flight.Flight" dataField="flightkey" cellsAlign="center" [width]="180">
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightDate" dataField="flightDate" cellsAlign="center" [width]="180">
+          </ngc-data-column>
+          <ngc-data-column text="messaging.message.status" dataField="id" [width]="500">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-container>
+                  <ngc-row formArrayName="monitorMessageList">
+                    <ng-container
+                      *ngFor="let msgStatus of monitoringMessageForm.get(['flightDetail', group, 'monitorMessageList']).controls; let sindex=index"
+                      [formGroupName]="sindex">
+                      <ngc-column [column]="1.5" style="left: 10px">
+                        <ngc-display formControlName="messageType"></ngc-display>
+                        <ng-container *ngIf="msgStatus.get('subMessageType').value">
+                          (<ngc-display formControlName="subMessageType"> </ngc-display>)
+                        </ng-container>
+                        <div>
+                          <ng-container align="center" *ngIf="msgStatus.get('messageStatus').value === 'Y'">
+                            <ngc-shape align="center" formControlName="messageStatus" type="circle" textColor="white"
+                              bgColor="green" [width]="25" [height]="25">
+                            </ngc-shape>
+                          </ng-container>
+                          <ng-container align="center" *ngIf="msgStatus.get('messageStatus').value === 'N'">
+                            <ngc-shape [usePointer]="true" align="center" (click)="openErrorMsgPopUp(group, sindex)"
+                              formControlName="messageStatus" type="circle" textColor="white" bgColor="red" [width]="25"
+                              [height]="25">
+                            </ngc-shape>
+                          </ng-container>
+                        </div>
+                      </ngc-column>
+                    </ng-container>
+                  </ngc-row>
+                </ngc-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+        <!-- <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="100">
+                <ngc-label value="flight.flightkey"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="flight.flightDate"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="messaging.message.status"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="flightDetail">
+            <tr *ngFor="let item of monitoringMessageForm.controls.flightDetail.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="flightkey"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightDate"></ngc-display>
+              </td>
+              <td align="center">
+                <ngc-container formArrayName="monitorMessageList" type="tab">
+                  <ngc-row>
+                    <ngc-column column="1.5"
+                      *ngFor="let msgStatus of item.controls.monitorMessageList.controls; let sindex=index"
+                      [formGroupName]="sindex">
+                      <ngc-display align="center" formControlName="messageType"></ngc-display>
+                      <ng-container align="center" *ngIf="msgStatus.get('subMessageType').value">
+                        (<ngc-display align="center" formControlName="subMessageType">
+                        </ngc-display>)
+                      </ng-container>
+                      <div>
+                        <ng-container align="center" *ngIf="msgStatus.get('messageStatus').value === 'Y'">
+                          <ngc-shape align="center" formControlName="messageStatus" type="circle" textColor="white"
+                            bgColor="green" [width]="25" [height]="25">
+                          </ngc-shape>
+                        </ng-container>
+                        <ng-container align="center" *ngIf="msgStatus.get('messageStatus').value === 'N'">
+                          <ngc-shape align="center" (click)="openErrorMsgPopUp(index, sindex)"
+                            formControlName="messageStatus" type="circle" textColor="white" bgColor="red" [width]="25"
+                            [height]="25">
+                          </ngc-shape>
+                        </ng-container>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table> -->
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #errorMessagePopUp title="message.log.error.message.log" width="600" height="500" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column [column]="12">
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label='g.shipmentNumber' width='20'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label='message.log.error.message' width='20'></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="erroreMessageListData">
+              <tr
+                *ngFor="let dataChild of monitoringMessageForm.get(['erroreMessageListData']).controls; let index = index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="shipmentNumber" [width]="60" uppercase='true'>
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="errorMessage" [width]="60" uppercase='true'>
+                  </ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-window #errorMessagePopUpNull title="message.log.error.message.log" width="600" height="500" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column [column]="12">
+          <ngc-label label="message.log.no.messages">
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

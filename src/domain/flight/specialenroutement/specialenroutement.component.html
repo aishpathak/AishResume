@@ -1,0 +1,256 @@
+<form [formGroup]="specialEnroutementform">
+  <!-- (cancel)="onSpecialScreenCancel()"-->
+  <ngc-titlebar title="flight.maintainSpecialEnroutement.title" (clear)="clearFormData()" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.carrierCode"></ngc-label>
+        <div>
+          <ngc-lov formControlName="carrierCode" [width]="40" dataField='code' displayMember='code'
+            (ngModelChange)="setCarrierCodeValueOnCancelPress()" upperCase="true" sourceId='CARRIER_OPT'
+            title='g.carrier' (onChange)="onSelectCarrier($event)" (select)="onSelectCarrierCode($event)"
+            accessEnableOn="r" entityAttribute="Flight.SpecialEnroutement.Carrier">
+            <ngc-data-column text="flight.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value='g.destination'></ngc-label>
+        <div>
+          <ngc-lov formControlName='finalDestination' [width]='100' upperCase='true' sourceId='FINAL_DESTINATION'
+            title='g.destination' dataField='code' displayMember='code' accessEnableOn="r">
+            <ngc-data-column text='flight.airport_cityCode' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <label></label>
+        <div>
+          <ngc-button label="g.search" (click)="onSearch()" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="10"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" width="1350">
+    <ngc-row>
+      <ngc-column column="12" align='right'>
+
+        <ngc-button label="flight.add" (click)="onAddRow()"></ngc-button>
+        <ngc-button label="g.delete" *ngIf="isspecialEnroutementDatatableVisible" (click)="onDelete()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable (linkClick)="onLinkClick($event)" *ngIf="isspecialEnroutementDatatableVisible"
+          formArrayName="resultList" [showToolbar]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.select" dataField="flagDelete" [width]="70" type="check" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.enroutementId" dataField="enroutementId" [hidden]="true" type="enroutementId"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.carrierCode" dataField="carrierCode" [width]="100" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="flight.finalDestination" dataField="finalDestination" [width]="150" cellsAlign="left"
+            iconType="edit"></ngc-data-column>
+          <ngc-data-column text="flight.via" dataField="via" [width]="100" cellsAlign="left" iconType="edit">
+          </ngc-data-column>
+          <ngc-data-column text="flight.paxCao" dataField="serviceType" [width]="100" cellsAlign="left" iconType="edit">
+          </ngc-data-column>
+          <ngc-data-column text="g.dateFrom" dataField="periodFrom" [width]="150" cellsAlign="left" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text="g.dateTo" dataField="periodTo" [width]="150" cellsAlign="left" type="displayDate">
+          </ngc-data-column>
+          <ngc-data-column text="flight.transferTo" dataField="transfer" [width]="100" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="flagUpdate" value="g.edit" [width]="70" type="link" iconType="edit">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <form formGroupName="updateForm">
+    <ngc-window #updateWindow [width]="1200" [height]="250" title="flight.editSpecialEnroutement">
+
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>&nbsp;</ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-display [hidden]="true" formControlName="enroutementId"></ngc-display>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="g.carrierCode"></ngc-label>
+            <div>
+              <ngc-display formControlName="carrierCode"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label='flight.finalDestination'></ngc-label>
+            <div>
+              <ngc-display formControlName="finalDestination"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label='flight.via'></ngc-label>
+            <div>
+              <ngc-lov formControlName='via' dataField="code" [width]='50' upperCase='true' sourceId='FINAL_DESTINATION'
+                title='flight.via' required>
+                <ngc-data-column text='g.destination' dataField='code' [width]='100'></ngc-data-column>
+                <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="flight.paxCao"></ngc-label>
+            <!-- <div>
+                            <ngc-display formControlName="serviceType"></ngc-display>
+                        </div> -->
+            <!-- <td>
+                            <ngc-dropdownlist [width]="90" formControlName="purpose" sourceId="SERVICE_TYPE" required></ngc-dropdownlist>
+                        </td> -->
+            <div>
+              <ngc-dropdownlist formControlName="serviceType" [width]="90" displayMember="code" required
+                sourceId="SERVICE_TYPE" sourceType="query"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.dateFrom"></ngc-label>
+            <div>
+              <ngc-dateinput #periodFromUpdateWindow formControlName="periodFrom" required>
+              </ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.dateTo"></ngc-label>
+            <div>
+              <ngc-dateinput #periodToUpdateWindow [width]="100" formControlName="periodTo">
+              </ngc-dateinput>
+            </div>
+          </ngc-column>s
+          <ngc-column>
+            <ngc-label label="flight.transferTo"></ngc-label>
+            <div>
+              <ngc-lov formControlName="transfer" dataField="code" [width]="40" upperCase="true" sourceId='CARRIER'
+                title='g.carrier'>
+                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="updateSpecialEnroutement()" value="g.save"></ngc-button>
+              <ngc-button (click)="onToggleUpdate()" value="g.cancel"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </form>
+  <form formGroupName="insertionForm">
+    <ngc-window #insertionWindow [width]="1200" [height]="250" title="flight.addSpecialEnroutement">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="g.carrierCode"></ngc-label>
+            <!--pattern=".{3,}"-->
+            <div>
+              <ngc-lov [disabled]="isCarrierDisabledInInsertWindow" formControlName="carrierCode" dataField="code"
+                [width]="50" upperCase="true" sourceId='CARRIER' title='g.carrier' required>
+                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label='flight.finalDestination'></ngc-label>
+            <!--pattern=".{3,}"-->
+            <div>
+              <ngc-lov [disabled]="isDestinationDisabledInInsertWindow" formControlName='finalDestination'
+                dataField="code" [width]='50' upperCase='true' sourceId='FINAL_DESTINATION'
+                title='flight.finalDestination' required>
+                <ngc-data-column text='g.destination' dataField='code' [width]='100'></ngc-data-column>
+                <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label label='flight.via'></ngc-label>
+            <div>
+              <ngc-lov formControlName='via' dataField="code" [width]='50' upperCase='true' sourceId='FINAL_DESTINATION'
+                title='flight.via' required>
+                <ngc-data-column text='g.destination' dataField='code' [width]='100'></ngc-data-column>
+                <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="flight.paxCao"></ngc-label>
+            <div>
+              <ngc-dropdownlist formControlName="serviceType" displayMember="code" sourceId="SERVICE_TYPE" [width]="80"
+                required></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.dateFrom"></ngc-label>
+            <div>
+              <ngc-dateinput #periodFromInsertWindow [width]="100" formControlName="periodFrom" required>
+              </ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.dateTo"></ngc-label>
+            <div>
+              <ngc-dateinput #periodToInsertWindow [width]="100" formControlName="periodTo">
+              </ngc-dateinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="flight.transferTo"></ngc-label>
+            <div>
+              <ngc-lov formControlName="transfer" dataField="code" [width]="40" upperCase="true" sourceId='CARRIER'
+                title='g.carrier'>
+                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="saveSpecialEnroutement('insertionForm')" value="g.save"></ngc-button>
+              <ngc-button (click)="onToggleInsert()" value="g.cancel"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </form>
+
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column *ngIf="isspecialEnroutementDatatableVisible">
+      <ngc-button value="flight.special" (click)="navigateToNormalEnroutment()"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

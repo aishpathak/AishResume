@@ -1,0 +1,303 @@
+<form [formGroup]="form" formName="mainForm">
+  <ngc-titlebar title="flight.maintain.flight.schedule.title" (clear)="onClear()" (cancel)="onCancel()">
+  </ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="flightCarrierCode" upperCase="true" [noCache]="true"
+            [autoFocus]="true" dataField="code" displayMember="code" [width]="75" sourceId='CARRIER'
+            title='flight.carrierType' (onChange)="onSelectCarrier($event)" (select)="onSelectCarrier($event)" required>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+            <ngc-data-column text="flight.assisted" dataField="param1" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flightNumber"></ngc-label>
+        <!-- <div>
+          <ngc-input accessEnableOn="r" [width]="60" [maxLength]="5" [minLength]="4" upperCase="true" formControlName="flightNumber" required></ngc-input>
+        </div> -->
+        <div>
+          <ngc-flightkeyinput [disabled]="onSearchFlag" [width]="100" [noCarrier]="true" upperCase="true"
+            formControlName="flightNumber" required accessEnableOn="r"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <label>&nbsp;</label>
+        <div>
+          <ngc-button (click)="submit(form)" label="g.search" iconType="search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <label>&nbsp;</label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="routeToDisplaySchedulesScreen()" entityAttribute="Flight.BuBdOffice"
+            value="flight.displayschedules" [disabled]="!showFlightSchedule">
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+
+      <ngc-column [column]="8"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="flight" type="section">
+    <ngc-row>
+      <ngc-column *ngIf="showFlightSchedule">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flight"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showFlightSchedule" column="6">
+        <ngc-label label="g.name"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightName"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button (click)="routeToDisplaySchedules($event)" value="flight.displayDetails" accessEnableOn="r"
+          [disabled]="!showFlightSchedule"></ngc-button>
+        <ngc-button [disabled]="hasReadPermission" (click)="routeToCreateSchedules($event)"
+          value="flight.createNewSchedule"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="scheduleForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+
+        <ngc-container *ngIf="showFlightSchedule">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table formArrayName="flightScheduleGroupList" width="270">
+                <tbody>
+                  <tr>
+                    <td cellspacing="1" width="200"
+                      *ngFor="let item of scheduleForm.controls.flightScheduleGroupList.controls; let subIndexData=index"
+                      [formGroupName]="subIndexData">
+                      <ngc-table cellspacing="0">
+                        <thead cellspacing="0">
+                          <th colspan="5" with="100" cellspacing="0" style="padding:0">
+                            <ngc-label label="flight.schedule"></ngc-label>
+                            <ngc-label label="{{subIndexData+1}}"></ngc-label>
+                          </th>
+                        </thead>
+                        <!-- <tr>
+                    <th width="50" style="padding:0">
+                      <ngc-label label="fromDate"></ngc-label>
+                    </th>
+                    <th width="50" style="padding:0">
+                      <ngc-label label="toDate"></ngc-label>
+                    </th>
+                    <th width="50" style="padding:0"> 
+                      <ngc-label label="flight.apron"></ngc-label>
+                    </th>
+                    <th width="50" style="padding:0">
+                      <ngc-label label="handler"></ngc-label>
+                    </th>
+                  </tr> -->
+
+                  <tr (click)="clicGet(item.value, subIndexData,subIndexData)">
+                    <td cellspacing="1" width="270">
+                      <ngc-display formControlName="dateFrom" [onlyDate]="true"></ngc-display>&nbsp;&nbsp; -
+                      &nbsp;&nbsp;
+                      <ngc-display formControlName="dateTo" [onlyDate]="true"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="apronString"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="groundHandler"></ngc-display>
+                    </td>
+                  </tr>
+              </ngc-table>
+              </td>
+              </tr>
+              </tbody>
+              </ngc-table>
+
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="operativeFlightForm">
+  <ngc-container type="section" *ngIf="showOperativeFlight" add-on-panel-class="padding-top-bottom-15 border-on-bottom"
+    class="scrollBottom">
+    <ngc-row>
+      <ngc-column align="left">
+        <ngc-checkbox [disabled]="hasReadPermission" formControlName="checkAll"></ngc-checkbox>
+        <ngc-label label="flight.selectallforcreate"></ngc-label> &nbsp;&nbsp;&nbsp;
+        <!--ayush-->
+      </ngc-column>
+      <ngc-column align="left">
+        <ngc-checkbox [disabled]="hasReadPermission" formControlName="checkAllforCancel"></ngc-checkbox>
+        <ngc-label label="flight.selectallforcancel"></ngc-label> &nbsp;&nbsp;&nbsp;
+        <!--ayush-->
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button [disabled]="hasReadPermission" (click)="onCancelFlight()" label="flight.cancelFlight"></ngc-button>
+        <ngc-button [disabled]="hasReadPermission" (click)="onCreate()" label="flight.createFlight"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <!-- <ngc-carousel [width]="1300" [height]="360" [currentPage]="focusPage" (next)="onNext($event)" (previous)="onPrevious($event)">
+          <ngc-carousel-card> -->
+        <ngc-container [width]="1300" *ngIf="show">
+          <ngc-row>
+            <ngc-column column="4">
+              <ngc-datatable *ngIf="operativeFlightForm.controls.operativeFlighList1.length"
+                formArrayName="operativeFlighList1" [pageable]='false'>
+                <ngc-data-column [disabled]="hasReadPermission" text="flight.select" dataField="check" [width]="55"
+                  type="check" align="center" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" cellsAlign="center"
+                  type="displayDate"></ngc-data-column>
+                <ngc-data-column text="flight.routing" dataField="routing" [width]="150" align="center"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.status" dataField="status" [width]="70" type="icon" iconType="yesno"
+                  align="center" cellsAlign="center"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-datatable *ngIf="operativeFlightForm.controls.operativeFlighList2.length"
+                formArrayName="operativeFlighList2" (itemSelect)='subscribeToCheckBox()' [pageable]='false'>
+                <ngc-data-column [disabled]="hasReadPermission" text="flight.select" dataField="check" [width]="55"
+                  type="check" align="center" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" cellsAlign="center"
+                  type="displayDate"></ngc-data-column>
+                <ngc-data-column text="flight.routing" dataField="routing" [width]="150" align="center"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="flight.status" dataField="status" [width]="70" type="icon" iconType="yesno"
+                  align="center" cellsAlign="center"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-datatable *ngIf="operativeFlightForm.controls.operativeFlighList3.length"
+                formArrayName="operativeFlighList3" (itemSelect)='subscribeToCheckBox()' [pageable]='false'>
+                <ngc-data-column [disabled]="hasReadPermission" text="flight.select" dataField="check" [width]="55"
+                  type="check" align="center" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" cellsAlign="center"
+                  type="displayDate"></ngc-data-column>
+                <ngc-data-column text="flight.routing" dataField="routing" [width]="150" align="center"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="flight.status" dataField="status" [width]="70" type="icon" iconType="yesno"
+                  align="center" cellsAlign="center"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="11">
+            </ngc-column>
+            <ngc-column *ngIf="operativeFlightForm.controls.operativeFlighList4.length > 0">
+              <ngc-button accessEnableOn="r" label="schedule.next" [width]="100" (click)="onShowNext($event)">
+              </ngc-button>
+
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <!-- </ngc-carousel-card>
+
+          <ngc-carousel-card *ngIf="operativeFlightForm.controls.operativeFlighList4.length > 0"> -->
+        <ngc-container *ngIf="showSecond">
+          <ngc-row>
+            <ngc-column column="4">
+              <ngc-datatable *ngIf="operativeFlightForm.controls.operativeFlighList4.length"
+                formArrayName="operativeFlighList4" (itemSelect)='subscribeToCheckBox()' [pageable]='false'>
+                <ngc-data-column [disabled]="hasReadPermission" text="flight.select" dataField="check" [width]="55"
+                  type="check" align="center" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" cellsAlign="center"
+                  type="displayDate"></ngc-data-column>
+                <ngc-data-column text="flight.routing" dataField="routing" [width]="150" align="center"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="flight.status" dataField="status" [width]="70" type="icon" iconType="yesno"
+                  align="center" cellsAlign="center"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-datatable *ngIf="operativeFlightForm.controls.operativeFlighList5.length" [pageable]='true'
+                formArrayName="operativeFlighList5" (itemSelect)='subscribeToCheckBox()'>
+                <ngc-data-column [disabled]="hasReadPermission" text="flight.select" dataField="check" [width]="55"
+                  type="check" align="center" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" cellsAlign="center"
+                  type="displayDate"></ngc-data-column>
+                <ngc-data-column text="flight.routing" dataField="routing" [width]="150" align="center"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="flight.status" dataField="status" [width]="70" type="icon" iconType="yesno"
+                  align="center" cellsAlign="center"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-datatable *ngIf="operativeFlightForm.controls.operativeFlighList6.length"
+                formArrayName="operativeFlighList6" (itemSelect)='subscribeToCheckBox()' [pageable]='false'>
+                <ngc-data-column [disabled]="hasReadPermission" text="flight.select" dataField="check" [width]="55"
+                  type="check" align="center" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="g.date" dataField="flightDate" [width]="100" align="center" cellsAlign="center"
+                  type="displayDate"></ngc-data-column>
+                <ngc-data-column text="flight.routing" dataField="routing" [width]="150" align="center"
+                  cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="flight.status" dataField="status" [width]="70" type="icon" iconType="yesno"
+                  align="center" cellsAlign="center"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="11">
+            </ngc-column>
+            <ngc-column *ngIf="operativeFlightForm.controls.operativeFlighList1.length > 0">
+
+              <ngc-button accessEnableOn="r" label="schedule.previous" [width]="100" (click)="onShowPrevious($event)">
+              </ngc-button>
+
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!-- </ngc-carousel-card>
+        </ngc-carousel> -->
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="showICMSSchedule" type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="flight.schedule.summary"></ngc-label>
+        <ngc-datatable formArrayName="scheduleFlightList" [pageSize]=18 [enablePageSizeHeight]="false">
+          <ngc-data-column text="Received Date/time" dataField="createdDateTime" type="displayDateTime" [width]="70"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="Schedule Start Date" dataField="effectiveFromDate" type="displayDate" [width]="120"
+            align="center" cellsAlign="center" accessEnableOn="r"></ngc-data-column>
+          <ngc-data-column text="Schedule End Date" dataField="effectiveToDate" type="displayDate" [width]="100"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Frequency" dataField="frequency" [width]="80" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="Status" dataField="status" [width]="90" align="center" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="!showOperativeFlight && ScheduleData" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button accessEnableOn="r" (click)="routeToDisplaySchedules($event)" value="flight.displayDetails">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

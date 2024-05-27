@@ -1,0 +1,328 @@
+<ngc-titlebar title="title.mailbag.overview" (clear)="onClear($event)" (save)="onSave($event)"></ngc-titlebar>
+<form [formGroup]="mailbagOverviewForm">
+  <ngc-container type="header">
+    <ngc-row formGroupName="searchFormGroup">
+      <ngc-column>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="byDisptachMode" groupName="searchMode" checked="true">
+            <ngc-i18n value="mb.bydispatch" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="byUldMode" groupName="searchMode">
+            <ngc-i18n value="unload.uld" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="!screenModeFlag">
+        <ngc-label label="outhouse.uld"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="uldtrolley" [width]="150" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenModeFlag">
+        <ngc-label label="airmail.dispatchnum"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="dispatchNumber" (ngModelChange)="appendZeroToDN(item)"
+            [width]="130" required [maxLength]="4"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenModeFlag">
+        <ngc-label label="g.mailBagNumber"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="mailNumber" [width]="130" [maxLength]="29"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenModeFlag">
+        <ngc-label label="g.origin"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="origin" [width]="120" [maxLength]="3"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenModeFlag">
+        <ngc-label label="g.destination"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="destination" [width]="120" [maxLength]="3"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.fromDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="fromDate" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.toDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="toDate" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="screenModeFlag">
+        <ngc-label label="mb.xrayresult"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="120" formControlName="xrayresult" [noCache]="true"
+            sourceId="MailbagOverview$XRAYResult"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="middle">
+        <ngc-button accessEnableOn="r" value="expbu.search" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container formGroupName="mailbagDetailsForm" *ngIf="isMailbagData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="mailbagDetailsList">
+          <ngc-data-column text="g.select" type="check" [width]="18" align="left" cellsAlign="center" dataField="check">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="check" (click)="checkLoadedParent(group)"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="mb.dispatchno" [width]="50" align="left" cellsAlign="left" dataField="dns">
+          </ngc-data-column>
+          <ngc-data-column text="outhouse.originoe" [width]="30" align="left" cellsAlign="left" dataField="originOE">
+          </ngc-data-column>
+          <ngc-data-column text="outhouse.destinationoe" [width]="40" align="left" cellsAlign="left"
+            dataField="destinationOE"></ngc-data-column>
+          <ngc-data-column text="import.nextdest" [width]="45" align="left" cellsAlign="left"
+            dataField="nextDestination"></ngc-data-column>
+          <ngc-data-column text="g.pieces" [width]="25" align="left" type="displayPieces" cellsAlign="right"
+            dataField="shpPieces">
+          </ngc-data-column>
+          <!--<ngc-data-column text="g.weight" [width]="25" align="left" type="displayWeight" cellsAlign="right" dataField="shpWeight">-->
+          <ngc-data-column text="g.weight" [width]="18" align="left" cellsAlign="center" dataField="check">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightdisplay formControlName="shpWeight"></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column [width]="40" text="mb.storelocation" dataField="uniqueShpLoc"></ngc-data-column>
+          <ngc-data-column [width]="55" text="warehouseLocation" dataField="uniqueWareLoc"
+            [cellsStyleRenderer]="breakdownlocationRenderer"></ngc-data-column>
+          <ngc-data-column [width]="70" text="mb.muldt" align="left" dataField="uniqueManUldLoc"
+            [cellsStyleRenderer]="uldRenderer"></ngc-data-column>
+          <ngc-data-column text="mb.dsnremark" [width]="50" align="left" cellsAlign="left" dataField="remarks">
+          </ngc-data-column>
+          <ngc-data-column [width]="40" text="status" align="left" dataField="status" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-row>
+            <ng-template let-group>
+              <ng-container [formGroupName]="group">
+                <ngc-datatable formArrayName="mailbagDetails" (itemSelect)="checkLoadedChild($event,group)"
+                  (linkClick)="onLinkClick($event,group)" [pageable]="false">
+                  <ngc-data-column text=" " type="check" [width]="20" align="left" cellsAlign="left"
+                    dataField="selectCheckBox"></ngc-data-column>
+                  <ngc-data-column [width]="50" text="Mailbag <br> Number" dataField="mailBagNumber" dataType="string">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" text="outhouse.rsn" dataField="rsn"></ngc-data-column>
+                  <ngc-data-column [width]="40" text="agent.agent" dataField="agentCode"></ngc-data-column>
+                  <ngc-data-column [width]="60" text="flight.incoming.flight.br" dataField="incomingFlightInfo">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="60" text="flight.booked.flight.br" dataField="bookedFlightInfo">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="60" text="flight.outgoing.flight" dataField="manifestedFlightInfo">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" text="g.pieces" dataField="pieces"></ngc-data-column>
+                  <ngc-data-column [width]="50" text="g.weight" dataField="weight"></ngc-data-column>
+                  <ngc-data-column [width]="60" text="mb.storelocation" dataField="storeLocation"></ngc-data-column>
+                  <ngc-data-column [width]="60" text="warehouse.warehouse.location.br" dataField="warehouseLocation">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="60" text="mb.muldt" dataField="manifestedUldTrolley">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" type="icon" iconType="yesno" text="mb.emargo" dataField="embargoFlag">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="50" type="icon" iconType="yesno" text="outhouse.damaged"
+                    dataField="damaged"></ngc-data-column>
+                  <ngc-data-column [width]="50" text="import.remark" dataField="dsnRemark"></ngc-data-column>
+                  <ngc-data-column [width]="50" text="mb.xrayresult" dataField="xrayResultFlag"></ngc-data-column>
+                  <ngc-data-column [width]="50" text="MssWeight" dataField="mssWeight"></ngc-data-column>
+                  <!-- <ngc-data-column [width]="50" text="history" dataField="history"></ngc-data-column> -->
+                  <ngc-data-column text='flight.history' iconType="edit" type="link" [width]="60" dataField="history"
+                    cellsAlign="center" align="center"></ngc-data-column>
+                  <ngc-data-column text='' iconType="edit" type="link" [width]="60" dataField="damage"
+                    cellsAlign="center" align="center"></ngc-data-column>
+                </ngc-datatable>
+              </ng-container>
+            </ng-template>
+          </ngc-data-row>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button *ngIf="updateLocFlag" value="mb.updateloc" [disabled]='disableUpdateLocationButton'
+          (click)="openUpdateLocationPopUp()" [width]="200">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #updateLocatioPopUp width="800" height="400" title="warehouse.updatelocation" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="awb.shipment.location"></ngc-label>
+          <div>
+            <ngc-input formControlName="shpLoc" (ngModelChange)="patchSameShpLocToMB($event)"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label value="g.warehouseLocation"></ngc-label>
+          <div>
+            <ngc-input formControlName="wareLoc" (ngModelChange)="patchSameWareLocToMB($event)"></ngc-input>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <th>
+                <ngc-label label="mb.mbname"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mb.currentloc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="mb.currentwloc"></ngc-label>
+              </th>
+            </thead>
+            <tbody formArrayName="inventoryPopupArray">
+              <tr [formGroupName]="index"
+                *ngFor="let item of mailbagOverviewForm.controls.inventoryPopupArray.controls; let index=index">
+                <td>
+                  <ngc-display formControlName="mailBagNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="storeLocation"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="warehouseLocation"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onSaveUpdateLocation($event)" label="Save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #showPopUpWindow width="750" height="400" title="g.history">
+    <ngc-container type="tab">
+      <ngc-row formGroupName="allStatusFormGroup">
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th width="20">
+                  <ngc-label value="g.break.down.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.accepted.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.transferred.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.location.assigned.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.booked.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.loaded.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.manifeted.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="g.offloaded.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="airmail.dnata.handover.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="airmail.delivered.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="airmail.returned.by"></ngc-label>
+                </th>
+                <th width="20">
+                  <ngc-label value="airmail.return.reason"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>
+                  <ngc-display formControlName="breakdowndoneBy"></ngc-display><br>
+                  <ngc-display formControlName="breakdowndoneOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="acceptedBy"></ngc-display><br>
+                  <ngc-display formControlName="acceptedOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="transferredBy"></ngc-display><br>
+                  <ngc-display formControlName="transferredOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="locationassignedBy"></ngc-display><br>
+                  <ngc-display formControlName="locationassignedOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="bookingdoneBy"></ngc-display><br>
+                  <ngc-display formControlName="bookingdoneOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="loadedBy"></ngc-display><br>
+                  <ngc-display formControlName="loadedOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="manifestBy"></ngc-display><br>
+                  <ngc-display formControlName="manifestOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="offloadedBy"></ngc-display><br>
+                  <ngc-display formControlName="offloadedOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="dnataHandoverBy"></ngc-display><br>
+                  <ngc-display formControlName="dNataHandoverOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="deliveredBy"></ngc-display><br>
+                  <ngc-display formControlName="deliveredOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="returnedBy"></ngc-display><br>
+                  <ngc-display formControlName="returnedOn"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="returnReason"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

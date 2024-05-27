@@ -1,0 +1,159 @@
+<form [formGroup]="ediInterfaceTelexSetUp">
+  <ngc-titlebar title='edi.interface.telexaddress.setup.title'></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='messaging.interface.system.name'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="interfacingSystemId" sourceId="SELECT_INTERFACE_TYPES" sourceType="query"
+            (select)="getInterfaceSystemName($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="messaging.telex.address"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="interfacingSystemTelexAddress" maxlength="65">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search"></ngc-button>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button (click)="onAdd()" value="g._add"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column *ngIf="showData" column="6">
+        <ngc-datatable formArrayName="messageHandlingDefinition" (linkClick)="onLinkClick($event)"
+          [enablePageSizeHeight]="false" [showToolbar]="true">
+          <ngc-data-column text="messaging.interfacing.system" dataField="interfacingSystemName" [width]="270"></ngc-data-column>
+          <ngc-data-column text="messaging.interfacing.system.id" dataField="interfacingSystemId" [width]="270" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="messaging.interfacing.system.table.id" dataField="referenceId" [width]="270" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="messaging.telex.address" dataField="interfacingSystemTelexAddress" [width]="350">
+          </ngc-data-column>
+          <ngc-data-column text='g.edit' dataField="edit" [width]="270" iconType='edit' type="link" cellsAlign="center"
+            align="left"></ngc-data-column>
+          <ngc-data-column [disabled]="hasReadPermission" text='g.delete' dataField="delete" [width]="270" iconType='delete' type="link"
+            cellsAlign="center" align="left"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+      <ngc-column column="6">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #saveWindow title="edi.interfacing.system.telex.address.setup.title" [showCloseButton]="true" width="650"
+    height="300" (close)="onWindowClose(saveInterfaceTelexSetUp)">
+    <form [formGroup]="saveInterfaceTelexSetUp">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="10">
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th>
+                    <ngc-label label="messaging.interface.system.name"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="messaging.telex.address"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="g.delete"></ngc-label>
+                  </th>
+                </tr>
+              </thead>
+              <tbody formArrayName="telexAddress">
+                <tr *ngFor="let item of saveInterfaceTelexSetUp.get('telexAddress').controls; let index=index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-dropdownlist required formControlName="interfacingSystemId" default="interfacingSystem"
+                      sourceId="SELECT_INTERFACE_TYPES" sourceType="query"
+                      [disabled]="this.ediInterfaceTelexSetUp.get('interfacingSystemId') && this.ediInterfaceTelexSetUp.get('interfacingSystemId').value != null">
+                    </ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-input required formControlName="interfacingSystemTelexAddress" maxlength="65">
+                    </ngc-input>
+                  </td>
+                  <td>
+                    <ngc-link (linkClick)="onDeleteTelexAddress($event,index)" hideValue="true" iconType="delete">
+                      Delete
+                    </ngc-link>
+                  </td>
+                </tr>
+              </tbody>
+            </ngc-table>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-label label=" "></ngc-label>
+            <div>
+              <ngc-button (click)="onAddTelexAddress()" value="g._add"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=" "></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="center">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button (click)="saveSetUp()" value="g.save"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+  </ngc-window>
+  <ngc-window #editWindow title="edi.interfacing.system.telex.address.setup.edit" [showCloseButton]="true" [width]="500"
+    [height]="300">
+    <form [formGroup]="editInterfaceTelexSetUp">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label='messaging.interface.system.name'></ngc-label>
+            <div>
+              <ngc-dropdownlist required formControlName="interfacingSystemId" sourceId="SELECT_INTERFACE_TYPES"
+                sourceType="query" [disabled]="true"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column column="6">
+            <ngc-label label="messaging.telex.address"></ngc-label>
+            <div>
+              <ngc-input required formControlName="interfacingSystemTelexAddress" maxlength="65">
+              </ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column align="center">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button (click)="updateSetUp()" value="g.save"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+  </ngc-window>
+</form>

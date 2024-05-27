@@ -1,0 +1,366 @@
+<ngc-titlebar title='export.export.manifest.title' (save)="onSave()" (cancel)="onBack($event)"></ngc-titlebar>
+<form [formGroup]="exportMailManifestForm">
+  <ngc-container type='header'>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="flight.Flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" [width]="100" [maxlength]="7" required></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="airmail.Date"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="flightDate" (ngModelChange)="onSelectDate($event)" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value='flight.segment'></ngc-label>
+        <div>
+          <div>
+            <ngc-dropdownlist accessEnableOn="r" sourceId="FLIGHTSEGMENTMAILMANIFEST" [sourceParameters]="flightKeyforDropdown"
+              sourceType='query' formControlName="segment" [noCache]="true" [width]="100"></ngc-dropdownlist>
+          </div>
+        </div>
+      </ngc-column>
+      <ngc-column column="5" [grid48]="true">
+        <ngc-label label="mailbag.next.destination"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="nextDestination" [width]="100" [maxlength]="3"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="mailbag.final.destination"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="finalDestination" [width]="100" [maxlength]="3"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="3" align="left">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()" verticalAlign="bottom"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label="export.mail.manifest.time.std.etd"></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-display formControlName="timeSTD"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type='section'>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="flight.Flight"></ngc-label>
+        <div>
+          {{filghtKeyDisplay}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="airmail.Date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.segment"></ngc-label>
+        <div>
+          <ngc-display formControlName="displaySegment"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="mailbag.next.destination"></ngc-label>
+        <div>
+          {{nextDestinationDisplay}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="mailbag.final.destination"></ngc-label>
+        <div>
+          {{finalDestinationDisplay}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label="g.totalpieces"></ngc-label>
+        <div>
+          {{finalTotalPieces}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label="g.totalweight"></ngc-label>
+        <div>
+          {{finalTotalWeight}}
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label="flight.manifest.complete"></ngc-label>
+        <div>
+          <ngc-icon type="yesno" *ngIf="exportMailManifestForm.get('manifestCompleteDisplay').value== 'true'"
+            formControlName="manifestCompleteDisplay"></ngc-icon>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.dls.complete"></ngc-label>
+        <div>
+          <ngc-icon type="yesno" *ngIf="exportMailManifestForm.get('dlsCompletedDisplay').value== 'true'"
+            formControlName="dlsCompletedDisplay"></ngc-icon>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.flight.complete"></ngc-label>
+        <div>
+          <ngc-icon type="yesno" *ngIf="exportMailManifestForm.get('flightCompleteDisplay').value== 'true'"
+            formControlName="flightCompleteDisplay"></ngc-icon>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-display formControlName="segmentDisplay" displayMember="desc"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="uldTrolleyArray" [pageable]="false">
+          <ngc-data-column text=" " type="check" [width]="5" cellsAlign="left" dataField="check">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="check" (click)="parentCheck(group)"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.uld.trolley" [width]="100" cellsAlign="left" dataField="uldTrolley">
+          </ngc-data-column>
+          <ngc-data-column text="mailbag.location.type" [width]="100" cellsAlign="left" dataField="locationType">
+          </ngc-data-column>
+          <ngc-data-column text="g.totalpieces" [width]="100" cellsAlign="right" dataField="totalPieces"
+            type="displayPieces"></ngc-data-column>
+          <ngc-data-column text="export.mail.manifested.weight" [width]="100" cellsAlign="right"
+            dataField="manifestedWeight">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightdisplay formControlName="manifestedWeight"></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="export.mail.manifest.nested.info" [width]="100" cellsAlign="left" dataField="nestedId">
+          </ngc-data-column>
+          <ngc-data-column text="export.mail.manifest.intact" [width]="100" align="left" cellsAlign="left"
+            dataField="weight">
+          </ngc-data-column>
+          <ngc-data-column text='uld.remarks' [width]="60" dataField="uldRemarks" cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input formControlName="uldRemarks"></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='g.delete' [width]="60" dataField="delete" cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onDeleteWhole(group)">
+                  <ngc-icon type="delete" value="true" true-color="grey" align="left"></ngc-icon>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-row>
+            <ng-template let-parentgroup>
+              <ng-container [formGroupName]="parentgroup" title="">
+                <ngc-edittable formArrayName="mailBagInfo" [pageable]="false">
+                  <!--<ngc-data-column text=" " type="check" [width]="5" cellsAlign="left" dataField="childCheckBox">
+                  </ngc-data-column>-->
+                  <ngc-data-column text=" " type="check" [width]="5" cellsAlign="left" dataField="childCheckBox">
+                    <ng-template let-name="name" let-group="group">
+                      <ng-container [formGroupName]="group">
+                        <ngc-checkbox formControlName="childCheckBox"
+                          (modelChange)="onselectMailBag( parentgroup, group)"> </ngc-checkbox>
+                      </ng-container>
+                    </ng-template>
+                  </ngc-data-column>
+                  <ngc-data-column [width]="130" text="mailbag.dispatch" dataField="dispatchNumberDisplay">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="200" text="mailbag.rsn" dataField="rsn"></ngc-data-column>
+                  <ngc-data-column [width]="120" text="g.pieces" dataField="pieces" cellsAlign="right"
+                    type="displayPieces"></ngc-data-column>
+
+                  <ngc-data-column text="export.mail.manifested.weight" [width]="200" align="left" cellsAlign="right"
+                    dataField="manifestedWeight">
+                    <ng-template let-name="name" let-group="group">
+                      <ng-container [formGroupName]="group">
+                        <ngc-weightdisplay formControlName="manifestedWeight"></ngc-weightdisplay>
+                      </ng-container>
+                    </ng-template>
+                  </ngc-data-column>
+                  <ngc-data-column [width]="130" text="mailbag.mail.type" dataField="mailType"></ngc-data-column>
+                  <ngc-data-column [width]="150" text="mailbag.origin" dataField="origin"></ngc-data-column>
+                  <ngc-data-column [width]="200" text="mailbag.destination" dataField="destination"></ngc-data-column>
+                  <ngc-data-column [width]="150" text="mailbag.next.destination" dataField="nextDestination">
+                  </ngc-data-column>
+                  <ngc-data-column [width]="120" text="agent.agentCode" dataField="agentCode"></ngc-data-column>
+                  <ngc-data-column [width]="120" text="KC/UC" dataField="rcarStatus"></ngc-data-column>
+                  <ngc-data-column text="g.remarks" align="center" cellsAlign="center">
+                    <ng-template let-name="name" let-group="group">
+                      <ng-container [formGroupName]="group">
+                        <ngc-input formControlName="remarks" [maxlength]="150" [width]="190"></ngc-input>
+                      </ng-container>
+                    </ng-template>
+                  </ngc-data-column>
+
+                </ngc-edittable>
+              </ng-container>
+            </ng-template>
+          </ngc-data-row>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+
+        <ngc-container *ngIf="showTable">
+          <ngc-row>
+            <ngc-column>
+              <ngc-window #showPopUpWindowNestedInformation [width]="350" [height]="200"
+                title="export.mail.manifest.add.nestedid" [showCloseButton]="true">
+                <ngc-container type="tab">
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="uld.uld.trolley"></ngc-label>
+                      <div>
+                        <ngc-display formControlName="uldTrolley" [width]="300"></ngc-display>
+                      </div>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label="export.mail.manifest.nestedid"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="nestedId" pattern="^[A-Za-z0-9-. ]*$" [maxlength]="14" [width]="200"
+                          maxLength='20' required></ngc-input>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+                <ngc-window-footer>
+                  <ngc-container type="tab">
+                    <ngc-row>
+                      <ngc-column column="3"></ngc-column>
+                      <ngc-column column="8" align="right">
+                        <ngc-button (click)="addNestedId()" value="g.save"></ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-window-footer>
+              </ngc-window>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <ngc-container *ngIf="showTable">
+          <ngc-row>
+            <ngc-column>
+              <ngc-window #showPopUpWindowStoreLocation [width]="650" [height]="200"
+                title="export.mail.manifest.add.locations" [showCloseButton]="true">
+                <ngc-container type="tab">
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="mailbag.store.location"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="storeLocation" [width]="100"></ngc-input>
+                      </div>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label="mailbag.warehouse.location"></ngc-label>
+                      <div>
+                        <ngc-locations-list [noTerminal]="true" formControlName="warehouseLocation"
+                          [displayOnlyLocation]="true">
+                        </ngc-locations-list>
+                        <!-- <ngc-input formControlName="warehouseLocation" [width]="100"></ngc-input> -->
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="mailbag.number"></ngc-label>
+                            </th>
+                            <th [width]="80">
+                              <ngc-label label="mailbag.store.location"></ngc-label>
+                            </th>
+                            <th [width]="80">
+                              <ngc-label label="mailbag.warehouse.location"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="UpdateLocationArray">
+                          <tr
+                            *ngFor="let item of exportMailManifestForm.controls.UpdateLocationArray.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-display formControlName="mailBagNumber"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display [width]="100" formControlName="storeLocation"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display [width]="100" formControlName="warehouseLocation"></ngc-display>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+
+                </ngc-container>
+                <ngc-window-footer>
+                  <ngc-container type="tab">
+                    <ngc-row>
+                      <ngc-column column="3"></ngc-column>
+                      <ngc-column column="8" align="right">
+                        <ngc-button (click)="onClick($event)" value="g.save"></ngc-button>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-window-footer>
+              </ngc-window>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='ExportManifest'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindowCN46 title="g.report"  reportId='exportManifestCN46'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportDetailWindow title="g.report"  reportId='ExpManifestedNew'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column *ngIf="showTable" type="tab">
+      <ngc-button value="expMailManifest.transfer" (click)="onTransferToCN46()"></ngc-button>
+      <ngc-button value="expMailManifest.manifestDetailReport" accessEnableOn="r" (click)="onExportManifestDetail()"
+        [disabled]="manifestCompleteFlag"></ngc-button>
+      <ngc-button value="expMailManifest.manifestReport" accessEnableOn="r" (click)="onExportServiceReport()"
+        [disabled]="manifestCompleteFlag"></ngc-button>
+      <ngc-button value="expMailManifest.addNestedInfo" [disabled]="manifestReopenFlag"
+        (click)="onAddNestedInformation()"></ngc-button>
+      <ngc-button *ngIf="manifestCompleteFlag" value="expMailManifest.manifestComplete" (click)="onManifestComplete()">
+      </ngc-button>
+      <ngc-button *ngIf="manifestReopenFlag" value="expMailManifest.reopenManifest" (click)="onManifestComplete()">
+      </ngc-button>
+      <ngc-button value="expMailManifest.delete.mailbags" (click)="onDeleteMailBags()" [disabled]="disableDelete">
+      </ngc-button>
+
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

@@ -1,0 +1,593 @@
+<form [formGroup]="form" [allowSubmission]="true" *ngIf="isAuthorized()">
+  <!-- Dashboard Logo -->
+  <div *ngIf="isDashboardActive() && isFullScreen()" [ngClass]="headerClasses">
+    <div class="col">
+      <div class="row">
+        <div class="col">
+          <span class="navbar-brand">
+            <img src="assets/images/logo.png" height="30px">
+          </span>
+        </div>
+        <div class="col text-right">
+          <div class="ui-dashboard-user-name">
+            <i class="fa fa-user-o fa-lg"></i>&nbsp;
+            <ngc-display formControlName="userLoginCode" emphasis="nl"></ngc-display>&nbsp;
+            <i class="fa fa-globe fa-lg"></i>&nbsp;
+            <ngc-display formControlName="tenantId" emphasis="nl"></ngc-display>&nbsp;
+            <i class="fa fa-map-marker fa-lg"></i>&nbsp;
+            <ngc-display formControlName="terminalId" emphasis="nl">
+            </ngc-display>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <!-- Navigation Bar (Begin) -->
+  <div *ngIf="!isDashboardActive() || !(isDashboardActive() && isFullScreen())" [ngClass]="headerClasses">
+    <ngc-app-mega-menu *ngIf="(applicationId == 'COSYS' && !isTouchDevice())" [source]="menuSource"></ngc-app-mega-menu>
+    <ngc-app-slide-menu *ngIf="(applicationId == 'COSYS' && isTouchDevice())" [source]="menuSource">
+    </ngc-app-slide-menu>
+    <div class="col">
+      <div class="row">
+        <div class="col d-none d-sm-block padding-left-right-10">
+          <span class="navbar-brand pointer">
+            <img src="assets/images/logo.png" height="30px" (click)="onHome()">
+          </span>
+          <i class="fa fa-home fa-md pointer" (click)="onHome()"></i>&nbsp;
+          <i class="fa fa-location-arrow fa-md pointer" (click)="onLocation()"></i>
+          <ngc-wh-location [width]="600" #handlingAreaWindow [height]="400" [terminals]="handlingArea">
+          </ngc-wh-location>
+        </div>
+        <!-- Fix Due to Non Availability of d-xs-block -->
+        <div class="col d-sm-none padding-left-right-10">
+          <span class="navbar-brand pointer">
+            <img src="assets/images/logo.png" height="30px" (click)="onHome()">
+          </span>
+        </div>
+        <div class="col-40 padding-left-right-5 text-left smaller-font">
+          <div class="row">
+            <div class="col padding-left-right-none d-none d-sm-block">
+              <i class="fa fa-user-o fa-lg"></i>&nbsp;
+              <div class="ui-user-name">
+                <ngc-display formControlName="userLoginCode" emphasis="nl"></ngc-display>
+              </div>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-74 padding-left-right-none d-none d-sm-block">
+              <i class="fa fa-clock-o fa-md"></i>&nbsp;
+              <ngc-display formControlName="loginTime" emphasis="sm"></ngc-display>
+            </div>
+            <div class="col-70 padding-left-right-none d-none d-sm-block">
+              <i class="fa fa-globe fa-md"></i>&nbsp;
+              <ngc-display formControlName="tenantId" emphasis="ag"></ngc-display>&nbsp;
+              <i class="fa fa-map-marker fa-md pointer" (click)="onLocation()"></i>&nbsp;
+              <ngc-display formControlName="terminalId" emphasis="ag" (click)="onLocation()" class="pointer">
+              </ngc-display>
+            </div>
+          </div>
+        </div>
+        <div class="col d-none d-xl-block padding-left-right-5 text-right">
+          <ul class="navbar-nav">
+            <ul class="form-inline">
+              <div class="smaller-font">
+                <ngc-input #searchFunction placeHolder="Search Function (F3)" formControlName="searchBy"
+                  [source]="searchSource" displayMember="desc" upperCase="false" [width]="200" [dropDownWidth]="200"
+                  handlerIconType="search" (enterKey)="onSearchFunction($event)" (select)="onSearchFunction($event)">
+                </ngc-input>
+              </div>
+            </ul>
+          </ul>
+        </div>
+        <!---->
+        <div class="col-10 d-none d-lg-block">
+          <ul class="nav">
+            <li class="text-center">
+              <i class="fa fa-language fa-lg pointer" id="localeButton" data-toggle="dropdown" aria-haspopup="true"
+                aria-expanded="false"></i>
+              <div *ngIf="profile !== 'PROD'" class="five-letters-only pointer" (click)="onI18NUpdate()">
+                {{ getLocale() }}
+              </div>
+              <div *ngIf="profile === 'PROD'" class="five-letters-only pointer">
+                <ngc-i18n [value]="getLocale()"></ngc-i18n>
+              </div>
+              <div class="dropdown-menu" aria-labelledby="localeButton">
+            <li class="dropdown-item" *ngFor="let locale of getLocales()" (click)="onLanguageChange(locale)">
+              <i class="fa fa-language"></i>&nbsp;
+              {{locale.localeName}}
+            </li>
+        </div>
+        </li>
+        </ul>
+      </div>
+      <!---->
+    </div>
+  </div>
+  <div class="col">
+    <div class="row">
+      <div class="col d-none d-sm-block smaller-font">
+        <ul class="nav pointer">
+          <li class="text-center">
+            <i class="fa fa-star-o"></i>
+          </li>
+          <li class="nav-item text-center" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false">
+            <span>
+              <ngc-i18n value="Favourites"></ngc-i18n>
+            </span>
+            <div class="dropdown-menu" role="menu">
+          <li class="dropdown-item" *ngFor="let item of favourites" (click)="onFavouriteClick($event, item.url)">
+            <i class="fa fa-star-o"></i>&nbsp;
+            <span>{{ item.title }}</span>
+          </li>
+      </div>
+      </li>
+      </ul>
+    </div>
+    <div class="col d-none d-lg-block text-right smaller-font">
+      <ul class="nav pointer" (click)="onHelp()">
+        <li class="text-center">
+          <i class="fa fa-question"></i>
+        </li>
+        <li class="text-center">
+          <span>
+            <ngc-i18n value="Help"></ngc-i18n>
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="col d-none d-xl-block text-right smaller-font">
+      <ul class="nav pointer" (click)="onMessage()">
+        <li class="text-center">
+          <i class="fa fa-bell-o"></i>
+        </li>
+        <li class="text-center">
+          <span class="no-wrap">
+            <ngc-i18n value="Message"></ngc-i18n> ({{ notificationMessageCount }})
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="col d-none d-xl-block text-right smaller-font">
+      <ul class="nav pointer" (click)="onPasswordChange($event)">
+        <li class="text-center">
+          <i class="fa fa-key"></i>
+        </li>
+        <li class="text-center">
+          <span>
+            <ngc-i18n value="Chg Pwd"></ngc-i18n>
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="col d-none d-xl-block text-right smaller-font">
+      <ul *ngIf="!isNewWindow()" class="nav pointer" (click)="onChat()">
+        <li class="text-center">
+          <i class="fa fa-comments-o">
+            <i *ngIf="isAnyMessage" class="fa fa-certificate"></i>
+          </i>
+        </li>
+        <li class="text-center">
+          <span>
+            <ngc-i18n value="Chat"></ngc-i18n>
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div class="col d-none d-xl-block text-right smaller-font">
+      <ul *ngIf="!isNewWindow()" class="nav pointer" (click)="onLogout()">
+        <li class="text-center">
+          <i class="fa fa-sign-out"></i>
+        </li>
+        <li class="text-center">
+          <span>
+            <ngc-i18n value="Logout"></ngc-i18n>
+          </span>
+        </li>
+      </ul>
+    </div>
+    <div [ngStyle]="{'margin-top' : '-6px'}">
+      <!-- <img src="assets/favicon/apple-touch-icon.png" height="30px"> -->
+      <ngc-logo [maxWidth]="100" [maxHeight]="50" [height]="47"></ngc-logo>
+    </div>
+    <div class="col d-none d-xl-block text-right">
+      <ul class="nav pointer">
+        <li class="text-center">
+          <i *ngIf="!userPhoto" class="fa fa-user-circle-o fa-3x"></i>
+          <img *ngIf="userPhoto" [src]="userPhoto" width="40" height="40" class="ui-user-photo" />
+        </li>
+      </ul>
+    </div>
+  </div>
+  </div>
+  <!-- Please refer ngOnInit for Fix -->
+  <div id="menuByResponsiveness" class="col-3 padding-left-right-none text-right">
+    <i class="fa fa-ellipsis-v fa-lg pointer" data-toggle="dropdown" aria-haspopup="true" aria-expanded="false"></i>
+    <div class="dropdown-menu pull-left" role="menu">
+      <li class="dropdown-item d-sm-none">
+        <i class="fa fa-star-o"></i>&nbsp;
+        <span>
+          <ngc-i18n value="Favourites"></ngc-i18n>
+        </span>
+      </li>
+      <li class="dropdown-item d-xl-none" (click)="onMessage()">
+        <i class="fa fa-bell-o"></i>&nbsp;
+        <span class="no-wrap">
+          <ngc-i18n value="Message"></ngc-i18n> ({{ notificationMessageCount }})
+        </span>
+      </li>
+      <li class="dropdown-item d-xl-none" (click)="onChat()">
+        <i class="fa fa-comments-o"></i>&nbsp;
+        <span>
+          <ngc-i18n value="Chat"></ngc-i18n>
+        </span>
+      </li>
+      <li class="dropdown-item d-lg-none" (click)="onHelp()">
+        <i class="fa fa-question"></i>&nbsp;
+        <span>
+          <ngc-i18n value="Help"></ngc-i18n>
+        </span>
+      </li>
+      <li class="dropdown-divider d-lg-none"></li>
+      <li class="dropdown-item d-lg-none form-inline">
+        <div class="smaller-font">
+          <ngc-input #searchFunction placeHolder="Search Function (F3)" formControlName="searchBy"
+            [source]="searchSource" displayMember="desc" upperCase="false" [width]="200" [dropDownWidth]="200"
+            handlerIconType="search" (enterKey)="onSearchFunction($event)" (select)="onSearchFunction($event)">
+          </ngc-input>
+        </div>
+      </li>
+      <li class="dropdown-divider"></li>
+      <li class="dropdown-item" (click)="onTheme('ngc')">
+        <i class="fa fa-snowflake-o"></i>&nbsp;
+        <span>
+          <ngc-i18n value="NG Cosys"></ngc-i18n>
+        </span>
+      </li>
+      <li class="dropdown-item" (click)="onTheme('lite')">
+        <i class="fa fa-snowflake-o"></i>&nbsp;
+        <span>
+          <ngc-i18n value="NG Singapura"></ngc-i18n>
+        </span>
+      </li>
+      <li class="dropdown-divider d-xl-none"></li>
+      <div class="dropdown-item d-xl-none">
+        <ul class="nav pointer">
+          <li class="text-center">
+            <i *ngIf="!userPhoto" class="fa fa-user-circle-o fa-3x"></i>
+            <img *ngIf="userPhoto" [src]="userPhoto" width="40" height="40" class="user-photo" />
+          </li>
+        </ul>
+      </div>
+      <li class="dropdown-divider"></li>
+      <li class="dropdown-item" (click)="onNewWindow()">
+        <i class="fa fa-window-restore"></i>&nbsp;
+        <span>
+          <ngc-i18n value="New Window"></ngc-i18n>
+        </span>
+      </li>
+      <li *ngIf="profile == 'DEV'" class="dropdown-divider"></li>
+      <li *ngIf="profile == 'DEV'" class="dropdown-item" (click)="onClearCacheClick($event)">
+        <i class="fa fa-chain-broken"></i>&nbsp;
+        <span>
+          <ngc-switchbutton (change)="onClearCache($event)"></ngc-switchbutton>&nbsp;
+          <ngc-i18n value="Clear Cache"></ngc-i18n>
+        </span>
+      </li>
+      <li class="dropdown-divider"></li>
+      <li class="dropdown-item d-xl-none" (click)="onLogout()">
+        <i class="fa fa-sign-out"></i>&nbsp;
+        <span>
+          <ngc-i18n value="Logout"></ngc-i18n>
+        </span>
+      </li>
+    </div>
+  </div>
+  </div>
+  <!-- Navigation Bar (End) -->
+
+
+  <!-- Content Body (Begin) -->
+  <div [ngClass]="routerOutletContainerClasses">
+    <!-- Space Adjustment (Header Height) -->
+    <div [ngStyle]="{ 'height.px': headerHeight }">
+      <!-- Grawl Message for Status -->
+      <ngc-message-notification #statusGrawl browserBoundsOffset="60px" width="300px" position='top-right'
+        [life]="6000">
+      </ngc-message-notification>
+      <!-- Grawl Message for Chat -->
+      <ngc-message-notification #chatGrawl browserBoundsOffset="60px" width="300px" position='bottom-right'
+        [life]="8000">
+      </ngc-message-notification>
+      <!-- To Avoid Logical Conflict in Deciding the Loader to be Used (TODO - Make Single Loader - LOW PRIORITY) -->
+      <ngc-loader #pageLoader [isModal]="true" text="Initializing Page..."></ngc-loader>
+      <ngc-loader #progressLoader [isModal]="true" text="Request In Progress..."></ngc-loader>
+      <ngc-loader #navigationLoader [isModal]="true" text="Loading Page/Module..."></ngc-loader>
+    </div>
+    <!-- Router Outlet (Begin) -->
+    <div [expandToFullScreen]="'default'">
+      <ngc-scrollpanel #pageContainer [style]="{ 'width': '100%', 'height': scrollPanelHeight + 'px' }"
+        type='application'>
+        <div [ngClass]="routerOutletBodyClasses">
+          <!-- Router Outlet -->
+          <router-outlet></router-outlet>
+
+          <!-- Space Adjustment -->
+          <div [ngStyle]="{ 'height.px': footerHeight }"></div>
+          <!-- Clear Fix for Space Adjustment -->
+          <div class="clearfix"></div>
+        </div>
+      </ngc-scrollpanel>
+    </div>
+    <!-- Router Outlet (End) -->
+  </div>
+  <!-- Content Body (End) -->
+
+  <!-- Footer (Begin) -->
+  <footer [ngClass]="footerClasses">
+    <div class="container-fluid">
+      <div class="row">
+        <div class="col-80">
+          <div class="small d-none d-sm-block">
+            <p class="footer-status">
+              <ng-container [ngSwitch]="statusType">
+                <i *ngSwitchCase="'W'" class="fa fa-exclamation-triangle fa-lg icon-color-warning"></i>
+                <i *ngSwitchCase="'E'" class="fa fa-exclamation-circle fa-lg icon-color-error"></i>
+                <i *ngSwitchCase="'S'" class="fa fa-check-circle fa-lg icon-color-success"></i>
+                <i *ngSwitchDefault class="fa fa-info-circle fa-lg icon-color-unknown"></i>
+              </ng-container>
+              <span [innerHTML]="status"></span>
+            </p>
+          </div>
+        </div>
+        <div class="col-15 d-none d-md-block">
+          <ngc-progressbar [value]="totalPendingRestCalls" [height]="25" [min]="0" [max]="10" [showText]="false">
+          </ngc-progressbar>
+        </div>
+        <div class="col-49 d-none d-md-block text-right">
+          <p>
+            <kbd><code><ngc-display [value]="profile"></ngc-display></code></kbd>&nbsp;
+            <ngc-i18n value="v"></ngc-i18n>
+            <ngc-display [value]="version"></ngc-display>&nbsp;&nbsp;&nbsp;
+            <i class="fa fa-wrench fa-md pointer" (click)="onDevelopmentTool()"></i>
+            <i class="fa fa-sticky-note fa-md pointer" (click)="onStickyNote()"></i>
+            <!-- logo removed for BUG-2250 -->
+            &nbsp;&nbsp;&nbsp;
+            <ngc-i18n value="g.tenant.name"></ngc-i18n>
+          </p>
+        </div>
+      </div>
+    </div>
+  </footer>
+  <!-- Footer (End) -->
+  <ngc-sidebar position="left" type="help" [(visible)]="helpViewVisible" [enableESC]="true">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <i class="fa fa-question-circle fa-1x"></i>
+          <ngc-label label="Help" emphasis="md"></ngc-label>
+          <ngc-label label="((F1)" emphasis="md"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-help [mediaWikiUrl]='mediaWikiUrl'></ngc-help>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-sidebar>
+  <ngc-sidebar position="right" type="chat" [(visible)]="chatViewVisible" [enableESC]="true">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <i class="fa fa-comments fa-1x"></i>
+          <ngc-label label="Chat" emphasis="md"></ngc-label>
+          <ngc-label label="((F5)" emphasis="md"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-chat *ngIf="!isNewWindow()" (notifyEmitter)="notifyChatMessage($event)">
+          </ngc-chat>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-sidebar>
+  <ngc-sidebar position="right" type="message" [(visible)]="messageViewVisible" [enableESC]="true">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <i class="fa fa-bell fa-1x"></i>
+          <ngc-label label="Message" emphasis="md"></ngc-label>
+          <ngc-label label="((F4)" emphasis="md"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-application-message *ngIf="!isNewWindow()"></ngc-application-message>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-sidebar>
+  <ngc-sidebar position="bottom" type="developer" [(visible)]="developerViewVisible" [fullScreen]="true"
+    [enableESC]="true">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <i class="fa fa-bug fa-2x"></i>
+          <ngc-label label="Developer Tool - Debug Purpose Only" emphasis="lg"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-debug></ngc-debug>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-sidebar>
+  <ngc-sidebar position="top" type="note" [(visible)]="stickyNoteViewVisible" [enableESC]="true">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <i class="fa fa-sticky-note-o fa-1x"></i>
+          <ngc-label label="Note" emphasis="md"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-scribblingpad></ngc-scribblingpad>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-sidebar>
+</form>
+<!-- Change Password -->
+<form [formGroup]="loginForm">
+  <ngc-window #changePasswordWindow (close)="onChangePasswordClose()" [width]="600" [height]="400"
+    title="Change Password" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-labelpasswordinput label="Current Password" formControlName="currentPassword" [width]="240">
+            </ngc-labelpasswordinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-labelpasswordinput label="New Password" [width]='240' formControlName="newPassword">
+            </ngc-labelpasswordinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-labelpasswordinput label="Confirm Password" [width]='240' formControlName="confirmPassword">
+            </ngc-labelpasswordinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label=""></ngc-label>
+          </div>
+          <ngc-button label="Save" [width]="140" (click)="onChangePasswordSave($event)">
+          </ngc-button>
+          <ngc-button label="Cancel" [width]="140" (click)="onChangePasswordCancel($event)">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="Password Must Meet Following Requirements"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          1. Must be at least 8 characters long.
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          2. Must contain at least one alphabet i.e. a-z, A-Z.
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          3. Must contain at least one number i.e. 0-9.
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          4. Must contain at least one special character.
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          5. White space is not allowed
+        </ngc-column>
+        <ngc-column>
+          6.Must not use last 7 passwords.
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+<form [formGroup]="localeForm">
+  <ngc-window #localeUpdateWindow title="Localization - Lable/Message Update " [width]="1000" [height]="700">
+    <ngc-window-header>
+      <ngc-container type="section">
+        <ngc-row>
+          <ngc-column [column]="4">
+            <ngc-label label="Filter"></ngc-label>
+            <div>
+              <ngc-input formControlName="filter" [source]="localizationFilterSource" [width]="300" upperCase="false">
+              </ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="Exact Match"></ngc-label>
+            <div>
+              <ngc-switchbutton formControlName="exactFilter"></ngc-switchbutton>
+            </div>
+          </ngc-column>
+          <ngc-column align="right">
+            <ngc-button label="Filter" (click)='filterLocale()'></ngc-button>
+            <ngc-button label="Clear Filter" (click)='clearFilter()'></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-header>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="localeList" [pageSize]="10">
+            <ngc-data-column text="Type" type="text" [width]="10" align="left" cellsAlign="center" dataField="type">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="Code" type="text" [width]="20" align="left" cellsAlign="left" dataField="code">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="English" type="text" [width]="35" align="left" cellsAlign="left"
+              dataField="labelEnglish">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display [formControlName]="name"></ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="In Current Language" type='text' [width]="35" align="left" cellsAlign="left"
+              dataField="labelCurrentLanguage">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input formControlName="labelCurrentLanguage" upperCase="false"></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="sectiontop">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button label="Save" (click)='saveLocale($event)'></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

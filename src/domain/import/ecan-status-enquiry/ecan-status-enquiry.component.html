@@ -1,0 +1,121 @@
+<form [formGroup]='ecanStatusEnquiryForm'>
+  <ngc-titlebar title='import.ecan.title' (clear)="onClear()" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container type='header'>
+    <ngc-row>
+      <ngc-column [column]='1.5'>
+        <ngc-label label='agent.searchAWB'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName='shipmentNumber'></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='4'>
+        <ngc-label label='agent.agent.name'>
+        </ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='300' formControlName="consigneeDetails" upperCase="true"
+            sourceId="APPOINTED_AGENT_DATA" title="g.name" dataField="code" required>
+            <ngc-data-column text="g.name" dataField="desc" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="80">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1.5'>
+        <ngc-label label='import.sch.date.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName='dateTimeFrom' [showCalendarButton]="true"
+            [showTimeButton]="true" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='1.5'>
+        <ngc-label label='import.sch.date.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName='dateTimeTo' [showCalendarButton]="true"
+            [showTimeButton]="true" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)='searchEcanStatus()'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showTable">
+    <ngc-row>
+      <ngc-column align="right">
+        <div>
+          <ngc-button label="common.send" [width]="90" (click)="sendEcan($event,group)"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable (linkClick)="onHyperLinkClick($event)" formArrayName="ecanStatusList" *ngIf="showTable"
+          [showToolbar]="false" [pageSize]=13 [pageable]='true'>
+          <ngc-data-column text="g.sNo" dataField="sno" [width]="50" [pinned]='true' align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.select" dataField="checkFlag" [width]="50" [pinned]='true' align="center"
+            cellsAlign="center" type='check'>
+          </ngc-data-column>
+          <ngc-data-column text="undelivered.shipmentNumber" dataField="shipmentNumber" [width]="160" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="flight.Flight" dataField="flightData" [width]="120" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.ecan.letter" dataField="letterArray" [width]="80" align="center"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist accessEnableOn="r" formControlName="letterArray" sourceId="letter$letter_values"
+                  [width]="130" dataField="desc" [multiSelect]="true" (ngModelChange)='onLetterSelect($event,group)'>
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <!--<ngc-data-column text="Remarks" dataField="" [width]="80"></ngc-data-column>-->
+          <ngc-data-column [width]="150" text="g.remarks" dataField="remarks" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-remarksinput formControlName="remarks" uppercase="true" [maxlength]="65" [width]="250">
+                </ngc-remarksinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.ecan.status" dataField="ecanStatus" [width]="80" align="center"
+            cellsAlign="center" type="icon" iconType="yesno"></ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #sendEcanStatus title="import.resend.generate.ecan" width="1000" height="200" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.email.address"></ngc-label>
+          <div>
+            <ngc-taginput formControlName="emailAdd" [maxItems]="9"></ngc-taginput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-button label="common.send" [width]="210" (click)="resendEcanButton()">
+            </ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

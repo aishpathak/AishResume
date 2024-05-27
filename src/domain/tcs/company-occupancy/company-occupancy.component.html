@@ -1,0 +1,169 @@
+<form [formGroup]="companyOccupancyForm">
+  <ngc-titlebar title="tcs.companyOccupancyDetails" (clear)="onClear($event)" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ng-container formGroupName="search">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="1">
+          <ngc-label label="tcs.tenant"></ngc-label>
+          <div>
+            <ngc-checkbox formControlName="tenant"></ngc-checkbox>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="4">
+          <ngc-label label="g.companyName"></ngc-label>
+          <div>
+            <ngc-lov *ngIf="companyOccupancyForm.get(['search', 'tenant']).value" formControlName="companyId"
+              dataField="param1" displayField="desc" sourceId="TCS_TENANT" [width]="350" title="tcs.tenantList">
+              <ngc-data-column text="g.companyCode" dataField="code" [width]="50"></ngc-data-column>
+              <ngc-data-column text="g.companyName" [width]="150" dataField="desc"></ngc-data-column>
+            </ngc-lov>
+            <ngc-lov *ngIf="!companyOccupancyForm.get(['search', 'tenant']).value" formControlName="companyId"
+              dataField="param1" displayField="desc" sourceId="COMPANY_NAME" [width]="350" title="tcs.companyList">
+              <ngc-data-column text="g.companyCode" dataField="code" [width]="50"></ngc-data-column>
+              <ngc-data-column text="g.companyName" [width]="150" dataField="desc"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column cellsAlign="right" verticalAlign="bottom">
+          <ngc-button label="g.search" (click)="onSearch()"></ngc-button>
+        </ngc-column>
+        <ngc-column align="right" *ngIf="isSearch" verticalAlign="bottom" [column]="1">
+          <ngc-label label="tcs.tenantAutoRefresh"></ngc-label>
+          <div>
+            <ngc-switchbutton accessEnableOn="r" formControlName="auto" (change)="onSwitchChange($event)">
+            </ngc-switchbutton>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="isSearch" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="companyDetails" (linkClick)="onDataTableClick($event, detailsWindow)"
+            [columnsHeight]="50">
+            <ngc-data-column text="tcs.companyName" dataField="companyName" [width]="150">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.inTruckDock" dataField="inTruckDock" cellsAlign="right" [width]="40"
+              accessEnableOn="r">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.inTruckPark" dataField="inTruckPark" cellsAlign="right" [width]="40"
+              accessEnableOn="r">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.dockPoolSize" dataField="dockPoolSize" cellsAlign="right" [width]="40"
+              accessEnableOn="r">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.autoEnqueueRequired" dataField="autoEnqueueRequired" cellsAlign="center"
+              type="icon" iconType="yesno" [width]="40" accessEnableOn="r">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.parkOverlapSize" dataField="parkOverlapSize" cellsAlign="right" [width]="50"
+              accessEnableOn="r">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.parkOverlapMinute" dataField="parkOverlapMinute" cellsAlign="right" [width]="50"
+              accessEnableOn="r">
+            </ngc-data-column>
+            <ngc-data-column text="tcs.details" dataField="details" type="link" iconType="edit" cellsAlign="center"
+              [width]="20">
+            </ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+  <ng-container formGroupName="detailsInfo">
+    <ngc-window #detailsWindow title="tcs.companyTruckDockOccupancyDetails" [width]="700" [height]="350">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="3">
+            <ngc-label label="tcs.tenant"></ngc-label>
+            <div>
+              <ngc-icon type="yesno" formControlName="tenant"></ngc-icon>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.companyName"></ngc-label>
+            <div>
+              <ngc-display formControlName="companyName"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="companyOccupancyForm.get('search.tenant').value">
+          <ngc-column>
+            <ngc-label label="tcs.dockPoolSize"></ngc-label>
+            <div>
+              <ngc-display formControlName="dockPoolSize"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.parkPoolSize"></ngc-label>
+            <div>
+              <ngc-display formControlName="parkPoolSize"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.parkOverlapSize"></ngc-label>
+            <div>
+              <ngc-display formControlName="parkOverlapSize"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="tcs.parkOverlapMinute"></ngc-label>
+            <div>
+              <ngc-display formControlName="parkOverlapMinute"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="!companyOccupancyForm.get('search.tenant').value">
+          <ngc-column [column]="10">
+            <ngc-label label="tcs.dockAllocated"></ngc-label>
+            <div>
+              <ngc-display formControlName="allocatedVehicles"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="companyOccupancyForm.get('search.tenant').value">
+          <ngc-column [column]="4">
+            <ngc-label label="tcs.trucksInDockPool"></ngc-label>
+            <div>
+              <ngc-display formControlName="vehiclesInDockPool"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="companyOccupancyForm.get('search.tenant').value">
+          <ngc-column>
+            <ngc-label label="tcs.trucksInParkPool"></ngc-label>
+            <div>
+              <ngc-display formControlName="vehiclesInParkPool"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="companyOccupancyForm.get('search.tenant').value">
+          <ngc-column>
+            <ngc-label label="tcs.trucksInOverlapPool"></ngc-label>
+            <div>
+              <ngc-display formControlName="vehiclesInOverlapPool"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="companyOccupancyForm.get('search.tenant').value">
+          <ngc-column>
+            <ngc-label label="tcs.trucksInHourPark"></ngc-label>
+            <div>
+              <ngc-display formControlName="vehiclesInHourlyPool"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="sectiontop">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.cancel" (click)="onClose(detailsWindow)"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+
+    </ngc-window>
+  </ng-container>
+</form>

@@ -1,0 +1,224 @@
+<div class="card-block card-highlight-bottom border-on-bottom">
+  <ngc-titlebar title="admin.assignRoleFunction" (save)="onSave($event)" (cancel)="onCancel()"
+    [disableSave]="hasReadPermission">
+  </ngc-titlebar>
+</div>
+<form [formGroup]='assignRoleForm'>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="admin.roleCode"> </ngc-label>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="admin.function.group"></ngc-label>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label></ngc-label>
+      </ngc-column>
+      <ngc-column column="8"> </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-display formControlName="roleCode" [i18n]='true'></ngc-display>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <ngc-button (click)="onsearchMuliple()" value="admin.search.function.group" iconType="search"></ngc-button>
+      </ngc-column>
+      <ngc-column column="8"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="header" title="" subTitle="">
+    <ngc-row>
+      <ngc-column>
+        <ngc-accordion formArrayName="assignRoleFunctionList" [width]="800">
+          <ngc-accordion-card [title]="item.controls['subModuleCodeDescription'].value" *ngFor="let item of assignRoleForm.controls.assignRoleFunctionList.controls; let index=index"
+            [formGroupName]="index" [selected]="expandorcollapse">
+            <ngc-container type="heading">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th width='400'>
+                          <ngc-label label="admin.function"></ngc-label>
+                        </th>
+                        <th width='100'>
+                          <ngc-label label="g.application.type"></ngc-label>
+                        </th>
+                        <th width='100'>
+                          <ngc-label label="admin.read"></ngc-label>
+                        </th>
+                        <th width='100'>
+                          <ngc-label label="admin.write"></ngc-label>
+                        </th>
+                        <th width='100'>
+                          <ngc-label label="admin.allowRestrictedFunction"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="screenAssignments">
+                      <tr *ngFor="let screens of item.controls.screenAssignments.controls; let subIndex=index" [formGroupName]="subIndex">
+                        <td>
+                          <ngc-display [emphasis]="screens.get('module').value?'md':null" formControlName="screenCodeDescription">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="applicationId"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-checkbox formControlName="displayFlag" [disabled]="screens.get('module').value" (click)="onAutoSelectSubModule(index)">
+                          </ngc-checkbox>
+                        </td>
+                        <td>
+                          <ng-container *ngIf="screens.get('readOnlyScreen').value">
+                            <ngc-icon type="yesno" value="no"></ngc-icon>
+                          </ng-container>
+                          <ng-container *ngIf="!screens.get('readOnlyScreen').value">
+                            <ngc-checkbox formControlName="updateFlag" [disabled]="screens.get('module').value" (click)="onAutoSelectSubModule(index)">
+                            </ngc-checkbox>
+                          </ng-container>
+                        </td>
+                        <td *ngIf="screens.get('subFunctionexist').value">
+                          <ngc-link formControlName="screenCode" iconType="edit" (linkClick)="onLinkClick($event)" [hideValue]="true">
+                            <ngc-display formControlName="rolePermission"></ngc-display>
+                          </ngc-link>
+                        </td>
+                        <td *ngIf="!screens.get('subFunctionexist').value">
+
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #restrictedFunctionWindow [width]="600" [height]="700" title="admin.restricted.functions">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.name"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label=""></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="createScreenFunctionList">
+              <tr *ngFor="let item of assignRoleForm.controls.createScreenFunctionList.controls; let index=index" [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="screenFunctionCode"> </ngc-display>
+                </td>
+                <td>
+                  <ngc-checkbox formControlName="screenAssignedFlag"> </ngc-checkbox>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button [disabled]="hasReadPermission" (click)="onButtonSave()" value="g.save"></ngc-button>
+            <ngc-button (click)="onButtonCancel()" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #functionListWindow [width]="600" [height]="500" [title]="'Module'">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="admin.menu.item"></ngc-label>
+          <div>
+            <ngc-lov [noList]="true" upperCase='true' [width]="250" sourceId='MENUITEM' title='admin.menu.item' [sourceParameters]="dropDownAny"
+              dataField='desc' (modelChange)="onSelectMenu($event)">
+              <ngc-data-column text='admin.menu.item' [width]='80' dataField='code'></ngc-data-column>
+              <ngc-data-column text='g.description' [width]='150' dataField='desc'>
+              </ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.select"></ngc-label>
+                  <ngc-checkbox (modelChange)="selectAll($event)"></ngc-checkbox>
+                </th>
+                <th>
+                  <ngc-label label="g.function"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.application.type"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="functionList">
+              <ng-container *ngFor="let item of assignRoleForm.controls.functionList.controls; let index=index" [formGroupName]="index">
+
+                <tr *ngIf="item.get('parent').value" [ngStyle]="{'background-color': '#C0C0C0'}">
+                  <!-- <td>{{item.parent | json}}</td> -->
+                  <td>
+                    <ngc-checkbox (click)="patchAllChildCheckBox(item.value, index)" formControlName="select">
+                    </ngc-checkbox>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="desc"> </ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="param1"> </ngc-display>
+                  </td>
+
+                </tr>
+                <tr *ngIf="!item.get('parent').value">
+
+                  <td>
+                    <ngc-checkbox formControlName="select"> </ngc-checkbox>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="desc"> </ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="param1"> </ngc-display>
+                  </td>
+
+
+                </tr>
+              </ng-container>
+
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onSearchModule()" value="g.ok"></ngc-button>
+            <ngc-button (click)="onButtonCancel()" value="g.cancel"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

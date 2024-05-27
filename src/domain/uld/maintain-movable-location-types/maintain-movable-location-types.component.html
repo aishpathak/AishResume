@@ -1,0 +1,503 @@
+<form [formGroup]="form">
+  <ngc-titlebar (cancel)="onCancel($event)" title='uld.movable.locationslist' (save)='onSave($event)'>
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label value="uld.movable.locationtype"></ngc-label>
+              <div>
+                <ngc-dropdownlist accessEnableOn="r" sourceId="Location$MovableLocationType"  [width]="100"
+                  (select)='onSelectDropdown($event)' formControlName="moveableLocationType" required>
+                </ngc-dropdownlist>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value=" "></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch($event)" value="g.search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label value=" "></ngc-label>
+        </div>
+        <ngc-button *ngIf="showAddButton && this.form.get('moveableLocationType').value" (click)="onAddNewRow($event)"
+          value="g.add"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column column="12">
+        <ngc-edittable *ngIf="binFlag" formArrayName="moveableLocationTypeList">
+          <ngc-data-column text="uld.series.from" dataField="uldSeriesNumberFrom" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberFrom"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesTo($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberFrom"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.to" dataField="uldSeriesNumberTo" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesTo($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberTo"></ngc-input>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberTo"></ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.shipment.type" dataField="usedFor" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist [width]="150" sourceId="AgentPortal$Purpose" formControlName="usedFor">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.available.for.storage" dataField="availableToUse" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="availableToUse">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.available.for.loading" dataField="availableForLoading" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="availableForLoading">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.start.date" dataField="effectiveStartDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput required formControlName="effectiveStartDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.end.date" dataField="effectiveEndDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput formControlName="effectiveEndDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.delete" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="deleteMovableLocation(group)" iconType="delete">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.info" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="onSeriesInfo(group)" accessEnableOn="r" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+        <ngc-edittable *ngIf="btmtpdFlag" formArrayName="moveableLocationTypeList">
+          <ngc-data-column text="uld.series.from" dataField="uldSeriesNumberFrom" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberFrom"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesFrom($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberFrom"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.to" dataField="uldSeriesNumberTo" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberTo"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesTo($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberTo"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.available.for.storage" dataField="availableToUse" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="availableToUse">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.available.for.loading" dataField="availableForLoading" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="availableForLoading">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.start.date" dataField="effectiveStartDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput required formControlName="effectiveStartDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.end.date" dataField="effectiveEndDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput formControlName="effectiveEndDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.delete" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="deleteMovableLocation(group)" iconType="delete">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.info" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="onSeriesInfo(group)" accessEnableOn="r" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+        <ngc-edittable *ngIf="uldFlag" formArrayName="moveableLocationTypeList">
+          <ngc-data-column text="uld.series.from" dataField="uldSeriesNumberFrom" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberFrom"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesFrom($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberFrom"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.to" dataField="uldSeriesNumberTo" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberTo"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesTo($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberTo"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.available.for.storage" dataField="availableToUse" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="availableToUse">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.available.for.loading" dataField="availableForLoading" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="availableForLoading">
+                </ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.start.date" dataField="effectiveStartDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput required formControlName="effectiveStartDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.end.date" dataField="effectiveEndDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput formControlName="effectiveEndDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.delete" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="deleteMovableLocation(group)" iconType="delete">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.info" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="onSeriesInfo(group)" accessEnableOn="r" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+        <ngc-edittable *ngIf="lspFlag" formArrayName="moveableLocationTypeList">
+          <ngc-data-column text="uld.series.from" dataField="uldSeriesNumberFrom" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberFrom"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesFrom($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberFrom"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.to" dataField="uldSeriesNumberTo" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value !== 'C'">
+                  <ngc-display formControlName="uldSeriesNumberTo"></ngc-display>
+                </ng-container>
+                <ng-container *ngIf="this.form.get(['moveableLocationTypeList', group, 'flagCRUD']).value === 'C'">
+                  <ngc-input [maxlength]="maxLength" required [width]="80"
+                    (ngModelChange)="selectSeriesTo($event, group)" [minlength]="minLength"
+                    formControlName="uldSeriesNumberTo"></ngc-input>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.htClass" dataField="htClass" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-input patternName="digit" maxlength="1" formControlName="htClass"></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.tare.weight" dataField="uldSeriesTareWeight" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-weightinput required formControlName="uldSeriesTareWeight"></ngc-weightinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.start.date" dataField="effectiveStartDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput required formControlName="effectiveStartDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.effective.end.date" dataField="effectiveEndDate" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-datetimeinput formControlName="effectiveEndDate"></ngc-datetimeinput>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.delete" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="deleteMovableLocation(group)" iconType="delete">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.series.info" [width]='90'>
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (click)="onSeriesInfo(group)" accessEnableOn="r" iconType="edit">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #seriesInformationWindow (close)="onClose()" [width]="1200" [height]="655"
+    title="{{seriesInformationTitle}}" [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="2">
+          <div>
+            <ngc-label value="uld.from"></ngc-label>
+          </div>
+          <ngc-input accessEnableOn="r" [maxlength]="maxLength" [width]="80" [minlength]="minLength"
+            formControlName="uldSeriesNumberFrom" (ngModelChange)="onSearchChange()">
+          </ngc-input>
+        </ngc-column>
+        <ngc-column column="2">
+          <div>
+            <ngc-label value="To"></ngc-label>
+          </div>
+          <ngc-input accessEnableOn="r" [maxlength]="maxLength" [width]="80" [minlength]="minLength"
+            formControlName="uldSeriesNumberTo" (ngModelChange)="onSearchChange()">
+          </ngc-input>
+        </ngc-column>
+        <ngc-column column="2">
+          <div>
+            <ngc-label value=" "></ngc-label>
+          </div>
+          <ngc-button accessEnableOn="r" (click)="onSearchList(null)" value="g.search">
+          </ngc-button>
+        </ngc-column>
+        <ngc-column *ngIf="popupFlag" align="right">
+          <div>
+            <ngc-label value=" "></ngc-label>
+          </div>
+          <ngc-button (click)="onAddUldSeries($event)" value="g.add">
+          </ngc-button>
+          <ngc-button (click)="onSaveUldSeries($event)" value="uld.Save"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row *ngIf="popupFlag">
+        <ngc-column>
+          <ngc-table>
+            <thead align="left">
+              <tr>
+                <th *ngIf="locationTypeValue != 'LSP'" [width]="100">
+                  <ngc-label label="uld.Number"></ngc-label>
+                </th>
+                <th *ngIf="locationTypeValue == 'LSP'" [width]="100">
+                  <ngc-label label="LSP.Number"></ngc-label>
+                </th>
+                <th *ngIf="locationTypeValue != 'LSP'" [width]="100">
+                  <ngc-label label="uld.check.digit"></ngc-label>
+                </th>
+                <th *ngIf="locationTypeValue != 'LSP'" [width]="100">
+                  <ngc-label label="uld.shipment.type"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="uld.status"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="uld.effective.start.date"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="uld.effective.end.date"></ngc-label>
+                </th>
+                <th [width]="100">
+                  <ngc-label label="uld.delete"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="uldSeriesList">
+              <tr *ngFor="let item of form.controls.uldSeriesList.controls; let group=index" [formGroupName]="group">
+                <td *ngIf="locationTypeValue != 'LSP'">
+                  <ngc-input [width]="100" maxlength="4" minlength="4"
+                    *ngIf="form.get(['uldSeriesList', group, 'allowEdit']).value" formControlName="uldNumber"
+                    decimalDigits="0">
+                  </ngc-input>
+                  <ngc-display [width]="100" *ngIf="!form.get(['uldSeriesList', group, 'allowEdit']).value"
+                    formControlName="uldNumber">
+                  </ngc-display>
+                </td>
+                <td *ngIf="binFlagShow">
+                  <ng-container *ngIf="form.get(['uldSeriesList', group, 'flagCRUD']).value != 'C'; else checkForLsp">
+                    <ngc-display formControlName="uldKey"></ngc-display>
+                  </ng-container>
+                  <ng-template #checkForLsp>
+                    <ng-container *ngIf="locationTypeValue != 'LSP'">
+                      <ngc-display formControlName="uldKey"></ngc-display>
+                    </ng-container>
+                    <ng-container *ngIf="locationTypeValue == 'LSP'">
+                      <ngc-input minlength="5" maxlength="5" formControlName="uldKey"
+                        (ngModelChange)="onEnterLspNumber($event, group)"></ngc-input>
+                    </ng-container>
+                  </ng-template>
+                </td>
+                <td *ngIf="locationTypeValue != 'LSP'">
+                  <ngc-display formControlName="checkDigit"></ngc-display>
+                </td>
+                <td *ngIf="locationTypeValue != 'LSP'">
+                  <ngc-dropdownlist [width]="150" sourceId="AgentPortal$Purpose" formControlName="usedFor">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-dropdownlist [width]="150" formControlName="status" sourceId="ULD$ULD_CONDITION_TYPE">
+                  </ngc-dropdownlist>
+                </td>
+                <td>
+                  <ngc-datetimeinput required formControlName="effectiveStartDate"></ngc-datetimeinput>
+                </td>
+                <td>
+                  <ngc-datetimeinput formControlName="effectiveEndDate"></ngc-datetimeinput>
+                </td>
+                <td>
+                  <ngc-link (click)="deleteSeriesInfo(group)" iconType="delete">
+                  </ngc-link>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab" *ngIf="dataToSeriesInfo">
+      <ngc-row *ngIf="popupFlag">
+        <ngc-column column="3.5"></ngc-column>
+        <ngc-column column="1">
+          <ngc-button accessEnableOn="r" [disabled]="dataToSeriesInfo && dataToSeriesInfo.offSet == 0" value="g.prev"
+            (click)="onSearchList('previous')"></ngc-button>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-label emphasis="md"  label="Page No: {{((dataToSeriesInfo.offSet/10) + 1)}}"></ngc-label>
+        </ngc-column>
+        <ngc-column column="2">
+          <ng-container *ngIf="dataToSeriesInfo.offSet + 10 > recordCount; else recordCountTemplate ">
+            <ngc-label *ngIf="recordCount!=0" emphasis="md"
+               label="Records: {{dataToSeriesInfo.offSet+1}} - {{recordCount}} of {{recordCount}}">
+            </ngc-label>
+          </ng-container>
+          <ng-template #recordCountTemplate>
+            <ngc-label *ngIf="recordCount!=0" emphasis="md"
+               label="Records: {{dataToSeriesInfo.offSet+1}} - {{dataToSeriesInfo.offSet + 10}} of {{recordCount}}">
+            </ngc-label>
+          </ng-template>
+          <ngc-label *ngIf="recordCount==0" emphasis="md"
+             label="Records: {{0}} - {{dataToSeriesInfo.offSet}} of {{recordCount}}">
+          </ngc-label>
+        </ngc-column>
+        <ngc-column column="1">
+          <ngc-button accessEnableOn="r" [disabled]="dataToSeriesInfo && recordCount && recordCount > 10
+            && dataToSeriesInfo.offSet && (dataToSeriesInfo.offSet + 10) >= recordCount" value="g.next"
+            (click)="onSearchList('next')"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

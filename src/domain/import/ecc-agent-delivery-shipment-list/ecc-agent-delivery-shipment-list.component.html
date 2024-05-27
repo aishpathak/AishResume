@@ -1,0 +1,153 @@
+<!--form control to get the  input Data-->
+<form [formGroup]="eccdeliveryform">
+  <!-- Title Bar -->
+  <ngc-titlebar title='import.agent.delivery.ecc' (save)="onSave($event)" (clear)="onClear($event)">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='import.working.shift.time'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" required (select)="eoDropdown($event)" sourceId='ECC_TEAM'
+             sourceType='query' formControlName="team"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='import.ecc.eo'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" required [sourceParameters]='team' sourceId='EO_LIST' sourceType='query'
+            formControlName="eo"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='import.ecc.planned.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required formControlName="date" [showCalendarButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getDeliveryList($event)" value="search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="showEo">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="ECC.EO"></ngc-label>
+        <div>
+          <ngc-display formControlName="eo"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="dateToShow"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="left">
+            <tr>
+              <th [width]="28">
+                <ngc-label value="g.select"></ngc-label>
+              </th>
+              <th [width]="125">
+                <ngc-label value="g.flight"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label value="g.date"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label value="g.awbNumber"></ngc-label>
+              </th>
+              <th [width]="120">
+                <ngc-label value="import.ecc.loading.advice"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="g.pieces"></ngc-label>
+              </th>
+              <th [width]="80">
+                <ngc-label value="g.weight"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="import.ecc.agent"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="g.shc"></ngc-label>
+              </th>
+              <th [width]="150">
+                <ngc-label value="import.ecc.delivery.location"></ngc-label>
+              </th>
+              <th [width]="200">
+                <ngc-label value="import.ecc.hand.over.to"></ngc-label>
+              </th>
+              <th [width]="200">
+                <ngc-label value="import.ecc.hand.over.date"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody align="center" formArrayName="deliveryList">
+            <tr *ngFor="let item of eccdeliveryform.controls.deliveryList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox [disabled]="disable[index]" formControlName="select" [width]="28"></ngc-checkbox>
+              </td>
+              <td align="left">
+                <ngc-display formControlName="flight"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="flightDateToShow"></ngc-display>
+              </td>
+              <td align="left">
+                <ngc-display formControlName="awbNumber"></ngc-display>
+              </td>
+              <td align="left">
+                <ngc-display formControlName="uldNumber"></ngc-display>
+              </td>
+              <td align="right">
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+              </td>
+              <td align="right">
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </td>
+              <td align="left">
+                <ngc-display formControlName="agent"></ngc-display>
+              </td>
+              <td align="left">
+                <ngc-display formControlName="shc"></ngc-display>
+              </td>
+              <td *ngIf="!disable[index]">
+                <ngc-dropdownlist formControlName="location" (ngModelChange)="onUpdate(index, $event)" [width]="140"
+                  [source]="locations"></ngc-dropdownlist>
+              </td>
+              <td *ngIf="disable[index]">
+                <ngc-display formControlName="location"></ngc-display>
+              </td>
+              <td *ngIf="!disable[index]">
+                <ngc-input required formControlName="handOverTo"></ngc-input>
+              </td>
+              <td *ngIf="disable[index]">
+                <ngc-display formControlName="handOverTo"></ngc-display>
+              </td>
+              <td *ngIf="!disable[index]">
+                <ngc-datetimeinput required formControlName="handOverDateTime" [showCalendarButton]="true"
+                  [showTimeButton]="true"></ngc-datetimeinput>
+              </td>
+              <td *ngIf="disable[index]">
+                <ngc-display formControlName="handOverDateTime"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>

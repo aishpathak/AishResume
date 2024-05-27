@@ -1,0 +1,518 @@
+<ngc-titlebar title='title.eitt.submission.confirmation.cancellation' (clear)='onClear($event)'>
+</ngc-titlebar>
+<form [formGroup]="eIttForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="eitt.itt.req.type"></ngc-label>
+        </div>
+        <ngc-dropdownlist [width]="90" formControlName="ittReqType" sourceId="Customs$IttReqType" required
+          accessEnableOn="r">
+        </ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="flight.flightKey"></ngc-label>
+        </div>
+        <ngc-flightkeyinput formControlName="flightKey" accessEnableOn="r" [width]="80"
+          (ngModelChange)="onFlightChange()" [required]="flightOptionalFlag">
+        </ngc-flightkeyinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="flight.flightDate"></ngc-label>
+        </div>
+        <ngc-dateinput formControlName="flightDate" accessEnableOn="r" [required]="flightOptionalFlag"
+          (ngModelChange)="onFlightChange()">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.startDate"></ngc-label>
+        </div>
+        <ngc-dateinput formControlName="startDate" accessEnableOn="r" [required]="!selectionDateTimeOptionalFlag"
+          [startOfDay]="true">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="g.endDate"></ngc-label>
+        </div>
+        <ngc-dateinput formControlName="endDate" accessEnableOn="r" [required]="!selectionDateTimeOptionalFlag"
+          [endOfDay]="true">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-awbinput formControlName="shipmentNumber"></ngc-awbinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="eitt.itt.req.no"></ngc-label>
+        </div>
+        <ngc-input width='90px' accessEnableOn="r" formControlName="ittReqNo" [maxlength]="3"></ngc-input>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="eitt.itt.req.date"></ngc-label>
+        </div>
+        <ngc-dateinput accessEnableOn="r" formControlName="ittReqDate" accessEnableOn="r">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="eitt.itt.req.code"></ngc-label>
+        </div>
+        <ngc-input accessEnableOn="r" width='90px' formControlName="ittReqCode" [maxlength]="16"></ngc-input>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button value="g.search" (click)="onSearch()" align="bottom" accessEnableOn="r"></ngc-button>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button value="eitt.query.cancel.list" (click)="onSearch('Cancel-in')" align="bottom" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column column="1"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="submissionFlag">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value="eitt.submit.itt" (click)="onSubmitITTClick()" align="bottom"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="submissionsList">
+          <ngc-data-column type="check" text="g.select" align="center" dataField="select" cellsAlign="center"
+            [width]="20" [checkAll]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-checkbox [width]="20" formControlName="select" *ngIf="submissionListSelectCheck(group)">
+                  </ngc-checkbox>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="agent.sno" align="center" dataField="sno" cellsAlign="center" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightKey" align="center" dataField="flightKey" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.flightDate" align="center" dataField="flightDate" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-display [width]="40" formControlName="flightDate" [onlyDate]="true">
+                  </ngc-display>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" align="center" dataField="awbNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-shipmentdisplay formControlName="awbNo" shipmentType='AWB'></ngc-shipmentdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="pc.wt" align="center" dataField="pieces" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-piecesdisplay formControlName="pieces">
+                </ngc-piecesdisplay>
+                <ngc-label label="/"></ngc-label>
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.cc.code" align="center" dataField="clearanceInfo" cellsAlign="center" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.accs.submission.status" align="center" dataField="status" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.to.cargo.handler" align="center" dataField="destinationCargoHandler"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist [width]="90" formControlName="destinationCargoHandler" sourceId="Flight$Handler"
+                  required="true">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.req.no.date" align="center" dataField="ittReqNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="ittReqNo">
+                </ngc-display>
+                <ngc-label label="/" *ngIf="eIttForm.get(['submissionsList', group, 'ittReqNo']).value"></ngc-label>
+                <ngc-display formControlName="ittReqDate" [onlyDate]="true">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.req.code" align="center" dataField="ittReqCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.auth.code" align="center" dataField="ittAuthCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.eitt.status" align="center" dataField="eittStatus" cellsAlign="center"
+            [width]="20">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" type="link" (linkClick)="onStatusClick(group, 'submissionsList')"
+                  iconType="open-link" align="center" cellsAlign="center"
+                  *ngIf="eIttForm.get(['submissionsList', group, 'status']).value != 'Pending'">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="tab" *ngIf="confirmFlag">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value="eitt.confirm.itt" (click)="onConfirmITTClick()" align="bottom"></ngc-button>
+        <ngc-button value="eitt.reject.itt" (click)="onRejectITTClick()" align="bottom"></ngc-button>
+        <ngc-button value="eitt.pause" (click)="stopAutoRefresh()" align="bottom"></ngc-button>
+        <ngc-button value="eitt.auto.refresh" (click)="startAutoRefresh()" align="bottom"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="confirmationList">
+          <ngc-data-column text="g.select" type="check" align="center" dataField="select" cellsAlign="center"
+            [checkAll]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-checkbox [width]="20" formControlName="select" *ngIf="confirmationListSelectCheck(group)">
+                  </ngc-checkbox>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="agent.sno" align="center" dataField="sno" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="eitt.itt.req.code" align="center" dataField="ittReqCode" cellsAlign="center"
+            width="100">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.auth.code" align="center" dataField="ittAuthCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.org.cargo.handler" align="center" dataField="originCargoHandler"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.des.cargo.handler" align="center" dataField="destinationCargoHandler"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.dc.y.n" align="center" dataField="dutiableCommodities" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.confirmed.denied" align="center" dataField="ittConfirmDenied"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.confirmed.denied.user.date" align="center" dataField="userId"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="userId">
+                </ngc-display>
+                <ngc-label label="/" *ngIf="eIttForm.get(['confirmationList', group, 'userId']).value"></ngc-label>
+                <ngc-display formControlName="confirmDeniedDateTime" [onlyDate]="true">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="eitt.accs.submission.status" align="center" dataField="status" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="Flt Key/Date" align="center" dataField="flightKey" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="flightKey">
+                </ngc-display>
+                <ngc-label label="/"></ngc-label>
+                <ngc-display formControlName="flightDate" [onlyDate]="true">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" align="center" dataField="awbNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-shipmentdisplay formControlName="awbNo" shipmentType='AWB'></ngc-shipmentdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="Gen.HawbNo" align="center" dataField="hawbNo" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.ctm.ref.no" align="center" dataField="ctmRefNo" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.eitt.status" align="center" dataField="eittStatus" cellsAlign="center"
+            [width]="20">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" type="link" (linkClick)="onStatusClick(group, 'confirmationList')"
+                  iconType="open-link" align="center" cellsAlign="center">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="tab" *ngIf="cancellationFlag">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value="eitt.cancel.itt" (click)="onCancelIttClick()" align="bottom"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="cancellationList">
+          <ngc-data-column text="g.select" type="check" align="center" dataField="select" cellsAlign="center"
+            [width]="20" [checkAll]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-checkbox [width]="20" formControlName="select" *ngIf="cancellationListSelectCheck(group)">
+                  </ngc-checkbox>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="agent.sno" align="center" dataField="sno" cellsAlign="center" [width]="20">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.req.no.date" align="center" dataField="ittReqNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" type="link" (linkClick)="onCancellationStatusClick(group)" align="center"
+                  cellsAlign="center">
+                  <ngc-display formControlName="ittReqNo">
+                  </ngc-display>
+                  <ngc-label label="/"></ngc-label>
+                  <ngc-display formControlName="ittReqDate" [onlyDate]="true">
+                  </ngc-display>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.req.code" align="center" dataField="ittReqCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.itt.auth.code" align="center" dataField="ittAuthCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.des.cargo.handler" align="center" dataField="destinationCargoHandler"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.flt.key.date" align="center" dataField="flightKey" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="flightKey">
+                </ngc-display>
+                <ngc-label label="/"></ngc-label>
+                <ngc-display formControlName="flightDate" [onlyDate]="true">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" align="center" dataField="awbNo" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-shipmentdisplay formControlName="awbNo" shipmentType='AWB'></ngc-shipmentdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="pc.wt" align="center" dataField="pieces" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-piecesdisplay formControlName="pieces">
+                </ngc-piecesdisplay>
+                <ngc-label label="/"></ngc-label>
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.cc.code" align="center" dataField="clearanceInfo" cellsAlign="center" width="20">
+          </ngc-data-column>
+          <ngc-data-column text="eitt.accs.submission.status" align="center" dataField="status" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="box" title='tracing.note.header' *ngIf="submissionFlag || confirmFlag || cancellationFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="eitt.note.pending"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="eitt.note.inprogress"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="eitt.note.initiated"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="eitt.note.accepted"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+
+  <ngc-window #eIttStatusWindow [width]="1600" [height]="600" title="e-ITT Status" [showCloseButton]="true"
+    (close)="closeStatusWindow()">
+    <ngc-container [formGroup]="eittStatus">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.itt.req.no.date"></ngc-label>
+          </div>
+          <ngc-display formControlName="ittReqNo"></ngc-display>
+          <ngc-label label="/" *ngIf="eittStatus.get('ittReqNo').value"></ngc-label>
+          <ngc-display formControlName="ittReqDate" [onlyDate]="true"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.itt.req.code"></ngc-label>
+          </div>
+          <ngc-display formControlName="ittReqCode"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.itt.auth.code"></ngc-label>
+          </div>
+          <ngc-display formControlName="ittAuthCode"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.itt.org.cargo.handler"></ngc-label>
+          </div>
+          <ngc-display formControlName="originCargoHandler"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.itt.des.cargo.handler"></ngc-label>
+          </div>
+          <ngc-display formControlName="destinationCargoHandler"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.confirmed.denied"></ngc-label>
+          </div>
+          <ngc-display formControlName="ittConfirmDenied"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="g.message.type"></ngc-label>
+          </div>
+          <ngc-display formControlName="ittReqType"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="eitt.accs.submission.status"></ngc-label>
+          </div>
+          <ngc-display formControlName="status"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="eittStatusList">
+            <ngc-data-column text="agent.sno" align="center" dataField="sno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.message.type" align="center" dataField="ittReqType" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="dashboard.submissionDate" align="center" dataField="submissionDate"
+              cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display formControlName="submissionDate">
+                  </ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="customs.ack.date" align="center" dataField="acknowledgeDate" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display formControlName="acknowledgeDate">
+                  </ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="eitt.error.msg.ind" align="center" dataField="errorMsgInd" cellsAlign="center">
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+
+  <ngc-window #errorMessageWindow [width]="1500" [height]="600" title="e-ITT Status" [showCloseButton]="true"
+    (close)="closeErrorWindow()">
+    <ngc-container [formGroup]="errorMessage">
+      <ngc-row>
+        <ngc-column [column]="0.5"></ngc-column>
+        <ngc-column [column]="5">
+          <ngc-label emphasis='md' value="request.details"></ngc-label>
+          <ngc-edittable formArrayName="requestDetailsList">
+            <ngc-data-column text="eitt.itt.req.no.date" align="center" dataField="ittReqNo" cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-display formControlName="ittReqNo">
+                  </ngc-display>
+                  <ngc-label label="/" *ngIf="errorMessage.get(['requestDetailsList', group ,'ittReqNo']).value">
+                  </ngc-label>
+                  <ngc-display formControlName="ittReqDate" [onlyDate]="true"
+                    *ngIf="errorMessage.get(['requestDetailsList', group ,'ittReqNo']).value">
+                  </ngc-display>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="eitt.itt.req.code" align="center" dataField="ittReqCode" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="g.message.type" align="center" dataField="ittReqType" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="g.status" align="center" dataField="status" cellsAlign="center">
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+        <ngc-column [column]="1"></ngc-column>
+        <ngc-column [column]="5">
+          <ngc-label emphasis='md' value="eitt.submission.status"></ngc-label>
+          <ngc-datatable formArrayName="eittStatusList" [showToolbar]="false" [showPrint]="false" [showXLS]="false"
+            [showPDF]="false" [showCSV]="false" [enablePageSizeHeight]="false">
+            <ngc-data-column text="agent.sno" align="center" dataField="sno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.message.type" align="center" dataField="ittReqType" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" align="center" dataField="awbNo" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="hawb.no" align="center" dataField="hawbNo" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="eitt.err.mgs" align="center" dataField="errorMsgInd" cellsAlign="center">
+            </ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+        <ngc-column [column]="0.5"></ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+</form>

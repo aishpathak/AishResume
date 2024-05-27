@@ -1,0 +1,101 @@
+<form [formGroup]="form">
+  <ngc-window #slotWindow title="tcs.timeSlot" [width]="1600" [height]="350">
+    <ngc-container type="section" formGroupName="slot">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th [pinned]="true" name="day" [width]="100">
+                  <ngc-label label="Day"></ngc-label>
+                </th>
+                <ng-container>
+                  <th *ngFor="let header of slotsHeader24; let slotIndex = index" colspan="4">
+                    <div [ngClass]="{ 'tcs-slot-header96' : false, 'tcs-slot-header24' : true }">
+                      <ngc-display [value]="header.from" [onlyTime]="true"></ngc-display>&nbsp;
+                      <!-- <ngc-display [value]="header.till" [onlyTime]="true"></ngc-display> -->
+                    </div>
+                  </th>
+                </ng-container>
+              </tr>
+            </thead>
+            <tbody formArrayName="days">
+              <tr *ngFor="let item of form.get('slot.days').controls; let index = index;" [formGroupName]="index">
+                <td [pinned]="true" name="day" [width]="100">
+                  <ngc-display formControlName="slotDay" [onlyDate]="true"></ngc-display>
+                </td>
+                <ng-container formArrayName="freeSlots">
+                  <td [ngClass]="{ 
+                      'tcs-slot' : true, 
+                      'tcs-slot-pastday': slotItem.get('futureTime').value == false,
+                      'tcs-slot-reservable': slotItem.get('reservable').value == true,
+                      'tcs-slot-selected': slotItem.get('selected').value == true
+                      }" *ngFor="let slotItem of item.get('freeSlots').controls; let slotIndex = index"
+                    [formGroupName]="slotIndex" (click)="onTimeSlotSelection(slotItem)" align="center">
+                    <ng-container *ngIf="slotItem.get('futureTime').value">
+                      <ngc-icon *ngIf="slotItem.get('selected').value == true" type="yes-circle"
+                        formControlName="reservable">
+                      </ngc-icon>
+                      <ngc-icon *ngIf="slotItem.get('selected').value == false" type="o" formControlName="reservable">
+                      </ngc-icon>
+                    </ng-container>
+                    <ng-container *ngIf="showInfo">
+                      <ngc-display formControlName="total"></ngc-display>
+                    </ng-container>
+                  </td>
+                </ng-container>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.purpose"></ngc-label>
+          <div>
+            <ngc-display formControlName="purpose" sourceId="INCOMING_PURPOSE" sourceCategory="dropdown"
+              sourceType='query'></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="tcs.duration"></ngc-label>
+          <div>
+            <ngc-display formControlName="duration">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.slot"></ngc-label>
+          <div>
+            <ngc-display formControlName="slotStartDate">
+            </ngc-display>
+          </div>
+          <div>
+            <ngc-display formControlName="slotEndDate">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column *ngIf="showInfo">
+          <ngc-label label="Took"></ngc-label>
+          <div>
+            <ngc-display formControlName="requestDuration"></ngc-display>
+            <ngc-label label="ms" color="red"></ngc-label>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container>
+        <ngc-row>
+          <ngc-column>
+            <ngc-icon type="info" (click)="onInfo()" trueColor="lightgray" [value]="true"></ngc-icon>
+          </ngc-column>
+          <ngc-column align="right">
+            <ngc-button label="g.confirm" (click)="onOk(slotWindow)"></ngc-button>
+            <ngc-button label="g.cancel" (click)="onClose(slotWindow)"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

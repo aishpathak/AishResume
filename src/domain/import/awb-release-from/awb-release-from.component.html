@@ -1,0 +1,205 @@
+<form [formGroup]="awbreleasefrom" item-width="100%">
+  <ngc-titlebar title='import.awb.release.form' (save)="onSave($event)" (cancel)="onCancel($event)"
+    [disableSave]="saveFlag==false"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label='import.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="warehouseterminal" sourceId='WAREHOUSE_TERMINAL'
+            sourceType="query" [width]="140"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label='import.appointed.agent'></ngc-label>
+        <div>
+          <!--<ngc-dropdownlist sourceId='AGENT' sourceType="query" formControlName="customer" [width]='120'></ngc-dropdownlist>-->
+          <ngc-lov accessEnableOn="r" formControlName="customer" sourceId="APPOINTED_AGENT_DATA_FOR_AWB_RELEASE"
+            title="g.customer.list" dataField="code" displayMember='code' [width]="120" required
+            (select)='onCompanyLOVSelect($event)' (ngModelChange)="resetForm($event)" [noValidation]="true">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4" [grid24]="true">
+        <ngc-label label='import.agent.companyname'></ngc-label>
+        <div>
+          <div>
+            <ngc-lov dataField='desc' valueMember='desc' accessEnableOn="r" formControlName='customerShortName'
+              [width]='180' upperCase='true' sourceId='AWB_RELEASE_APPOINTED_AGENT_DATA' title='import.companyname.list'
+              (select)='onCompanyNameLOVSelect($event)' [dropDownWidth]='60' [noValidation]="true">
+              <ngc-data-column text='g.companyName' dataField='desc' [width]='190'></ngc-data-column>
+              <ngc-data-column text='g.companyCode' dataField='code' [width]='100'></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-awbtaginput accessEnableOn="r" formControlName="shipmentNumber" dataField="shipment" required
+            [width]="150" [splitOnPaste]="true" splitChar=",">
+          </ngc-awbtaginput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <br>
+        <ngc-button value="g.search" accessEnableOn="r" (click)="getsearchValues()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="displaySearchContainer">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="resultList" [pageable]="true" [pageSize]="10">
+          <ngc-data-column dataField="select" [width]="30" align="center" cellsAlign="center" type="check">
+            <ng-template let-name="name" let-group="group">
+              <!-- <ng-container *ngIf="awbreleasefrom.get(['resultList',group,'onHold']).value" [formGroupName]="group">
+                <ngc-icon type="lock" formControlName="onHold" value='yes' iconSize="2x" blankColor="red"></ngc-icon>
+              </ng-container> -->
+              <ng-container *ngIf="awbreleasefrom.get(['resultList',group,'select']).value" [formGroupName]="group">
+                <ngc-checkbox formControlName="select"></ngc-checkbox>
+              </ng-container>
+              <ng-container *ngIf="awbreleasefrom.get(['resultList',group,'blocklistid']).value"
+                [formGroupName]="group">
+                <ngc-display formControlName="blacklist"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.svc" dataField="svc" [width]="40" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.ShipmentNumber" dataField="awbNumber" [width]="80" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.ConsigneeAgent" dataField="consignee" [width]="130" type="text" align="center"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.appointedAgent" dataField="appointedAgent" [width]="50" type="text"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.flightInfo" dataField="flightinfodata" [width]="100" align="center"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.DocumentAttached" dataField="documentAttached" [width]="50" type="check"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.document.pouch" dataField="documentPouch" [width]="50" type="check"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.DocumentType" dataField="documentType" [width]="50" align="center"
+            cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist formControlName="documentType" sourceId="AWBdocumentType$DocumentType" [width]="120">
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="awb.remarks" dataField="remarks" [width]="65" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ng-container>
+                  <ngc-textarea [width]="200" [height]="30" formControlName="remarks" [maxlength]="65"></ngc-textarea>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="displaySearchContainer" type="section">
+    <ngc-row>
+      <ngc-column align='left'>
+        <ngc-label label='import.awb.released.to'></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align='left' [column]="3" [grid24]="true">
+        <ngc-label label='import.agent.document.box'></ngc-label>
+        <div align='center'>
+          <ngc-checkbox formControlName="documentbox" (modelChange)="validateDocumentboxSubscription($event)">
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column align='left' [column]="4" [grid24]="true">
+        <ngc-label label='export.screening.airport.pass.number'></ngc-label>
+        <div>
+          <ngc-alphanuminput formControlName="icNumber" [width]='200'
+            entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+          </ngc-alphanuminput>
+          <ngc-label label='&nbsp;&nbsp;'></ngc-label>
+          <ngc-button value='import.validate.v' (click)="validateIcOrAirportPass(false)"
+            [disabled]="disabelValidateButton">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align='left' [column]="3" [grid24]="true">
+        <ngc-label label='Customer.AuthorisedPersonName'></ngc-label>
+        <div *ngIf="displayNameAndComapany">
+          <ngc-display formControlName="personelName"></ngc-display>
+        </div>
+        <div *ngIf="displayNameAndComapanyInput">
+          <ngc-input formControlName="personelName" [width]='200' patternName='alphanumspace'
+            entityAttribute="Customer.AuthorisedPersonName" (keyup)="onPersonelNameChange($event)"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column align='left' [column]="6" [grid24]="true">
+        <ngc-label label='import.contractor.companyname'></ngc-label>
+        <div *ngIf="displayNameAndComapany">
+          <ngc-display formControlName="contractorName"></ngc-display>
+        </div>
+        <div *ngIf="displayNameAndComapanyInput">
+          <ngc-input formControlName="contractorName" [width]='250' [maxlength]="70"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align='left' [column]="5" [grid24]="true">
+        <ngc-label label='import.authorised.letter.received'></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="autherizedReceiveFlag"
+            (click)="validateaAutherizedReceiveFlagSubscription($event)">
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column align='left' [column]="3" [grid24]="true">
+        <ngc-label label='g.remarks'></ngc-label>
+        <div>
+          <ngc-textarea [width]="400" [height]="30" formControlName="reason" [maxlength]="65"></ngc-textarea>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align='right'>
+        <ngc-button value='import.release.document.r' (click)="releaseAwbForm()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="displaySearchContainer">
+    <ngc-row formArrayName="resultList">
+      <ngc-column align='left'>
+        <ngc-label label="import.awb.remarks"></ngc-label>
+        <ngc-container *ngFor="let item of awbreleasefrom.getList('resultList'); let index=index"
+          [formGroupName]="index">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label formControlName="awbNumber"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngFor="let sitem of item.get('awbRemarkList').value; let sindex=index">
+            <ngc-column align='left'>
+              {{sindex+1}}) &nbsp; {{sitem}}
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<app-duplicatenamepopup #duplicateNamePopup (onConfirmNewEntry)="onConfirmNewEntry($event)"
+  (onNameSelect)="onNameSelect($event)"></app-duplicatenamepopup>

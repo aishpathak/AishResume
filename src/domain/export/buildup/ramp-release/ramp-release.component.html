@@ -1,0 +1,187 @@
+<form [formGroup]="rampReleaseform">
+  <ngc-titlebar title="exp.ramp.release" (cancel)="onBack($event)"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label="export.driverId">`
+        </ngc-label>
+        &nbsp;&nbsp;
+        <ngc-input accessEnableOn="r" formControlName="driverId" [disabled]="driverIdFlagUniversal" required>
+        </ngc-input>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-button accessEnableOn="r" label="export.next" (click)="onNext()" [disabled]="driverIdFlag"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=" ">
+        </ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="driverIdFlag">
+      <ngc-column cloumn="2">
+        <ngc-row>
+          <ngc-column>
+            <div>
+              <ngc-checkbox formControlName="ocs"></ngc-checkbox>
+              <ngc-label label="OCS"></ngc-label>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <div>
+              <ngc-checkbox formControlName="handCarry"></ngc-checkbox>
+              <ngc-label label="export.handCarry"></ngc-label>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+      <ngc-column cloumn="4">
+        <div>
+          <ngc-label label="export.uldNumber"></ngc-label>
+        </div>
+        <ngc-input formControlName="containertrolleynumber" (ngModelChange)="onChangeTrolleyNumber($event)" [width]="100" required
+          [disabled]="trolleyActivateFlag"></ngc-input>
+      </ngc-column>
+      <ngc-column cloumn="1">
+        <div>
+          <ngc-label label="flight.Flight"></ngc-label>
+        </div>
+        <div *ngIf="!piecesRemarksDisplayFlag &&  !manualReleaseCase">
+          <ngc-display formControlName="flightKey" required disabled=true></ngc-display>
+        </div>
+        <div *ngIf="piecesRemarksDisplayFlag || manualReleaseCase ">
+          <ngc-flightkeyinput formControlName="flightKey" (ngModelChange)="getFlightDetails($event)" required [width]="100">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column cloumn="2">
+        <div>
+          <ngc-label label="flight.date"></ngc-label>
+        </div>
+        <div *ngIf="!piecesRemarksDisplayFlag && !manualReleaseCase">
+          <ngc-display formControlName="startedat" disabled=true [onlyDate]="true"></ngc-display>
+        </div>
+        <div *ngIf="piecesRemarksDisplayFlag ||  manualReleaseCase">
+          <ngc-datetimeinput formControlName="startedat" [onlyDate]="true" required (ngModelChange)="getFlightDetails($event)" [width]="100"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column cloumn="2">
+        <div>
+          <ngc-label label="ramp.exp.parkbay"></ngc-label>
+        </div>
+        <ngc-display formControlName="bay"></ngc-display>
+      </ngc-column>
+      <ngc-column cloumn="1">
+        <div *ngIf="piecesRemarksDisplayFlag">
+          <div>
+            <ngc-label label="ramp.no.of.bags"></ngc-label>
+          </div>
+          <ngc-piecesinput formControlName="pieces" [width]="100"></ngc-piecesinput>
+        </div>
+      </ngc-column>
+      <ngc-column cloumn="4">
+        <div>
+          <div>
+            <ngc-label label="g.remarks"></ngc-label>
+          </div>
+          <ngc-input formControlName="remarks" maxLength="65"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column cloumn="1" align="left">
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button label="g._add" iconType="add" (click)="addReleaseRamp()" [disabled]="!addReleaseButtonFlag">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="export.ramp.releaseLocation"></ngc-label>
+        <div>
+          <ngc-input formControlName="releaselocation" [width]="159" [maxLength]="64" required></ngc-input>
+        </div>
+      </ngc-column>
+      <!--  -->
+      <ngc-column>
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button label="g.addPhoto" align="right" (click)="uploadPhoto()" [disabled]="trolleyActivateFlag"></ngc-button>
+       
+
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button label="exp.ramp.releaseAndPrint" (click)="onRelease()" [disabled]="releaseButtonFlag">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <!--  -->
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-container *ngIf="dataTableFlag" type="tab">
+ 
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="handOverContainerTrolley" (linkClick)="onDeleteAddedTrolley($event)" [pageable]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text="flight.Flight" [width]="30" align="left" cellsAlign="left" dataField="flightKey">
+          </ngc-data-column>
+          <ngc-data-column text="flight.date" [width]="30" align="left" cellsAlign="left" type="displayDate" dataField="date">
+          </ngc-data-column>
+          <ngc-data-column text="flight.std" [width]="30" align="left" cellsAlign="left" type="displayTime" dataField="std">
+          </ngc-data-column>
+          <ngc-data-column text="flight.etd" [width]="30" align="left" cellsAlign="left" [cellsStyleRenderer]="etdDateCellsStyleRenderer"
+            dataField="etd"></ngc-data-column>
+          <ngc-data-column text="ramp.release.hand.carry.uld.ocs" [width]="50" align="left" cellsAlign="left" dataField="containertrolleynumber"></ngc-data-column>
+          <ngc-data-column text="g.handlingArea" [width]="30" align="left" cellsAlign="left" dataField="handlingArea">
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" [width]="50" align="left" cellsAlign="left" dataField="concatShc">
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" [width]="50" align="left" cellsAlign="center" dataField="pieces">
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" [width]="50" align="left" cellsAlign="center" dataField="remarks">
+          </ngc-data-column>
+          <ngc-data-column text="g.delete" [width]="50" iconType='delete' type="link" align="center" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #photoUploadPopUp [width]="500" [height]="500" title="g.upload" [cancelButton]="true" (Close)="onClosePopUp($event)">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align='left'>
+          <ngc-capturephoto title="g.capture.photo" previewWidth="100" previewHeight="100" entityType="ULD" associatedTo="Flight" stage="Ramp"
+            [entityKey]="rampReleaseform.get('uldNumberForPhoto').value">
+          </ngc-capturephoto>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['HANDOVER']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="printHandover()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

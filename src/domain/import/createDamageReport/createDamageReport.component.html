@@ -1,0 +1,232 @@
+<form [formGroup]="createDamageReportForm">
+  <ngc-titlebar title="import.create.damage.report" (save)="onSaveAddition($event)" (clear)="clear($event)"
+    (print)="onPrint()">
+  </ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='g.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flight" required></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="flightDate" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label entityAttribute="Import.ATA" label='import.ata'></ngc-label>
+        <div>
+          <ngc-display entityAttribute="Import.ATA" formControlName="flightATA"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)='onSearch()' iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="isShowFlag">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='g.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flight"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='create.damage.weather.condition'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="weatherCondition" sourceId="DamageReport$Weather_Condition" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="create.damage.prepared.by"></ngc-label>
+        <div>
+          <ngc-display formControlName="preparedBy"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="10">
+      </ngc-column>
+      <ngc-column>
+        <ngc-display formControlName="status" color="blue" emphasis='md'></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button label="cap.damage" (click)="addDamage()"></ngc-button>
+      </ngc-column>
+
+      <ngc-column align="right">
+        <ngc-button *ngIf="UnFinalzeDamage" label="create.damage.unfinalize.damage" (click)="finalize()"></ngc-button>
+      </ngc-column>
+
+      <ngc-column align="right">
+        <ngc-button *ngIf="FinalzeDamage" label="create.damage.finalize.damage" (click)="finalize()"></ngc-button>
+      </ngc-column>
+
+
+    </ngc-row>
+
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf="isShowFlag1">
+
+    <!-- <ngc-row>
+      <ngc-column>
+        <ngc-label label='g.awbNumber'></ngc-label>
+      </ngc-column>
+      <ngc-column align="right">
+         <ngc-report #reportWindow title="g.report" reportId='awbDamageReport' [reportParameters]='reportParameters'
+          [showReport]="true"></ngc-report>
+      </ngc-column>
+    </ngc-row> -->
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="awbnumber"></ngc-label>
+        <ngc-datatable formArrayName="listDamageReportAWBDetails" [showAggregates]="true" [pageable]="false"
+          (linkClick)="transferData($event, 'AWB')">
+          <ngc-data-column text="g.awbNumber" dataField="entityKey" [width]="110" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column entityAttribute="Import.AwbPiceWeight" text="import.AwbPiecsWeight" dataField="awbPcsWt"
+            [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Import.ManifestPieceWeight" text="g.man.pcs.wts" dataField="manifestPcsWt"
+            [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Gen.Origin" text="g.origin" dataField="origin" [width]="80"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.hawbNumber" dataField="hawbnumber" feature="Imp.Bd.HAWBHandling" [width]="124"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.peices.damaged" dataField="damagePieces" [width]="140" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Import.IrregularityWeight" text="imp.dam.wt" dataField="damageWeight"
+            [width]="140" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.content" dataField="content" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.severity" dataField="severity" [width]="80" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="capturedamage.Occurrence.m" dataField="occurence" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="capture.damage.nod" [width]="650" name="damageGroup" cellsAlign="center">
+            <ngc-data-column text="create.damage.crushed" dataField="natureOfDamageBooleancrushed" type="icon"
+              iconType="yesno" [width]="80" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.seems.opened" dataField="natureOfDamageBooleanseam" type="icon"
+              iconType="yesno" [width]="130" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.seems.opened" dataField="natureOfDamageBooleanpuncture" type="icon"
+              iconType="yesno" [width]="130" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.torn" dataField="natureOfDamageBooleantorn" type="icon"
+              iconType="yesno" [width]="50" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.wet.damp" dataField="natureOfDamageBooleanwet" type="icon"
+              iconType="yesno" [width]="90" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.foreign.taping" dataField="natureOfDamageBooleanforeigntaping"
+              type="icon" iconType="yesno" [width]="130" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.others" dataField="natureOfDamageBooleanothers" [width]="80"
+              type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remark" [width]="90" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column entityAttribute="Gen.Damage.Photo" text="uld.photo" dataField="photo" [width]="60"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="imp.house.damage" dataField="houseInfo" [width]="140" *ngIf="hawbInfoFeatureEnabled"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column iconType='edit' type="link" text="g.edit" dataField="modifiedOn" align="center"
+            cellsAlign="center" [width]="70" accessEnableOn="r"></ngc-data-column>
+        </ngc-datatable>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="isShowFlag2">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='mailbag.number'></ngc-label>
+      </ngc-column>
+      <ngc-column align="right">
+        <!---<ngc-report #reportWindow title="g.report" reportId='MAIL_BAG' [reportParameters]='reportParameters'
+          [showReport]="true"></ngc-report>-->
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="listDamageReportMailDetails" [showAggregates]="true" [pageable]="false"
+          (linkClick)="transferData($event,'MBN')">
+          <ngc-data-column text="mailbag.number" dataField="entityKey" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.pieces" dataField="damagePieces" [width]="100" cellsAlign="center"></ngc-data-column>
+          <!--<ngc-data-column text="g.weight" dataField="" [width]="100" cellsAlign="center" [aggregates]="['sum']"></ngc-data-column>-->
+          <ngc-data-column text="g.severity" dataField="severity" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="capturedamage.Occurrence.m" dataField="occurence" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="capture.damage.nod" [width]="500" name="damageGroup" cellsAlign="center">
+            <ngc-data-column text="create.damage.torn" dataField="natureOfDamageBooleantorn" type="icon"
+              iconType="yesno" [width]="100" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.wet" dataField="natureOfDamageBooleanwet" type="icon" iconType="yesno"
+              [width]="100" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.plundered" dataField="natureOfDamageBooleanpuncture" type="icon"
+              iconType="yesno" [width]="100" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.altered.seals" dataField="natureOfDamageBooleanalteredseals"
+              type="icon" iconType="yesno" [width]="100" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.others" dataField="natureOfDamageBooleanothers" [width]="100"
+              type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remark" [width]="180" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column iconType='edit' type="link" text="g.edit" dataField="modifiedOn" align="center"
+            cellsAlign="center" [width]="80"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="isShowFlag3">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='uld.uld.number'></ngc-label>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-report #reportWindow title="g.report" reportId='ULD' [reportParameters]='reportParameters'
+          [showReport]="true"></ngc-report>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="listDamageReportULDDetails" [showAggregates]="true" [pageable]="false"
+          (linkClick)="transferData($event,'ULD')">
+          <ngc-data-column text="uld.uld.number" dataField="entityKey" [width]="200" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="capturedamage.Occurrence.m" dataField="occurence" [width]="200" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="capture.damage.nod" [width]="600" name="damageGroup" cellsAlign="center">
+            <ngc-data-column text="create.damage.serviceable.usable" dataField="natureOfDamageBooleanserusable"
+              type="icon" iconType="yesno" [width]="200" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.serviceable.non.usable" dataField="natureOfDamageBooleansernonusable"
+              type="icon" iconType="yesno" [width]="200" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="create.damage.non.serviceable" dataField="natureOfDamageBooleannonservicable"
+              type="icon" iconType="yesno" [width]="200" cellsAlign="center"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="g.remarks" dataField="remark" [width]="200" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column iconType='edit' type="link" text="g.edit" dataField="modifiedOn" align="center"
+            cellsAlign="center" [width]="80"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--<ngc-window>
+    <common-capturedamage></common-capturedamage>
+  </ngc-window>-->
+  <ngc-report #reportWindow title="g.report" reportId='awbDamageReport' [reportParameters]='reportParameters'>
+  </ngc-report>
+
+</form>

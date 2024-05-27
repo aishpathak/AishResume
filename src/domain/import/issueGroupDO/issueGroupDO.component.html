@@ -1,0 +1,166 @@
+<form [formGroup]="issueGroupDOForm">
+  <ngc-titlebar title='Issue Group DO' (save)="onSave($event)" (clear)="onClear($event)" (cancel)=onCancel()>
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1.2">
+        <ngc-label label='g.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminalCode" sourceId="SVC_HANDLINGAREA"
+            sourceType="query" [width]='80' displayMember="desc">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=" 1.5">
+        <ngc-label label="imp.intl.dom.full"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="domesticInterFlight"
+            sourceId="Flight$Flight_Handler_Type" [width]="150" entityAttribute="Flight.DomesticInternationalHandling">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1.2">
+        <!-- *ngIf=handledbyHouse -->
+        <ngc-label label="warehouse.truckdock"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" sourceId="TRUCKDOCK_DO" sourceType='query' formControlName="truckdock"
+            [width]="100" title='warehouse.truckdock' [validOnly]="true" dataField="code" [noCache]="true">
+            <ngc-data-column text="warehouse.truckdock" [width]='80' dataField="code"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+
+
+      <ngc-column [column]="1">
+        <ngc-label label="g.agentName"></ngc-label>
+        <div>
+          <ngc-lov [width]="80" accessEnableOn="r" formControlName="appointedAgent"
+            sourceId="APPOINTED_AGENT_DATA_FOR_AWB_RELEASE" title="g.customer.list" dataField="code"
+            displayMember='code' [noValidation]="true">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.customer.full.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.2">
+        <ngc-label value="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType="{{shipmentType1}}" [width]="200" [noDN]="true" [noCBN]="true"
+            formControlName="shipmentNumber" (select)="onShipmentSelect($event)" accessEnableOn="r">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1.2" feature="Imp.Bd.HAWBHandling">
+        <!-- *ngIf=handledbyHouse -->
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" sourceId="HWBNUMBER" formControlName="hawbNumber" upperCase="true" [width]="100"
+            title='g.hawb.number' [validOnly]="true" dataField="code" valueMember="code" [noCache]="true"
+            [sourceParameters]="{'parameter1': this.issueGroupDOForm.get('shipmentNumber').value}">
+            <ngc-data-column text="g.hawb.number" [width]='80' dataField="code"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.2">
+        <ngc-label label='display.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="requestedFrom"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.2">
+        <ngc-label label='display.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="requestedTo"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button value="display.search" accessEnableOn="r" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="box">
+    <ngc-row *ngIf="displayData">
+      <ngc-column>
+        <ngc-datatable formArrayName="issueGroupDetailList" (linkClick)="onLinkClick($event)"
+          [enablePageSizeHeight]="false" [pageable]="true" [pageSize]="15" [pagerMode]="'advanced'" [columnsHeight]="45"
+          [showToolbar]="true" [showPrint]="false" [showXLS]="false" [showPDF]="false" [showCSV]="false"
+          [pagerMode]="'advanced'">
+          <ngc-data-column text="&nbsp;" [width]='30' dataField="selectCheck" align="center" cellsAlign="center"
+            type="check" [checkAll]="true">
+          </ngc-data-column>
+          <ngc-data-column text="display.po" [width]='120' dataField="deliveryRequestOrderNo" align="center"
+            cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text='agent.awb' dataField="shipmentNumber" [width]="110" align="center" cellsAlign="center"
+            type="text"></ngc-data-column>
+          <ngc-data-column text='g.hawbNumber' dataField="hawbnumber" [width]="110" align="center" cellsAlign="center"
+            type="text"></ngc-data-column>
+          <ngc-data-column text='import.AwbPiecsWeight' dataField="awbPiecesWeight" type="text" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text='g.hawbPiecesWeight' dataField="hawbPiecesWeight" type="text" [width]="110">
+          </ngc-data-column>
+          <ngc-data-column text='import.consignee' dataField="consignee" [width]="150" type="text" [width]="140"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.clearing.agent.br' dataField="appointedAgentName" [width]="80" align="center"
+            cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="display.poRequested" name="PO requested" [width]="110" align="center">
+            <ngc-data-column text="import.pieces.weight.br" dataField="poPiecesWeight" [width]="100" cellsAlign="right"
+              type="text">
+            </ngc-data-column>
+            <ngc-data-column text="display.date" dataField="poDateTime" [width]="100" cellsAlign="center"
+              type="displayDateTime">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text='import.po.status' dataField="paymentStatus" [width]="100" align="center"
+            cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="imp.icairportpass.m" name="IC Airport Pass" [width]="100" align="center">
+            <ngc-data-column text="g.number" dataField="airportNo" [width]="80" cellsAlign="center" type="text">
+            </ngc-data-column>
+            <ngc-data-column text="g.name" dataField="airportName" [width]="100" cellsAlign="center"
+              type="displayDateTime">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text='warehouse.truckdock' dataField="whbTruckDock" [width]="90" align="center"
+            cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text='awb.charges' dataField="charges" [width]="80" align="center" cellsAlign="center"
+            type="text">
+          </ngc-data-column>
+          <ngc-data-column text='import.customs.edo' dataField="edo" [width]="80" align="center" cellsAlign="center"
+            type="text">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Import.CustomsDocumentRequiredForDelivery" dataField="boe" [width]="80"
+            align="center" cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Import.CustomsClearanceRequiredForDelivery" dataField="oc" [width]="80"
+            align="center" cellsAlign="center" type="text" feature="Imp.Bd.HAWBHandling"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-report #reportWindow title="g.report" reportId='issueGroupDO' [reportParameters]='reportParameters'>
+  </ngc-report>
+
+</form>
+<ngc-footer>
+  <ngc-container type="tab" *ngIf="displayData">
+    <ngc-row>
+      <ngc-column>
+        <ngc-button label='awb.issuedo' (click)="onissueDO()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-footer>

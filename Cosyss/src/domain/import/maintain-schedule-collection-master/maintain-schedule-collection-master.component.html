@@ -1,0 +1,289 @@
+<!-- Form containing search parameters -->
+<form [formGroup]="maintainScheduleSearch">
+  <ngc-titlebar title='import.maintain.Schedule.Collection.Master' (print)="onPrint()" (clear)="onClear($event)"
+    (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="g.customerName"></ngc-label>
+        <div>
+          <ngc-lov dataField='desc' (ngModelChange)="Onchange()" valueMember='desc' formControlName='customerName'
+            [width]='200' upperCase='true' sourceId='COMPANY_DEREGISTER_NAME' title='g.customerName' accessEnableOn="r"
+            [dropDownWidth]='60' required [noCache]="true" (select)='onCustomerNameLOVSelect($event)'>
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='190'></ngc-data-column>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='100'></ngc-data-column>
+          </ngc-lov>
+        </div>
+
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="import.Customer.No"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="customerNo" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.iatacode"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="iataCode" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" [width]="120" value="g.search" iconType="search" (click)="onSearch()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button value="g.add" iconType="add" (click)="onAdd()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-row>
+  </ngc-row>
+
+
+  <ngc-container *ngIf="showData">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="Schedule Collection Time Slot List"></ngc-label>
+        <ngc-datatable (linkClick)="onClick($event)" formArrayName="maintainScheduleEntryData" [showToolbar]="false"
+          [pageSize]=13 [enablePageSizeHeight]="false">
+          <ngc-data-column text="Sno" dataField="sno" [width]="20" align="center" cellsAlign="center">
+
+          </ngc-data-column>
+          <ngc-data-column text="g.customerName" dataField="customerName">
+
+          </ngc-data-column>
+          <ngc-data-column text="import.Customer.No" dataField="customerNo">
+
+          </ngc-data-column>
+          <ngc-data-column text="g.iatacode" dataField="iataCode">
+
+          </ngc-data-column>
+          <ngc-data-column text="import.truck.Dock.no" dataField="truckDock">
+          </ngc-data-column>
+
+          <ngc-data-column text="import.time.From" dataField="timeFrom" [width]="100">
+
+          </ngc-data-column>
+          <ngc-data-column text="import.time.To" dataField="timeTo" [width]="100">
+
+          </ngc-data-column>
+          <ngc-data-column text="import.day.Frequency" dataField="dayFrequency">
+
+          </ngc-data-column>
+          <ngc-data-column text="Edit" (linkClick)="onClick($event)" iconType="edit" type='link' align="center"
+            cellsAlign="center">
+
+          </ngc-data-column>
+          <ngc-data-column text="g.delete" (linkClick)="onClick($event)" iconType="delete" type='link' align="center"
+            cellsAlign="center">
+
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>
+
+<form [formGroup]="maintainSchedulePopUp">
+
+  <ngc-window #maintainScheduleEditWindow [width]="1100" [height]="150" title='import.maintain.Schedule.Time.Slots'
+    [showCloseButton]="true" (close)="onCloseWindow()">
+    <ngc-container *ngIf="windowFlag" type="section">
+      <ngc-row>
+        <ngc-column column="3">
+          <ngc-label label="import.from.Time"></ngc-label>
+          &nbsp;
+          <ngc-timeinput required formControlName='fromTime' dataType="string"></ngc-timeinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="import.to.Time"></ngc-label>
+          &nbsp;
+          <ngc-timeinput required formControlName='toTime' dataType="string"></ngc-timeinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="g.remarks"></ngc-label>
+          &nbsp;
+          <ngc-input [required]="editedTrue" maxChars="100" formControlName='remarks' dataType="string"></ngc-input>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+    <ngc-container *ngIf="windowFlag" type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-checkbox formControlName="isAll" (ngModelChange)="onSelectAll($event)">
+            <ngc-label label="flight.all"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isMon">
+            <ngc-label label="flight.mon"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isTue">
+            <ngc-label label="flight.tue"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isWed">
+            <ngc-label label="flight.wed"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isThu">
+            <ngc-label label="flight.thu"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isFri">
+            <ngc-label label="flight.fri"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isSat">
+            <ngc-label label="flight.sat"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isSun">
+            <ngc-label label="flight.sun"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="windowFlag">
+      <ngc-row>
+        <ngc-column column="9">
+        </ngc-column>
+        <ngc-column column align="right">
+          <ngc-button (click)="onSavePopUp($event)" value="g.save" iconType="save"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+
+  </ngc-window>
+
+  <!-- Pop up window for Add button -->
+  <ngc-window #maintainScheduleRecordWindow [width]="1100" [height]="150" title='import.maintain.Schedule.Time.Slots'
+    [showCloseButton]="true" (close)="onCloseWindow()">
+    <ngc-container *ngIf="windowFlag" type="section">
+      <ngc-row>
+        <ngc-column column="4.5">
+          <ngc-label label="g.customerName"></ngc-label>
+          &nbsp;
+          <ngc-lov dataField='desc' valueMember='desc' formControlName='customerName' [width]='200' upperCase='true'
+            sourceId='COMPANY_DEREGISTER_NAME' title='g.customerName' accessEnableOn="r"
+            (select)='onCompanyNameLOVSelect($event)' [dropDownWidth]='60' required [noCache]="true">
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='190'></ngc-data-column>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='100'></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column column="3">
+          <ngc-label label="import.Customer.No"></ngc-label>
+          &nbsp;
+          <ngc-input formControlName="customerNo" disabled='true'>
+          </ngc-input>
+        </ngc-column>
+        <ngc-column column="4">
+          <ngc-label label="g.iatacode"></ngc-label>
+          &nbsp;
+          <ngc-input formControlName="iataCode" disabled='true'>
+          </ngc-input>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container>
+      <ngc-row>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column column="4.5">
+          <ngc-label label="import.truck.Dock.no"></ngc-label>&nbsp;
+          <ngc-lov dataField='code' valueMember='code' formControlName='truckDock' upperCase='true'
+            sourceId='KEY_TRUCKER_COMPANY' title='import.truck.Dock.no' accessEnableOn="r" required
+            [dropDownWidth]='60'>
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column column="3">
+          <ngc-label label="import.from.Time"></ngc-label>
+          &nbsp;
+          <ngc-timeinput required formControlName='fromTime' dataType="string"></ngc-timeinput>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="import.to.Time"></ngc-label>
+          &nbsp;
+          <ngc-timeinput required formControlName='toTime' dataType="string"></ngc-timeinput>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="windowFlag" type="section">
+      <ngc-row>
+        <ngc-column>
+          <ngc-checkbox formControlName="isAll" (ngModelChange)="onSelectAll($event)">
+            <ngc-label label="flight.all"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isMon">
+            <ngc-label label="flight.mon"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isTue">
+            <ngc-label label="flight.tue"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isWed">
+            <ngc-label label="flight.wed"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isThu">
+            <ngc-label label="flight.thu"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isFri">
+            <ngc-label label="flight.fri"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isSat">
+            <ngc-label label="flight.sat"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <ngc-checkbox formControlName="isSun">
+            <ngc-label label="flight.sun"></ngc-label>
+          </ngc-checkbox>
+        </ngc-column>
+      </ngc-row>
+
+
+    </ngc-container>
+    <ngc-container *ngIf="windowFlag">
+      <ngc-row>
+        <ngc-column column="9">
+        </ngc-column>
+        <ngc-column column align="right">
+          <ngc-button (click)="onSavePopUp($event)" value="g.save" iconType="save"></ngc-button>
+        </ngc-column>
+
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

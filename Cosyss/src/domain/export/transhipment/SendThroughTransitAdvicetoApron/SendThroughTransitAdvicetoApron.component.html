@@ -1,0 +1,289 @@
+<ngc-titlebar title="ThroughTransit.SendThroughTransitAdvice" (print)="onprint()" (clear)="onClear()"
+  (cancel)="onCancel($event)"></ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='transhipment.flight.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='Flight$Flight_Type' formControlName="flightType" [width]="80"
+            upperCase="true" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='transhipment.shift'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='EXPORT$SHIFT' formControlName="shift"
+            [disabled]="form.get('flightType').value == 'C' || form.get('flightType').value == null "
+            [required]="form.get('flightType').value == 'P'" [width]="100">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" upperCase="true" formControlName="adviceDate"
+            [disabled]="form.get('flightType').value == 'C'|| form.get('flightType').value == null "
+            [required]="form.get('flightType').value == 'P'">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="form.get('flightType').value == 'P'" feature="Exp.Transhipment.SendTransitAdvice">
+        <ngc-label label="g.carrier.group"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroupCode"
+            sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA" sourceType="query" [width]="100" [noCache]="true"
+            (select)="getCarrierCodeByCarrierGroup($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="form.get('flightType').value == 'P'" feature="Exp.Transhipment.SendTransitAdvice">
+        <ngc-label label='g.carrierCode'></ngc-label>
+        <div>
+          <ngc-lov formControlName='carrierCode'  width='40px'  upperCase='true'  sourceId='CARRIER'
+             title='Carrier Type' [sourceParameters]="carrierGroupCodeParam"  dataField='code' displayMember="code"
+             [dropDownWidth]='60'  [width]='50'>
+            <ngc-data-column text='Carrier'  dataField='code'  [width]='100'>
+            </ngc-data-column>
+            <ngc-data-column text='Description'  dataField='desc'  [width]='150'>
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="center">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-label value='g.or'></ngc-label>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='transhipment.outbound.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="80" upperCase="true" formControlName="outboundFlight"
+            required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="100" upperCase="true" formControlName="outboundFlightDate"
+            required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        {{header}}
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label=' '></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.stt.seq.num'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.stt.inbound.outbound.flight' width="80"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.origin.dest.m'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.uld'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.awb'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.pieces'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.weight'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='awb.natureofgoods'></ngc-label>
+              </th>
+              <th width='150'>
+                <ngc-label label='g.shc'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.transfer.type'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.remarks'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.status'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="connectingFlights">
+            <ng-container *ngFor="let item of form.get('connectingFlights').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-checkbox formControlName='select'></ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-display formControlName='flightPairSequence'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='inboundOutboundFlight'></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName='originDestination'></ngc-display>
+                </td>
+                <td colspan="9">
+                </td>
+              </tr>
+              <ng-container *ngIf="form.get(['connectingFlights', index, 'uldWithShipments']).controls.length > 0"
+                formArrayName="uldWithShipments">
+                <ng-container
+                  *ngFor="let subItem of form.get(['connectingFlights', index, 'uldWithShipments']).controls; let subIndex=index"
+                  [formGroupName]="subIndex">
+                  <tr>
+                    <td colspan='4'>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='uldNumber' [width]='100'></ngc-display>
+                    </td>
+                    <td colspan="2"></td>
+                    <td>
+                      <ngc-weightdisplay formControlName='weight' [width]='100'></ngc-weightdisplay>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='natureOfGoods' [width]='100'></ngc-display>
+                    </td>
+                    <td width='150'>
+                      <ngc-taginput formArrayName='shcList' dataField="code" viewMode="readonly" [width]='80'>
+                      </ngc-taginput>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='transferType' [width]='100'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='remarks' [width]='100'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='status' [width]='100'></ngc-display>
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+              <ng-container *ngIf="form.get(['connectingFlights', index, 'bulkShipments']).controls.length > 0"
+                formArrayName="bulkShipments">
+                <ng-container
+                  *ngFor="let subItem of form.get(['connectingFlights', index, 'bulkShipments']).controls; let subIndex=index"
+                  [formGroupName]="subIndex">
+                  <tr>
+                    <td colspan='4'>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='location' [width]='100'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='shipmentNumber' [width]='100'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-piecesdisplay formControlName='pieces' [width]='100'></ngc-piecesdisplay>
+                    </td>
+                    <td>
+                      <ngc-weightdisplay formControlName='weight' [width]='100'></ngc-weightdisplay>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='natureOfGoods' [width]='100'></ngc-display>
+                    </td>
+                    <td width='150'>
+                      <ngc-taginput formArrayName='shcList' dataField="code" viewMode="readonly" [width]='80'>
+                      </ngc-taginput>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='transferType' [width]='100'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='remarks' [width]='100'></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='status' [width]='100'></ngc-display>
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #sendWindow [width]="500" [height]="200" title="export.stt.to.resend" [showCloseButton]="true">
+    <ngc-container type="tab">
+
+      <!-- TTWAAPRON_ADDRESS -->
+      <ngc-row>
+        <ngc-column>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="export.stt.from.address"></ngc-label>
+                <ngc-input formControlName="fromAddress" required></ngc-input>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.stt.to.address"></ngc-label>
+          <ngc-taginput formControlName="adressList" [disabled]="insertotheraddresses" dataField="code" required>
+          </ngc-taginput>
+
+
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+
+
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="sentAll()" value="export.sent.all"></ngc-button>
+          </ngc-column>
+          <ngc-column align="right">
+            <ngc-button (click)="insertOtherAddresses()" value="export.stt.insert.other.addresses"></ngc-button>
+          </ngc-column>
+          <ngc-column align="right">
+            <ngc-button (click)="reSend()" value="g.send"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-report  #reportWindow title="g.report"  reportId='exportttm_UI_ModifiedNew'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer entityAttribute="Exp.Transhipment.SendTransitAdvice">
+  <ngc-row *ngIf="searchFlag">
+    <ngc-column align="center">
+      <ngc-button label="flight.mail" (click)="send()" [disabled]="adviceSentFlag"></ngc-button>
+      <ngc-button label="tt.sendupdate" (click)="sendUpdate()" [disabled]="!adviceSentFlag"></ngc-button>
+      <ngc-button label="tt.resend" (click)="sendWindowOpen()" [disabled]="!adviceSentFlag"></ngc-button>
+      <ngc-button label="tt.throughNavigate" (click)="onThroughTransit()"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

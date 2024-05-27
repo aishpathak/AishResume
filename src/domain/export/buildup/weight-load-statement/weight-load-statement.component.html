@@ -1,0 +1,272 @@
+<ngc-titlebar title='weight.load.stmt' [disableSave]="this.form.get('status').value == 'DEP' || 
+this.form.get('finalize').value" (print)="printReport()" (save)="globalSave(false)" (onClear)="onClear()"
+  (cancel)="onCancel()">
+</ngc-titlebar>
+<!-- *********************************************************************************************** -->
+<!-- SEARCH SECTION STARTS  -->
+<form [formGroup]="formSearch">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="90" formControlName="flightKey" upperCase="true" required
+            (ngModelChange)="onSearchChange()">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required width='100px' formControlName="flightOriginDate"
+            (ngModelChange)="onSearchChange()">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <br>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- SEARCH SECTION ENDS  -->
+
+<!-- Search Result Section STARTS  -->
+<form [formGroup]="form">
+  <!-- Flight Result Section STARTS  -->
+  <ngc-container type='tab' *ngIf="showPage">
+    <ngc-row>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="flight.std"></ngc-label>
+        </div>
+        <ngc-display formControlName="std"></ngc-display>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="flight.etd"></ngc-label>
+        </div>
+        <ngc-display formControlName="etd"></ngc-display>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="flight.segment"></ngc-label>
+        </div>
+        <ngc-display formControlName="routingInfo" color="blue"></ngc-display>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="aByCReg"></ngc-label>
+        </div>
+        <ngc-display formControlName="aircraftRegistration"></ngc-display>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='export.notoc.result.flightpaxcao'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightType"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='wrkLst.Aircraft'></ngc-label>
+        <div>
+          <ngc-display formControlName="aircraftType"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showPage" type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='g.finalize.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="wlsFinalizeDate" type="displayDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='export.dls.finalize.status'></ngc-label>
+        <div>
+          <ngc-display formControlName="wlsStatus"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" align="left">
+        <div>
+          <ngc-label label="flight.segment"></ngc-label>
+        </div>
+        <ngc-dropdownlist accessEnableOn="r" sourceId="FLIGHTSEGMENT" [width]='70' formControlName='flightSegmentId'
+          [autoSelect]="true" [noCache]="true"
+          [sourceParameters]="{ 'parameter1': this.formSearch.get('flightKey').value, 'parameter2':this.formSearch.get('flightOriginDate').value }"
+          sourceType="query">
+        </ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="imp.completed.m"></ngc-label>
+        <div>
+          <ng-container *ngIf="form.controls.weightLoadStatementULDTrolleyList.length != 0">
+            <ngc-display formControlName="uldTrolleyCountAssignedDeckAndPos"></ngc-display>/
+            <ngc-display [value]="this.form.get(['weightLoadStatementULDTrolleyList']).value.length"></ngc-display>
+          </ng-container>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button value='uld.finalize' (click)="finalizeWLS()"
+            [disabled]="this.form.get('status').value == 'DEP' || this.form.get('finalize').value">
+          </ngc-button>
+          <ngc-button value='uld.unfinalize' (click)="unFinalizeWLS()"
+            [disabled]="this.form.get('status').value == 'DEP' || !this.form.get('finalize').value">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- Flight Result Section ENDS  -->
+
+  <!--ULD/Trolley Data Table Section Starts -->
+  <ngc-container *ngIf="showPage" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="uld.bt.code"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.dest"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="transhipment.contour"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="dls.gross.Weight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="man_Wgt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="dls.tare.wt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="net_wgt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.shc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="dls.deck"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.postion"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="dls.seq"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="dls.remark"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="weightLoadStatementULDTrolleyList">
+            <tr *ngFor="let item of form.controls.weightLoadStatementULDTrolleyList.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display align="center" cellsAlign="center" value={{index+1}}></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="uldTrolleyNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="destination"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="heightCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="actualWeight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-weightdisplay align="center" cellsAlign="center" formControlName="manifestWeight">
+                </ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-weightdisplay formControlName="tareWeight"></ngc-weightdisplay>
+              </td>
+              <td>
+                <ngc-display formControlName="netWeight"></ngc-display>
+              </td>
+              <td>
+                <ngc-display align="center" cellsAlign="center" formControlName="shc"></ngc-display>
+              </td>
+              <td>
+                <div>
+                  <ngc-dropdownlist accessEnableOn="r" formControlName="deck" sourceId="ULD$Deck" [autoSelect]="false"
+                    [width]="100" [disabled]="this.form.get('status').value == 'DEP' || this.form.get('finalize').value"
+                    required></ngc-dropdownlist>
+                </div>
+              </td>
+              <td>
+                <ngc-alphanuminput formControlName="position"
+                  [disabled]="this.form.get('status').value == 'DEP' || this.form.get('finalize').value">
+                </ngc-alphanuminput>
+              </td>
+              <td>
+                <ngc-input formControlName="priorityOfLoading"
+                  [disabled]="this.form.get('status').value == 'DEP' || this.form.get('finalize').value">
+                </ngc-input>
+              </td>
+              <td>
+                <ngc-display align="center" cellsAlign="center" formControlName="remarks"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--ULD/Trolley Data Table Section Ends -->
+
+  <!--Logged in User data Section Starts -->
+  <ngc-container *ngIf="showPage" type="tab">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label="export.preparedBy"></ngc-label>
+        <div>
+          <ngc-input formControlName="preparedBy" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.telephone"></ngc-label>
+        <div>
+          <ngc-phoneinput formControlName="telephoneNo"></ngc-phoneinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label="g.checkedby"></ngc-label>
+        <div>
+          <ngc-input formControlName="checkedBy" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="3">
+        <ngc-label label="g.remarks"></ngc-label>
+        <div>
+          <ngc-input formControlName="remarks"></ngc-input>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--Logged in User data Section Ends -->
+  <ngc-report format='xls' #reportWindow *ngIf="form.get('reportTemplate').value=='HX' ||
+    form.get('reportTemplate').value=='RH'" title=" g.report"  reportId='Deadload_Weight_Statement'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='xls' #reportWindow *ngIf="form.get('reportTemplate').value=='Standard'" title=" g.report"
+     reportId='Standard_Weight_Load_statement'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<!-- Search Result Section ENDS  -->

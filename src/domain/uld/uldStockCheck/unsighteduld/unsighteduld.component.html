@@ -1,0 +1,188 @@
+<form [formGroup]="unSightedUldsForm">
+  <ngc-titlebar title="uld.title.Unsighted" (cancel)="onCancel($event)" (save)="onSave()" (clear)="onClear($event)"
+    (print)="onPrint()"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='uld.carrier'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" required="true" formControlName="carrierCode" displayMember="code"
+            upperCase="true"  [dropDownWidth]='60' dataField="code" [width]="75" sourceId='CARRIER' displayMember="code"
+            (select)="onSelectCarrier($event)">
+            <ngc-data-column text="uld.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='uld.heldby'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="Uld_Location" [width]="100" [dropDownWidth]="100"
+            formControlName="apronCargoLocation" (select)="getHeldBy($event)" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='uld.uld'></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" formControlName="uldKey"></ngc-uldinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1" *ngIf="uldGroupFeatureEnabled" >
+        <ngc-label label='imp.uld.grp'></ngc-label>
+        <!--Lov to select UldGroup-->
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldGroup" sourceId='ULDGROUP' title='imp.uld.grp'
+            dataField='code' width='70px' upperCase='true' (select)="onSelectUldGroup($event)" displayMember="code"
+             [dropDownWidth]='60'>
+            <ngc-data-column text="imp.uld.grp" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='uld.uld.type'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldType" displayMember="code"  [dropDownWidth]='60'
+            upperCase="true" sourceId='ULDTYPE' title='uld.uld.type' dataField='code' [dropDownWidth]="60" [width]="50"
+            (select)="onSelectUldType($event)">
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="6">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="tableFlag" type="tab">
+    <ngc-row>
+      <ngc-column [column]="4"></ngc-column>
+      <ngc-column align='right'>
+        <ngc-button feature='ULD.Unsighted.AutoSighting' value="uld.autosighting" (click)="autoSighting()"></ngc-button>
+        <ngc-button value="uld.confirmsighted" (click)="confirmSighted()"></ngc-button>
+        <ngc-button value="uld.confirmmissing" (click)="confirmMissingPopup($event)"></ngc-button>
+        <ngc-button value="uld.confirmdelete" (click)="confirmDelete($event)"></ngc-button>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ng-container *ngIf="tableFlag">
+          <ngc-checkbox formControlName="checkAll" (click)="checkAll()"></ngc-checkbox>
+          <ngc-label label="uld.select.all"></ngc-label>
+        </ng-container>
+        <ngc-edittable *ngIf="tableFlag" formArrayName="unsightedUldsList">
+          <ngc-data-column text="uld.select" type="check" align="center" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox accessEnableOn="r" formControlName="selectedCheckBox"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.uld.number" [width]="100" align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="uldKey"
+                  [ngClass]="{'redtext': (unSightedUldsForm.get(['unsightedUldsList', group, 'uldStatus']).value == 'ORA' || unSightedUldsForm.get(['unsightedUldsList',group, 'uldStatus']).value == 'ORP') && unSightedUldsForm.get(['unsightedUldsList', group, 'apronCargoLocation']).value=='Apron'}">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.usedby" [width]="100" align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="handlingCarrierCode"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.conditiontype" [width]="100" align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist sourceId="ULD$ULD_TRANSFER_CONDITION_TYP" [width]="103" [dropDownWidth]="103"
+                  formControlName="uldConditionType"></ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.heldby" [width]="100" align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist sourceId="Uld_Location"
+                  [disabled]="(unSightedUldsForm.get(['unsightedUldsList', group, 'uldStatus']).value == 'ORP' || unSightedUldsForm.get(['unsightedUldsList',group, 'uldStatus']).value == 'ORA') && unSightedUldsForm.get(['unsightedUldsList', group, 'apronCargoLocation']).value=='Cargo'"
+                  [width]="100" [dropDownWidth]="100" formControlName="apronCargoLocation" required>
+                </ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.stockarea" [width]="180" align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-column
+                  *ngIf="unSightedUldsForm.get(['unsightedUldsList', group, 'apronCargoLocation']).value=='Apron'">
+                  <ngc-dropdownlist [width]="180" sourceId="Uld_Location$Apron" [dropDownWidth]="158"
+                    formControlName="stockCheckAreaCode"></ngc-dropdownlist>
+                </ngc-column>
+                <ngc-column
+                  *ngIf="unSightedUldsForm.get(['unsightedUldsList', group, 'apronCargoLocation']).value=='Cargo'">
+                  <ngc-dropdownlist [width]="180" sourceId="Uld_Location$Cargo" [dropDownWidth]="158"
+                    formControlName="stockCheckAreaCode"
+                    [disabled]="unSightedUldsForm.get(['unsightedUldsList', group, 'stockCheckAreaCode']).value=='AGENT WAREHOUSE' || unSightedUldsForm.get(['unsightedUldsList', group, 'stockCheckAreaCode']).value=='REPAIR WAREHOUSE'">
+                  </ngc-dropdownlist>
+                </ngc-column>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.damagedetails" [width]="150 " align="left" cellsAlign="center">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onLinkClick(group)" iconType="edit"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.lastmovementtype" [width]="200 " align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="uldStatus"
+                  [ngClass]="{'redtext': (unSightedUldsForm.get(['unsightedUldsList', group, 'uldStatus']).value == 'ORA' || unSightedUldsForm.get(['unsightedUldsList', group, 'uldStatus']).value == 'ORP') && unSightedUldsForm.get(['unsightedUldsList', group, 'apronCargoLocation']).value=='Apron'}">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="uld.movementdetails" [width]="200" align="left" cellsAlign="left">
+            <ng-template let-data let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="flightkey"></ngc-display>
+                &nbsp;
+                <ngc-display formControlName="movementDetails" [onlyDate]="true"></ngc-display>
+                &nbsp;
+                <ngc-display formControlName="movementDetails" [onlyTime]="true"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" reportId='UnsightedULDs' [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindow1 title="g.report" reportId='UnsightedULDs_CompleteCycle'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column *ngIf="tableFlag" type="tab">
+      <ngc-button accessEnableOn="r" value="1.uld" (click)="uldInOutMovement($event)"></ngc-button>
+      <ngc-button accessEnableOn="r" value="2.uld" (click)="displayUld($event)"></ngc-button>
+      <ngc-button accessEnableOn="r" value="3.uld" (click)="auditTrail($event)"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

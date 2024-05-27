@@ -1,0 +1,205 @@
+<ngc-titlebar title="tracing.report.title"  (clear)="onClear($event)"  (save)="onSave()" (cancel)="onBack($event)">
+</ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="tracing.careerGrouplabel" entityAttribute="Tracing.CarrierGroupCode"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroupCode"
+            sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA" sourceType="query" [width]="100" [noCache]="true"
+            (select)="onCarierGroup($event)" entityAttribute="Tracing.CarrierGroupCode"></ngc-dropdownlist>
+        </div>
+
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrierCode"
+            (ngModelChange)="getCarrierCodeByCarrierGroup($event)" upperCase='true' sourceId='DISPLAY_CARRIER_CODE'
+            sourceType='query' title="g.carrierCode" [sourceParameters]="carrierGroupCodeParam" dataField='code'
+            [width]="60" [noCache]="true" [validOnly]='true'>
+            <ngc-data-column text="g.carrierCode" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="6" [grid48]="true">
+        <ngc-label value='g.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" formControlName="fromDate" [showCalendarButton]="true"
+            required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="6" [grid48]="true">
+        <ngc-label value='g.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" formControlName="toDate" [showCalendarButton]="true"
+            [min]='form.controls.fromDate.value' required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="tracing.justifiable"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="justifiableCaseFlag"
+            sourceId='BlackList$BlacklistIndicator' [width]="100" required></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" align="left">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="tracing.search" (click)="onSearch()" verticalAlign="bottom">
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value="export.excel" (click)="exportToExcel()"></ngc-button>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="searchFlag" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable (linkClick)='onLocation($event)' formArrayName="tracingLocationList" [pageable]="true"
+          [pageSize]="10">
+          <ngc-data-column text="import.irregurlarity" [width]="185" dataField="irregularityTypeCode" dataType="string"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text="tracing.tracing.date" [width]="185" dataField="createdDateTime" dataType="string"
+            cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="createdDateTime" [onlyDate]="true"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.export.import" [width]="80" dataField="importExportIndicator"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text="import.ReferenceNumber" [width]="90" dataField="shipmentNumber" cellsAlign="center"
+            align="center"></ngc-data-column>
+          <ngc-data-column text="cargoSurvey.hawbNumber" [width]="100" dataField="houseNumber" cellsAlign="center"
+            align="center"></ngc-data-column>
+          <ngc-data-column text="tracing.irrpcs.by.totalpcs" [width]="100" dataField="irregularityPiecesToShow"
+            cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display  formControlName="irregularityPiecesToShow" cellsAlign="center" align="center">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.irrweight.by.totalweight" [width]="100" dataField="irregularityWeightToShow"
+            cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display  formControlName="irregularityWeightToShow" cellsAlign="center" align="center">
+                </ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="tracing.flight" [width]="60" dataField="flightKey" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text="tracing.flightdate" [width]="55" dataField="flightDate" cellsAlign="center"
+            align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='tracing.org' [width]="65" dataField="origin" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text='tracing.des' [width]="60" dataField="destination" cellsAlign="center" align="center">
+          </ngc-data-column>
+          <ngc-data-column text='import.natureOfGoods' [width]="60" dataField="natureOfGoodsDescription"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text='tracing.location.info.br' iconType='delete' type='link' [width]="60">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" value="" iconType="location" (click)="onLocation(group)"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='tracing.import.staff.name.br' [width]="70" dataField="importStaffName"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text='tracing.export.staff.name.br' [width]="80" dataField="exportStaffName"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text='tracing.justifiable' [width]="60" dataField="justifiableCaseFlag" cellsAlign="center"
+            align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-dropdownlist formControlName="justifiableCaseFlag" sourceId="IAHolder$IA_Holder" width="50"
+                  [noBlank]="true" required></ngc-dropdownlist>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='import.remark' [width]="115" dataField="remarks" cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-textarea [width]="300" [height]="50" formControlName="remarks" [maxlength]="250"></ngc-textarea>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-window #windowData [width]="400" [height]="500" title="{{locationInformationData}}"
+          [showCloseButton]="true">
+          <ngc-container type="tab">
+            <ngc-row>
+              <ngc-column>
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label value="shp.shpLocation"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="import.pieces"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="shp.warehouseLocation"></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label value="imp.handlingArea"></ngc-label>
+                      </th>
+                    </tr>
+                  </thead>
+                  <tbody [formArrayName]="locationArray">
+                    <tr *ngFor="let sitem of locationArray; let sindex=index" [formGroupName]="sindex">
+                      <td>
+                        <ngc-display [value]="locationArray[sindex].shipmentLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display [value]="locationArray[sindex].pieces"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display [value]="locationArray[sindex].warehouseLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display [value]="locationArray[sindex].handlingArea"></ngc-display>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-window>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" format="xls"  reportId='generateTracingReport'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>

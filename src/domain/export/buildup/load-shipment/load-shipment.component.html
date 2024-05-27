@@ -1,0 +1,670 @@
+<ngc-titlebar title='load.screen.loadshipment' (save)="onSave()" [disableSave]="!loadingFlag"></ngc-titlebar>
+<form [formGroup]='LoadShipmentForm'>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label value='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput onlyDate='true' required [width]="90" formControlName="flightOriginDate">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <br />
+        <div>
+          <ngc-button value='g.search' (click)="onSearch()" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="loadingFlag" width="100px">
+        <br />
+        <div>
+          <ngc-button label="loadshipment.label.load.shipment.by.uld" (click)='onUldClick()'
+            [disabled]="loadShipmentEnableFlag">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="loadingFlag" width="100px">
+        <br />
+        <div>
+          <ngc-button label="loadshipment.label.load.shipment.by.awb" (click)='onAwbClick()'
+            [disabled]="loadShipmentEnableFlag">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="loadingFlag" column="1.5">
+        <br />
+        <div>
+          <ngc-button label="loadshipment.label.buildup.completed" (click)='onBuildUpCompleted()'> </ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column *ngIf="loadingFlag">
+        <br />
+        <div>
+          <ngc-button value='loadshipment.label.bookMultipleShipment' (click)='onMultipleShipment()'></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column *ngIf="loadingFlag">
+        <br />
+        <div>
+          <ngc-button label="loadshipment.label.eccFlightPlannerList" (click)='onClickFlightPlanner()'> </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='flightFlag' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='flight.Flight'></ngc-label>
+        <div>
+          <ngc-display formControlName='flightKey'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value='flight.date'></ngc-label>
+        <div>
+          <ngc-display [onlyDate]="true" formControlName='flightOriginDate'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value='flight.std'></ngc-label>
+        <div>
+          <ngc-display formControlName='std'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value='flight.etd'></ngc-label>
+        <div>
+          <ngc-display formControlName='etd'></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value='flight.segment'></ngc-label>
+        <div>
+          <ngc-display formControlName='segment' color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="12">
+        <br>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column [column]="35" [grid72]="true" *ngIf="toBeLoadFlag">
+        <ngc-label label="loadshipment.label.yet.to.be.load"></ngc-label>
+        <ngc-datatable formArrayName="toBeLoadedList" [groups]="['segment']" [pageable]="false"
+          (linkClick)="onLinkClick($event)" [enablePageSizeHeight]="false">
+          <ngc-data-column text="flight.segment" dataField="segment" [hidden]="true" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.select" dataField="select" type="check" [width]="70" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.origin" dataField="origin" [width]="150" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="awb.destination" dataField="destination" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="Shipment Pieces Weight" dataField="shipmentPiecesWeight" [width]="150"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Booking pieces Weight" dataField="bookingPiecesWeight" [width]="150"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Booking Status" dataField="bookingStatusCode" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="Available to Load Pieces Weight" dataField="remainingPiecesWeight" [width]="170"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shcs" [width]="150" cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+      <ngc-column></ngc-column>
+      <ngc-column [column]="35" [grid72]="true" *ngIf="loadFlag">
+        <ngc-label label="loadshipment.label.loaded.shipment"></ngc-label>
+        <ngc-datatable formArrayName="loadedUldList" [groups]="['segment', 'assUldTrolleyNo']"
+          [groupsRenderer]="groupsRenderer" [pageable]="false" (linkClick)="updateWeight($event)"
+          [enablePageSizeHeight]="false">
+          <ngc-data-column text="flight.segment" dataField="segment" [hidden]="true" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="ULD/TrolleyNumber" dataField="assUldTrolleyNo" [hidden]="true" [width]="150"
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="150" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.loaded.pieces" dataField="loadedPieces" [width]="150" cellsAlign="right"
+            type="displayPieces"></ngc-data-column>
+          <ngc-data-column text="Loaded weight" dataField="loadedWeight" [width]="150" cellsAlign="right"
+            type="displayWeight"></ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shcs" [width]="150" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Tag Numbers" dataField="tagNo" [width]="150" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Dry Ice Weight" dataField="dryIceWeight" [width]="150" cellsAlign="right"
+            type="displayWeight"></ngc-data-column>
+          <ngc-data-column text="Update Weight" [width]="150" dataField="link" iconType="edit" cellsAlign="center"
+            type="link"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="12">
+        <br>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- Load Shipment by ULD window start from here -->
+  <ngc-window #uldWindow [showCloseButton]="true" [width]="1250" [height]='600' title="export.load.shipment.by.uld"
+    (open)="onUldWindowOpen()" (close)="onCancelUldWindow()">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='loadshipment.label.uld.trolley'></ngc-label>
+          <div>
+            <ngc-lov formControlName="assUldTrolleyNo" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+              [width]="110" dataField='code' (select)="onSelect($event)" [sourceParameters]="uldSourceParameter"
+              [noCache]="true" required patternName='alphanum'>
+              <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+              <ngc-data-column text="uld.uldNumbers" dataField="param2" [width]="80"></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label='contentcode'></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="WH_CONTENTCODE" [width]='80' sourceType="query" formControlName='contentCode'>
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+        <ngc-column>
+          <ngc-label label='loadshipment.label.contour.code'></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="CONTOURCODE" [width]='90' [dropDownHeight]="150" [dropDownWidth]="80"
+              sourceType="query" formControlName='heightCode'></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+        <ngc-column *ngIf="this.LoadShipmentForm.get('contentCode').value !== 'M'">
+          <ngc-label label='loadshipment.label.phc.indicator'></ngc-label>
+          <div>
+            <ngc-checkbox formControlName="phcIndicator"></ngc-checkbox>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-container type="tab">
+            <ngc-row>
+              <ngc-column>
+                <div>
+                  <br />
+                </div>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="awbnumber" [width]="35"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="pieces" [width]="10"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="weight" [width]="18"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="awb.shipment.loc" [width]="20"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="awb.warehouse.loc" [width]="20"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="export.load.loc.pieces" [width]="15"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="export.load.loc.weight" [width]="15"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="dryIce" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.load.pieces.to.move" [width]="18"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="export.load.weight.to.move" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.load.dry.ice.to.move" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.shc" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.tag.number" [width]="20"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.trm.number" [width]="20"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <!-- Awb level Array start from here -->
+            <tbody formArrayName="uldShipmentArray">
+              <ng-container *ngFor="let record of LoadShipmentForm.get('uldShipmentArray').controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td>
+                    <ngc-display formControlName="shipmentNumber" [width]="35"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-piecesdisplay formControlName="pieces" [width]="25"></ngc-piecesdisplay>
+                  </td>
+                  <td>
+                    <ngc-weightdisplay formControlName="weight" [width]="25"></ngc-weightdisplay>
+                  </td>
+                  <td colspan="9">
+                  </td>
+                </tr>
+                <!-- Shipment level array start from here -->
+                <ng-container formArrayName="uldInventory">
+                  <ng-container *ngFor="let childRecord of record.get('uldInventory').controls; let subIndex=index"
+                    [formGroupName]="subIndex">
+                    <tr>
+                      <td colspan="3">
+                      </td>
+                      <td>
+                        <ngc-display formControlName="shipmentLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="warehouseLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="locationPiecs" [width]="50"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="locationWeight" [width]="50"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="dryIceWeight" [width]="25"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-piecesinput formControlName="movePiecs"
+                          (ngModelChange)="onPiecesChange($event,index,subIndex)"
+                          *ngIf="!childRecord.get('locked').value && !record.get('shipmentLockFlag').value">
+                        </ngc-piecesinput>
+                        <i class="fa fa-lock fa-2x" style="color:red"
+                          *ngIf="childRecord.get('locked').value || record.get('shipmentLockFlag').value"></i>
+                      </td>
+                      <td>
+                        <ngc-weightinput formControlName="moveWeight"
+                          *ngIf="!childRecord.get('locked').value && !record.get('shipmentLockFlag').value">
+                        </ngc-weightinput>
+                        <i class="fa fa-lock fa-2x" style="color:red"
+                          *ngIf="childRecord.get('locked').value || record.get('shipmentLockFlag').value"></i>
+                      </td>
+                      <td>
+                        <ngc-input formControlName="moveDryIce" [width]="70"
+                          [disabled]="childRecord.get('locked').value || record.get('shipmentLockFlag').value">
+                        </ngc-input>
+                      </td>
+                      <td>
+                        <ng-container *ngIf="6 > childRecord.get('dropDownShcList').value.length">
+                          <ngc-dropdownlist [autoSelect]="true" [multiSelect]="true" formControlName="shcList"
+                            [source]="childRecord.get('dropDownShcList').value">
+                          </ngc-dropdownlist>
+                        </ng-container>
+                        <ng-container *ngIf="childRecord.get('dropDownShcList').value.length > 5">
+                          <ngc-dropdownlist [autoSelect]="true" [multiSelect]="true" formControlName="shcList"
+                            [width]="childRecord.get('dropDownShcList').value.length * 35"
+                            [source]="childRecord.get('dropDownShcList').value">
+                          </ngc-dropdownlist>
+                        </ng-container>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist [multiSelect]="true" formControlName="tagNumberList" [dropDownWidth]="80"
+                          [source]="childRecord.get('dropDownTagNumberList').value" [width]="80"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="trmNumber"></ngc-display>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+                <!-- Shipment level array ends here -->
+              </ng-container>
+              <!-- AWB level by array ends  here -->
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <div>
+        </div>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button [disabled]="confirmLoadFlag" value='loadshipment.label.load' (click)='onLoad()'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!-- Load Shipment by ULD window end here -->
+
+  <!--Load by AWB popup start from here  -->
+  <ngc-window #awbWindow [showCloseButton]="true" [width]="1600" [height]='600' title="export.load.shipment.by.awb"
+    (open)="onAwbWindowOpen" (close)="onAwbWindowClose()">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-container tye="tab">
+            <ngc-row>
+              <ngc-column>
+                <div>
+                  <br />
+                </div>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="awbnumber" [width]="35"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="pieces" [width]="10"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="weight" [width]="18"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="loadshipment.label.uld.trolley"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="contentcode"> </ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label='loadshipment.label.contour.code'></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label='loadshipment.label.phc.indicator'></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.shipment.loc" [width]="20"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="awb.warehouse.loc" [width]="20"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.load.loc.pieces" [width]="15"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="export.load.loc.weight" [width]="15"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="dryIce" [width]="18"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="export.load.pieces.to.move" [width]="18"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="export.load.weight.to.move" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.load.dry.ice.to.move" [width]="18"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="g.shc" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.tag.number" [width]="20"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <!-- AWB level array starts from here -->
+            <tbody formArrayName="uldShipmentArray">
+              <ng-container *ngFor="let record of LoadShipmentForm.get('uldShipmentArray').controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td>
+                    <ngc-display formControlName="shipmentNumber" [width]="35"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-piecesdisplay formControlName="pieces" [width]="25"></ngc-piecesdisplay>
+                  </td>
+                  <td>
+                    <ngc-weightdisplay formControlName="weight" [width]="25"></ngc-weightdisplay>
+                  </td>
+                  <td>
+                    <ngc-lov formControlName="assUldTrolleyNo" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                      [width]="110" dataField='code' (select)="onULDTrolleyNoSelect($event, index)"
+                      [sourceParameters]="uldSourceParameter" [noCache]="true" patternName='alphanum'>
+                      <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                    </ngc-lov>
+                  </td>
+                  <td>
+
+                    <ngc-dropdownlist sourceId="WH_CONTENTCODE" [width]='80' sourceType="query"
+                      formControlName='contentCode'></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ngc-dropdownlist sourceId="CONTOURCODE" [width]='90' [dropDownHeight]="150" [dropDownWidth]="80"
+                      sourceType="query" formControlName='heightCode'></ngc-dropdownlist>
+                  </td>
+                  <td>
+                    <ng-container *ngIf="record.get('contentCode').value !== 'M'">
+                      <ngc-checkbox formControlName="phcIndicator"></ngc-checkbox>
+                    </ng-container>
+                  </td>
+                  <td colspan="8"></td>
+                </tr>
+                <!-- Shipment level array starts from here -->
+                <ng-container formArrayName="uldInventory">
+                  <ng-container *ngFor="let childRecord of record.get('uldInventory').controls; let subIndex=index"
+                    [formGroupName]="subIndex">
+                    <tr>
+                      <td colspan="7"></td>
+                      <td>
+                        <ngc-display formControlName="shipmentLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="warehouseLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="locationPiecs" [width]="50"></ngc-piecesdisplay>
+                      </td>
+
+                      <td>
+                        <ngc-weightdisplay formControlName="locationWeight" [width]="50"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="dryIceWeight" [width]="25"></ngc-weightdisplay>
+                      </td>
+
+                      <td>
+                        <ngc-piecesinput formControlName="movePiecs"
+                          (ngModelChange)="onPiecesChange($event,index,subIndex)"
+                          *ngIf="!childRecord.get('locked').value && !record.get('shipmentLockFlag').value">
+                        </ngc-piecesinput>
+                        <i class="fa fa-lock fa-2x" style="color:red"
+                          *ngIf="childRecord.get('locked').value || record.get('shipmentLockFlag').value"></i>
+                      </td>
+                      <td>
+                        <ngc-weightinput formControlName="moveWeight"
+                          *ngIf="!childRecord.get('locked').value && !record.get('shipmentLockFlag').value">
+                        </ngc-weightinput>
+                        <i class="fa fa-lock fa-2x" style="color:red"
+                          *ngIf="childRecord.get('locked').value || record.get('shipmentLockFlag').value"></i>
+                      </td>
+
+                      <!-- <td>
+                        <ngc-piecesinput formControlName="movePiecs" (ngModelChange)="onPiecesChange($event,index,subIndex)" [disabled]="childRecord.get('locked').value || record.get('shipmentLockFlag').value">
+                        </ngc-piecesinput>
+                      </td>
+                      <td>
+                        <ngc-weightinput formControlName="moveWeight" [disabled]="childRecord.get('locked').value || record.get('shipmentLockFlag').value">
+                        </ngc-weightinput>
+                      </td> -->
+                      <td>
+                        <ngc-numberinput formControlName="moveDryIce" [width]="70" decimalDigits="1"
+                          [disabled]="childRecord.get('locked').value || record.get('shipmentLockFlag').value">
+                        </ngc-numberinput>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist [autoSelect]="true" [multiSelect]="true" formControlName="shcList"
+                          [source]="childRecord.get('dropDownShcList').value" [width]="70"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist [multiSelect]="true" formControlName="tagNumberList" [dropDownWidth]="80"
+                          [source]="childRecord.get('dropDownTagNumberList').value" [width]="80"></ngc-dropdownlist>
+                      </td>
+                    </tr>
+                  </ng-container>
+                </ng-container>
+                <!-- Shipemnt level array ends here -->
+              </ng-container>
+              <!--AWB level array ends here -->
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <div>
+        </div>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button [disabled]="confirmLoadFlag" value='loadshipment.label.load' (click)='onLoad()'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!--Load by ULD popup ends  here  -->
+
+  <!-- Update Loaded Weight window start here -->
+  <ngc-window #updateWeightWindow [showCloseButton]="true" [width]="800" [height]='500' title="export.load.update.loaded.weight">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.uldTrolleyNumber" [width]="35"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.awbnumber" [width]="35"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.loaded.pieces" [width]="35"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.loaded.weight" [width]="35"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.shc" [width]="35"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody formArrayName="updateLoadedWeightArray">
+              <tr *ngFor="let record of LoadShipmentForm.get('updateLoadedWeightArray').controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="assUldTrolleyNo" [width]="35"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="shipmentNumber" [width]="35"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="loadedPieces" [width]="35"></ngc-display>
+                </td>
+                <td>
+                  <ngc-weightinput formControlName="loadedWeight" (ngModelChange)="onUpdateWeightChange($event,index)">
+                  </ngc-weightinput>
+                </td>
+                <td>
+                  <ngc-shcinput formControlName="newShcList"></ngc-shcinput>
+                </td>
+                <td>
+                  <ngc-display formControlName="shipmentDate" [hidden]="true"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="segment" [hidden]="true"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.load.total.loaded.weight"> </ngc-label>
+          <div>
+            <ngc-display [value]="totalPieces + '/'"></ngc-display>
+            <ngc-weightdisplay [value]="totalShipmentWeightBeforeUpdate" decimalDigits="1"> </ngc-weightdisplay>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.load.difference.weight"> </ngc-label>
+          <div>
+            <ngc-display [value]="'0' + '/'"></ngc-display>
+            <ngc-display [value]="totalShipmentWeightAfterUpdate"> </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button value='loadshipment.label.update' (click)='onUpdateWeightButton()'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!-- Update Loaded weight window ends here -->
+</form>
+<!-- Load Shipment Form ends here-->

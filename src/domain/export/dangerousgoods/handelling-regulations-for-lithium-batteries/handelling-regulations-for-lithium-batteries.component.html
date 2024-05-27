@@ -1,0 +1,324 @@
+<form [formGroup]="dgForm">
+  <ngc-titlebar title='DG Handling Regulations for Lithium Batteries' (save)="OnUpdate()" (clear)="onClear()"
+    (cancel)="onBack($event)"></ngc-titlebar>
+  <ngc-container type="sectiontop">
+    <ngc-row height="2">
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column></ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-lov accessEnableOn="r" (select)="getAll($event)" formControlName="uniqueIdentificationNo" required
+          sourceId="RLIRLM_UNIDNO" title="UNIDNO" [width]="159" displayField="code" dataField="param1" UPPERCASE="true"
+          placeHolder="placeholder.unid.number" [displayAllInSuggestion]="true" [selectionByRowId]="true">
+          <ngc-data-column text="export.unid" dataField="code" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.proper.shipping.name" dataField="desc" [width]="500"></ngc-data-column>
+          <ngc-data-column text="export.dg.tech" dataField="parameter5" [width]="50">
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="param3" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.dg.erg" dataField="param4" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.dg.subriskcode" dataField="param5" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.dg.sbr1" dataField="param7" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.dg.imp1" dataField="parameter3" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.dg.sbr2" dataField="parameter2" [width]="50"></ngc-data-column>
+          <ngc-data-column text="export.dg.imp2" dataField="parameter4" [width]="50"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="unid==''">
+        <ngc-dropdownlist accessEnableOn="r" formControlName="impCode" required sourceId="DgImpCode$EliElmImp"
+          [width]="159" [dropDownWidth]="159"></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="unid!=''">
+        <ngc-dropdownlist accessEnableOn="r" formControlName="impCode" required sourceId="DgRegulation$ImpCode"
+          [width]="159" [dropDownWidth]="159"></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-lov accessEnableOn="r" formControlName="carrierCode" sourceId="SATS_CARRIERCODE" title="Carrier"
+          [width]="159" dataField="code" UPPERCASE="true" placeHolder="placeholder.carrier">
+          <ngc-data-column text="g.carrier" dataField="code" [width]="159"></ngc-data-column>
+          <ngc-data-column text="g.carrierName" dataField="desc" [width]="159"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-button accessEnableOn="r" value="g.search" (click)="OnSearchRliRlm()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="sectiontop" *ngIf="flagShowRliRlmRelatedTable">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label="handellingregulation.psn"></ngc-label>
+        <div>
+          <ngc-display formControlName="properShippingName" [width]="300" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="handellingregulation.impcode1"></ngc-label>
+        <div>
+          <ngc-display formControlName="impCode1" [width]="200" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="handellingregulation.class"></ngc-label>
+        <div>
+          <ngc-display formControlName="dgClassCode" [width]="100" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="handellingregulation.erg"></ngc-label>
+        <div>
+          <ngc-display formControlName="emergencyRespondGroup" [width]="100" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="handellingregulation.sbr1"></ngc-label>
+        <div>
+          <ngc-display formControlName="dgSubRiskCode1" [width]="100" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="handellingregulation.imp1"></ngc-label>
+        <div>
+          <ngc-display formControlName="dgSubRiskIMPCode1" [width]="100" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="handellingregulation.sbr2"></ngc-label>
+        <div>
+          <ngc-display formControlName="dgSubRiskCode2" [width]="100" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="handellingregulation.imp2"></ngc-label>
+        <div>
+          <ngc-display formControlName="dgSubRiskIMPCode2" [width]="100" UPPERCASE="true"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="flagShowRliRlmRelatedTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="handellingregulation.rlirlm"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="flagShowRliRlmRelatedTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.carrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.pg"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.mlq"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.pi"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.quantity"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.forbidden"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.upperdeck"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.lowerdeck"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.paxflight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.frtflight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="rliRlmInstructionList">
+            <tr *ngFor="let item of dgForm.controls.rliRlmInstructionList.controls let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="check"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-lov formControlName="carrierCode" required sourceId="SATS_CARRIERCODE" title="Carrier"
+                  [width]="100" dataField="code" UPPERCASE="true">
+                  <ngc-data-column text="g.carrier" dataField="code" displayMember="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.carrierName" dataField="desc" [width]="159">
+                  </ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-dropdownlist formControlName="packingGroupCode" (select)="getPackingInstruction($event)"
+                  sourceId="EXP_DGD$DGD_PG" required [width]="100" [dropDownWidth]="100"></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist (select)="populateData($event, index)" formControlName="dgQuantityFlag"
+                  sourceId="DgHandelling$PIcode" required [width]="100" [dropDownWidth]="100"></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-display formControlName="packingInstruction"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="dgQuantity"></ngc-display>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="forbiddenFlag" (click)="myFunction($event,index)"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="upperDeck" (click)="disableRliForbidden($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="lowerDeck" (click)="disableRliForbidden($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="passengerFlag" (click)="disableRliForbidden($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="freighterFlag" (click)="disableRliForbidden($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-input formControlName="dgRemarks" [width]="700" UPPERCASE="true" maxlength="65"></ngc-input>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="flagShowRliRlmRelatedTable">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value="g.addRow" (click)="clickAddRowRliRlm()"></ngc-button>
+        <ngc-button value="g.delete" (click)="deleteRliRlm()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="flagShowEliElmRelatedTable">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="handellingregulation.elielm"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="flagShowEliElmRelatedTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value=""></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.carrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.imp"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.pi"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.forbidden"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.upperdeck"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.lowerdeck"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.paxflight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.frtflight"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="handellingregulation.remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="addRowArrayForEliElm">
+            <tr *ngFor="let item of dgForm.controls.addRowArrayForEliElm.controls let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-checkbox formControlName="check"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-lov formControlName="carrierCode" required sourceId="SATS_CARRIERCODE" title="Carrier"
+                  [width]="100" dataField="code" UPPERCASE="true">
+                  <ngc-data-column text="g.carrier" dataField="code" displayMember="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.carrierName" dataField="desc" [width]="159">
+                  </ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-input formControlName="impCode" required [width]="100" UPPERCASE=true></ngc-input>
+              </td>
+              <td>
+                <ngc-input formControlName="packingInstruction" required [width]="100"></ngc-input>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="forbiddenFlag" (click)="diasbleAllFlag($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="upperDeck" (click)="diasbleEliForbiddenFlag($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="lowerDeck" (click)="diasbleEliForbiddenFlag($event,index)" [width]="100">
+                </ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="passengerFlag" (click)="diasbleEliForbiddenFlag($event,index)"
+                  [width]="100"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-checkbox formControlName="freighterFlag" (click)="diasbleEliForbiddenFlag($event,index)"
+                  [width]="100"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-input formControlName="dgRemarks" [width]="700" UPPERCASE="true" maxlength="65"></ngc-input>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="flagAddEliElmRelatedTable" type="tab">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label value="&nbsp;"></ngc-label>
+      </ngc-column>
+      <ngc-column column="7"></ngc-column>
+      <ngc-column column="1">
+        <ngc-button value="g.addRow" (click)="clickAddRowEliElm()"></ngc-button>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-button value="g.delete" (click)="DeleteEliElm()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

@@ -1,0 +1,912 @@
+<ngc-titlebar title='Update DLS' [disableSave]="finalizeFlagDisabled" (save)="globalSave(event)"
+  (onClear)="clear(event)" (cancel)="onCancel()">
+</ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label='date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" required width='100px' formControlName="flightOriginDate">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <br>
+        <div>
+          <ngc-button accessEnableOn="r" value='rcar.search' (click)="searchDLS()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="searchResponse">
+        <br>
+        <div *ngIf="searchResponse.finalize">
+          <!--<ngc-label label="flight.status"></ngc-label>-->
+          <strong style="color:red;"> DLS Has Been Finalized -
+            <ngc-display formControlName="finalizeDate"></ngc-display>
+          </strong>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <br>
+        <div *ngIf="showPage">
+          <ngc-button value='DLS Variance' (click)="dlsShortcut()"></ngc-button>
+
+          <ngc-button value='Send DLS' [disabled]="sendDlsFlagDisabled" accessSectionId="SENDDLS" (click)="sendDLS()">
+          </ngc-button>
+
+          <ngc-button accessEnableOn="r" value='Print DLS' (click)="printDLS($event,index)"></ngc-button>
+
+          <!-- <ngc-button value='Send PLD Email' *ngIf='sendPLD' (click)="sendPLDEmail()"></ngc-button> -->
+
+          <ngc-button value='NFM' *ngIf='nfmFlag' (click)="NFM()"></ngc-button>
+
+          <ngc-button value='Finalize DLS' *ngIf="dlsFinalize" [disabled]="finalizeFlagDisabled"
+            accessSectionId="Finalize_DLS" (click)="finalizeDLS()"></ngc-button>
+          <ngc-button value='UnFinalize DLS' *ngIf="!dlsFinalize" (click)="UnfinalizeDLS()"></ngc-button>
+          <ngc-button label="ECC-Flight Planner List" (click)='onClickFlightPlanner()'> </ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1" *ngIf="showPage">
+        <ngc-label label='Finalize Status'></ngc-label>
+        <div>
+          <ngc-display formControlName="dlsStatus"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" *ngIf="showPage">
+
+        <ngc-label label='DLS Version'></ngc-label>
+        <div>
+          <ngc-display formControlName="dlsVersion"></ngc-display>
+
+        </div>
+      </ngc-column>
+
+
+
+    </ngc-row>
+    <ngc-row *ngIf="showPage">
+      <ngc-column>
+        <div>
+          <ngc-label label="flight"></ngc-label>
+        </div>
+        <ngc-display formControlName="flightKey"></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="date"></ngc-label>
+        </div>
+        <ngc-display [onlyDate]="true" formControlName="flightOriginDate"></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="STD"></ngc-label>
+        </div>
+        <ngc-display formControlName="std"></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="ETD"></ngc-label>
+        </div>
+        <ngc-display formControlName="etd"></ngc-display>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="flight.segment"></ngc-label>
+        </div>
+        <ngc-display formControlName="routingInfo" color="blue" emphasis="md"></ngc-display>
+      </ngc-column>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="g.status"></ngc-label>
+        </div>
+        <ngc-display formControlName="status"></ngc-display>
+      </ngc-column>
+      <ngc-column class='text-center'>
+        <div>
+          <ngc-label label="Weight Code"></ngc-label>
+        </div>
+        <ngc-dropdownlist formControlName="weightCode" sourceId='Dls_Export$Weight_Code_DLS' [width]="100" required>
+        </ngc-dropdownlist>
+      </ngc-column>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="A/C Reg"></ngc-label>
+        </div>
+        <ngc-display formControlName="aircraftRegistration"></ngc-display>
+      </ngc-column>
+
+      <ngc-column column="4">
+        <!-- <div>
+          <ngc-label label="ALI"></ngc-label>
+        </div> -->
+        <ngc-row>
+          <ngc-column column='1'>
+            <ngc-label label="Total"></ngc-label>
+          </ngc-column>
+          <ngc-column align="right">
+            <ngc-display formControlName="aliTotal">
+            </ngc-display>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column='1'>
+            <ngc-label label="Remaining"></ngc-label>
+          </ngc-column>
+          <ngc-column align="right">
+            <ngc-display formControlName="aliRemain">
+            </ngc-display>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showPage" align="right">
+      <ngc-column align="right">
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container formGroupName="dls" *ngIf="showPage" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button value='g.delete' [disabled]="finalizeFlagDisabled" (click)="deleteUld()"></ngc-button>
+        <ngc-button value='Fetch Weight' [disabled]="finalizeFlagDisabled" (click)="fetchWeight()"></ngc-button>
+        <ngc-button value='Add ULD' [disabled]="finalizeFlagDisabled" (click)="addULD()"></ngc-button>
+        <ngc-button value='Add Trolley' [disabled]="finalizeFlagDisabled" (click)="addTrolley()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <!--*ngIf="showDataTable"-->
+      <ngc-column *ngIf="showPage">
+        <ngc-datatable formArrayName="uldTrolleyList" [pageable]="false" [groups]="['segmentOrder']"
+          [groupsRenderer]="groupsRenderer" (linkClick)="editULD($event)" [enablePageSizeHeight]="false">
+          <!-- [widthInPixels]="true" -->
+          <ngc-data-column text="Sno" [width]='30' cellsAlign="center" dataField="" [cellsRenderer]="cellsRendererSno">
+          </ngc-data-column>
+          <ngc-data-column text="Sno" [width]='30' hidden="true" cellsAlign="center" dataField="segmentOrder">
+          </ngc-data-column>
+          <ngc-data-column text="SEL <br>BOX" tooltip='SEL BOX' [width]='30' dataField="select" type="check"
+            align="center" cellsAlign="center"></ngc-data-column>
+          <!-- <ngc-data-column text="PRIO" dataField="priorityOfLoading" [pinned]="true" [width]='20' cellsAlign="center">
+          </ngc-data-column> -->
+          <ngc-data-column text="ULD/TROLLEY<br> NO" tooltip='ULD/TROLLEY NO' dataField="uldTrolleyNumber" [width]='100'
+            align="left" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="PHC" [width]='30' dataField="usedForPerishableContainer" cellsAlign="center"
+            type="icon" iconType="yesno" [cellsStyleRenderer]="trolleyCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="ECC" [width]='45' dataField="usedForExpressCourierContainer" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="TT/TTT" dataField="transferType" [width]='45' cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="ACTUAL<br> GROSS WGT" tooltip='ACTUAL GROSS WGT' dataField="actualWeight" [width]='50'
+            cellsAlign="right" [cellsStyleRenderer]="actualWeight"></ngc-data-column>
+          <ngc-data-column text="AUTO<br> WGT(ICS)" type="displayWeight" tooltip='AUTO WGT(ICS)'
+            dataField="icsGrossWeight" [width]='50' cellsAlign="right"></ngc-data-column>
+          <ngc-data-column dataField="offPointGroup" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text="WGT<br>DIFF" type="displayWeight" tooltip='WGT DIFF' dataField="weightDifference"
+            [width]='50' cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="TARE<br>WGT" type="displayWeight" tooltip='TARE WGT' dataField="tareWeight"
+            [width]='50' cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="NET<br>WGT" type="displayWeight" tooltip='NET WGT' dataField="netWeight" [width]='50'
+            cellsAlign="right"></ngc-data-column>
+          <!--<ngc-data-column text="MAN<br>WGT" type="displayWeight" tooltip='MAN WGT' dataField="manifestWeight" [width]='50' cellsAlign="right"></ngc-data-column>-->
+          <ngc-data-column text="HT<br>CODE" tooltip='HT WGT' dataField="heightCode" [width]='50' cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" dataField="shc" [width]='100' cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="DRY ICE<br> WGT" type="displayWeight" tooltip='DRY ICE WGT' dataField="dryIceWeight"
+            [width]='50' cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="REMARKS" dataField="remarks" [width]='150' cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="CONT<br> CODE" tooltip='CONT CODE' dataField="content" [width]='40' cellsAlign="left">
+          </ngc-data-column>
+          <!--[hidden]="trolleyInd"<ngc-data-column text="LOADING ADV" dataField="loadingControlAdvice" [width]='150' cellsAlign="left"></ngc-data-column> -->
+          <ngc-data-column text="Release by" tooltip='Release by' dataField="handedOverBy" [width]='50'
+            cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Release time" type="displayDateTime" tooltip='Release time' dataField="completedAt"
+            [width]='100' cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="ROB" [width]='30' dataField="usedForTransitUse" cellsAlign="center" type="icon"
+            iconType="yesno" [cellsStyleRenderer]="trolleyCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="USE AS<br>TROLLEY" [width]='50' tooltip='USE AS TROLLEY' dataField="usedAsTrolley"
+            cellsAlign="center" type="icon" iconType="yesno" [cellsStyleRenderer]="trolleyCellsStyleRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="SBY" [width]='30' dataField="usedAsStandBy" cellsAlign="center" type="icon"
+            iconType="yesno" [cellsStyleRenderer]="trolleyCellsStyleRenderer"></ngc-data-column>
+          <!-- <ngc-data-column text="PLAN FLT DATE" dataField="flightKey" [width]='80' cellsAlign="left" [cellsStyleRenderer]="FlightDateCellsStyleRenderer"></ngc-data-column> -->
+          <!-- <ngc-data-column text="Date" dataField="flightOriginDate" [width]='80' type="displayDate" cellsAlign="left"></ngc-data-column> -->
+          <ngc-data-column text="AC-<br>CES-<br>SORY" [width]='30' tooltip='ACCESSORY' dataField="accessory"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="EDIT" [width]='30' dataField="Edit" type="link" iconType="edit" cellsAlign='center'
+            align="center"></ngc-data-column>
+
+
+          <ngc-data-column text="Remark" [hidden]="true" dataField="offPoint" cellsAlign="left"></ngc-data-column>
+
+          <!-- <ngc-data-column text="Piggy<br>Back" dataField="piggybackString" [width]='45' cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="Estimated<br>Weight" dataField="estimatedWeight" [width]='70' cellsAlign="right"></ngc-data-column>
+           -->
+
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showPage" type="tab">
+    <ngc-row>
+      <ngc-column>
+
+        <ngc-container type="heading" formGroupName="dls">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button value='addOsi' [disabled]="finalizeFlagDisabled" (click)="addOsi()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <div>
+                <ngc-label label="OSI"></ngc-label>
+              </div>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="g.sNo"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.details"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="RampCheckInd"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.createdBy"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.created.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.action"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="osiDisplayList">
+                  <tr *ngFor="let accessory of form.get('dls.osiDisplayList').controls; let osiIndex=index"
+                    [formGroupName]="osiIndex">
+                    <td *ngIf="form.get(['dls','osiDisplayList',osiIndex,'flagCRUD']).value !== 'D'">
+                      <ngc-display formControlName="transactionSequenceNo" [width]="50"
+                        *ngIf="!form.get(['dls','osiDisplayList',osiIndex,'manual']).value"></ngc-display>
+                      <ngc-input maxlength="3" formControlName="transactionSequenceNo" [width]="50"
+                        *ngIf="form.get(['dls','osiDisplayList',osiIndex,'manual']).value"></ngc-input>
+                    </td>
+                    <td *ngIf="form.get(['dls','osiDisplayList',osiIndex,'flagCRUD']).value !== 'D'">
+                      <ngc-display formControlName="detail" [width]="50"
+                        *ngIf="!form.get(['dls','osiDisplayList',osiIndex,'manual']).value"></ngc-display>
+                      <ngc-input maxlength="61" upperCase="true"
+                        *ngIf="form.get(['dls','osiDisplayList',osiIndex,'manual']).value" formControlName="detail"
+                        [width]="600" required></ngc-input>
+                    </td>
+                    <td *ngIf="form.get(['dls','osiDisplayList',osiIndex,'flagCRUD']).value !== 'D'">
+                      <ngc-checkbox formControlName="rampIndicate" [width]="20"></ngc-checkbox>
+                    </td>
+                    <td *ngIf="form.get(['dls','osiDisplayList',osiIndex,'flagCRUD']).value !== 'D'">
+                      <ngc-display upperCase="true" formControlName="createdBy" [width]="60" required></ngc-display>
+                    </td>
+                    <td *ngIf="form.get(['dls','osiDisplayList',osiIndex,'flagCRUD']).value !== 'D'">
+                      <ngc-display upperCase="true" [onlyDate]="true" formControlName="createdOn" [width]="60" required>
+                      </ngc-display>
+                    </td>
+                    <td *ngIf="form.get(['dls','osiDisplayList',osiIndex,'flagCRUD']).value !== 'D'">
+                      <ngc-link *ngIf="form.get(['dls','osiDisplayList',osiIndex,'manual']).value"
+                        (linkClick)="deleteOSI(osiIndex)" hide-value="true">
+                        <ngc-icon type="delete" value="true" true-color="grey"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <!-- <ngc-row>
+            <ngc-column>
+              <div>
+                <ngc-label label="SYSTEM DEFINED OSI"></ngc-label>
+              </div>
+              <ngc-datatable formArrayName="systemOsiList" [pageable]="false">
+                <ngc-data-column text="System" dataField="detail" [width]='400' cellsAlign="left"></ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row> -->
+        </ngc-container>
+
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+
+        <ngc-button accessEnableOn="r" value='ULD Weight Statement' (click)="uldWeightStatement($event,index)">
+        </ngc-button>
+
+        <ngc-button accessEnableOn="r" value='Assign Uld/Trolley To Flight' (click)="assignULDTrolleytoFlight()">
+        </ngc-button>
+
+        <ngc-button accessEnableOn="r" value='EDI Message' (click)="ediMessage()"></ngc-button>
+        <ngc-button accessEnableOn="r" value='NOTOC' (click)="notoc()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #insertionULDWindow [title]="uldTitle" [showCloseButton]="true" [width]="1000" height='550'>
+    <ngc-container *ngIf="showInsertWindow" formGroupName="insertDLS" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-container [disabled]="disableUldForm">
+            <ngc-row>
+              <ngc-column>
+                <div>
+                  <ngc-label label="flight.segment"></ngc-label>
+                </div>
+                <ngc-dropdownlist [autoSelect]="true" [disabled]="disableUldForm" required sourceId='FLIGHTSEGMENT_DLS'
+                  [sourceParameters]="sourceIdSegmentDropdown" [displayBoth]="false" [noCache]='true' sourceType='query'
+                  formControlName="flightSegmentId" width='100px'></ngc-dropdownlist>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="g.terminal"></ngc-label>
+                </div>
+                <div>
+                  <ngc-dropdownlist formControlName="handlingArea" sourceId="WAREHOUSE_TERMINAL" [width]="100"
+                    sourceType='query'></ngc-dropdownlist>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="uld.uldNumber"></ngc-label>
+                </div>
+                <ngc-alphanuminput *ngIf="insertUldFlag" width='120px' (ngModelChange)="getUldTrolleyNumber($event)"
+                  formControlName="uldTrolleyNumber" required upperCase='true'></ngc-alphanuminput>
+                <ngc-display *ngIf="editULDFLag" width='120px' formControlName="uldTrolleyNumber"></ngc-display>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="uld.priority"></ngc-label>
+                </div>
+                <ngc-input width='50px' formControlName="priorityOfLoading" upperCase='true'></ngc-input>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="uld.contentcode"></ngc-label>
+                </div>
+                <ngc-dropdownlist formControlName="contentCode" (ngModelChange)="checkEmptyUldContentcode($event)"
+                  sourceType="query" sourceId='WH_CONTENTCODE' [width]="73" required></ngc-dropdownlist>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="uld.heightcode"></ngc-label>
+                </div>
+                <ngc-input width='50px' required formControlName="heightCode"
+                  (ngModelChange)="addContouCodeWeight($event)" upperCase='true'></ngc-input>
+                <!--<ngc-dropdownlist  formControlName="heightCode" sourceType="query" sourceId='CONTOURCODE' [width]="73"></ngc-dropdownlist>-->
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="export.transfer.type"></ngc-label>
+                </div>
+                <ngc-dropdownlist displayMember="code" formControlName="transferType" sourceType="query"
+                  sourceId='TRANSFER_TYPE' [width]="100"></ngc-dropdownlist>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="uld.phc"></ngc-label>
+                      </div>
+                      <ngc-checkbox formControlName="usedForPerishableContainer"></ngc-checkbox>
+                    </ngc-column>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="uld.standby"></ngc-label>
+                      </div>
+                      <ngc-checkbox formControlName="usedAsStandBy">
+                      </ngc-checkbox>
+                    </ngc-column>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="ROB"></ngc-label>
+                      </div>
+                      <ngc-checkbox formControlName="usedForTransitUse">
+                      </ngc-checkbox>
+                    </ngc-column>
+
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="uld.useAsTrolley"></ngc-label>
+                      </div>
+                      <ngc-checkbox formControlName="usedAsTrolley"></ngc-checkbox>
+                    </ngc-column>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="ECC"></ngc-label>
+                      </div>
+                      <ngc-dropdownlist sourceType="query" sourceId='ECC_HANDLINGAREA'
+                        formControlName="usedForExpressCourierContainer" [width]="80"></ngc-dropdownlist>
+                    </ngc-column>
+                    <ngc-column></ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <!-- <ngc-column>
+                <div>
+                  <ngc-label label="Estimated Weight"></ngc-label>
+                </div>
+                <ngc-input width='90px' formControlName="estimatedWeight" required upperCase='true'></ngc-input>
+              </ngc-column> -->
+              <ngc-column>
+                <div>
+                  <ngc-label label="uld.tare.weight"></ngc-label>
+                </div>
+                <ngc-numberinput negativeSymbol=" " formControlName="tareWeight" [digits]="7" decimalDigits="0"
+                  width='100px'></ngc-numberinput>
+                <!-- <ngc-input width='150px' formControlName="tareWeight" upperCase='true'></ngc-input> -->
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="Dry Ice Weight"></ngc-label>
+                </div>
+                <ngc-numberinput negativeSymbol=" " formControlName="dryIceWeight" [digits]="7" decimalDigits="0"
+                  width='100px'></ngc-numberinput>
+                <!-- <ngc-input width='150px' formControlName="dryIceWeight" upperCase='true'></ngc-input> -->
+              </ngc-column>
+              <ngc-column *ngIf="showManifestWeight">
+                <div>
+                  <ngc-label label="Manifested Weight"></ngc-label>
+                </div>
+                <ngc-display width='150px' formControlName="manifestWeight" upperCase='true'></ngc-display>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="Actual Gross Weight"></ngc-label>
+                </div>
+                <ngc-numberinput negativeSymbol=" " *ngIf="showActualWeight" (ngModelChange)="checkEmptyUld($event)"
+                  formControlName="actualWeight" [digits]="7" decimalDigits="0" width='100px'></ngc-numberinput>
+                <!-- <ngc-input *ngIf="showActualWeight" width='90px' formControlName="actualWeight" upperCase='true'></ngc-input> -->
+                <ngc-display *ngIf="showIcsWeight" formControlName="icsGrossWeight" [width]="20"></ngc-display>
+              </ngc-column>
+              <ngc-column>
+                <div>
+                  <ngc-label label="Ics Gross Weight"></ngc-label>
+                </div>
+
+                <ngc-display formControlName="icsGrossWeight" [width]="20"></ngc-display>
+              </ngc-column>
+              <!-- <ngc-column>
+                <div>
+                  <ngc-label label="Loading Control Advice"></ngc-label>
+                </div>
+                <ngc-dropdownlist  formControlName="loadingControlAdviceId" sourceType="query" sourceId='LOADING_CONTROL_ADVICE'
+                  [width]="100"></ngc-dropdownlist>
+              </ngc-column>
+               <ngc-column></ngc-column> -->
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-container type="none">
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="g.shc"></ngc-label>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-shcinput upperCase="true" [width]="50" [maxItems]="9" formArrayName="shcs"
+                        dataField="specialHandlingCode"></ngc-shcinput>
+                    </ngc-column>
+
+                  </ngc-row>
+                </ngc-container>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <div>
+                  <ngc-label label="Remarks"></ngc-label>
+                </div>
+                <ngc-input width='600px' formControlName="remarks" upperCase='true'></ngc-input>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="ACCESSORY"></ngc-label>
+                    </ngc-column>
+                    <ngc-column align="right">
+                      <ngc-button value='g.add.more' (click)="addAccessory()"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <!-- <th>
+                               <ngc-checkbox ngcFormControlName="selectAllAccessory" >
+                              </ngc-checkbox>
+                            </th>-->
+                            <th>
+                              <ngc-label label="g.type"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="Part ID"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="Quantity" required></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.action"></ngc-label>
+                            </th>
+                        </thead>
+                        <tbody formArrayName="accessoryList">
+                          <tr
+                            *ngFor="let accessory of form.get('insertDLS.accessoryList').controls; let accessoryIndex=index"
+                            [formGroupName]="accessoryIndex">
+                            <td
+                              *ngIf="form.get(['insertDLS','accessoryList', accessoryIndex,'flagCRUD']).value !== 'D'">
+                              <ngc-dropdownlist formControlName="accessoryTypeId" sourceId='ACCESSORY_TYPE'
+                                sourceType="query" [width]="300" [autoSelect]="true" required></ngc-dropdownlist>
+                            </td>
+                            <td
+                              *ngIf="form.get(['insertDLS','accessoryList', accessoryIndex,'flagCRUD']).value !== 'D'">
+                              <ngc-input upperCase="true" formControlName="accessoryPartId" [width]="100"></ngc-input>
+                            </td>
+                            <td
+                              *ngIf="form.get(['insertDLS','accessoryList', accessoryIndex,'flagCRUD']).value !== 'D'">
+                              <ngc-input upperCase="true" formControlName="quantity" [width]="100"></ngc-input>
+                            </td>
+                            <td align="center">
+                              <ngc-link (linkClick)="deleteAccesory(accessoryIndex)" hide-value="true">
+                                <ngc-icon type="delete" value="true" true-color="grey"></ngc-icon>
+                              </ngc-link>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-column>
+              <!-- <ngc-column [grid72]="true" [column]="1">
+              </ngc-column> -->
+              <ngc-column>
+                <ngc-container type="tab" *ngIf="piggyBackFlag">
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="PIGGY BACK"></ngc-label>
+                    </ngc-column>
+
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="Piggybacked ULD"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.action"></ngc-label>
+                            </th>
+                        </thead>
+                        <tbody formArrayName="piggyBackUldList">
+                          <tr
+                            *ngFor="let piggyBack of form.get('insertDLS.piggyBackUldList').controls; let piggyIndex=index"
+                            [formGroupName]="piggyIndex">
+                            <td *ngIf="form.get(['insertDLS','piggyBackUldList',piggyIndex,'flagCRUD']).value !== 'D'">
+                              <ngc-display formControlName="serialNumber"></ngc-display>
+                            </td>
+                            <td
+                              *ngIf="form.get(['insertDLS','piggyBackUldList',piggyIndex,'flagCRUD']).value === 'R' || form.get(['insertDLS','piggyBackUldList',piggyIndex,'flagCRUD']).value === 'U'">
+                              <ngc-display formControlName="uldNumber"></ngc-display>
+                            </td>
+                            <td
+                              *ngIf="form.get(['insertDLS','piggyBackUldList',piggyIndex,'flagCRUD']).value === 'C' || form.get(['insertDLS','piggyBackUldList',piggyIndex,'flagCRUD']).value === 'T'">
+                              <ngc-input upperCase="true" formControlName="uldNumber"
+                                (ngModelChange)="addUldPalletWeight($event,piggyIndex)" required></ngc-input>
+                            </td>
+                            <td align="center">
+                              <ngc-link [disabled]="disableUldForm" (linkClick)="deletePiggyback(piggyIndex)"
+                                hide-value="true">
+                                <ngc-icon type="delete" value="true" true-color="grey"></ngc-icon>
+                              </ngc-link>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-column align="right">
+              <ngc-button value='g.add.more' (click)="addPiggyBack()"></ngc-button>
+            </ngc-column>
+            <!-- <ngc-button value=" delete " (click)="deleteULD() "></ngc-button> -->
+            <ngc-button value="g.save" (click)="saveULD() " [disabled]="finalizeFlagDisabled"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-window #insertionTrollyWindow [title]="trolleyTitle" [showCloseButton]="true" [width]="900" height='350'>
+    <ngc-container *ngIf="showInsertTrollyWindow" formGroupName="insertTrolly" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="flight.segment"></ngc-label>
+          </div>
+          <ngc-dropdownlist required [autoSelect]="true" sourceId='FLIGHTSEGMENT_DLS'
+            [sourceParameters]="sourceIdSegmentDropdown" [displayBoth]="false" [noCache]='true' sourceType='query'
+            formControlName="flightSegmentId" width='100px'></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="Trolley Number"></ngc-label>
+          </div>
+          <ngc-alphanuminput *ngIf="insertUldFlag" width='110px' formControlName="uldTrolleyNumber" required
+            upperCase='true'></ngc-alphanuminput>
+          <ngc-display *ngIf="editULDFLag" width='110px' formControlName="uldTrolleyNumber"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="g.terminal"></ngc-label>
+          </div>
+          <div>
+            <ngc-dropdownlist formControlName="handlingArea" sourceId="WAREHOUSE_TERMINAL" [width]="100"
+              sourceType='query'></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="uld.priority"></ngc-label>
+          </div>
+          <ngc-input width='100px' formControlName="priorityOfLoading"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="uld.contentcode"></ngc-label>
+          </div>
+          <ngc-dropdownlist sourceId="WH_CONTENTCODE" [width]='70' sourceType="query" formControlName='contentCode'
+            required></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="export.transfer.type"></ngc-label>
+          </div>
+          <ngc-dropdownlist displayMember="code" formControlName="transferType" sourceType="query"
+            sourceId='TRANSFER_TYPE' [width]="70"></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column *ngIf="showManifestWeight">
+          <div>
+            <ngc-label label="Manifested Weight"></ngc-label>
+          </div>
+          <ngc-display width='150px' formControlName="manifestWeight" upperCase='true'></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="Net Weight"></ngc-label>
+          </div>
+          <!-- <ngc-display formControlName="actualWeight " upperCase='true'></ngc-display> -->
+          <ngc-numberinput width='90px' required formControlName="actualWeight" [digits]="7" decimalDigits="0">
+          </ngc-numberinput>
+          <!-- <ngc-display *ngIf="showIcsWeight" formControlName="icsGrossWeight" [width]="20"></ngc-display> -->
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="Ics Gross Weight"></ngc-label>
+          </div>
+          <ngc-display formControlName="icsGrossWeight" [width]="20"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="uld.phc"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="usedForPerishableContainer"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="uld.standby"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="usedAsStandBy"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="ECC"></ngc-label>
+          </div>
+          <ngc-dropdownlist sourceType="query" sourceId='ECC_HANDLINGAREA'
+            formControlName="usedForExpressCourierContainer" [width]="80"></ngc-dropdownlist>
+        </ngc-column>
+        <ngc-column></ngc-column>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-container>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.shc"></ngc-label>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-shcinput upperCase="true" [width]="50" [maxItems]="9" formArrayName="shcs"
+                  dataField="specialHandlingCode"></ngc-shcinput>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="Remarks"></ngc-label>
+          </div>
+          <ngc-input width='600px' formControlName="remarks" upperCase='true'></ngc-input>
+        </ngc-column>
+
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button value="fltpouch.save" (click)="saveTrolly()" [disabled]="finalizeFlagDisabled"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #sendNFMWindow [title]=" 'NFM Details'" [showCloseButton]="true" [width]="1350" height='300'>
+    <ngc-container *ngIf="nfmFlag" type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.sNo"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="uld.uldNumber"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="SB"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="PGY"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Gross Weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="uld.tare.weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Net Weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Height"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="Routing"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="BUP"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="TAG"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="HDL"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="OVR"></ngc-label>
+                </th>
+            </thead>
+            <tbody formArrayName="NFMList">
+              <tr *ngFor="let nfm of form.get('NFMList').controls; let nfmIndex=index" [formGroupName]="nfmIndex">
+                <td>
+                  <ngc-display formControlName="serialNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="uldTrolleyNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="usedAsStandBy"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="piggyback"></ngc-display>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="actualWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="tareWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="netWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName="heightCode"></ngc-display>
+                </td>
+                <td formArrayName="routeList">
+                  <span *ngFor="let route of form.get([ 'NFMList',nfmIndex, 'routeList']).controls; let routeIndex=index
+            " [formGroupName]="routeIndex">
+                    <ngc-input upperCase="true" [width]='50' formControlName="airportCode" required></ngc-input>
+                  </span>
+                  <ngc-button value="+" (click)="addRoute(nfmIndex) "></ngc-button>
+                </td>
+                <td>
+                  <ngc-input upperCase="true" [width]='30' required formControlName="bupUnitType"></ngc-input>
+                </td>
+                <td>
+                  <ngc-input upperCase="true" [width]='30' required formControlName="tagUnitType"></ngc-input>
+                </td>
+                <td>
+                  <ngc-input upperCase="true" [width]='30' required formControlName="handlingCode"></ngc-input>
+                </td>
+                <td>
+                  <ngc-input upperCase="true" [width]='30' required formControlName="overhangingInd"></ngc-input>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button value="Send NFM" (click)="sendNFM()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+  <ngc-report #reportWindow1 dataSource='transactional'  title="g.report"  reportId='printdls'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='xls' dataSource='transactional'  #reportWindow2 title="g.report"  reportId='ULD_WeightStatement'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>

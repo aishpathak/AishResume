@@ -1,0 +1,276 @@
+<form [formGroup]='flightDiscrepancyListForm'>
+  <ngc-titlebar title='import.flight.discrepancy.list' (save)="onSave($event)" [disableSave]="!displayData"
+    (print)="onPrint()" [disablePrint]="!displayData" (delete)="onDelete($event)" (cancel)="onCancel($event)">
+  </ngc-titlebar>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column=2>
+        <ngc-label label='g.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="150" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column=2>
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput [width]="150" accessEnableOn="r" formControlName="flightOriginDate" required='true'>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column=2>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)="onSearchDiscrepancyList()" value="g.Search"
+            iconType="search" #searchbutton></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="sectiontop"></ngc-container>
+  <ngc-container *ngIf='displayData' type="tab">
+    <ngc-row>
+      <ngc-column [column]="9" align="right">
+        <div>
+          <ngc-display formControlName="status" color="blue" emphasis='md'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]=1>
+        <ngc-label label='g.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKey" upperCase='true'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=1>
+        <ngc-label label='g.date'></ngc-label>
+        <div>
+          <ngc-display [onlyDate]="true" formControlName="flightOriginDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=1>
+        <ngc-label label='import.segment'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="segment" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query"
+            [sourceParameters]="sourceIdSegmentDropdown" [width]="100" [dropDownWidth]='110'
+            (modelChange)="onSegmentChange($event)" accessEnableOn="r">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]=2>
+        <ngc-label label='g.segments'></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis='md'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=1 *ngIf='completed' align="center">
+        <ngc-label label='import.flight.complete'></ngc-label>
+        <div align="center">
+          <ngc-shape type="circle" textColor='white' bgColor='gray' formControlName="flightCompletedAt" [width]="20">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=1.5 *ngIf='!completed'>
+        <ngc-label label='import.flight.complete'></ngc-label>
+        <div>
+          <!--<ngc-shape  formControlName="flightCompletedAt"></ngc-shape>-->
+          <ngc-shape type="circle" textColor='white' bgColor='red' formControlName="flightCompletedAt" [width]="20">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=1.5>
+        <ngc-label label='import.last.version.sent'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDiscrepncyListSentBy"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=2>
+        <ngc-label label='import.last.sent.date.time'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDiscrepncyListSentAt"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=2>
+        <div>
+          <ngc-button (click)="onSendAdviceDiscrepancy()" value="import.send.advice.on.discrepancy"
+            [disabled]="!completed">
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf='displayData'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable *ngIf="!displayBySegmentData" (linkClick)="onLinkClick($event)" #paginateReset
+          [pagerMode]="'advanced'" formArrayName="flightDiscrepancyList" [groups]="['segment']"
+          [groupsRenderer]="groupsRenderer" [enablePageSizeHeight]="false">
+          <ngc-data-column type="check" text="g.select" align="center" dataField="select" align="center"
+            cellsAlign="center" [width]="40"></ngc-data-column>
+          <ngc-data-column text="S.NO" dataField="sno" align="center" [aggregates]="['count']" [width]="70"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" align="center" dataField="shipmentNumber" [width]="120"
+            cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column text="g.origin" dataField="origin" align="center" [width]="60" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.destination" dataField="destination" align="center" [width]="80" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.AwbPiecsWeight" dataField="awbPcsWt" align="center" [aggregates]="['sum']"
+            [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.manifestPieces" dataField="manifestPcsWt" align="center" [aggregates]="['sum']"
+            [width]="80" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute='Imp.Fdl.FFMInfo' text="import.FFM.Info" dataField="uldnumber" align="center"
+            [width]="79" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.breakdown.Pieces.Weight" dataField="breakDownPcsWt" align="center"
+            [aggregates]="['sum']" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" align="center" dataField="shcs" [width]="70" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.flight.discrepancy" align="center" name="discrepancy" align="center">
+            <ngc-data-column text="import.type.peices" align="center" dataField="irregularity" [width]="115"
+              cellsAlign="center" [cellsStyleRenderer]="cellsStyleRendererColorProcessed">
+            </ngc-data-column>
+            <ngc-data-column text="g.remarks" align="center" dataField="irregularityTypeDescription" [width]="350"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.remarks" align="center" dataField="segment" [width]="350" cellsAlign="center"
+              hidden="true"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column feature="Imp.Bd.DocumentIrregularityRemarks" text="g.action"
+            dataField="additionalActionRemarks" align="center" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column feature="Imp.Bd.HAWBInfo" type="link" iconType='edit' text="g.house" align="center"
+            [width]="100" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+
+
+
+
+        <ngc-datatable *ngIf="displayBySegmentData" (linkClick)="onLinkClick($event)" #paginateReset
+          [pagerMode]="'advanced'" formArrayName="flightDiscrepancyListbySegment" [groups]="['segment']"
+          [groupsRenderer]="groupsRenderer" [enablePageSizeHeight]="false">
+          <ngc-data-column type="check" text="g.select" align="center" dataField="select" align="center"
+            cellsAlign="center" [width]="40"></ngc-data-column>
+          <ngc-data-column text="S.NO" dataField="sno" align="center" [aggregates]="['count']" [width]="70"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" align="center" dataField="shipmentNumber" [width]="120"
+            cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.origin" dataField="origin" align="center" [width]="60" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.destination" dataField="destination" align="center" [width]="80" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.AwbPiecsWeight" dataField="awbPcsWt" align="center" [aggregates]="['sum']"
+            [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="import.manifestPieces" dataField="manifestPcsWt" align="center" [aggregates]="['sum']"
+            [width]="80" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column entityAttribute='Imp.Fdl.FFMInfo' text="import.FFM.Info" dataField="uldnumber" align="center"
+            [width]="79" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.breakdown.Pieces.Weight" dataField="breakDownPcsWt" align="center"
+            [aggregates]="['sum']" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.shc" align="center" dataField="shcs" [width]="70" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="import.flight.discrepancy" align="center" name="discrepancy" align="center">
+            <ngc-data-column text="import.type.peices" align="center" dataField="irregularity" [width]="115"
+              cellsAlign="center" [cellsStyleRenderer]="cellsStyleRendererColorProcessed">
+            </ngc-data-column>
+            <ngc-data-column text="g.remarks" align="center" dataField="irregularityTypeDescription" [width]="350"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.remarks" align="center" dataField="segment" [width]="350" cellsAlign="center"
+              hidden="true">
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column feature="Imp.Bd.DocumentIrregularityRemarks" text="g.action"
+            dataField="additionalActionRemarks" align="center" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column feature="Imp.Bd.HAWBInfo" type="link" iconType='edit' text="g.house" align="center"
+            [width]="100" cellsAlign="center">
+
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+
+  <ngc-window #showPopUpWindow width="1100" height="500" title="import.hawb.List" align="center"
+    [showCloseButton]="true">
+
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="2">
+          <ngc-label label="g.hawb.number"></ngc-label>
+        </ngc-column>
+        <!-- <ngc-window-header> -->
+        <ngc-column>
+          <ngc-input accessEnableOn="r" formControlName="hawbNo">
+          </ngc-input>
+        </ngc-column>
+        <ngc-column verticalAlign="button">
+          <ngc-button (click)="filterHawbListdate()" value="g.search" label='g.search' accessEnableOn="r">
+          </ngc-button>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button accessEnableOn="r" value="close" (click)='onClose($event)'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <!-- </ngc-window-header> -->
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="MaintainHouseList">
+            <ngc-data-column text="g.hawb.number" dataField="houseNumber" cellsAlign="center" [width]="85">
+            </ngc-data-column>
+            <ngc-data-column text="import.HousePcsWt" dataField="hawbPieceWeight" cellsAlign="center" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="import.bd.pcs.wt" dataField="bdpieceWeight" cellsAlign="center" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="import.hawb.Cir.Pcs" dataField="irregularityPiece" cellsAlign="center" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="import.hawb.Cir.Wt" dataField="irregularityWeight" cellsAlign="center" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="g.irregularity" dataField="irregularityType" cellsAlign="center" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="g.remarks" dataField="remarks" cellsAlign="center" [width]="50">
+            </ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+
+
+  <!-- <ngc-container *ngIf='displayData' type="tab">
+    <ngc-row>
+    </ngc-row>
+  </ngc-container> -->
+  <ngc-report #reportWindow title="g.report"  reportId='FDL_report_AAT'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row *ngIf='displayData'>
+    <ngc-column>
+      <ngc-button accessEnableOn="r" (click)="onIrregularity()" value="dis.Irregularity"></ngc-button>
+      <ngc-button accessEnableOn="r" (click)="onCaptureDseign()" [disabled]="false" value="dis.capture"></ngc-button>
+      <ngc-button accessEnableOn="r" (click)="onCreateDamageReport()" [disabled]="false" value="dis.rpt"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

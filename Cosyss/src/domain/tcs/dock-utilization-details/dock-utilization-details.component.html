@@ -1,0 +1,86 @@
+<form [formGroup]="docUtilizationForm">
+  <ngc-titlebar title="tcs.dockUtilDetailsTitle"></ngc-titlebar>
+  <ng-container formGroupName="search">
+    <ngc-container type="section">
+      <ngc-row>
+        <ngc-column [column]="2.5">
+          <ngc-label label="tcs.dockCharacteristics"></ngc-label>
+          <div>
+            <ngc-dropdownlist accessEnableOn="r" formControlName="dockCharacteristics" sourceId="DOCK_CHARACTERISTIC"
+              sourceType='query'>
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+
+          <ngc-label label="tcs.fromDAte"></ngc-label>
+          <div>
+            <ngc-datetimeinput accessEnableOn="r" [showTimeButton]="true" [showCalendarButton]="true"
+              formControlName="startPeriodDate" (modelChange)="onFromDateChange()">
+            </ngc-datetimeinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2">
+          <ngc-label label="tcs.toDate"></ngc-label>
+          <div>
+
+            <ngc-datetimeinput accessEnableOn="r" [showTimeButton]="true" [showCalendarButton]="true"
+              formControlName="endPeriodDate"
+              [min]="docUtilizationForm.get('search')['controls']['startPeriodDate'].value" [max]="maxDateTime">
+            </ngc-datetimeinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label="tcs.dockFloor"></ngc-label>
+          <div>
+            <ngc-dropdownlist accessEnableOn="r" [dropDownWidth]="80" formControlName="floor" sourceId="TCS$FLOOR"
+              [width]="150">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label="tcs.dockZone"></ngc-label>
+          <div>
+            <ngc-dropdownlist accessEnableOn="r" [dropDownWidth]="80" formControlName="zone" sourceId="TCS$ZONE"
+              [width]="150">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+        <ngc-column verticalAlign="bottom" [column]="1.5">
+          <ngc-button accessEnableOn="r" label="search" (click)="onSearch()"></ngc-button>
+        </ngc-column>
+
+        <ngc-column align="right" *ngIf="searched" verticalAlign="bottom" [column]="1">
+          <ngc-label label="tcs.dockUtilAutoRefresh"></ngc-label>
+          <div>
+            <ngc-switchbutton accessEnableOn="r" align="right" formControlName="auto" (change)="onchangedata($event)">
+            </ngc-switchbutton>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+  <ngc-container *ngIf="searched && (dockList.length != 0 )" title="tcs.dockUtilization" type="tab">
+    <ngc-row>
+      <ngc-column>
+
+
+        <ngc-datatable formArrayName="dockUtilizationList" [groups]="['startDate']" [groupsRenderer]="groupsRenderer"
+          [widthInPixels]="true">
+          <ngc-data-column dataField="startDate" dataType="date" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="date" dataField="startDateTime" dataType="date" [width]="100"
+            [cellsStyleRenderer]="cellsStyleRenderer" [pinned]="true">
+          </ngc-data-column>
+          <ng-container *ngFor="let dock of dockList">
+            <ngc-data-column [text]="dock" [dataField]="dock" [width]="70">
+            </ngc-data-column>
+          </ng-container>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+</form>

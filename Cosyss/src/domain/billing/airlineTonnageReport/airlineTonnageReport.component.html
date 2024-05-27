@@ -1,0 +1,296 @@
+<ngc-titlebar title="billing.airline.tonnage.report" (clear)="onClear($event)" (cancel)='backToHome($event)'>
+</ngc-titlebar>
+<form [formGroup]="tonnageReportForm">
+  <ngc-container type="header" formGroupName="searchOp">
+    <ngc-row>
+
+      <ngc-column column="2">
+        <ngc-label label="outhouse.year"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="year" sourceType='query' sourceId="REPORT_YEAR" [width]="150">
+          </ngc-dropdownlist>
+
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label label="billing.airline.rt_month"></ngc-label>
+        <div>
+
+          <ngc-dropdownlist accessEnableOn="r" formControlName="month" sourceType='query' sourceId="REPORT_MONTH" [width]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label value='flight.carrier'></ngc-label>
+        <div>
+          <ngc-lov #carrierCode accessEnableOn="r" formControlName='carrierCode' [width]='50' upperCase='true' dataField="code"  
+            displayMember="code" displayMember="code" sourceId='CARRIER_OPT' title='g.carrier.type' maxlength='3'>
+            <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+            <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value='billing.airline.rt_search' (click)='searchRecords($event)'></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button value='airline.tonnage.upload.document' (click)='openPopup($event)'></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <!-- <div>
+          <ngc-button value='bil.generateReport' (click)='onGenerateReport($event)'></ngc-button>
+        </div> -->
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="section" *ngIf='showTable'>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value="flight.carrierCode"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="billing.airline.rt_reportname"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="billing.airline.rt_reportDate"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="admin.createdOn"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="bil.payMode"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value="bil.status"></ngc-label>
+              </th>
+
+              <th>
+                <ngc-label value=""></ngc-label>
+              </th>
+
+
+            </tr>
+          </thead>
+          <tbody formArrayName="resultList">
+            <ng-container *ngFor="let item of tonnageReportForm.get('resultList').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display formControlName="carrierCode"></ngc-display>
+                </td>
+
+
+                <td>
+
+                  <div
+                    *ngIf="item.get('status').value.toLowerCase() =='pending'.toLowerCase() || item.get('status').value.toLowerCase() =='void'.toLowerCase(); else hideLink ">
+                    <ngc-link formControlName="reportName" (linkClick)=uploadFunc(item,index)></ngc-link>
+                  </div>
+                  <ng-template #hideLink>
+                    <ngc-filedownload [uploadDocId]="item.get('uploadedDocId').value"></ngc-filedownload>
+                    <ngc-display formControlName="reportName"></ngc-display>
+                  </ng-template>
+                </td>
+
+
+                <td>
+                  <ngc-display formControlName="reportDate" dataType="date" format="MM/YYYY"></ngc-display>
+                </td>
+
+
+                <td>
+                  <ngc-display formControlName="reportGenDateTime"></ngc-display>
+                </td>
+
+
+                <td>
+                  <ngc-display formControlName="reportMode"></ngc-display>
+                </td>
+
+
+                <td>
+                  <ngc-display formControlName="status"></ngc-display>
+                </td>
+
+
+
+                <td *ngIf="item.get('status').value.toLowerCase() =='pending'.toLowerCase() ">
+                  <ngc-button label="billing.publish" iconType="send" (click)="updatePublishStatus($event,index)">
+                  </ngc-button>
+                  <ngc-button label="billing.void" (click)="updateVoidStatus($event,index)"></ngc-button>
+                </td>
+
+                <td *ngIf="item.get('status').value.toLowerCase() =='publish'.toLowerCase() ">
+                  <ngc-button label="billing.void" (click)="updateVoidStatus($event,index)"></ngc-button>
+                </td>
+                <td *ngIf="item.get('status').value.toLowerCase() =='void'.toLowerCase() ">
+                  <ngc-button label="billing.active" (click)="activeStatus($event,index)"></ngc-button>
+                </td>
+
+
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="viewForm">
+  <ngc-window #viewWindow [width]="1000" [height]="360" title="Upload Doc" [showCloseButton]="true">
+
+    <ngc-container type="tab">
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-display formControlName="reportName"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+          <!-- <ngc-display formControlName="reportOutputId"></ngc-display> -->
+        </ngc-column>
+
+        <ngc-column>
+          <ngc-button label="g.save" iconType="save" (click)="onSave($event)"></ngc-button>
+        </ngc-column>
+
+
+
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value="bil.upload"></ngc-label>
+          <div>
+            <!-- <ngc-fileupload accept="*/*" [multiple]="false" entityType="TONNAGEREPORT"
+              (uploaded)="getUploadData($event,index)" [uploadDocId]="getReferenceId()"
+              [entityKey]="viewForm.get('reportOutputId').value" associatedTo="Tonnage" stage="Tonnage_Report">
+            </ngc-fileupload> -->
+            <ngc-fileupload accept="*/*" [multiple]="false" [entityType]="viewForm.get('carrierCode').value"
+              [uploadDocId]="viewForm.get('uploadedDocId').value" [entityKey]="viewForm.get('entityKey').value"
+              [entityDate]="viewForm.get('entityDate').value" associatedTo="Tonnage" stage="Tonnage_Report">
+            </ngc-fileupload>
+
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report format='xls' #reportWindow title="billing.fhl.report"  reportId='fhl_report'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow1 title="billing.plastic.and.spreader.report"  reportId='plasticAndSpreader'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow2 title="billing.fwb.report"  reportId='fwb_report'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow3 title="billing.bup.with.transhipment.report"  reportId='BUPwithTrans'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow4 title="billing.imp.mcr.report"  reportId='IMPMCR'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow5 title="billing.tonnage.report"  reportId='Tonnage_import_flight_weight_report'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow6 title="billing.tonnage.report"  reportId='BUPandBUC1'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow7 title="billing.tonnage.report"  reportId='BUPandBUCwithouttrans'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow8 title="billing.tonnage.report"  reportId='ContainerBilling'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow9 title="billing.tonnage.report"  reportId='SQBUP'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow10 title="billing.tonnage.report"  reportId='PAXandFRT'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #reportWindow11 title="billing.tonnage.report"  reportId='PAXReport'
+    [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<form [formGroup]="uploadReportForm">
+  <ngc-window #uploadReportFormWindow [width]="1000" [height]="360" title="airline.tonnage.upload.document"
+    [showCloseButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="3">
+          <ngc-label value='billing.report.name'></ngc-label>
+          <div>
+            <ngc-lov #carrierCode formControlName='reportName' [width]='200' upperCase='true' dataField="code"  
+              displayField="desc" sourceId='TONNAGE_TEMPLATE' title='billing.report.name' required>
+              <ngc-data-column text='billing.reportname' dataField='param1' [width]='100'></ngc-data-column>
+              <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+
+        <ngc-column column="2">
+          <ngc-label label="outhouse.year"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="year" sourceType='query' sourceId="REPORT_YEAR" [width]="120" required>
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+        <ngc-column column="2">
+          <ngc-label label="billing.airline.rt_month"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="month" sourceType='query' sourceId="REPORT_MONTH" [width]="120" required>
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label value='flight.carrier'></ngc-label>
+          <div>
+            <ngc-lov #carrierCode formControlName='carrierCode' [width]='80' upperCase='true' dataField="code"  
+              displayMember="code" displayMember="code" sourceId='CARRIER_OPT' title='g.carrier.type' maxlength='3'
+              required (ngModelChange)="onCarrierCode($event)">
+              <ngc-data-column text='g.carrier' dataField='code' [width]='100'></ngc-data-column>
+              <ngc-data-column text='g.description' dataField='desc' [width]='150'></ngc-data-column>
+            </ngc-lov>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label value=""></ngc-label>
+          <div>
+            <ngc-fileupload accept="*/*" [multiple]="false"
+              [entityKey]="uploadReportForm.get('entityKeyForNewUpload').value"
+              [entityType]="uploadReportForm.get('entityType').value" [entityDate]="viewForm.get('entityDate').value"
+              associatedTo="Tonnage" stage="Tonnage_Report">
+            </ngc-fileupload>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-label value=""></ngc-label>
+        <ngc-column align="center">
+          <ngc-button label="g.save" iconType="save" (click)="onSaveTonnageDoc()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

@@ -1,0 +1,116 @@
+<form [formGroup]="form">
+  <!-- Card (Begin) -->
+  <ngc-titlebar title="Playground - Data Table" (save)="onSave($event)"></ngc-titlebar>
+  <!-- Card Heading (End) -->
+  <ngc-container type="section" title="Test Datatable" subTitle="Test Data Table">
+    <ngc-row>
+      <ngc-column>
+        <ngc-button priority="secondary" (click)="onAddRow($event)" value="Add Row"></ngc-button>
+        <ngc-button priority="secondary" (click)="onAddMultiRows($event)" value="Add Multiple Row"></ngc-button>
+        <ngc-button priority="secondary" (click)="onAddChildRow($event)" value="Add 1st Child Row"></ngc-button>
+        <ngc-button priority="secondary" (click)="onRemoveAll($event)" value="Remove All" iconType="delete"></ngc-button>
+        <ngc-button priority="secondary" (click)="onDelete($event)" value="Delete"></ngc-button>
+        <ngc-button priority="secondary" (click)="onSoftDelete($event)" value="Soft Delete"></ngc-button>
+        <ngc-button priority="secondary" (click)="onDisableEnable($event)" value="Disable/Enable"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="header" title="Datatable" subTitle="Example of Datatable with Aggregates & Grouping">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="resultList" (onRowClick)="onLinkClick($event)" [showAggregates]="true" [groups]="['firstOffPt']"
+          [groupsRenderer]="groupsRenderer" [aggregatesHeight]="50" [rowCellsStyleRenderer]="rowCellsStyleRenderer" [widthInPixels]="true"
+          [pageSize]="7" (itemSelect)="itemSelect($event)" (groupSelect)="groupSelect($event)">
+          <ngc-data-column text="Select" dataField="scInd" [width]="50" type="radio" align="center" cellsAlign="center" [checkAll]="true"
+            [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="AWB No." dataField="awbNo" [width]="150" type="link" iconType="delete" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="AWB Date." dataField="awbDate" type="displayDate" [width]="150" [cellsStyleRenderer]="cellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="Carrier" dataField="carr" [width]="100" cellsAlign="center" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text="Destination of Cosys" tooltip="Destination of All Humans" dataField="dest" [width]="100" cellsAlign="center"
+            [cellsStyleRenderer]="cellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="First Off Pt" dataField="firstOffPt" [width]="120" cellsAlign="center" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="Pieces" dataField="pcs" [width]="200" cellsAlign="right" [aggregates]="['sum']" type="displayPieces"></ngc-data-column>
+          <ngc-data-column text="Weight" dataField="wt" [width]="200" cellsAlign="right" [aggregates]="['sum']" type="displayWeight"></ngc-data-column>
+          <ngc-data-column text="FWB" dataField="fwb" [width]="100" type="delete" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="EAWB" dataField="eawb" [width]="100" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="AWB Received" dataField="awbReceived" [width]="50" type="icon" iconType="yesno" cellsAlign="center"
+            [cellsStyleRenderer]="awbReceivedStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="Pouch" dataField="pouch" [width]="100" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="Status" dataField="status" [width]="150" align="center" [cellsStyleRenderer]="cellsStyleRenderer"
+            [noWrap]="true"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- <ngc-container type="header" title="Datatable" subTitle="Example of Datatable with Nested Child">
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable formArrayName="resultList" (linkClick)="onLinkClick($event)">
+                    <ngc-data-column text="Select" dataField="scInd" [width]="50" type="check" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="AWB No." dataField="awbNo" [width]="130" type="link" iconType="delete"></ngc-data-column>
+                    <ngc-data-column text="AWB Date." dataField="awbDate" [width]="130" type="displayDate"></ngc-data-column>
+                    <ngc-data-column text="Carrier" dataField="carr" [width]="50" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="Destination" dataField="dest" [width]="70" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="Pieces" dataField="pcs" [width]="100" cellsAlign="right" [aggregates]="['sum', 'min', 'max']"></ngc-data-column>
+                    <ngc-data-column text="Weight" dataField="wt" [width]="100" cellsAlign="right" cellsFormat="d2" [aggregates]="['sum', 'min', 'max']"></ngc-data-column>
+                    <ngc-data-row-childs>
+                        <ngc-data-row-child *ngFor="let item of form.getList('resultList'); let index=index" [formGroupName]="index" [row]="index">
+                            <ngc-edittable formArrayName="childRecords" [pageable]="false">
+                                <ngc-data-column text="FWB" dataField="fwb" [width]="50" type="input" cellsAlign="center"></ngc-data-column>
+                                <ngc-data-column text="EAWB" dataField="eawb" [width]="50" type="dropdown" cellsAlign="center" sourceId="CARRIER"></ngc-data-column>
+                                <ngc-data-column text="RCAR KC to Target" dataField="rcarKcToTarget" [width]="50" type="check" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                                <ngc-data-column text="AWB Received" dataField="awbReceived" [width]="50" type="check" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                                <ngc-data-column text="Pouch" dataField="pouch" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                            </ngc-edittable>
+                        </ngc-data-row-child>
+                    </ngc-data-row-childs>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container> -->
+  <ngc-container type="header" title="Datatable" subTitle="Example of Datatable with Header Group">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="resultList" (linkClick)="onLinkClick($event)">
+          <ngc-data-column text="Select" dataField="scInd" [width]="50" type="check" align="center" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="AWB" name="awbGroup" align="center">
+            <ngc-data-column text="AWB No." dataField="awbNo" [width]="130" type="link" iconType="delete"></ngc-data-column>
+            <ngc-data-column text="AWB Date." dataField="awbDate" [width]="130" type="displayDate"></ngc-data-column>
+            <ngc-data-column text="Carrier" dataField="carr" [width]="50" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="Location" name="locationGroup" align="center">
+              <ngc-data-column text="Destination" dataField="dest" [width]="70" cellsAlign="center"></ngc-data-column>
+              <ngc-data-column text="First Off Pt" dataField="firstOffPt" [width]="70" cellsAlign="center"></ngc-data-column>
+              <ngc-data-column text="Second Off Pt" dataField="secondOffPt" [width]="70" cellsAlign="center"></ngc-data-column>
+            </ngc-data-column>
+            <ngc-data-column text="Pieces/Weight" name="pcsWtGroup" align="center">
+              <ngc-data-column text="Pieces" dataField="pcs" [width]="70" cellsAlign="right"></ngc-data-column>
+              <ngc-data-column text="Weight" dataField="wt" [width]="70" cellsAlign="right"></ngc-data-column>
+            </ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="NOG" dataField="nog" [width]="100"></ngc-data-column>
+          <ngc-data-column text="RCAR" dataField="rcar" [width]="100"></ngc-data-column>
+          <ngc-data-column text="AWB Charge Code" dataField="awbChargeCode" [width]="100"></ngc-data-column>
+          <ngc-data-column text="Document Status" name="documentStatusGroup" align="center">
+            <ngc-data-column text="FWB" dataField="fwb" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="EAWB" dataField="eawb" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="RCAR KC to Target" dataField="rcarKcToTarget" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="AWB Received" dataField="awbReceived" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="Pouch" dataField="pouch" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="Status" dataField="status" [width]="100" type="link" iconType="edit" align="center" [noWrap]="true"></ngc-data-column>
+          <!-- <ngc-data-row-childs>
+            <ngc-data-row-child *ngFor="let item of form.getList('resultList'); let index=index" [formGroupName]="index" [row]="index">
+              <ngc-edittable formArrayName="childRecords" [pageable]="false">
+                <ngc-data-column text="FWB" dataField="fwb" [width]="50" type="check" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="EAWB" dataField="eawb" [width]="50" type="check" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="RCAR KC to Target" dataField="rcarKcToTarget" [width]="50" type="check" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="AWB Received" dataField="awbReceived" [width]="50" type="check" iconType="yesno" cellsAlign="center"></ngc-data-column>
+                <ngc-data-column text="Pouch" dataField="pouch" [width]="50" type="icon" iconType="yesno" cellsAlign="center"></ngc-data-column>
+              </ngc-edittable>
+            </ngc-data-row-child>
+          </ngc-data-row-childs> -->
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

@@ -1,0 +1,1215 @@
+<ngc-titlebar title="export.acceptance.weighing.title" [disableSave]="delayAcceptanceFlag" (save)="onSave($event)"
+  [disabled]="finalize" (cancel)="onCancel($event)" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="weighingForm">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-input accessEnableOn="r" formControlName='shipmentNumber' required></ngc-input>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label> &nbsp </ngc-label>
+        </div>
+        <ngc-button (click)="onSearch()" value="g.search" iconType="search" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="g.printer"></ngc-label>
+        </div>
+        <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']">
+        </ngc-printer>
+      </ngc-column>
+    </ngc-row>
+
+
+    <ngc-row *ngIf=displayFlag>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.eacceptanceType"></ngc-label>
+        </div>
+        <ngc-display formControlName='eacceptanceDescription'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.serviceNumber"></ngc-label>
+        </div>
+        <ngc-display formControlName='serviceNumber'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.book.svc"></ngc-label>
+        </div>
+        <ng-container>
+          <ngc-icon align="right" type="yesno" [value]="this.weighingForm.get('svcFlag').value" true-color="grey">
+          </ngc-icon>
+        </ng-container>
+        <!-- <ng-container *ngIf="svc">
+          <ngc-icon align="right" type="yesno" [value]="false" true-color="grey"></ngc-icon>
+        </ng-container> -->
+      </ngc-column>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="export.weighing.volumetric.enabled.carrier"></ngc-label>
+        </div>
+        <ng-container>
+          <ngc-icon align="right" type="yesno" [value]="this.weighingForm.get('volumetricWeightEnableFlag').value"
+            true-color="grey"></ngc-icon>
+        </ng-container>
+        <!-- <ng-container *ngIf="svc">
+                <ngc-icon align="right" type="yesno" [value]="false" true-color="grey"></ngc-icon>
+              </ng-container> -->
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.totalVolumetricWeight"></ngc-label>
+        </div>
+
+
+        <ngc-weightdisplay formControlName='totalVolWeight' [width]='100' decimalDigits="2"></ngc-weightdisplay>
+      </ngc-column>
+
+      <ngc-column>
+        <div>
+          <ngc-label label="export.book.awbnumber"></ngc-label>
+        </div>
+        {{weighingForm.get('shipmentNumber').value}}
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.selectAnotherAwbNumber"></ngc-label>
+        </div>
+        <ngc-dropdownlist formControlName="shipmentNumber" [source]="awbDropdown" [width]="120" (select)=onSelectAWB()
+          required></ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column [column]='1'>
+      </ngc-column>
+      <ngc-column [column]='5'>
+        <ngc-container type='box'>
+          <ngc-row>
+            <ngc-column>
+              <div>
+                <ngc-label label="export.acceptedPieces"></ngc-label>
+              </div>
+              <ngc-display formControlName='weighingAcceptedPieces'></ngc-display>
+              <ngc-label label="/"></ngc-label>
+              <ngc-display formControlName='acceptedDocumentPieces'></ngc-display>
+              <!-- correct -->
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="export.acceptedWeight"></ngc-label>
+              </div>
+              <ngc-weightdisplay formControlName='weighingAcceptedWeight'></ngc-weightdisplay>
+              <ngc-label label="/"></ngc-label>
+              <ngc-weightdisplay formControlName='acceptedDocumentWeight'></ngc-weightdisplay>
+              <!-- correct -->
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="export.weightDifference"></ngc-label>
+              </div>
+              <ngc-weightdisplay formControlName='weightDifference'></ngc-weightdisplay>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf=displayFlag formGroupName="shipmentModel">
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.destination"></ngc-label>
+        </div>
+        <ngc-display formControlName='destination'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.carrier"></ngc-label>
+        </div>
+        <ngc-display formControlName='carrier'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.shc"></ngc-label>
+        </div>
+        <div>
+          {{weighingForm.get('shcstring').value}}
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.uldBup"></ngc-label>
+        </div>
+        <div>
+          {{weighingForm.get('uldBupIndicator').value}}
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.screenedPieces"></ngc-label>
+        </div>
+        <div>
+          {{weighingForm.get('screenedPieces').value}}
+        </div>
+        <!-- <ngc-display formControlName='screenedPieces'></ngc-display> -->
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.totalDryIceWeight"></ngc-label>
+        </div>
+        <div>
+          {{weighingForm.get('totalDryIceWeight').value}}
+        </div>
+
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.weighing.requested.temperature.range"></ngc-label>
+        </div>
+        <div>
+          {{weighingForm.get('requestedTemperatureRange').value}}
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type='box'>
+    <ngc-row *ngIf='displayFlag'>
+      <ngc-column>
+        <ngc-label label='export.weighingscale'></ngc-label>
+        <div>
+          <ngc-weighing-scale [disabled]="finalize" [width]="80" formControlName="weighingScaleId"
+            (select)="onSelectScale($event)" [autoSelectOnSingle]=true></ngc-weighing-scale>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="volumetricWeightEnableFlag">
+        <ngc-label label='export.weighing.volumetric.scanner'></ngc-label>
+        <div>
+          <ngc-volumetric-scanner [disabled]="finalize" [width]="140" (select)="onSelectVolumetricScanner($event)">
+          </ngc-volumetric-scanner>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="export.weighing.date.time"></ngc-label>
+        </div>
+        <ngc-display formControlName='weighingstarttime'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button label='export.weighing.start' (click)="onStartWeighing($event)" [disabled]="startweighingflag"
+          #startWeighingButton></ngc-button>
+      </ngc-column>
+      <ngc-column [column]='8'>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row *ngIf="startweighingflag">
+      <ngc-column align="right">
+        <ngc-button [disabled]="finalize" label='export.weighing.finalize.weight.button' (click)=" onFinalizeWeight()"
+          #finalizeWeightButton>
+        </ngc-button>
+
+        <ngc-button [disabled]="!partenableflag || finalize" label='export.weighing.part.confirm.button'
+          (click)="onPartClick()" #partConfirmButton></ngc-button>
+        <ngc-button [disabled]="!finalize" label='export.weighing.print.rfid.button' (click)="onClickRfid()"
+          #rfidButton></ngc-button>
+        <ngc-button label='export.weighing.print.weighing.slip' [disabled]="!finalize" (click)="onPrintViewingSlip()">
+        </ngc-button>
+        <ngc-button [disabled]="!finalize" label="export.weighing.unfinalize.btn" (click)="unfinalizeShipment()"
+          #unfinalizeWeightButton>
+        </ngc-button>
+        <ngc-button [disabled]="!enableEcc || eccfinalized || !finalize" label='export.weighing.ecc.shipment.button'
+          (click)="onECC()" #eccButton></ngc-button>
+        <ngc-button label='export.weighing.return.document.button' (click)="onReturnDocument()" #returnDocumentButton>
+        </ngc-button>
+        <ngc-button *ngIf="!delayAcceptanceFlag" label='export.weighing.delay.acceptance.button'
+          (click)="onSaveDelayTime()" #delayAcceptanceButton [disabled]='finalize'></ngc-button>
+        <ngc-button *ngIf="delayAcceptanceFlag" label='export.weighing.resume.acceptance.button'
+          (click)="onResumeDelayTime()" #delayAcceptanceButton [disabled]='omegaDisabler'></ngc-button>
+
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf="startweighingflag">
+      <ngc-column>
+        <ngc-tabs (select)="releaseEvent($event)">
+
+          <div ngc-tab-card title='export.cargoWeighing' [indicatorIconType]="cargoIndicator" indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th width="1%">
+                          <ngc-label label='g.sNo'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.uld'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='Export.WeighingPieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='Export.WeighingWeight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.volumetric.weight.kg'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.volumetric.scan'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.net.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.skid.uld.tare.weight'></ngc-label>
+                        </th>
+
+                        <th>
+                          <ngc-label label='export.weighing.number.of.skids'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.skid.height'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.shipment.location'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.weighing.warehouse.location'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='Export.locationPieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='Export.locationWeight'></ngc-label>
+                        </th>
+
+                        <th>
+                          <ngc-label label='export.weighing.dryice.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='export.shc'></ngc-label>
+                        </th>
+                        <th>
+                        </th>
+                        <th>
+                        </th>
+                      </tr>
+                    </thead>
+
+
+                    <tbody formArrayName="cargoWeighingDetailModel">
+                      <ng-container
+                        *ngFor="let item of weighingForm.get( 'cargoWeighingDetailModel').controls; let index=index"
+                        [formGroupName]="index">
+                        <ng-container *ngIf="item !==null">
+                          <tr [crud]="item.get( 'flagCRUD').value">
+                            <td width="1%">
+                              {{index+1}}
+                            </td>
+                            <td width='20'>
+                              <ngc-uldinput formControlName='uldNumber' (ngModelChange)="onChangeULD($event,index)"
+                                [disabled]="this.weighingForm.get([ 'cargoWeighingDetailModel', index, 'partrowdisableflag']).value">
+                              </ngc-uldinput>
+                            </td>
+                            <td width='15'>
+                              <ngc-piecesinput formControlName='piece' [width]='60' [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value"
+                                (ngModelChange)="onChangeGrossPieces($event,index,item)" required></ngc-piecesinput>
+                            </td>
+                            <td width='15'>
+                              <div>
+                                <ngc-weightinput formControlName='grossWeight' [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value||allowGrossWeight" [width]='70'
+                                  decimalDigits="1" (ngModelChange)="onChangeGrossWeight($event,index,item)" required>
+                                </ngc-weightinput>
+                              </div>
+
+                              <div>
+                                <ngc-button label='export.get.weight' iconType="scale"
+                                  [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value||finalizeButtonDisableFlag||addWeight||delayAcceptanceFlag"
+                                  (click)="onGetWeight($event, index)"></ngc-button>
+                              </div>
+                            </td>
+
+
+                            <td width='15'>
+                              <div>
+                                <ngc-weightinput formControlName='volumetricWeight' [hidden]="true" [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value||volumetricWeightEnableFlag" [width]='70'
+                                  decimalDigits="2"></ngc-weightinput>
+                              </div>
+
+                              <div>
+                                <ngc-button label='export.weighing.get.vol.weight'
+                                  [disabled]="!volumetricWeightEnableFlag|| this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value ||finalizeButtonDisableFlag||delayAcceptanceFlag||!enableVolScannerButton" iconType="scale"
+                                  (click)="onClickVolumetricWeight(index)"></ngc-button>
+                              </div>
+                            </td>
+                            <td width='10'>
+                              <ngc-checkbox formControlName='oddsize'>
+                              </ngc-checkbox>
+                            </td>
+                            <td width='10'>
+                              <ngc-weightdisplay formControlName='netWeight' [width]='70'></ngc-weightdisplay>
+                            </td>
+                            <td width='10'>
+                              <ngc-numberinput formControlName="tareWeight" [width]='70' [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value" decimalDigits="1"
+                                (ngModelChange)="onChangeTare($event,index)"></ngc-numberinput>
+                            </td>
+
+                            <td width='10'>
+                              <ngc-input formControlName='skids' [width]='70' [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value"
+                                (ngModelChange)="onChangeSkid($event,index)"></ngc-input>
+                            </td>
+                            <td width='10'>
+                              <ngc-dropdownlist formControlName='skidHeight' sourceId="Skid_Height$Skid_Values"
+                                [width]="70"
+                                [disabled]="this.weighingForm.get([ 'cargoWeighingDetailModel', index, 'partrowdisableflag']).value">
+                              </ngc-dropdownlist>
+                            </td>
+
+                            <ng-container formArrayName="intentory">
+                              <ng-container *ngFor="let subItem of weighingForm.get([ 'cargoWeighingDetailModel', index,
+            'intentory']).controls| page :1 :1; let sindex=index" [formGroupName]="0">
+                                <td width='25'>
+
+                                  <ngc-movable-storage-location
+                                    [shipmentNumber]="this.weighingForm.get('shipmentNumber').value" [origin]="this.weighingForm.get( 'shipmentModel').get(
+            'origin').value" [destination]="this.weighingForm.get( 'shipmentModel').get( 'destination').value"
+                                    upperCase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                                    (ngModelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="shipmentLocation">
+                                  </ngc-movable-storage-location>
+
+                                </td>
+                                <td width='25'>
+                                  <ngc-locations-list [noTerminal]="true" [temperatureRange]="this.weighingForm.get(
+            'requestedTemperatureRangeCode').value" [displayOnlyLocation]="true"
+                                    (ngModelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="warehouseLocation" [locationTypeList]="['STORAGE']">
+                                  </ngc-locations-list>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesinput formControlName='piece' [autoFocus]="false" [width]='60'
+                                    (ngModelChange)="onChangeWeightPieces(index,sindex,$event)" decimalDigits="0"
+                                    required></ngc-piecesinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-numberinput (ngModelChange)="onChangeWeight()" formControlName='actualWeight'
+                                    [width]='70' decimalDigits="2" required></ngc-numberinput>
+                                </td>
+
+
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='dryIceWeight' [width]='70' decimalDigits="1">
+                                  </ngc-numberinput>
+                                </td>
+                                <td width='20'>
+
+                                  <ngc-shcinput formControlName="shc" dataField="code"></ngc-shcinput>
+                                </td>
+
+                              </ng-container>
+                            </ng-container>
+
+                            <td width='20'>
+
+                              <ngc-button label='awb.add.location' (click)="onAddLocation(index)"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-button>
+                              <br>
+                              <ngc-button label='export.weighing.reproportionate' iconType="scale"
+                                [disabled]="this.weighingForm.get([
+            'cargoWeighingDetailModel', index, 'partrowdisableflag']).value||finalizeButtonDisableFlag||delayAcceptanceFlag" (click)="onChangeWeightAllForGross()">
+                              </ngc-button>
+
+                            </td>
+                            <td width='5'>
+                              <ngc-link (linkClick)="onDeleteRow(index)" iconType="delete"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-link>
+                            </td>
+                          </tr>
+
+                          <ng-container formArrayName="intentory">
+                            <ng-container *ngFor="let subItem of weighingForm.get([ 'cargoWeighingDetailModel', index,
+            'intentory']).controls; let subIndex=index" [formGroupName]="subIndex">
+                              <tr [crud]="subItem.get( 'flagCRUD').value" *ngIf="subIndex> 0">
+                                <td colspan="10">
+                                </td>
+
+                                <td width='25'>
+                                  <ngc-movable-storage-location
+                                    [shipmentNumber]="this.weighingForm.get('shipmentNumber').value"
+                                    [origin]="this.weighingForm.get('shipmentModel').get('origin').value"
+                                    (ngModelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    [destination]="this.weighingForm.get('shipmentModel').get('destination').value"
+                                    upperCase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                                    formControlName="shipmentLocation">
+
+                                  </ngc-movable-storage-location>
+                                </td>
+                                <td width='25'>
+                                  <ngc-locations-list [noTerminal]="true"
+                                    [temperatureRange]="this.weighingForm.get('requestedTemperatureRangeCode').value"
+                                    [displayOnlyLocation]="true"
+                                    (ngModelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                    formControlName="warehouseLocation" [locationTypeList]="['STORAGE']">
+                                  </ngc-locations-list>
+                                </td>
+                                <td width='20'>
+                                  <ngc-piecesinput formControlName='piece'
+                                    (ngModelChange)="onChangeWeightPieces(index,subIndex,$event)" [width]='60' required>
+                                  </ngc-piecesinput>
+                                </td>
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='actualWeight' (ngModelChange)="onChangeWeight()"
+                                    [width]='70' decimalDigits="2" required></ngc-numberinput>
+                                </td>
+
+
+                                <td width='20'>
+                                  <ngc-numberinput formControlName='dryIceWeight' [width]='70' decimalDigits="1">
+                                  </ngc-numberinput>
+                                </td>
+                                <td width='20'>
+                                  <!-- <ngc-dropdownlist formControlName="shc" sourceId='SHIP_INVENTORY_SHC' sourceType='query' [multiSelect]="true" [width]="80"
+                               
+                                    dataField='code' [sourceParameters]="{'parameter1': docId }" [noCache]="true"></ngc-dropdownlist> -->
+                                  <!-- <ngc-dropdownlist [autoSelect]="true" formControlName="shc" [source]='shclist' [multiSelect]="true" [width]="80" dataField='code'
+                                    [noCache]="true"></ngc-dropdownlist> -->
+
+                                  <ngc-shcinput formControlName="shc" dataField="code"></ngc-shcinput>
+
+                                </td>
+                                <!--<td [width]='50'>
+                                    <ngc-link *ngIf="subItem.get('flagCRUD').value !== 'C'" (linkClick)="onEditLocation(index, subIndex)" iconType="edit" [disabled]='omegaDisabler'></ngc-link>
+                                  </td>-->
+                                <td>
+                                </td>
+                                <td width='20'>
+                                  <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" iconType="delete"
+                                    [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-link>
+                                </td>
+                              </tr>
+                            </ng-container>
+                          </ng-container>
+
+
+
+
+
+                        </ng-container>
+                      </ng-container>
+
+
+                      <tr>
+
+                        <td width="1%">
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='20'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='15'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+                        <td width='15'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+                        <ng-container>
+
+                          <td width='25'>
+
+                            <ngc-label label=""></ngc-label>
+                          </td>
+                          <td width='25'>
+                            <ngc-label label=""></ngc-label>
+                          </td>
+                          <td width='20'>
+                            <ngc-label label="export.weighing.total"></ngc-label>
+                          </td>
+                          <td width='20'>
+                            <div align="right">
+                              {{weighingForm.get('totalAcceptedPiecesSum').value}}
+                            </div>
+
+                            <!-- <ngc-display label="" formControlName="this.weighingForm.get('
+                              totalAcceptedPiecesSum').value"></ngc-display> -->
+                          </td>
+
+
+                          <td width='20'>
+                            <div align="right">
+                              {{weighingForm.get('totalAcceptedWeightSum').value}}
+                            </div>
+                            <!-- <ngc-display label="" formControlName="this.weighingForm.get('
+                              totalAcceptedWeightSum').value"></ngc-display> -->
+                          </td>
+                          <td width='20'>
+                            <ngc-label label=""></ngc-label>
+                          </td>
+
+                        </ng-container>
+
+                        <td width='20'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='5'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='5'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+
+
+
+
+
+
+
+                      </tr>
+
+                      <tr>
+
+                        <td width="1%">
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='20'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='15'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+                        <td width='15'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='10'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+                        <ng-container>
+
+                          <td width='25'>
+
+                            <ngc-label label=""></ngc-label>
+                          </td>
+                          <td width='25'>
+                            <ngc-label label=""></ngc-label>
+                          </td>
+                          <td width='20'>
+                            <ngc-label label="export.weighing.difference"></ngc-label>
+                          </td>
+                          <td width='20'>
+                            <div align="right">
+                              {{weighingForm.get('differencePieces').value}}
+                            </div>
+
+                            <!-- <ngc-display label="" formControlName="this.weighingForm.get('
+                                      totalAcceptedPiecesSum').value"></ngc-display> -->
+                          </td>
+
+
+                          <td width='20'>
+                            <div align="right">
+                              {{weighingForm.get('differenceWeight').value}}
+                              <br>
+                              <ngc-label label="["></ngc-label>
+                              {{weighingForm.get('differenceWeightPercent').value}}
+                              <ngc-label label="%"></ngc-label>
+                              <ngc-label label="]"></ngc-label>
+
+                            </div>
+                            <!-- <ngc-display label="" formControlName="this.weighingForm.get('
+                                      totalAcceptedWeightSum').value"></ngc-display> -->
+                          </td>
+                          <td width='20'>
+                            <ngc-label label=""></ngc-label>
+                          </td>
+
+                        </ng-container>
+
+                        <td width='20'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='5'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+                        <td width='5'>
+                          <ngc-label label=""></ngc-label>
+                        </td>
+
+
+
+
+
+
+
+
+
+                      </tr>
+
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align='right'>
+                  <ngc-button label="g.addRow" (click)="onAddRow()"
+                    [disabled]='finalizeButtonDisableFlag||delayAcceptanceFlag'></ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title='Remarks' [indicatorIconType]="remarksIndicator" indicatorIconColor="red">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [column]='10'>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-button label='export.addRemark' (click)="onAddRemark()"
+                    [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]='100'>
+                          <ngc-label label='awb.remarkType'></ngc-label>
+                        </th>
+                        <th [width]='700'>
+                          <ngc-label label='export.details'></ngc-label>
+                        </th>
+                        <th [width]='80'>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="remarks">
+                      <tr *ngFor="let item of weighingForm.controls.remarks.controls; let index=index"
+                        [formGroupName]="index">
+                        <td>
+
+                          <ngc-dropdownlist formControlName="type" sourceId="Cargo_Handling$RemarkType">
+                          </ngc-dropdownlist>
+
+                          <!-- <ngc-dropdownlist formControlName='type' sourceId="CUSTOMER_TYPES_DESC" sourceType="query" [width]="100" [disabled]="finalizeButtonDisableFlag"></ngc-dropdownlist> -->
+                        </td>
+                        <td>
+                          <ngc-input formControlName='detail' [width]='900' [disabled]="finalizeButtonDisableFlag">
+                          </ngc-input>
+                        </td>
+                        <td [width]='50'>
+                          <ngc-link formControlName='deleteRemark' (linkClick)="onDelete($event, index)"
+                            iconType="delete" [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+
+
+
+
+
+          <div ngc-tab-card title='Dimension' [indicatorIconType]="dimensionIndicator" indicatorIconColor="red">
+            <ngc-container>
+
+              <ngc-row>
+                <ngc-column [column]='5'>
+                  <ngc-label label='export.fwbDetails'></ngc-label>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label='export.actualDetails'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align='right'>
+                  <ngc-button label='export.addRow' (click)="onDetailsAddRow()" #addRowButton></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]='4'>
+                  <ngc-container>
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-datatable formArrayName="fwbDimension" #releasedtable>
+                          <ngc-data-column text="g.pieces" height='40' cellsAlign="left" dataField="piece" [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.length" height='40' cellsAlign="left" dataField="length"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.width" height='40' cellsAlign="left" dataField="width"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.height" height='40' cellsAlign="left" dataField="height"
+                            [width]="20">
+                          </ngc-data-column>
+                          <ngc-data-column text="awb.volume" height='40' cellsAlign="left" dataField="volume"
+                            [width]="20">
+                          </ngc-data-column>
+                        </ngc-datatable>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+                <ngc-column [column]='1'>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.manual.scan.reason'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.book.pieces'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='length'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.book.width'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='height'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.vol.wt'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.multiplier'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.total.pcs'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label='export.weighing.total.vol.wt'></ngc-label>
+                        </th>
+                        <th [width]='100'>
+                          <ngc-label label=''></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <ng-container formArrayName="dimension">
+                        <tr *ngFor="let item of weighingForm.controls.dimension.controls; let index=index"
+                          [formGroupName]="index">
+                          <td>
+
+                            <div>
+                              <ngc-dropdownlist sourceId="Admin$ManualScanReason"
+                                (select)="onSelectManualScanReason(index,$event)" [width]="150" [dropDownWidth]="150"
+                                formControlName="manualScanReason"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-dropdownlist>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='pcs' [width]='100' decimalDigits="0"
+                                (ngModelChange)="onChangeDimePieces(index,$event)"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag||(weighingForm.get(['dimension', index, 'messageId']) && weighingForm.get(['dimension', index, 'messageId']).value!=null)">
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='length'
+                                (ngModelChange)="onChangeDimensions(index,$event)" [width]='100' decimalDigits="0"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag||(weighingForm.get(['dimension', index, 'messageId']) && weighingForm.get(['dimension', index, 'messageId']).value!=null)">
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='width'
+                                (ngModelChange)="onChangeDimensions(index,$event)" [width]='100' decimalDigits="0"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag||(weighingForm.get(['dimension', index, 'messageId']) && weighingForm.get(['dimension', index, 'messageId']).value!=null)">
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='height'
+                                (ngModelChange)="onChangeDimensions(index,$event)" [width]='100' decimalDigits="0"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag||(weighingForm.get(['dimension', index, 'messageId']) && weighingForm.get(['dimension', index, 'messageId']).value!=null)">
+                              </ngc-numberinput>
+                            </div>
+
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-weightdisplay formControlName='volumetricWeight' [width]='100' decimalDigits="2"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag">
+                              </ngc-weightdisplay>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-numberinput formControlName='multiplier' (ngModelChange)="onChangeMultiplier(index)"
+                                decimalDigits="0" [width]='100'
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag||(weighingForm.get(['dimension', index, 'messageId']) && weighingForm.get(['dimension', index, 'messageId']).value!=null)">
+                              </ngc-numberinput>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-weightdisplay formControlName='totalPieces' [width]='100' decimalDigits="2"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag">
+                              </ngc-weightdisplay>
+                            </div>
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-weightdisplay formControlName='totalVolumetricWeight' [width]='100' decimalDigits="2"
+                                [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag">
+                              </ngc-weightdisplay>
+                            </div>
+                          </td>
+
+
+                          <td [width]='50'>
+                            <ngc-link (linkClick)="onDeleteDimension(index)" iconType="delete"
+                              [disabled]="finalizeButtonDisableFlag||delayAcceptanceFlag"></ngc-link>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+
+            </ngc-container>
+          </div>
+          <div ngc-tab-card title='exp.acceptance.action.list' [indicatorIconType]="actionlistindicator"
+            indicatorIconColor="red">
+            <ngc-container type="heading" formGroupName="ruleShipmentExecutionDetails">
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-label label=' '></ngc-label>
+                  <div>
+                    <ngc-button (click)="onCloseFailureData()" value="awb.cpe.close.failure"></ngc-button>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-container type="box" title="awb.cpe.info.check">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.sNo"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.process.name"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.trigger.point"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.message"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.status"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.closed.date"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.closed.by"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.acknowledge"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="execInfoList">
+                            <tr
+                              *ngFor="let item of weighingForm.getList(['ruleShipmentExecutionDetails','execInfoList']); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-label label={{index+1}}></ngc-label>
+                              </td>
+                              <ngc-label formControlName="processAreaName"></ngc-label>
+                              <td>
+                                <ng-container formGroupName="triggerPoint">
+                                  <ngc-display formControlName="triggerPointName"></ngc-display>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="failureMessage"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="status"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedOn"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedBy"></ngc-display>
+                              </td>
+                              <td>
+                                <ng-container
+                                  *ngIf="weighingForm.get(['ruleShipmentExecutionDetails','execInfoList', index, 'status']).value === 'CLOSED'">
+                                  <ngc-icon align="center" value="true" type="yesno" formControlName="acknowledge"
+                                    true-color="grey">
+                                  </ngc-icon>
+                                </ng-container>
+                                <ng-container
+                                  *ngIf="weighingForm.get(['ruleShipmentExecutionDetails','execInfoList', index, 'status']).value !== 'CLOSED'">
+                                  <ngc-checkbox formControlName="acknowledge">
+                                  </ngc-checkbox>
+                                </ng-container>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container type="box" title="awb.cpe.warning.check">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.sNo"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.process.name"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.trigger.point"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.message"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.status"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.closed.date"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.closed.by"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.acknowledge"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="execWarnList">
+                            <tr
+                              *ngFor="let item of weighingForm.getList(['ruleShipmentExecutionDetails','execWarnList']); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-label label={{index+1}}></ngc-label>
+                              </td>
+                              <td>
+                                <ngc-label formControlName="processAreaName"></ngc-label>
+                              </td>
+                              <td>
+                                <ng-container formGroupName="triggerPoint">
+                                  <ngc-display formControlName="triggerPointName"></ngc-display>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="failureMessage"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="status"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedOn"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedBy"></ngc-display>
+                              </td>
+                              <td>
+                                <ng-container
+                                  *ngIf="weighingForm.get(['ruleShipmentExecutionDetails','execWarnList', index, 'status']).value === 'CLOSED'">
+                                  <ngc-icon align="center" value="true" type="yesno" formControlName="acknowledge"
+                                    true-color="grey">
+                                  </ngc-icon>
+                                </ng-container>
+                                <ng-container
+                                  *ngIf="weighingForm.get(['ruleShipmentExecutionDetails','execWarnList', index, 'status']).value !== 'CLOSED'">
+                                  <ngc-checkbox formControlName="acknowledge">
+                                  </ngc-checkbox>
+                                </ng-container>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                  <ngc-container type="box" title="awb.cpe.error.check">
+                    <ngc-row>
+                      <ngc-column>
+                        <ngc-table>
+                          <thead>
+                            <tr>
+                              <th>
+                                <ngc-label label="g.sNo"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.process.name"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.trigger.point"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.message"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.status"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.closed.date"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.closed.by"></ngc-label>
+                              </th>
+                              <th>
+                                <ngc-label label="awb.cpe.acknowledge"></ngc-label>
+                              </th>
+                            </tr>
+                          </thead>
+                          <tbody formArrayName="execErrorList">
+                            <tr
+                              *ngFor="let item of weighingForm.getList(['ruleShipmentExecutionDetails','execErrorList']); let index=index"
+                              [formGroupName]="index">
+                              <td>
+                                <ngc-label label={{index+1}}></ngc-label>
+                              </td>
+                              <ngc-label formControlName="processAreaName"></ngc-label>
+                              <td>
+                                <ng-container formGroupName="triggerPoint">
+                                  <ngc-display formControlName="triggerPointName"></ngc-display>
+                                </ng-container>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="failureMessage"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="status"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedOn"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-display formControlName="issueClosedBy"></ngc-display>
+                              </td>
+                              <td>
+                                <ngc-icon align="center" value="true" type="yesno" formControlName="acknowledge"
+                                  true-color="grey">
+                                </ngc-icon>
+                              </td>
+                            </tr>
+                          </tbody>
+                        </ngc-table>
+                      </ngc-column>
+                    </ngc-row>
+                  </ngc-container>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+
+
+
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='mngaccpwgtslip'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column *ngIf=displayFlag>
+      <ngc-button label="1.weighing" (click)='onClickFlightPlanner()'> </ngc-button>
+      <ngc-button label='2.weighing' accessEnableOn="r" (click)="onBackToSummary()" #backToSummary></ngc-button>
+      <ngc-button label="export.weighing.checklist.btn" (click)='onChecklist()'> </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

@@ -1,0 +1,309 @@
+<ngc-titlebar title="shp.title" (clear)="onClear($event)" (save)="onSave($event)" (cancel)="onCancel($event)"
+    *ngIf=!showAsPopup [disableSave]="saveFlag==false">
+</ngc-titlebar>
+<ngc-error *ngIf=showAsPopup></ngc-error>
+<ngc-row *ngIf=showAsPopup>
+    <ngc-column align="right">
+        <ngc-button label="savehold" (click)="onSave($event)"> </ngc-button>
+    </ngc-column>
+    <ngc-column [column]="1">
+        <ngc-label label=""></ngc-label>
+    </ngc-column>
+</ngc-row>
+
+<form [formGroup]="awbHoldForm">
+    <ngc-container type='section'>
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="shpHold.shpNum"></ngc-label>
+                <!-- BUG-742 change -->
+                <div>
+                    <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" (ngModelChange)="onTabOutCheckHandledBy()" required></ngc-awbinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="2" *ngIf=handledbyHouse>
+                <ngc-label label="g.hawb.number"></ngc-label>
+                <div>
+                    <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="100" sourceId='HWBNUMBER' required
+                         [validOnly]="true" dataField='code' valueMember='code' [noCache]="true"
+                        [sourceParameters]="{'parameter1': this.awbHoldForm.get('shipmentNumber').value}" (select)="setAWBNumber($event)">
+                        <ngc-data-column text='g.hawb.number' [width]='80' dataField='code'></ngc-data-column>
+                    </ngc-lov>
+                </div>
+                <!-- BUG-742 change END -->
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="shp.flight"></ngc-label>
+                <div>
+                    <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" upperCase='true' [width]="100"></ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="shp.date"></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" [width]="100" formControlName="flightKeyDate"
+                        formatString="ddMMMyyyy">
+                    </ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <div>
+                    <ngc-label label=""></ngc-label>
+                </div>
+                <ngc-button label="shp.search" accessEnableOn="r" (click)="onSearch()" [disabled]=showAsPopup>
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="isTableFlg" type="tab">
+        <ngc-row>
+            <ngc-column column="2">
+                <ngc-label label="shpHold.shpNum"></ngc-label>
+                <div>
+                    <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="shpHold.origin"></ngc-label>
+                <div>
+                    <ngc-display formControlName="origin"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="shp.destination"></ngc-label>
+                <div>
+                    <ngc-display formControlName="destination"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="shp.pieces"></ngc-label>
+                <div>
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column column="1">
+                <ngc-label label="shp.weight"></ngc-label>
+                <div>
+                    <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="shp.natureofgoods"></ngc-label>
+                <div>
+                    <ngc-display formControlName="natureOfGoods"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="g.shc"></ngc-label>
+                <div>
+                    <ngc-display formControlName="specialHandlingCode"></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" *ngIf="houseInfoFlag" formGroupName="hawbDetails">
+        <ngc-row>
+            <ngc-column column="2">
+                <div>
+                    <ngc-label label="g.hawb.number"></ngc-label>
+                </div>
+                <ngc-display formControlName="hwbNumber">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.origin"></ngc-label>
+                </div>
+                <ngc-display formControlName="hwbOrigin">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="g.destination"></ngc-label>
+                </div>
+                <ngc-display formControlName="hwbDestination">
+                </ngc-display>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="customs.hawb.pieces"></ngc-label>
+                </div>
+                <ngc-piecesdisplay formControlName="hwbPieces">
+                </ngc-piecesdisplay>
+            </ngc-column>
+            <ngc-column column="1">
+                <div>
+                    <ngc-label label="customs.hawb.weight"></ngc-label>
+                </div>
+                <ngc-weightdisplay formControlName="hwbWeight">
+                </ngc-weightdisplay>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="shp.natureofgoods"></ngc-label>
+                <div>
+                    <ngc-display formControlName="hwbNatureOfGoods"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <div>
+                    <ngc-label label="g.shc"></ngc-label>
+                </div>
+                <ngc-display formControlName="specialHandlingCodeHAWB">
+                </ngc-display>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container *ngIf="isTableFlg" type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th width="20">
+                                <ngc-checkbox formControlName="selectAll"></ngc-checkbox>
+                            </th>
+                            <th width="50">
+                                <ngc-label feature="'export.partSuffix" label="awb.part.suffix"></ngc-label>
+                            </th>
+                            <th width="100">
+                                <ngc-label label="shp.shpLocation"></ngc-label>
+                            </th>
+                            <th width="50">
+                                <ngc-label label="shp.pieces"></ngc-label>
+                            </th>
+                            <th width="50">
+                                <ngc-label label="shp.weight"></ngc-label>
+                            </th>
+                            <th width="130">
+                                <ngc-label label="shp.warehouseLocation"></ngc-label>
+                            </th>
+                            <th width="70">
+                                <ngc-label label="g.flight"></ngc-label>
+                            </th>
+                            <th width="90">
+                                <ngc-label label="g.date"></ngc-label>
+                            </th>
+                            <th width="130">
+                                <ngc-label label="shpHold.SHC"></ngc-label>
+                            </th>
+                            <th width="85">
+                                <ngc-label label="shp.hold"></ngc-label>
+                            </th>
+                            <th width="60">
+                                <ngc-label label="shp.user"></ngc-label>
+                            </th>
+                            <th width="110">
+                                <ngc-label label="shp.datetime"></ngc-label>
+                            </th>
+                            <th width="140">
+                                <ngc-label label="shp.holdReason"></ngc-label>
+                            </th>
+                            <th width="250">
+                                <ngc-label label="shp.remarks"></ngc-label>
+                            </th>
+                            <th width="200">
+                                <ngc-label label="shp.usergrouptonotify"></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName='shipmentInventories'>
+                        <tr *ngFor="let item of awbHoldForm.controls.shipmentInventories.controls; let index=index"
+                            [formGroupName]="index">
+                            <td [width]='15'>
+                                <ngc-checkbox formControlName="selected"></ngc-checkbox>
+                            </td>
+                            <td [width]='100'>
+                                <ngc-display feature="'export.partSuffix" formControlName="partSuffix"></ngc-display>
+                            </td>
+                            <td [width]='500'>
+                                <ngc-display formControlName="shipmentLocation"></ngc-display>
+                            </td>
+                            <td align="right" [width]='200'>
+                                <ngc-piecesdisplay formControlName="piecesInv"></ngc-piecesdisplay>
+                            </td>
+                            <td align="right">
+                                <ngc-weightdisplay formControlName="weightInv"></ngc-weightdisplay>
+                            </td>
+                            <td [width]='200'>
+                                <ngc-display formControlName="warehouseLocation"></ngc-display>
+                            </td>
+                            <td [width]='200'>
+                                <ngc-display formControlName="flightKey"></ngc-display>
+                            </td>
+                            <td [width]='200'>
+                                <ngc-display formControlName="flightKeyDate" [onlyDate]="true"></ngc-display>
+                            </td>
+                            <td [width]='500'>
+                                <ngc-shcinput [readonly]="true" formArrayName="shcListInv" dataField="shcInv">
+                                </ngc-shcinput>
+                            </td>
+                            <td align="center" [ngSwitch]="item.get('hold').value" [width]='300'>
+                                <ngc-link *ngSwitchCase="false" 
+                                    (linkClick)="onLock($event, index)" iconSize="2x" >
+                                    <i class="fa fa-unlock-alt fa-2x" style="color:green"></i>
+                                </ngc-link>
+
+                                <ngc-link *ngSwitchCase="true" 
+                                    (linkClick)="onUnLock($event, index)" iconSize="2x" >
+                                    <i class="fa fa-lock fa-2x" style="color:red" ></i>
+                                </ngc-link>
+                                <!-- <i class="fa fa-lock fa-2x" style="color:red" (click)="onUnLock($event, index)"
+                                    *ngSwitchCase="true"></i> -->
+                            </td>
+                            <td [width]='300'>
+                                <ngc-display formControlName="modifiedBy"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-display formControlName="modifiedOn" formatString="ddMMMyyyy"></ngc-display>
+                            </td>
+                            <td>
+                                <ngc-dropdownlist formControlName="reasonForHold" sourceId="SHIPMENTONHOLDREASON"
+                                    sourceType='query'>
+                                </ngc-dropdownlist>
+                            </td>
+                            <td>
+                                <ngc-input [width]="250" maxLength='65' formControlName="remarks"></ngc-input>
+                            </td>
+                            <td>
+                                <ngc-dropdownlist [width]="159" formControlName="holdNotifyGroup"
+                                    sourceId="SHIPMENTONHOLDNOTIFYGROUP" sourceType='query'>
+                                </ngc-dropdownlist>
+                            </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container *ngIf="isTableFlg" type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-row>
+                    <ngc-column column=10.5></ngc-column>
+                    <ngc-column>
+                        <div>
+                            <ngc-label label=""></ngc-label>
+                        </div>
+                        <ngc-button (click)="onGenerateCTO($event)" label="shp.generateCTO"></ngc-button>
+                    </ngc-column>
+
+                </ngc-row>
+            </ngc-column>
+        </ngc-row>
+
+    </ngc-container>
+</form>
+<ngc-footer *ngIf=!showAsPopup>
+    <ngc-row>
+        <ngc-column column="7.5">
+            <ngc-button label="shp.hold.loc" accessEnableOn="r" (click)="onAddLocation()" [disabled]=showAsPopup></ngc-button>
+            <ngc-button label='shp.hold.info' *ngIf="!handledbyHouse" accessEnableOn="r" (click)='onClickShipmentInformation()'
+                [disabled]=showAsPopup></ngc-button>
+            <ngc-button *ngIf="handledbyHouse" accessEnableOn="r" label="hawb.hold.info" (click)="onHAWBInformation()"
+                [disabled]=showAsPopup>
+            </ngc-button>
+       
+        </ngc-column>
+    </ngc-row>
+</ngc-footer>

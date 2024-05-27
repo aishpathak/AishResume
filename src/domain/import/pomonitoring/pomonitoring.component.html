@@ -1,0 +1,482 @@
+<form [formGroup]="pomonitoring">
+  <ngc-titlebar title='import.pick.order.monitoring' (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)=onCancel()>
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='display.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminalDisplay" sourceId="TERMINAL_CODE"
+            sourceType="query" [width]='80' (select)="onChange($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label='import.po.delivery.sectors'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="handlingSector" sourceId="KEY_DELIVERY_SECTORS"
+            sourceType="query" [sourceParameters]="subMessageParameter" [width]='140' [noCache]="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType="{{shipmentType1}}" [width]="200" [noDN]="true" [noCBN]="true"
+            formControlName="shipmentNumber" (select)="onShipmentSelect($event)" accessEnableOn="r">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5" feature="Imp.Bd.HAWBHandling" *ngIf="handledByMasterHouse">
+        <ngc-label label="g.hawbNumber"></ngc-label>
+        <div>
+          <ngc-lov formControlName="hawbNumber" [noCache]="true" title="g.hawbNumber" dataField='code'
+            sourceType='query' sourceId="HWBNUMBER" [width]="100"
+            [sourceParameters]="{'parameter1': pomonitoring.get(['shipmentNumber']).value,r:variable}" maxlength="16">
+            <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="requestedFrom"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='display.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+            formControlName="requestedTo"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='import.consigneeDetails'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="consigneeName" upperCase="true" sourceId="CONSIGNEE_DATA"
+            title="g.name" dataField="code">
+            <ngc-data-column text="g.name" dataField="desc" [width]="50">
+            </ngc-data-column>
+            <ngc-data-column text="g.code" dataField="code" [width]="80">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.agent'></ngc-label>
+        <div>
+          <ngc-lov [width]="50" accessEnableOn="r" formControlName="appointedAgent" sourceId="AGENT_NAME_DISPLAY_PO"
+            title="g.customer.list" dataField="code">
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.customer.full.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="import.po.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="poStatus" sourceId='DisplayPo$PO_STATUS' [width]="140">
+          </ngc-dropdownlist>
+
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button value="display.search" accessEnableOn="r" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button entityAttribute="Imp.Dlv.POMonitoingFucntions" label='import.po.change.priority'
+          (click)="changePriority()"></ngc-button>
+        <ngc-button entityAttribute="Imp.Dlv.POMonitoingFucntions" label='import.po.force.complete'
+          (click)="forceComplete()"></ngc-button>
+        <ngc-button entityAttribute="Imp.Dlv.POMonitoingFucntions" label='imp.pickorder.interrupt'
+          (click)="interrupt()"></ngc-button>
+        <ngc-button entityAttribute="Imp.Dlv.POMonitoingFucntions" label='imp.pickorder.resume' (click)="resume()">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable #mainTable formArrayName="shipmentArray" [pageSize]="15" [hierarchy]="[['movements']]">
+          <ngc-data-column text="" dataField="select" [width]="10" type="check" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-checkbox *ngIf="pomonitoring.get(['shipmentArray',indexes['root'],'checkBoxCheck']).value"
+                  [formControlName]="name"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.priority.seq.br" dataField="priority" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-input [formControlName]="name" [width]="50"></ngc-input>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" dataField="shipmentNumber" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.hawbNumber" feature="Imp.Bd.HAWBHandling" dataField="hawbNumber" cellsAlign="center"
+            align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="import.AWB.Pieces" feature="Imp.Bd.HAWBHandling" dataField="awbPieces" align="center"
+            cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.hawb.pieces" feature="Imp.Bd.HAWBHandling" dataField="hawbPieces" align="center"
+            cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.SRFNumber" text="srf.no" dataField="deliveryRequestOrderNo"
+            align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.POPieces" text="imp.po.pieces" dataField="deliveryRequestedPieces"
+            align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="import.appt.agent.br" dataField="appointedAgent" cellsAlign="center" align="center"
+            [width]="30">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column text="g.source" dataField="source" [width]="50" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.po.request.date.time" dataField="requestedOn" align="center" cellsAlign="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.Elapsed" text="imp.po.elapsed"
+            [cellsStyleRenderer]="elapsedFrom1SRFCellsStyleRenderer" dataField="elapsedFrom1SRFScan" align="center"
+            cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.FirstCargoRelease" text="imp.po.fst.cargo.release"
+            dataField="firstCargoRelease" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.CancelPO" text="import.po.cancelled.reason"
+            dataField="cancellationReason" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.POStatus" text="display.postatus" dataField="poStatus"
+            align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.po.work.order.status" name="workorderstatus">
+
+            <ngc-data-column entityAttribute="Imp.Dlv.RetrievalParty" text="imp.po.retrieval.party "
+              dataField="retrievalParty" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.shipment.location" dataField="shipmentLocation" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column entityAttribute="Gen.WareHouseDestination" text="awb.whs.loc.br"
+              dataField="warehouseLocation" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column feature="Gen.Shipment.ActualLocation" text="Gen.ActualLocation" dataField="actualLocation"
+              cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="pieces" dataField="pieces" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.po.truck.dock" dataField="targetLocation" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.status" dataField="status" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.po.device.id" dataField="jobExecutedBy" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.user" dataField="modifiedBy" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.po.start.time.br" dataField="startedOn" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.po.completion.time.br" dataField="completedOn" cellsAlign="center"
+              align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['movements'] >= 0">
+                    <ng-container formArrayName="movements">
+                      <ng-container [formGroupName]="indexes['movements']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <!-- <ngc-data-column text="Warehouse<br>Location" dataField="warehouseLocation" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="g.pieces" dataField="pieces" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="Truckdock" dataField="targetLocation" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="Status" dataField="status" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="Device ID" dataField="jobExecutedBy" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="User" dataField="modifiedBy" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="Start<br>Time" dataField="startedOn" cellsAlign="center" align="center"></ngc-data-column>
+            <ngc-data-column text="Completion<br>Time" dataField="completedOn" cellsAlign="center" align="center"></ngc-data-column> -->
+          </ngc-data-column>
+          <ngc-data-column entityAttribute="Imp.Dlv.CancelPO" text="import.cancel.po" dataField="cancel" align="center"
+            cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['movements'] == 0" [formGroupName]="indexes['root']">
+                <ngc-link iconType="edit" [formControlName]="name"
+                  (linkClick)="cancelPo(indexes['root'],indexes['movements'])">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column entityAttribute="Imp.Dlv.CancelWorkOrder" text="imp.po.cancel.WorkOrder" align="center"
+            cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container>
+                <ngc-link iconType="edit" [formControlName]="name"
+                  (linkClick)="cancelWorkOrder(indexes['root'],indexes['movements'],this.pomonitoring.get(['shipmentArray',indexes['root'],'movements',indexes['movements']]).value)">
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+  <!-- </ngc-column>
+  </ngc-row>
+  </ngc-container> -->
+  <ngc-window #cancelPO title="import.cancel.po" width="500" height="300" [cancelButton]="true">
+    <ngc-container formGroupName="cancelPo" type="tab">
+      <ngc-row>
+        <ngc-column column="4">
+          <ngc-label label="g.awbNumber"></ngc-label>
+          <div>
+            <ngc-display formControlName="shipmentNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="4" feature="Imp.Bd.HAWBHandling">
+          <ngc-label label="g.hawb.number"></ngc-label>
+          <div>
+            <ngc-display formControlName="hawbNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="4">
+          <ngc-label label="display.po"></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryRequestOrderNo"></ngc-display>
+          </div>
+        </ngc-column>
+
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="import.reason.for.cancellation"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="cancellationReason" sourceId="ReasonForCancellation" sourceType="query"
+              required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+
+      </ngc-row>
+
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+
+        <ngc-row>
+          <ngc-column align="right">
+            <!--<ngc-button (click)="onSave($event)" label="Save"></ngc-button>-->
+            <ngc-button (click)="onCancels($event)" label="g.save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+</form>

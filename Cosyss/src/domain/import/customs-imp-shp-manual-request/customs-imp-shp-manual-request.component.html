@@ -1,0 +1,448 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="title.customs.import.shipment.manual.request" (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <ngc-container type="section" formGroupName="searchDetails" [grid72]='true'>
+    <ngc-row>
+      <ngc-column column="7">
+        <ngc-label label="awb.document.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [disabled]="searchFlag" [width]="150" [dropDownWidth]="130"
+            sourceId="Import$CustomsDocType" formControlName="documentType" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="7">
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" [disabled]="searchFlag" [width]="150" formControlName="shipmentNumber"
+            (ngModelChange)='onChangeOfShipmentNumber()' required></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" *ngIf="handledByMasterHouse">
+        <ngc-label label="g.hawb.number"></ngc-label>
+        <div>
+          <ngc-lov formControlName="hawbNumber" [noCache]="true" title='HAWB Number' upperCase='true' accessEnableOn="r"
+            sourceType='query' [width]="150" sourceId='HWBNUMBER' dataField='code'
+            [sourceParameters]="{'parameter1': form.get('searchDetails.shipmentNumber').value}"
+            (select)="onSelectHouse()">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <ngc-button (click)="onSearch()" value="g.search" iconType="search" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom" align="right" *ngIf="searchFlag">
+        <ngc-button (click)="onStatusUpdate('Approved')"
+          [disabled]="this.form.get('status').value == 'Approved' || this.form.get('status').value == 'Reject' || this.form.get(['searchDetails','documentType']).value == 'Manual Update'"
+          value="g.approve" accessEnableOn="r">
+        </ngc-button>
+        <ngc-button (click)="onStatusUpdate('Reject')"
+          [disabled]="this.form.get('status').value == 'Approved' || this.form.get('status').value == 'Reject' || this.form.get(['searchDetails','documentType']).value == 'Manual Update'"
+          value="exp.reject" accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="squarethin" title="exp.acceptance.awb.info" formGroupName="shipmentInfo"
+          *ngIf="searchFlag && this.form.get(['searchDetails','hawbNumber']).value == null">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="g.awbNumber"></ngc-label>
+              <div>
+                <ngc-display formControlName="shipmentNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="g.origin"></ngc-label>
+              <div>
+                <ngc-display formControlName="origin"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="g.destination"></ngc-label>
+              <div>
+                <ngc-display formControlName="destination"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="import.pieces"></ngc-label>
+              <div>
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="g.weight"></ngc-label>
+              <div>
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="awb.chargeable.weight"></ngc-label>
+              <div>
+                <ngc-chargeableweightdisplay formControlName="chargeableWeight"></ngc-chargeableweightdisplay>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <ngc-accordion>
+          <ngc-accordion-card [selected]="expandaccordian" formGroupName="shipmentInfo"
+            *ngIf="searchFlag && this.form.get(['searchDetails','hawbNumber']).value != null">
+            <ngc-accordion-titlebar>
+              <ngc-label label="exp.acceptance.awb.info"> </ngc-label>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="g.awbNumber"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="g.origin"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="origin"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="g.destination"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="destination"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.pieces"></ngc-label>
+                  <div>
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="g.weight"></ngc-label>
+                  <div>
+                    <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="awb.chargeable.weight"></ngc-label>
+                  <div>
+                    <ngc-chargeableweightdisplay formControlName="chargeableWeight"></ngc-chargeableweightdisplay>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="squarethin" title="import.hawb.info" formGroupName="houseInfo"
+          *ngIf="this.form.get(['searchDetails','hawbNumber']).value != null && searchFlag">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="g.hawb.number"></ngc-label>
+              <div>
+                <ngc-display formControlName="hawbNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="g.origin"></ngc-label>
+              <div>
+                <ngc-display formControlName="origin"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="g.destination"></ngc-label>
+              <div>
+                <ngc-display formControlName="destination"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="import.pieces"></ngc-label>
+              <div>
+                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="g.weight"></ngc-label>
+              <div>
+                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="awb.chargeable.weight"></ngc-label>
+              <div>
+                <ngc-chargeableweightdisplay formControlName="chargeableWeight"></ngc-chargeableweightdisplay>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="searchFlag && hideManualUpdateFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <div ngc-tab-card *ngIf="this.form.get(['searchDetails','documentType']).value == 'BOE'" #boeInfoTab
+            title="import.customs.import.document.info">
+            <ngc-container type="squarethin">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="import.customs.import.document.number"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsImportDocumentNumber"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.import.document.date"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsImportDocumentDate"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.import.document.value"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsDeclaredValue"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.pieces"></ngc-label>
+                  <div>
+                    <ngc-piecesdisplay formControlName="customsDocumentPieces"></ngc-piecesdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="g.gross.weight"></ngc-label>
+                  <div>
+                    <ngc-weightdisplay formControlName="customsDocumentWeight"></ngc-weightdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="awb.chargeable.weight"></ngc-label>
+                  <div>
+                    <ngc-chargeableweightdisplay formControlName="customsDocumentChgWeight">
+                    </ngc-chargeableweightdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.importer.business.identification.no"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="importerBusinessIdentificationNo"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.importer.license.no"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="importerLicenseNo"></ngc-display>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+          <div ngc-tab-card *ngIf="this.form.get(['searchDetails','documentType']).value == 'OC'" #ocInfoTab
+            title="OC Info">
+            <ngc-container type="squarethin">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="import.customs.import.document.number"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsImportDocumentNumber"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.import.document.date"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsImportDocumentDate"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.clearance.number"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsClearanceNumber"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.clearance.date"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsClearanceDt"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.edo"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="houseAgentDeliveryAuthorizationNo"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.customs.cav"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsAssessedValue"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.pieces"></ngc-label>
+                  <div>
+                    <ngc-piecesdisplay formControlName="customsDocumentPieces"></ngc-piecesdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="g.gross.weight"></ngc-label>
+                  <div>
+                    <ngc-weightdisplay formControlName="customsDocumentWeight"></ngc-weightdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="awb.chargeable.weight"></ngc-label>
+                  <div>
+                    <ngc-chargeableweightdisplay formControlName="customsDocumentChgWeight">
+                    </ngc-chargeableweightdisplay>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.green.channel"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="greenChannel"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.importer.business.identification.no"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="importerBusinessIdentificationNo"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.importer.license.no"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="importerLicenseNo"></ngc-display>
+                  </div>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="import.stamp.duty"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="customsTotalDutyAmount"></ngc-display>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </div>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="squarethin" *ngIf="searchFlag && !hideManualUpdateFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="8">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-label label="import.customs.import.document.number"></ngc-label>
+              <div>
+                <ngc-input formControlName="boe" [width]="100" accessEnableOn="r"></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="import.customs.clearance"></ngc-label>
+              <div>
+                <ngc-input formControlName="oc" [width]="100" accessEnableOn="r"></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="import.customs.cav"></ngc-label>
+              <div>
+                <ngc-numberinput decimalDigits="2" formControlName="cov" [width]="100" accessEnableOn="r">
+                </ngc-numberinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="import.customs.totalduty"></ngc-label>
+              <div>
+                <ngc-numberinput decimalDigits="2" formControlName="totalDuty" [width]="100" accessEnableOn="r">
+                </ngc-numberinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="4">
+              <ngc-label label="import.customs.edo"></ngc-label>
+              <div>
+                <ngc-input formControlName="edo" [width]="300" accessEnableOn="r"></ngc-input>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="searchFlag && hideManualUpdateFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="6">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="awb.file.name"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.datetime"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="awb.view.document"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="documentStore">
+            <ng-container *ngFor="let item of this.form.get('documentStore').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display formControlName="fileName"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="receivedDateTime"></ngc-display>
+                </td>
+                <td>
+                  <ngc-filedownload [download]="false" [width]="800" [height]="600"
+                     [uploadDocId]="item.get('uploadedDocId').value">
+                  </ngc-filedownload>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="6">
+        <ngc-label label="req.reason"></ngc-label>
+        <ngc-input formControlName="rejectReason" [width]="400" accessEnableOn="r"></ngc-input>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

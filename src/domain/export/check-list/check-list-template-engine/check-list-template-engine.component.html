@@ -1,0 +1,181 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="export.setup.iata.airline.check.list.title" (save)="onSave($event)"></ngc-titlebar>
+  <ngc-container type="sub">
+    <ngc-row>
+      <ngc-column [column]='4'>
+        <ngc-label label="export.check.list.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist [disabled]="disableFlag" accessEnableOn="r" sourceId="CHECKLIST_TYPES"
+            formControlName="checkListId" sourceType='query' (select)="selectDropDown($event)" [width]="400" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1'>
+        <ngc-label label="g.carrier"></ngc-label>
+        <div>
+          <ngc-lov [disabled]="disableFlag" accessEnableOn="r" formControlName="carrierCode" upperCase="true"
+            dataField="code" displayMember="code" [width]="65" sourceId='CARRIER' (select)="selectLov($event)">
+            <ngc-data-column text="g.carrier" dataField="code" [width]="65"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='2'>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button [disabled]="disableFlag" accessEnableOn="r" label="g.search" iconType="search" (click)="onSearch()">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <div>
+        <ngc-label label="">
+        </ngc-label>
+      </div>
+      <ngc-column align="right">
+        <ngc-button label="export.check.list.add" (click)="onAddChecklist()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="checklistForm">
+  <ngc-container *ngIf="checkListTypesId">
+    <!--<ngc-container>-->
+    <ngc-row>
+      <ngc-column [column]='2'>
+        <ngc-label label="export.check.list.type"></ngc-label>
+        <div>
+          <ngc-display formControlName="checkListId"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="hideCarrierCode">
+        <ngc-label label="g.carrier"></ngc-label>
+        <div>
+          <ngc-display formControlName="carrierCode"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.select"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.airline"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.page.parameters"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.page.header"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.page.detail"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.questions.with.subheadings"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.questions.without.subheadings"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.page.footer"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.allignment.of.parameters"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.allignment.of.questions"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.delete"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="iataCheckListModel">
+            <tr *ngFor="let item of checklistForm.controls.iataCheckListModel.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-radiobutton accessEnableOn="r"  groupName="sel" formControlName="select"></ngc-radiobutton>
+              </td>
+              <td>
+                <ngc-display value={{index+1}}></ngc-display>
+              </td>
+              <td>
+                <ngc-lov [validOnly]='true' [required]="requiredCarrierCode" formControlName="carrierCode"
+                  upperCase="true" dataField="code" displayMember="code" [width]="65" sourceId='CARRIER'
+                  (select)="onSelectLOV($event, index)">
+                  <ngc-data-column text="g.carrier" dataField="code" [width]="65"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+                </ngc-lov>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="checkListParametersExists"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="checkListPageHeaderExists"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="checkListPageDetailExists"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="checkListQuestionnaireWithSubHeadingExists"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="checkListQuestionnaireWithoutSubHeadingExists"></ngc-icon>
+              </td>
+              <td>
+                <ngc-icon type="yesno" formControlName="checkListPageFooterExists"></ngc-icon>
+              </td>
+              <td>
+                <ngc-dropdownlist required width="150" formControlName="requiredAlignmentForParameters"
+                  sourceId="checklist$ChecklistAlignment"></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-dropdownlist required width="150" formControlName="requiredAlignmentForQuestions"
+                  sourceId="checklist$ChecklistAlignment"></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-link (linkClick)="onDeleteChecklist(index)" iconType="delete"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="export.check.list.from.base">
+        </ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="GET_AIRLINE_FOR_COPY" sourceType='query' [noCache]="true"
+            [sourceParameters]="AirlineByCheckListIDDropdown" formControlName="fromOtherAirlines">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    
+      <ngc-column>
+        <ngc-label label="">
+        </ngc-label>
+        <div>
+          <ngc-button label="export.check.list.copy" (click)="onCopyChecklist($event)"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button accessEnableOn="r" (click)="onPageParameter()" label="export.page.parameter"></ngc-button>
+        <ngc-button accessEnableOn="r" (click)="onPageHeader()" label="export.page.header"></ngc-button>
+        <ngc-button accessEnableOn="r" (click)="onPageDetails()" label="export.page.detail"></ngc-button>
+        <ngc-button accessEnableOn="r" (click)="onQuestionWithSubHeadings()" label="export.check.list.questions.with.subheadings"></ngc-button>
+        <ngc-button accessEnableOn="r" (click)="onQuestionWithoutSubHeadings()" label="export.check.list.questions.without.subheadings"></ngc-button>
+        <ngc-button accessEnableOn="r" (click)="onPageFooter()" label="export.page.footer"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

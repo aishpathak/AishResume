@@ -1,0 +1,103 @@
+<form [formGroup]="searchForm">
+  <ngc-titlebar title="uld.global.uld.stock.check" (clear)="onClear($event)">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1">
+        <ngc-label label='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov [width]="50" accessEnableOn="r" formControlName="carrier" sourceId="SATS_CARRIERCODE"
+            title="g.carrier.list" (select)='onClickCarrierCode($event)' dataField="code">
+            <ngc-data-column text="g.carrierCode" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.carrier.short.name" dataField="desc" [width]="80"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="exp.carrier.group"></ngc-label>
+        <div>
+          <ngc-lov formControlName="carrierGroupDesc" (select)='onClickCarrierGroup($event)' sourceId="CARRIER_GROUP"
+            title='g.airline' displayMember="desc" dataField='desc' [width]="80" uppercase='true'>
+            <ngc-data-column text="g.carrier" dataField="code" [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='tracing.station'></ngc-label>
+        <div>
+          <ngc-lov [maxLength]="3" formControlName="airportCode" [width]="70" upperCase="true" dataField="code"
+            title="flight.airportCode" displayMember="code" sourceId="APT">
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='imp.uld.grp'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldGroup" sourceId='ULDGROUP' title='imp.uld.grp'
+            dataField='code' width='50px' upperCase='true' displayMember="code"  [dropDownWidth]='60'
+            (select)="onSelectUldGroup($event)">
+            <ngc-data-column text="imp.uld.grp" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="uld.uld.type"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="uldType" displayMember="code" upperCase="true"
+            [dropDownWidth]='60' sourceId="ULDTYPE_FOR_ULDGROUP"
+            [sourceParameters]="{ 'param1': searchForm.get('uldGroupId').value }" title="uld.uld.type" dataField="code"
+            [width]="50">
+            <ngc-data-column text="uld.uld.type" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="uld.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="uld.total.uld.count"></ngc-label>
+        <div>
+          <ngc-dropdownlist [width]="150" accessEnableOn="r" sourceId="Global_Uld$Total_ULD_Count" [dropDownWidth]="50"
+            formControlName="totalUldCount">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search"></ngc-button>
+          <ngc-button [disabled]='disabledFlag' value="uld.exportXls" (click)="onExport()" align="right">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="globalUldStockCheckForm">
+  <ngc-container *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="UldStockList" [showToolbar]="false" [width]="50">
+          <ngc-data-column text="g.carrier" dataField="carrier" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="tracing.station" dataField="airportCode" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uldtype" dataField="uldType" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.minAllow" dataField="minimumAllow" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.maxAllow" dataField="maximumAllow" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.stdLimit" dataField="stdLimit" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="uld.total.uld.count" dataField="uldCount" [width]="5" cellsAlign="left">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #ReportExcel title="g.report" format='xls'  reportId='GlobalULDStockCheck'
+     [reportParameters]='reportParameters' dataSource='transactional'></ngc-report>
+</form>

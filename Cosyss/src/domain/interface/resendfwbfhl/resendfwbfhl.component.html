@@ -1,0 +1,283 @@
+<ngc-titlebar title="title.resendfwbfhl" [disableSave]="true"></ngc-titlebar>
+
+<!-- *********************************************************************************************** -->
+<!-- SEARCH SECTION STARTS  -->
+<form [formGroup]="searchFormGroup">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="g.flight"></ngc-label>
+        </div>
+        <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" required
+          (modelChange)="onSearchChange('unloadingPoint',$event, false)">
+        </ngc-flightkeyinput>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="g.date"></ngc-label>
+        </div>
+        <ngc-dateinput accessEnableOn="r" formControlName='flightDate' required
+          (modelChange)="onSearchChange('unloadingPoint',$event, false)">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="g.awbNumber"></ngc-label>
+        </div>
+        <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber"
+          (modelChange)="onSearchChange(null,$event, false)">
+        </ngc-awbinput>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.premanifest.unloading.point"></ngc-label>
+        </div>
+        <ngc-dropdownlist [autoSelectOnSingle]="true" formControlName="unloadingPoint"
+          sourceId="KEY_DROPDOWN_FLIGHTOFFPOINT_ACCPT" sourceType="query" [width]='70' [noCache]="true"
+          (modelChange)="onSearchChange(null,$event, false)"
+          [sourceParameters]="{ 'parameter1': this.searchFormGroup.get('flightKey').value,'parameter2': this.searchFormGroup.get('flightDate').value}">
+        </ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="8">
+              <div>
+                <ngc-label label="g.awb.origin"></ngc-label>
+              </div>
+              <ngc-lov formControlName='shipmentOrigin' accessEnableOn="r" [width]='75' upperCase='true' sourceId='APT'
+                title='origin' dataField="code" displayMember="code"
+                (modelChange)="onSearchChange('shipmentOriginExclude',$event, true)">
+                <ngc-data-column text='City/Airport Code' dataField='code' [width]='100'></ngc-data-column>
+                <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="4">
+              <div>
+                <ngc-label label='g.exclude'></ngc-label>
+              </div>
+              <ngc-checkbox formControlName="shipmentOriginExclude"
+                [disabled]="this.searchFormGroup.get('shipmentOrigin').value == null"
+                (modelChange)="onSearchChange(null,$event, false)">
+              </ngc-checkbox>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column column="8">
+              <div>
+                <ngc-label label="g.awb.destination"></ngc-label>
+              </div>
+              <ngc-lov formControlName='shipmentDestination' accessEnableOn="r" [width]='75' upperCase='true'
+                sourceId='APT' title='destination' dataField="code" displayMember="code"
+                (modelChange)="onSearchChange('shipmentDestinationExclude',$event, true)">
+                <ngc-data-column text='City/Airport Code' dataField='code' [width]='100'></ngc-data-column>
+                <ngc-data-column text='Description' dataField='desc' [width]='150'></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="4">
+              <div>
+                <ngc-label label='g.exclude'></ngc-label>
+              </div>
+              <ngc-checkbox formControlName="shipmentDestinationExclude"
+                [disabled]="this.searchFormGroup.get('shipmentDestination').value == null"
+                (modelChange)="onSearchChange(null,$event, false)">
+              </ngc-checkbox>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="4">
+        <div>
+          <ngc-label label="g.agent"></ngc-label>
+        </div>
+        <ngc-lov formControlName="customerId" sourceId="CUSTOMER_CODE_DISCOUNT" title="g.customer.list" dataField="code"
+          displayField="desc" [width]="350" (modelChange)="onSearchChange('customerExclude',$event, true)">
+          <ngc-data-column text="agent.agentCode" dataField="param1" [width]="50"></ngc-data-column>
+          <ngc-data-column text="agent.agentName" dataField="desc" [width]="80"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label='g.exclude'></ngc-label>
+        </div>
+        <ngc-checkbox formControlName="customerExclude"
+          [disabled]="this.searchFormGroup.get('customerId').value == null"
+          (modelChange)="onSearchChange(null,$event, false)">
+        </ngc-checkbox>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=""> </ngc-label>
+        </div>
+        <ngc-button label='display.search' accessEnableOn="r" (click)="onSearch()" iconType="search">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- SEARCH SECTION ENDS  -->
+
+<!-- Search Result Section STARTS  -->
+<form [formGroup]="resendFwbFhlFormGroup">
+  <ngc-container *ngIf="displayFlag">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label label='send.telex.to.telex.address'></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-taginput formControlName="telexAddress" width="100" [maxItems]="10"></ngc-taginput>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-display></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label label='send.telex.to.email.address'></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-taginput formControlName="emailAddress" width="100" [maxItems]="10"></ngc-taginput>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-button label='messages.send.notification' accessEnableOn="r" (click)="onSendNotification()"
+          [disabled]="!(this.resendFwbFhlFormGroup.get(['telexAddress']).value && this.resendFwbFhlFormGroup.get(['telexAddress']).value.length >0)">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="shipmentInformation">
+          <ngc-data-column text="messages.select.all.fwb" dataField="selectFwb" align="center" cellsAlign="center"
+            [checkAll]="true">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="selectFwb"
+                  *ngIf="!this.resendFwbFhlFormGroup.get(['shipmentInformation',group,'hideFwb']).value"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display [value]="group + 1"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.awbNumber" align="center" dataField="shipmentNumber" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="messages.fwb.date.time.sent" dataField="fwbDateTimeSent" type="displayDateTime"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="messages.select.all.fhl" cellsAlign="center" align="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="allFhl" (modelChange)="onAllFhlChange(group,$event)"
+                  *ngIf="!this.resendFwbFhlFormGroup.get(['shipmentInformation',group,'hideFhl']).value"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="exp.acceptance.fhl" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link (linkClick)="onOpenFhlPopup(group)" iconType="view"
+                  [disabled]="this.resendFwbFhlFormGroup.get(['shipmentInformation', group ,'houseInformation']).value
+                && this.resendFwbFhlFormGroup.get(['shipmentInformation', group ,'houseInformation']).value.length == 0">
+                  <ngc-label label='display.view'></ngc-label>
+                </ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="messages.fhl.date.time.sent" dataField="fhlDateTimeSent" type="displayDateTime"
+            align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="awb.nog" dataField="natureOfGoodsDescription" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.accpt.fwb.pieces.weight" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="fwbPieces"></ngc-display>/<ngc-weightdisplay formControlName="fwbWeight">
+                </ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="eawb.fhl.pcs.wgt" align="center" cellsAlign="center">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="fhlPieces"></ngc-display>/<ngc-weightdisplay formControlName="fhlWeight">
+                </ngc-weightdisplay>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="exp.shc" dataField="shc" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.awb.origin" dataField="shipmentOrigin" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.awb.destination" dataField="shipmentDestination" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.agent" dataField="customerCode" align="center" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<!-- Search Result Section ENDS  -->
+
+<!-- FHL Select Popup STARTS  -->
+<form [formGroup]="shipmentInfoFormGroup">
+  <ngc-window #houseInfoWindow title="export.accpt.house_info" width="700" height="500" [showCloseButton]="true"
+    (close)="onCloseWindow()">
+    <ngc-container *ngIf="displayFlag 
+    && shipmentInfoFormGroup.get(['houseInformation']).value
+    && shipmentInfoFormGroup.get(['houseInformation']).value.length > 0">
+      <ngc-row>
+        <ngc-column>
+          <ngc-row *ngIf="!this.shipmentInfoFormGroup.get(['hideFhl']).value">
+            <ngc-column column = "1">
+              <ngc-checkbox formControlName="allFhl" (modelChange)="onAllFhlChange(null,$event)">
+              </ngc-checkbox>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label="messaging.select.all"></ngc-label>
+            </ngc-column>
+          </ngc-row>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button value="g.ok" (click)="onClickOk()"></ngc-button>
+          <ngc-button value="uld.Cancel" (click)="onClickCancel()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="houseInformation">
+            <ngc-data-column text="g.select" dataField="selectFhl" align="center" cellsAlign="center" type = "check"
+                *ngIf="this.shipmentInfoFormGroup.get(['hideFhl']).value == false">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-checkbox formControlName="selectFhl" (modelChange)="onFhlChange($event)">
+                  </ngc-checkbox>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.house" align="center" dataField="houseNumber" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="awb.pieces" dataField="pieces" align="center" cellsAlign="center">
+            </ngc-data-column>
+            <ngc-data-column text="awb.weight" dataField="weight" align="center" cellsAlign="center">
+            </ngc-data-column>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<!-- FHL Select Popup Ends  -->

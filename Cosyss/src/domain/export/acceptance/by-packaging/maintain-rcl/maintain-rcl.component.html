@@ -1,0 +1,1817 @@
+<ngc-titlebar [disableClear]="finalizeStatus" [disableSave]="finalizeStatus" title="Maintain RCL" (print)="onPrint()"
+  (save)="onSave()" [disabled]=saveFlag (clear)="onClear()" (cancel)="onCancel()">
+</ngc-titlebar>
+
+
+<ngc-container type="box" *ngIf="entryForm" [formGroup]="maintainrclSearchForm">
+  <ngc-row>
+    <ngc-column [column]="2">
+      <ngc-label label="awb.acceptancetype"></ngc-label>
+      <div>
+        <ngc-dropdownlist formControlName="acceptanceType" sourceId="Acceptance$AcceptanceType" accessEnableOn="r"
+          (ngModelChange)="changeAcceptanceType($event)" required></ngc-dropdownlist>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2"
+      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!=null)">
+      <ngc-label label="g.shipmentNumber"></ngc-label>
+      <div>
+        <!-- <ngc-input formControlName="shipmentNumber" [autoFocus]="true" ></ngc-input> -->
+        <!-- <ngc-awbinput  accessEnableOn="r" [autoFocus]="true" formControlName="shipmentNumber">
+            </ngc-awbinput> -->
+        <ng-container
+          *ngIf="(this.acceptanceType=='Mail' || this.acceptanceType=='OBC' || this.acceptanceType=='Cargo Bag')">
+          <ngc-alphanuminput formControlName="awbPrefix" [maxlength]="3" [autoFocus]="true" [width]="50"
+            [required]="(this.acceptanceType=='Mail' || this.acceptanceType=='OBC' || this.acceptanceType=='Cargo Bag')">
+          </ngc-alphanuminput>
+          <ngc-display value=" - "></ngc-display>
+          <ngc-alphanuminput formControlName="awbSuffix" [maxlength]="8" [width]="130"
+            [required]="(this.acceptanceType=='Mail' || this.acceptanceType=='OBC' || this.acceptanceType=='Cargo Bag')">
+          </ngc-alphanuminput>
+        </ng-container>
+        <ng-container *ngIf="(this.maintainrclSearchForm.get('nonIATAAwb').value && this.acceptanceType!='Mail' && 
+            this.acceptanceType!='OBC' && this.acceptanceType!='Cargo Bag')">
+          <ngc-alphanuminput accessEnableOn="r" [autoFocus]="true" formControlName="shipmentNumber"
+            [required]="this.maintainrclSearchForm.get('nonIATAAwb').value" [width]="150">
+          </ngc-alphanuminput>
+        </ng-container>
+        <ng-container *ngIf="(!this.maintainrclSearchForm.get('nonIATAAwb').value && this.acceptanceType!='Mail' && 
+            this.acceptanceType!='OBC' && this.acceptanceType!='Cargo Bag')">
+          <ngc-awbinput accessEnableOn="r" [autoFocus]="true" formControlName="shipmentNumber"
+            [required]="!this.maintainrclSearchForm.get('nonIATAAwb').value" [width]="150">
+          </ngc-awbinput>
+        </ng-container>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2" *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK')">
+      <ngc-label label="uld"></ngc-label>
+      <div>
+        <ngc-uldinput formControlName="uldNumber"
+          [required]="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK')">
+        </ngc-uldinput>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1" *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Transfer Bulk' 
+          || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+      <ngc-label label="awb.nonIataStandardAwb"></ngc-label>
+      <div>
+        <ngc-checkbox formControlName="nonIATAAwb"></ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1" align="center" verticalAlign="bottom">
+      <ngc-button value="search" (click)="search()" [disabled]="searchButton">
+      </ngc-button>
+    </ngc-column>
+    <ngc-column [column]="1" verticalAlign="bottom">
+      <ngc-button value="create" (click)="create()" [disabled]="createfunction"></ngc-button>
+    </ngc-column>
+    <ngc-column [column]="1" verticalAlign="bottom">
+      <ngc-button value="Generate AWB" (click)="generateAWB()" *ngIf="generateAWBButton"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+  <!-- </ngc-container>
+
+    <ngc-container> -->
+  <ngc-row *ngIf="showMrclTable">
+    <ngc-column>
+      <ngc-table>
+        <thead>
+          <tr>
+            <th>
+              <ngc-label label="exp.mrcl.type"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="exp.mrcl.number"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="exp.mrcl.ttl.pcs.ntwt"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="exp.awb.uld.no"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="exp.truck.number"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="agent.agent.name"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="flight.carrier"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="exp.security.scr.option"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="exp.secured.transportation.method"></ngc-label>
+            </th>
+            <th>
+              <ngc-label label="agent.status"></ngc-label>
+            </th>
+          </tr>
+        </thead>
+        <tbody formArrayName="maintainrclFormSearchData">
+          <tr *ngFor="let item of maintainrclSearchForm.controls.maintainrclFormSearchData.controls; let index=index"
+            [formGroupName]="index">
+            <td>
+              <ngc-radiobutton (click)="selectionRow(index)">
+              </ngc-radiobutton>
+              <ngc-display formControlName="acceptanceType">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="prelodgeServiceNo">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="totalPiecesAndWeight">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="shipmentNumber">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="truckNumber">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="agentName">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="carrierCode">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="securityScreeningOption">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="screeningSecuredTransportationMethod">
+              </ngc-display>
+            </td>
+            <td>
+              <ngc-display formControlName="shipmentStatus">
+              </ngc-display>
+            </td>
+          </tr>
+        </tbody>
+      </ngc-table>
+    </ngc-column>
+    <ngc-column [column]="1" *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Export PPK')">
+      <ngc-button value="Change Mix/PPK" (click)="changeMixPPK($event)" vertical-align='bottom'></ngc-button>
+    </ngc-column>
+  </ngc-row>
+  <!-- </ngc-container>
+    <ngc-container> -->
+
+</ngc-container>
+
+<ngc-container type="box" *ngIf="showCreateForm" [formGroup]="maintainrclForm">
+  <ngc-row>
+    <ngc-column [column]="2">
+      <ngc-label label="awb.acceptancetype"></ngc-label>
+      <div>
+        <ngc-dropdownlist formControlName="acceptanceType" sourceId="Acceptance$AcceptanceType" accessEnableOn="r"
+          (ngModelChange)="changeAcceptanceType($event)" [disabled]="true"></ngc-dropdownlist>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2"
+      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!=null)">
+      <ngc-label label="g.shipmentNumber"></ngc-label>
+      <div>
+        <ngc-input formControlName="shipmentNumber" [autoFocus]="true" [disabled]="true"></ngc-input>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2" *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK')">
+      <ngc-label label="uld"></ngc-label>
+      <div>
+        <ngc-uldinput formControlName="uldNumber" [disabled]="true"></ngc-uldinput>
+      </div>
+    </ngc-column>
+  </ngc-row>
+  <ngc-row>
+    <ngc-column align="right">
+      <div style="color: red;">
+        <ngc-label label="exp.accpt.header.rcl.status"></ngc-label>
+        <ngc-display formControlName="status" [width]="150">
+        </ngc-display>
+      </div>
+    </ngc-column>
+  </ngc-row>
+  <ngc-row type="tab">
+    <ngc-column>
+      <ngc-table>
+        <thead>
+          <div style="padding-top:8px">
+            <ngc-label label="export.accpt.awbinfo"></ngc-label>
+          </div>
+        </thead>
+      </ngc-table>
+    </ngc-column>
+  </ngc-row>
+  <ngc-row>
+    <ngc-column [column]="8">
+      <ngc-container>
+        <ngc-row>
+          <!--for carrier Code-->
+          <ngc-column>
+            <ngc-label label='g.carrier'></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="carrierCode" upperCase="true" [noCache]="true"
+                [autoFocus]="true" dataField="code" displayMember="code" [width]="80" sourceId='CARRIER'
+                title='flight.carrierType' required>
+                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                <ngc-data-column text="flight.assisted" dataField="param1" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <!--for Destination-->
+          <ngc-column>
+            <ngc-label label="awb.origin"></ngc-label>
+            <div>
+              <ngc-lov formControlName="documentOrigin" sourceId='APT' sourceType='query' title='Airport'
+                dataField='code' [width]="80" (ngModelChange)="checkOriginDest($event)" required>
+                <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                </ngc-data-column>
+                <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                </ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <!--for Destination-->
+          <ngc-column>
+            <ngc-label label="awb.destination"></ngc-label>
+            <div>
+              <ngc-lov formControlName="documentDestination" sourceId='APT' sourceType='query' title='Airport'
+                dataField='code' [width]="80" (ngModelChange)="checkOriginDest($event)" required>
+                <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+                </ngc-data-column>
+                <ngc-data-column text="flight.airportName" dataField="desc" [width]="150">
+                </ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.pieces"></ngc-label>
+            <div>
+              <ngc-piecesinput formControlName="piece" min="1" [width]="80" required>
+              </ngc-piecesinput>
+              <!-- <ngc-numberinput digits="3" min="1" decimalDigits="0" required [width]="80" formControlName="piece">
+                  </ngc-numberinput> -->
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="g.weight"></ngc-label>
+            <div>
+              <!-- <ngc-weightinput formControlName="weight" [width]="80" (ngModelChange)="checkChargableWeight($event)"
+                    required [disabled]="true"></ngc-weightinput> -->
+              <ngc-numberinput formControlName="weight" [width]="80" (ngModelChange)="checkChargableWeight($event)"
+                digits="7" decimalDigits="2" required [disabled]="true">
+              </ngc-numberinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="exp.density.group"></ngc-label>
+            <div>
+              <ngc-lov formControlName="densityGroupCode" sourceId='KEY_DENSITYGROUPCODE' [noCache]='false' [width]="80"
+                sourceType='query' title='g.density.group.code' dataField='code' (select)="eventCallDensity($event,0)">
+                <ngc-data-column text="export.density.group.code" dataField="code" [width]="100">
+                </ngc-data-column>
+                <ngc-data-column text="export.density.group.code.description" dataField="desc" [width]="150">
+                </ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="export.weighing.vol.wt"></ngc-label>
+            <div>
+              <!-- <ngc-weightinput formControlName="volumetricWeight" [width]="80" [disabled]="true" decimalDigits="2">
+                  </ngc-weightinput> -->
+              <ngc-numberinput [width]="80" formControlName="volumetricWeight" digits="7" decimalDigits="2"
+                [disabled]="true">
+              </ngc-numberinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="chg.wt"></ngc-label>
+            <div>
+              <!-- <ngc-weightinput formControlName="chargeableWeight" [width]="80" [disabled]="true"></ngc-weightinput> -->
+              <ngc-numberinput formControlName="chargeableWeight" [width]="80" digits="7" decimalDigits="2"
+                [disabled]="true">
+              </ngc-numberinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="exp.NatureOfGoods"></ngc-label>
+            <div>
+              <ngc-alphainput formControlName="natureOfGoodsDescription" [width]="150" uppercase='true' [maxlength]="20"
+                required>
+              </ngc-alphainput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+
+        </ngc-row>
+        <ngc-row>
+
+        </ngc-row>
+      </ngc-container>
+    </ngc-column>
+    <!---Starting SHC-->
+    <ngc-column [column]="3">
+      <ngc-container>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="shp.SHC"></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <div>
+              <ngc-shcinput formArrayName="specialHandlingCode" dataField="specialHandlingCode"
+                (modelChange)="onShcChanges($event,index)" [disabled]="!finalizeformDisable">
+              </ngc-shcinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <!--End of SHC Container-->
+    </ngc-column>
+  </ngc-row>
+  <ngc-row>
+    <ngc-column [column]="1.5">
+      <ngc-label label='exp.truck.number'></ngc-label>
+      <div>
+        <!-- <ngc-lov formControlName="truckNumber" [width]="50" sourceId='APT' title='export.airport' dataField='code'>
+              <ngc-data-column text="flight.airportCode" dataField="code" [width]="100">
+              </ngc-data-column>
+              <ngc-data-column text="flight.airportName" dataField="desc" [width]="80">
+              </ngc-data-column>
+            </ngc-lov> -->
+        <ngc-alphanuminput formControlName="truckNumber" [width]="130" [maxlength]="8"></ngc-alphanuminput>
+      </div>
+    </ngc-column>
+    <!--Check boxes for Air side acceptance , Direct tow and Hand Carry-->
+    <ngc-column [column]="1.5">
+      <ngc-label label='warehouse.truckdock'></ngc-label>
+      <div>
+        <ngc-lov formControlName="truckDock" dataField="desc" sourceId="Truck_Dock_No" accessEnableOn="r" [width]="110">
+          <ngc-data-column text="tcs.truckDock" [width]="80" dataField="desc"></ngc-data-column>
+        </ngc-lov>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="temp.temparature"></ngc-label><br>
+      <ngc-digitinput formControlName="requestedTemperatureRange" maxlength="10" [width]="130"></ngc-digitinput>
+    </ngc-column>
+    <ngc-column [column]="1"
+      *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+      <div style="padding-top:8px">
+        <ngc-label label="Customer.AirsideAcceptanceType"></ngc-label><br>
+        <ngc-checkbox style="padding-left: 2px" accessEnableOn="r" formControlName="airsideAcceptance"
+          [checked]="DGChcked">
+        </ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1"
+      *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+      <div style="padding-top:8px">
+        <ngc-label label="exp.direct.tow"></ngc-label><br>
+        <ngc-checkbox style="padding-left: 2px" accessEnableOn="r" formControlName="directTow" [checked]="DGChcked">
+        </ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1"
+      *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+      <div style="padding-top:8px">
+        <ngc-label label="exp.hand.carry"></ngc-label><br>
+        <ngc-checkbox style="padding-left: 2px" accessEnableOn="r" formControlName="handCarry" [checked]="DGChcked">
+        </ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column *ngIf="(this.acceptanceType=='Mail')">
+      <div style="padding-top:8px">
+        <ngc-label label="export.mail.type"></ngc-label><br>
+        <ngc-dropdownlist sourceId='Mail$MailTypeForCargo' [width]="80" formControlName="mailType"
+          [required]="(this.acceptanceType=='Mail')">
+        </ngc-dropdownlist>
+      </div>
+    </ngc-column>
+    <!--For Upload/view files-->
+    <!-- <ngc-column>
+        <ngc-fileupload #upload label="exp.upload.view.files"></ngc-fileupload>
+      </ngc-column> -->
+  </ngc-row>
+  <!-- </ngc-container>
+
+    <ngc-container> -->
+  <ngc-row style="padding: 8px 8px;"
+    *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+    <ngc-column [column]="1.5">
+      <ngc-label label="export.dg"></ngc-label>
+      <div>
+        <ngc-checkbox formControlName="dg"></ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="exp.dutiable.commodities"></ngc-label>
+      <div>
+        <ngc-checkbox formControlName="dutiableCommodities"></ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="exp.prohibited.articles"></ngc-label><br>
+      <ngc-checkbox formControlName="exportProhibitedArticle"></ngc-checkbox>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="<6.3mm"></ngc-label>
+      <div>
+        <ngc-checkbox formControlName="thickness"></ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="exp.security.check"></ngc-label>
+      <div>
+        <ngc-checkbox formControlName="requiredScreening" (click)="changeSecurityCheck($event)">
+        </ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="export.reason"></ngc-label>
+      <div>
+        <ngc-dropdownlist sourceId='General$ReasonMasterPurpose' formControlName="reasonForScreening"
+          [disabled]="!this.maintainrclForm.get('requiredScreening').value">
+        </ngc-dropdownlist>
+      </div>
+    </ngc-column>
+  </ngc-row>
+  <!-- </ngc-container>
+    <ngc-container> -->
+  <ngc-row style="padding-bottom: 6px;"
+    *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+    <ngc-column [column]="2">
+      <ngc-label label="exp.security.scr.opt"></ngc-label>
+      <!-- <ngc-dropdownlist sourceType='query' sourceId='screeningMethod' formControlName="screeningMethod" >
+          </ngc-dropdownlist> -->
+      <div>
+        <ngc-dropdownlist sourceId='EXPORT$Screening_Option' formControlName="securityScreeningOption" align="right"
+          (ngModelChange)="changeScreeningOption($event)"
+          [required]="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+        </ngc-dropdownlist>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2.5">
+      <ngc-label label="exp.screening.exempted.reason"></ngc-label>
+      <div>
+        <ngc-dropdownlist sourceId="EXPORT$Screen_Exmpt" formControlName="screeningExemptedReason"
+          [disabled]="screenExmptFlag" [width]="250">
+        </ngc-dropdownlist>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label="exp.reject"></ngc-label>
+      <div>
+        <ngc-checkbox formControlName="rejected" (click)="changeRejectCheck($event)"></ngc-checkbox>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2">
+      <ngc-label label="export.reason"></ngc-label>
+      <div>
+        <ngc-dropdownlist sourceId='REJECT_RETURN_REASON' formControlName="reasonCode"
+          [disabled]="!this.maintainrclForm.get('rejected').value" sourceType="query">
+        </ngc-dropdownlist>
+      </div>
+    </ngc-column>
+  </ngc-row>
+  <ngc-row style="padding-bottom: 16px; padding-top: 12px;" formArrayName="packagingInformationList"
+    *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+    <ngc-column [column]="1.5">
+      <ngc-label label="exp.pi.litium.batteries"></ngc-label>
+    </ngc-column>
+    <ngc-column *ngFor="let item of maintainrclForm.controls.packagingInformationList.controls; let i=index"
+      [formGroupName]="i" [column]="1.5">
+      <ngc-dropdownlist sourceId="EXPORT$PI_LI_Batteries" formControlName="reference" [width]="150"
+        [disabled]="lithiumBatteryFlag" (modelChange)="PIDuplicacy($event,i)">
+      </ngc-dropdownlist>
+    </ngc-column>
+  </ngc-row>
+
+  <!-- </ngc-container>
+    <ngc-container> -->
+  <ngc-row formArrayName="liBattery" style="padding-bottom: 12px;"
+    *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+    <ngc-column [column]="1.5">
+      <ngc-label label="exp.li.battery"></ngc-label>
+    </ngc-column>
+    <ngc-column *ngFor="let item of maintainrclForm.controls.liBattery.controls; let i=index" [formGroupName]="i"
+      [column]="3">
+      <ngc-column [column]="6" style="padding-right: 38px;">
+        <ngc-dropdownlist sourceId='EXPORT$LI_Label_pcs' formControlName="reference" [width]="150">
+        </ngc-dropdownlist>
+      </ngc-column>
+      <ngc-display value="/"></ngc-display>
+      <ngc-column style="padding-left: 37px;">
+        <ngc-piecesinput formControlName="pieces" [width]="150">
+        </ngc-piecesinput>
+      </ngc-column>
+    </ngc-column>
+  </ngc-row>
+  <ngc-row
+    *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Mail' || this.acceptanceType=='OBC' || this.acceptanceType=='Cargo Bag')">
+    <ngc-column [column]="1.5">
+      <ngc-label label="g.iatacode"></ngc-label>
+      <div>
+        <ngc-input formControlName='agentIATACode' [width]='150' [disabled]="true"
+          [required]="(this.acceptanceType!='Transfer Bulk' && this.acceptanceType!='Transfer PPK' && this.acceptanceType!='Transfer Mix PPK')">
+        </ngc-input>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="g.agentName"></ngc-label>
+      <div>
+        <ngc-lov formControlName="agentName" placeHolder="agent.agent.name"
+          (select)='OnSelectAppointedAgentName($event, index)' sourceId="KEY_CUSTOMER_AGENT_WITH_IATA_CODE_INFO"
+          title="agent.list" dataField="desc" displayMember='desc' [width]="140"
+          [required]="(this.acceptanceType!='Transfer Bulk' && this.acceptanceType!='Transfer PPK' && this.acceptanceType!='Transfer Mix PPK')">
+          <ngc-data-column text="agent.agent.name" [width]="150" dataField="desc"></ngc-data-column>
+          <ngc-data-column text="agent.agent.code" dataField="code" [width]="50"></ngc-data-column>
+          <ngc-data-column text="g.iatacode" dataField="param1" [width]="50"></ngc-data-column>
+
+        </ngc-lov>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1.5">
+      <ngc-label label="exp.delivery.person"></ngc-label>
+      <div>
+        <ngc-input formControlName="deliveryPerson" patternName='alphanumspace'
+          entityAttribute="Customer.AuthorisedPersonName" [width]="150"
+          [required]="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+        </ngc-input>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="2">
+      <ngc-label label="exp.hkid"></ngc-label>
+      <div>
+        <ngc-alphanuminput formControlName="deliveryPersonId" [width]="150" [maxlength]="8"
+          [required]="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+        </ngc-alphanuminput>
+      </div>
+    </ngc-column>
+    <ngc-column></ngc-column>
+  </ngc-row>
+
+  <ngc-row style="padding: 8px 0px;"
+    *ngIf="(this.acceptanceType=='Transfer Bulk' || this.acceptanceType=='Transfer PPK' || this.acceptanceType=='Transfer Mix PPK')">
+    <ngc-column [column]="1">
+      <ngc-label label="transfer.carrier.code"></ngc-label>
+      <div>
+        <!-- <ngc-input  formControlName="transferCarrier"></ngc-input> -->
+        <ngc-lov accessEnableOn="r" formControlName="transferCarrier" [width]="120" title='g.carrier' upperCase="true"
+          dataField="code" displayMember="code" sourceId="CARRIER" [validOnly]='true' [maxLength]="3"
+          [required]="(this.acceptanceType=='Transfer Bulk' || this.acceptanceType=='Transfer PPK' || this.acceptanceType=='Transfer Mix PPK')">
+          <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label="receiver.carrier.code"></ngc-label>
+      <div>
+        <ngc-lov accessEnableOn="r" formControlName="receivingCarrier" [width]="120" title='g.carrier' upperCase="true"
+          dataField="code" displayMember="code" sourceId="CARRIER" [validOnly]='true' [maxLength]="3"
+          [required]="(this.acceptanceType=='Transfer Bulk' || this.acceptanceType=='Transfer PPK' || this.acceptanceType=='Transfer Mix PPK')">
+          <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label="exp.accpt.trmnumber"></ngc-label>
+      <div>
+        <ngc-alphanuminput formControlName="trmNumber" [width]="120" [maxlength]="15"></ngc-alphanuminput>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label="flight.inbound.flight"></ngc-label>
+      <div>
+        <!-- <ngc-input formControlName="incomingFlight"></ngc-input> -->
+        <ngc-flightkeyinput formControlName="incomingFlight" [width]="93" upperCase="true">
+        </ngc-flightkeyinput>
+      </div>
+    </ngc-column>
+    <ngc-column [column]="1">
+      <ngc-label label="export.flight.report.inbound.flt.date"></ngc-label>
+      <div>
+        <!-- <ngc-input formControlName="incomingFlightDate"></ngc-input> -->
+        <ngc-datetimeinput formControlName="incomingFlightDate">
+        </ngc-datetimeinput>
+      </div>
+    </ngc-column>
+    <ngc-column>
+      <ngc-label label="exp.trf.terminal"></ngc-label>
+      <div>
+        <ngc-dropdownlist sourceId="Flight$Handler" formControlName="trfTerminal"
+          [required]="(this.acceptanceType=='Transfer Bulk' || this.acceptanceType=='Transfer PPK' || this.acceptanceType=='Transfer Mix PPK')">
+        </ngc-dropdownlist>
+      </div>
+    </ngc-column>
+  </ngc-row>
+  <!-- </ngc-container>
+    <ngc-container> -->
+  <ngc-row>
+    <ngc-column class="float-left" [column]="9">
+      <ngc-label label="g.remarks"></ngc-label>
+      <div>
+        <ngc-input formControlName="remarks" width="500"></ngc-input>
+      </div>
+    </ngc-column>
+    <ngc-column>
+      <ngc-label label="export.weighingscale"></ngc-label>
+      <div>
+        <!-- <ngc-dropdownlist sourceType='query' sourceId='reason' formControlName="weighingScaleId" >
+            </ngc-dropdownlist> -->
+        <ngc-weighing-scale [width]="150" formControlName="weighingScaleId" (select)="onSelectScale($event)"
+          [autoSelectOnSingle]="true" required>
+        </ngc-weighing-scale>
+      </div>
+    </ngc-column>
+    <ngc-column>
+      <ngc-label label="exp.printerid"></ngc-label>
+      <div>
+        <!-- <ngc-dropdownlist sourceType='query' sourceId='reason' formControlName="printerId" >
+            </ngc-dropdownlist> -->
+        <ngc-printer #printerName [width]='200' formControlName="printerId" [printerTypeList]="['RCL_PRINTER']"
+          required>
+        </ngc-printer>
+      </div>
+    </ngc-column>
+  </ngc-row>
+  <ngc-row>
+    <ngc-column>
+      <ngc-container type='square'>
+        <ngc-row>
+          <ngc-column>
+            <ngc-tabs [width]="800" [height]="200">
+              <ngc-tab-card title="Customer.RACSF"
+                *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column [column]="3">
+                      <ngc-label label="exp.secured.transportation.method"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="screeningSecuredTransportationMethod" width="500" [disabled]="true">
+                        </ngc-input>
+                      </div>
+                    </ngc-column>
+                    <ngc-column align="center" [column]="2">
+                      <ngc-label label="exp.accpt.racsf.pass"></ngc-label>
+                      <div>
+                        <ngc-radiobutton formControlName="racsfResultPass" groupName="racsfradio"
+                          (click)="changeRacsfResult($event)"></ngc-radiobutton>
+                      </div>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-label label="exp.accpt.racsf.fail"></ngc-label>
+                      <div>
+                        <ngc-radiobutton formControlName="racsfResultFail" groupName="racsfradio"
+                          (click)="changeRacsfResult($event)"></ngc-radiobutton>
+                      </div>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label="exp.accpt.racsf.fail.reason"></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='RACSF_FAIL_REASON' sourceType="query"
+                          formControlName="racsfFailReason"
+                          [disabled]="!this.maintainrclForm.get('racsfResultFail').value">
+                        </ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.accpt.racsf.trucker.name"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.accpt.racsf.trucker.id"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="import.truckNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.racsf.kc.on.airport.scr.facility"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value!='Tamper Evident Bag/Cover' &&
+                                this.maintainrclForm.get('screeningSecuredTransportationMethod').value!='Dedicated Transportation Guard')">
+                              <ngc-label label="exp.accpt.racsf.sealno"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value=='Dedicated Transportation Guard')">
+                              <ngc-label label="exp.accpt.racsf.guard.name"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value=='Dedicated Transportation Guard')">
+                              <ngc-label label="exp.accpt.racsf.guard.id"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="racsf">
+                          <tr *ngFor="let item of maintainrclForm.controls.racsf.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+
+                            <td>
+                              <ngc-display formControlName="truckerName"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="truckerId"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="truckNumber">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="facilityCode">
+                              </ngc-display>
+                            </td>
+                            <td
+                              *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value!='Tamper Evident Bag/Cover' &&
+                                this.maintainrclForm.get('screeningSecuredTransportationMethod').value!='Dedicated Transportation Guard')">
+                              <ngc-display formControlName="sealNo">
+                              </ngc-display>
+                            </td>
+                            <td
+                              *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value=='Dedicated Transportation Guard')">
+                              <ngc-display formControlName="guardName">
+                              </ngc-display>
+                            </td>
+                            <td
+                              *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value=='Dedicated Transportation Guard')">
+                              <ngc-display formControlName="guardId">
+                              </ngc-display>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                    <ngc-column [column]="2.5"
+                      *ngIf="(this.maintainrclForm.get('screeningSecuredTransportationMethod').value=='Tamper Evident Bag/Cover')">
+                      <ngc-button value="exp.accpt.view.files" (click)="onViewFilesPopup()"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="right">
+                      <ngc-button value="exp.accpt.print.racsf" (click)="printRacsfChecklist()"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="tcs.booking"
+                *ngIf="(this.acceptanceType!='Mail' && this.acceptanceType!='Cargo Bag' && this.acceptanceType!='OBC')">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="flight.Flight"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="flight.date"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.accpt.unloading.point"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="flight.std"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.accpt.fbl.pcs"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.accpt.fbl.wt"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="booking" *ngIf="this.bookingColorFlag">
+                          <tr *ngFor="let item of maintainrclForm.controls.booking.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-display formControlName="flightNumber" style="color: red;"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="flightDate" style="color: red;"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="unloadingPoint" style="color: red;"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="flightStd" style="color: red;"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="fblPieces" style="color: red;"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="fblWeight" style="color: red;"></ngc-display>
+                            </td>
+                          </tr>
+                        </tbody>
+                        <tbody formArrayName="booking" *ngIf="!this.bookingColorFlag">
+                          <tr *ngFor="let item of maintainrclForm.controls.booking.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-display formControlName="flightNumber"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="flightDate"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="unloadingPoint"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="flightStd"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="fblPieces"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="fblWeight"></ngc-display>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="License/Permit"
+                *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Export Mix PPK')">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th [width]="20">
+                              <ngc-label label="g.sel"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.document.type"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="billing.document.no"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.awb.issuedate"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.expiry.date"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="clearance">
+                          <tr *ngFor="let item of maintainrclForm.controls.clearance.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-checkbox formControlName="sel" [width]="20"></ngc-checkbox>
+                            </td>
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-dropdownlist formControlName="documentType" sourceId="MASTER_PERMIT_TYPES"
+                                sourceType="query" (select)="changeDocumentType($event,index)" [width]="150" required>
+                              </ngc-dropdownlist>
+                            </td>
+                            <td>
+                              <ngc-input formControlName="documentNo" [width]="100" required></ngc-input>
+                            </td>
+                            <td>
+                              <ngc-dateinput formControlName="issueDate" [width]='50' accessEnableOn="r" required>
+                              </ngc-dateinput>
+                            </td>
+                            <td>
+                              <ngc-dateinput formControlName="expiryDate" [width]='50' accessEnableOn="r" required>
+                              </ngc-dateinput>
+                            </td>
+                            <!-- <td>
+                                  <ngc-link (click)="deleteClearanceTbl(s$event,index,group)" iconType="delete"
+                                    align="center" cellsAlign="center">
+                                  </ngc-link>
+                                </td> -->
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                    <ngc-column [column]="1" align="right">
+                      <ngc-button value="export.addRow" #addButton accessEnableon="r" (click)="onAddClearanceTbl()"
+                        *ngIf=" this.finalizeformDisable">
+                      </ngc-button>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-button label="g.delete" align="left" (click)="onDeleteClearance(i)"
+                        *ngIf=" this.finalizeformDisable"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="Weighing">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <!-- <th [width]="30">
+                                  <ngc-label label="g.sel"></ngc-label>
+                                </th> -->
+                            <th>
+                              <ngc-label label="Sno."></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                              <ngc-label label="export.uldNumber"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                              <ngc-label label="export.countourcode"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                              <ngc-label label="awb.height"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                              <ngc-label label="Overhang"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                              <ngc-label label="val.pieces"></ngc-label>
+                            </th>
+                            <!-- <th
+                                  *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                  <ngc-label label="g.weight"></ngc-label>
+                                </th> -->
+                            <th [width]="200">
+                              <ngc-label label="exp.acceptance.weight.gross.weight"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="uld.tare.weight"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.netWeight"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.skidWeight"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.weighing.noofskid"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                              <ngc-label label="export.skidheight"></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                              <ngc-label label='g.shipment.location'></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label='imp.warehouseDestination'></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                              <ngc-label label='exp.accpt.actual.location'></ngc-label>
+                            </th>
+
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                              <ngc-label label='export.location.pcs'></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                              <ngc-label label='export.location.wt'></ngc-label>
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK' && this.finalizeformDisable)">
+                            </th>
+                            <th
+                              *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.finalizeformDisable)">
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="weighing">
+                          <ng-container *ngFor="let item of maintainrclForm.get('weighing').controls; let index=index"
+                            [formGroupName]="index">
+                            <ng-container *ngIf="item !== null">
+                              <tr>
+                                <td>
+                                  <ngc-display value={{index+1}}></ngc-display>
+                                </td>
+                                <!-- <td>
+                                      <ngc-checkbox formControlName="sel" (click)="weighingSelection(index)"
+                                        [width]="30"></ngc-checkbox>
+                                    </td> -->
+                                <!-- <ngc-dropdownlist formControlName='skidHeight' sourceId="Skid_Height$Skid_Values" [width]="70">
+                                </ngc-dropdownlist> -->
+                                <!-- <td>
+                                      <ngc-checkbox formControlName="sel" [width]="30"></ngc-checkbox>
+                                    </td> -->
+                                <td
+                                  *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                                  <ngc-uldinput formControlName='uldNumber'
+                                    [required]="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                                  </ngc-uldinput>
+                                </td>
+                                <td
+                                  *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                                  <!-- <ngc-input formControlName='contourCode'>
+                                      </ngc-input> -->
+                                  <!-- <ngc-lov formControlName="contourCode" sourceId='CONTOURINDICATOR'
+                                        title='uld.contour.type' dataField='code' [width]="80" uppercase='true'>
+                                        <ngc-data-column text="uldType.contourIndicator" dataField="code" [width]="100">
+                                        </ngc-data-column>
+                                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                                        </ngc-data-column>
+                                      </ngc-lov> -->
+                                  <ngc-dropdownlist sourceId="CONTOURCODE" [width]='80' [dropDownHeight]="150"
+                                    [dropDownWidth]="80" sourceType="query" formControlName='contourCode'
+                                    [required]="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                                  </ngc-dropdownlist>
+                                </td>
+                                <td
+                                  *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                                  <ngc-digitinput formControlName='height' width="80">
+                                  </ngc-digitinput>
+                                </td>
+                                <td
+                                  *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK' || this.acceptanceType=='Export PPK' || this.acceptanceType=='Transfer PPK')">
+                                  <ngc-input formControlName='overhang' width="80">
+                                  </ngc-input>
+                                </td>
+                                <td
+                                  *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                  <ngc-piecesinput formControlName='pieces'
+                                    [required]="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                  </ngc-piecesinput>
+                                </td>
+                                <!-- <td
+                                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      <ngc-weightinput formControlName='weight'>
+                                      </ngc-weightinput>
+                                    </td> -->
+                                <td [width]="200">
+                                  <!-- <ngc-weightinput formControlName='grossWeight' (modelChange)="getNetWeight(index)"
+                                        required>
+                                      </ngc-weightinput> -->
+                                  <ngc-numberinput formControlName="grossWeight" (modelChange)="getNetWeight(index)"
+                                    digits="7" decimalDigits="2" required>
+                                  </ngc-numberinput>
+                                  <ngc-button value="Get Wt" (click)="getWeight(index)"
+                                    *ngIf="this.finalizeformDisable">
+                                  </ngc-button>
+                                </td>
+                                <td>
+                                  <!-- <ngc-weightinput formControlName='tareWeight' (modelChange)="getNetWeight(index)">
+                                      </ngc-weightinput> -->
+                                  <ngc-numberinput formControlName="tareWeight" digits="7" decimalDigits="2"
+                                    (modelChange)="getNetWeight(index)">
+                                  </ngc-numberinput>
+                                </td>
+                                <td>
+                                  <!-- <ngc-weightinput formControlName='netWeight'>
+                                      </ngc-weightinput> -->
+                                  <!-- <ngc-weightinput formControlName="netWeight" decimalDigits="1" [maxlength]="5"
+                                        [disabled]="true" required>
+                                      </ngc-weightinput> -->
+                                  <ngc-numberinput formControlName="netWeight" digits="7" [maxlength]="5"
+                                    decimalDigits="2" required [disabled]="true">
+                                  </ngc-numberinput>
+
+                                </td>
+                                <td>
+                                  <!-- <ngc-weightinput formControlName='skidTareWeight'
+                                        (modelChange)="getNetWeight(index)">
+                                      </ngc-weightinput> -->
+                                  <ngc-numberinput formControlName="skidTareWeight" (modelChange)="getNetWeight(index)"
+                                    digits="7" decimalDigits="2">
+                                  </ngc-numberinput>
+                                </td>
+                                <td>
+                                  <ngc-digitinput formControlName='numberOfSkIds' width="80"
+                                    (modelChange)="getNetWeight(index)" [maxlength]="5">
+                                  </ngc-digitinput>
+                                </td>
+                                <td
+                                  *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                  <ngc-dropdownlist formControlName='skidHeight' sourceId="Skid_Height$Skid_Values"
+                                    [width]="70">
+                                  </ngc-dropdownlist>
+                                </td>
+
+                                <ng-container formArrayName="weighingLocation">
+                                  <ng-container
+                                    *ngFor="let subItem of item.controls.weighingLocation.controls | page :1 :1; let sindex=index"
+                                    [formGroupName]="0">
+                                    <td width='25'
+                                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      <!-- <ngc-movable-storage-location upperCase="true" [maxlength]="12"
+                                            [minlength]="3" [width]="130" formControlName="shipmentLocation">
+                                          </ngc-movable-storage-location> -->
+                                      <ngc-movable-storage-location [minlength]="3" [width]="130"
+                                        [destination]="this.maintainrclForm.get('documentDestination').value"
+                                        [origin]="this.maintainrclForm.get('documentOrigin').value"
+                                        [shipmentNumber]="this.maintainrclForm.get('shipmentNumber').value"
+                                        formControlName="shipmentLocation"
+                                        [required]="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      </ngc-movable-storage-location>
+                                    </td>
+                                    <td width='25'>
+                                      <ngc-locations-list [displayOnlyLocation]="true"
+                                        (modelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                        formControlName="wareHouseLocation">
+                                      </ngc-locations-list>
+                                    </td>
+                                    <td width='25'
+                                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      <ngc-locations-list [displayOnlyLocation]="true" [noTerminal]='true'
+                                        [locationTypeList]="['STORAGE']" formControlName="actualLocation">
+                                      </ngc-locations-list>
+                                    </td>
+
+                                    <td width='20'
+                                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      <ngc-piecesinput formControlName='pieces' [autoFocus]="false" decimalDigits="0"
+                                        [required]="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      </ngc-piecesinput>
+                                    </td>
+                                    <td width='80'
+                                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      <!-- <ngc-weightinput formControlName='weight'
+                                            [required]="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                          </ngc-weightinput> -->
+                                      <ngc-numberinput formControlName="weight" digits="7" decimalDigits="2"
+                                        [required]="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      </ngc-numberinput>
+                                    </td>
+                                  </ng-container>
+                                </ng-container>
+                                <td width='20'
+                                  *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK' && this.finalizeformDisable)">
+                                  <ngc-button label='awb.add.location' (click)="onAddLocation(index)">
+                                  </ngc-button>
+                                </td>
+                                <td width='5'
+                                  *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.finalizeformDisable)">
+                                  <ngc-link (linkClick)="onDeleteRow(index)" iconType="delete"></ngc-link>
+                                </td>
+                              </tr>
+                              <ng-container formArrayName="weighingLocation">
+                                <ng-container
+                                  *ngFor="let subItem of item.controls.weighingLocation.controls ; let subIndex=index"
+                                  [formGroupName]="subIndex">
+                                  <tr *ngIf="subIndex > 0">
+                                    <!-- <td>
+                                          <ngc-checkbox formControlName="sel" [width]="30"
+                                            (click)="weighingSelectionLocation(index,subIndex)"></ngc-checkbox>
+                                        </td> -->
+                                    <td colspan="8">
+                                    </td>
+                                    <td width='25'>
+                                      <!-- <ngc-movable-storage-location [minlength]="3" [width]="130"
+                                            formControlName="shipmentLocation">
+                                          </ngc-movable-storage-location> -->
+                                      <ngc-movable-storage-location [minlength]="3" [width]="130"
+                                        [destination]="this.maintainrclForm.get('documentDestination').value"      
+                                        [origin]="this.maintainrclForm.get('documentOrigin').value"                
+                                        [shipmentNumber]="this.maintainrclForm.get('shipmentNumber').value"
+                                        formControlName="shipmentLocation" required>
+                                      </ngc-movable-storage-location>
+                                    </td>
+                                    <td width='25'>
+                                      <ngc-locations-list [displayOnlyLocation]="true"
+                                        (modelChange)="onChangeShipmentLocation(index,sindex,$event)"
+                                        formControlName="wareHouseLocation">
+                                      </ngc-locations-list>
+                                    </td>
+                                    <td width='25'
+                                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK' && this.acceptanceType!='Export PPK' && this.acceptanceType!='Transfer PPK')">
+                                      <ngc-locations-list [displayOnlyLocation]="true" [noTerminal]='true'
+                                        [locationTypeList]="['STORAGE']" formControlName="actualLocation">
+                                      </ngc-locations-list>
+                                    </td>
+                                    <td width='20'>
+                                      <ngc-piecesinput formControlName='pieces' required>
+                                      </ngc-piecesinput>
+                                    </td>
+                                    <td width='20'>
+                                      <!-- <ngc-weightinput formControlName="weight" required></ngc-weightinput> -->
+                                      <ngc-numberinput formControlName="weight" digits="7" decimalDigits="2" required>
+                                      </ngc-numberinput>
+                                    </td>
+                                    <td *ngIf="this.finalizeformDisable">
+                                    </td>
+                                    <td width='20' *ngIf="this.finalizeformDisable">
+                                      <ngc-link (linkClick)="onDeleteLocation(index, subIndex)" iconType="delete">
+                                      </ngc-link>
+                                    </td>
+                                  </tr>
+                                </ng-container>
+                              </ng-container>
+                            </ng-container>
+                          </ng-container>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column [column]="1"
+                      *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK')">
+                      <ngc-button value="export.addRow" #addButton accessEnableon="r" (click)="onAddWeighing()"
+                        *ngIf=" this.finalizeformDisable">
+                      </ngc-button>
+                    </ngc-column>
+                    <!-- <ngc-column [column]="1"
+                          *ngIf="(this.acceptanceType!='Export Mix PPK' && this.acceptanceType!='Transfer Mix PPK')">
+                          <ngc-button label="g.delete" (click)="deleteWeighingAndLocation(i)"></ngc-button>
+                        </ngc-column> -->
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="loadshipment.label.tag"
+                *ngIf="(this.acceptanceType=='Mail' || this.acceptanceType=='Cargo Bag' || this.acceptanceType=='OBC')">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column [column]="6">
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="imp.tags.m"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.pieces"></ngc-label>
+                            </th>
+                            <th *ngIf="this.finalizeformDisable"></th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="tags">
+                          <tr *ngFor="let item of maintainrclForm.controls.tags.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-input formControlName="number" [width]="200" [maxlength]="32"></ngc-input>
+                            </td>
+                            <td>
+                              <ngc-piecesinput formControlName="pieces" [width]="80" [maxlength]="3">
+                              </ngc-piecesinput>
+                            </td>
+                            <td *ngIf="this.finalizeformDisable">
+                              <ngc-link (click)="deletetags($event,index,group)" iconType="delete" align="center"
+                                cellsAlign="center">
+                              </ngc-link>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                    <ngc-column [column]="2.5">
+                      <ngc-button value="export.addRow" #addButton accessEnableon="r" (click)="addTagList()"
+                        *ngIf=" this.finalizeformDisable">
+                      </ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="awb.dimension"
+                *ngIf="(this.acceptanceType=='Export Bulk' || this.acceptanceType=='Transfer Bulk')">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <div>
+                        <ngc-label label="export.book.muc"></ngc-label>
+                      </div>
+                      <ngc-dropdownlist [source]='mesurementData' [autoSelect]="true" [noBlank]="true"
+                        formControlName="measurementUnitCode" (select)="eventDimensionCall($event)" width='80px'
+                        required>
+                      </ngc-dropdownlist>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label='export.book.volumecode'></ngc-label>
+                      <div>
+                        <ngc-dropdownlist sourceId='EXPORT$Volume_Code' formControlName="volumeCode" width='100px'
+                          (select)="eventDimensionCall($event)" required>
+                        </ngc-dropdownlist>
+                      </div>
+                    </ngc-column>
+                    <!-- <ngc-column>
+                          <div>
+                            <ngc-label label='export.book.volume'></ngc-label>
+                          </div>
+                          <ngc-display formControlName="tempVolume" decimalDigits="2" width='100px'></ngc-display>
+                        </ngc-column> -->
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table readonly="true">
+                        <thead>
+                          <tr>
+                            <th [width]="20">
+                              <ngc-label label="g.sel"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.pieces"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.length"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.width"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.width"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="awb.volume"></ngc-label>
+                            </th>
+                            <!-- <th>
+                                  <ngc-label label="Add Dimension"></ngc-label>
+                                </th> -->
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="dimesion">
+                          <tr *ngFor="let item of maintainrclForm.controls.dimesion.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-checkbox formControlName="sel" [width]="20"></ngc-checkbox>
+                            </td>
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-digitinput formControlName="pieces"
+                                (ngModelChange)="changeDimensionModel($event,0,item,index)" [width]="50" [maxlength]="3"
+                                required>
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-digitinput formControlName="length"
+                                (ngModelChange)="changeDimensionModel($event,0,item,index)" [width]="50" [maxlength]="3"
+                                required>
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-digitinput formControlName="width"
+                                (ngModelChange)="changeDimensionModel($event,0,item,index)" [width]="50" [maxlength]="3"
+                                required>
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-digitinput formControlName="height"
+                                (ngModelChange)="changeDimensionModel($event,0,item,index)" [width]="50" [maxlength]="3"
+                                required>
+                              </ngc-digitinput>
+                            </td>
+                            <td>
+                              <ngc-display [width]='80' formControlName="volume" decimalDigits="2"></ngc-display>
+                            </td>
+                            <!-- <td>
+                                  <ngc-link (click)="deletedimension(s$event,index,group)" iconType="delete"
+                                    align="center" cellsAlign="center">
+                                  </ngc-link>
+                                </td> -->
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                    <ngc-column [column]="1" align="right">
+                      <ngc-button *ngIf=" this.finalizeformDisable" value="Add Row" #addButton accessEnableon="r"
+                        (click)="addDimensionListTable()">
+                      </ngc-button>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-button *ngIf=" this.finalizeformDisable" label="g.delete" (click)="onDeleteDimension(i)">
+                      </ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label value="awb.total.pcs"></ngc-label>
+                      <ngc-piecesdisplay [width]='40' formControlName="totalDimentionPieces"></ngc-piecesdisplay>
+                    </ngc-column>
+                    <ngc-column>
+
+                    </ngc-column>
+                    <ngc-column align="right">
+                      <ngc-label value="export.booking.total.volume"></ngc-label>
+                      <ngc-display [width]='40' formControlName="tempVolume" decimalDigits="2"></ngc-display>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column align="right">
+                      <ngc-label value="export.booking.total.volumetric.weight"></ngc-label>
+                      <ngc-weightdisplay [width]='40' formControlName="totalDimentionVolumetricWeight">
+                      </ngc-weightdisplay>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="export.accpt.screening">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th [width]="20">
+                              <ngc-label label="g.sel"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="Security Check"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="Start/Complete Date"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.pieces"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.weight"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="exp.accpt.screening.chargeto"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="screening">
+                          <tr *ngFor="let item of maintainrclForm.controls.screening.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-checkbox formControlName="sel" [width]="20"></ngc-checkbox>
+                            </td>
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-dropdownlist sourceId="EXPORT$SCR_METHOD" [autoSelect]="true" [noBlank]="true"
+                                formControlName="screenedMethod" [width]="300" required>
+                              </ngc-dropdownlist>
+                            </td>
+                            <td>
+                              <ngc-dateinput formControlName="screeningDate" [width]='130' required>
+                              </ngc-dateinput>
+                            </td>
+                            <td>
+                              <ngc-piecesinput formControlName="pieces" [width]="80" required>
+                              </ngc-piecesinput>
+                            </td>
+                            <td>
+                              <ngc-weightinput formControlName="screenedWeight" [width]="80" required>
+                              </ngc-weightinput>
+                            </td>
+                            <td>
+                              <ngc-dropdownlist sourceId="SCREENING$SCREENING_CHARGETO" [autoSelect]="true"
+                                [noBlank]="true" formControlName="chargeto" [width]="150" required>
+                              </ngc-dropdownlist>
+                            </td>
+                            <!-- <td>
+                                  <ngc-link (click)="deleteScreeing(s$event,index,group)" iconType="delete"
+                                    align="center" cellsAlign="center">
+                                  </ngc-link>
+                                </td> -->
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                    <ngc-column [column]="1" align="right">
+                      <ngc-button *ngIf=" this.finalizeformDisable" value="export.addRow" accessEnableon="r"
+                        (click)="addScreening()">
+                      </ngc-button>
+                    </ngc-column>
+                    <ngc-column [column]="1">
+                      <ngc-button *ngIf=" this.finalizeformDisable" label="g.delete" (click)="onDeleteScreening(index)">
+                      </ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="Customer.ReturnAuthorisationNumber"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="rcaNumber" width="300" [disabled]="true"></ngc-input>
+                      </div>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label="g.iatacode"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="ScreeningIATACode" width="300" [disabled]="true"></ngc-input>
+                      </div>
+                    </ngc-column>
+                    <ngc-column>
+                      <ngc-label label="g.agentName"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="ScreeningAgentName" width="300" [disabled]="true"></ngc-input>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="exp.accpt.screening.remark"></ngc-label>
+                      <div>
+                        <ngc-input formControlName="screeningRemarks" width="300"></ngc-input>
+                      </div>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+              <ngc-tab-card title="exp.acceptance.action.list">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column align="right">
+                      <ngc-button (click)="closeFailure()" label="awb.cpe.close.failure"></ngc-button>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="exp.eacceptance.infocheck"></ngc-label>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="g.sel"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.processName"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.triggerPoint"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.message"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.status"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.closedDate"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.closedBy"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.acknowledge"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.link"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="actionList">
+                          <tr *ngFor="let item of maintainrclForm.controls.actionList.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-checkbox formControlName="sel" [width]="30"></ngc-checkbox>
+                            </td>
+
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="processName"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="triggerPoint">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="Message">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="status">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="closedDate">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="acknowledge">
+                              </ngc-display>
+                            </td>
+                            <td>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="exp.warningcheck.m"></ngc-label>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="g.sel"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.processName"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.triggerPoint"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.message"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.status"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.closedDate"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.closedBy"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.acknowledge"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.link"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="actionList">
+                          <tr *ngFor="let item of maintainrclForm.controls.actionList.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-checkbox formControlName="sel" [width]="30"></ngc-checkbox>
+                            </td>
+
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="processName"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="triggerPoint">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="Message">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="status">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="closedDate">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="acknowledge">
+                              </ngc-display>
+                            </td>
+                            <td>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-label label="exp.eacceptance.errorcheck"></ngc-label>
+                      <ngc-table>
+                        <thead>
+                          <tr>
+                            <th>
+                              <ngc-label label="g.sel"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="g.sNo"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.processName"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.triggerPoint"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.message"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.status"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.closedDate"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="export.closedBy"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+                        <tbody formArrayName="actionList">
+                          <tr *ngFor="let item of maintainrclForm.controls.actionList.controls; let index=index"
+                            [formGroupName]="index">
+                            <td>
+                              <ngc-checkbox formControlName="sel" [width]="30"></ngc-checkbox>
+                            </td>
+
+                            <td>
+                              <ngc-display value={{index+1}}></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="processName"></ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="triggerPoint">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="Message">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="status">
+                              </ngc-display>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="closedDate">
+                              </ngc-display>
+                            </td>
+                          </tr>
+                        </tbody>
+                      </ngc-table>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-tab-card>
+            </ngc-tabs>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-column>
+  </ngc-row>
+  <ngc-window #windows [width]="900" [height]="400" title="View Files">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="exp.accpt.tamper.evident"></ngc-label>
+          </div>
+          <ngc-fileupload accept="*/*" entityType="TAMPER" [entityKey]="this.prelodgeServiceNo" associatedTo="VAL"
+            stage="VAL_CHECK_OUT_VAL_AWB_ULD" viewMode="readonly">
+          </ngc-fileupload>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-row>
+    <ngc-column>
+      <ngc-button (click)="onFinalizeButton()" label="export.offload.finalize.shortcut" [disabled]="finalizeFlag">
+      </ngc-button>
+      <ngc-button (click)="collectPayment()" label="bil.enquireCharges" [disabled]="collectPaymentFlag"></ngc-button>
+      <ngc-button *ngIf="(this.acceptanceType=='Export Mix PPK' || this.acceptanceType=='Transfer Mix PPK')"
+        (click)="maintainBUPList()" label="maintain.bup.list">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-container>
+
+
+<ngc-report #reportWindow format="pdf" title="g.report" [reportId]='this.printReport'
+  [reportParameters]='reportParameters'>
+</ngc-report>
+<ngc-report #reportWindow1 format="pdf" title="g.report" [reportId]='this.printRacsfReport'
+  [reportParameters]='reportParameters1'>
+</ngc-report>

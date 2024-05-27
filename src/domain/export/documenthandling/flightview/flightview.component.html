@@ -1,0 +1,141 @@
+<form #div [formGroup]="formFlightView">
+  <ngc-titlebar title="flightViewDashboard"></ngc-titlebar>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column align="right" cellsAlign="right">
+        Date/Time :
+        <ngc-display formControlName="dateTime"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.dateFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput #dateFrom accessEnableOn="r" [width]="160" [showTimeButton]="true" [showCalendarButton]="true"
+            formControlName="dateFrom"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.dateTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput #dateTo accessEnableOn="r" [width]="160" [showTimeButton]="true" [showCalendarButton]="true"
+            formControlName="dateTo" [min]="dateToMin" [max]="dateToMax"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.dateOffice"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="officeDropDown" sourceId="CDH_OFFICES" sourceType="query" [width]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.flightCarrier"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" upperCase="true" [width]="150" formControlName="carrier"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.pouchStatus"></ngc-label>
+        <div>
+          <ngc-dropdownlist #pouchStatusDD accessEnableOn="r" upperCase="true" [width]="150" formControlName="pouchStatus"
+            sourceId="pouch$Pouch_Status"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.flightNumber"></ngc-label>
+        <div>
+          <!--<ngc-input [maxLength]="6" upperCase="true" [width]="150" (blur)="fltMasking()" formControlName="flightNo">-->
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightNo" maxlength="7" [width]="150"></ngc-flightkeyinput>
+          <!--</ngc-input>-->
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.flightDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput #flightDate accessEnableOn="r" formControlName="flightDate" [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.discrepancyInfo"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="150" formControlName="discrepancy" sourceId="General$YesNoFlag">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flightViewDashboard.pouchId"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" upperCase="true" [maxLength]="25" [width]="150" (blur)="pouchTrimming()" formControlName="pouchId">
+          </ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label=" "></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getFlightViewDetails()" label="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="show" type="box">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable #FlightViewTable formArrayName="flightViewFlightList" (linkClick)="onLinkClick($event)"
+          [pageable]="true" [pageSize]="10" [enablePageSizeHeight]="false">
+          <ngc-data-column text="flight.Flight" dataField="flightKey" [width]="100" type="link" cellsAlign="center"
+            true-color="grey"></ngc-data-column>
+          <ngc-data-column text="flight.bay" dataField="bay" [width]="100" cellsAlign="center" [cellsRenderer]="cellsRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="flight.acreg" dataField="acRegion" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="flight.dept.date" dataField="deptDate" type="displayDate" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="flight.etd.std" dataField="etdStd" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="flight.sector" dataField="sector" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.user" dataField="usr" [width]="70" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.flight.view.nil.pouch" dataField="nilPouch" [width]="100" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.flight.bkd.manf" dataField="bkedMnf" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.flight.lbl.print" dataField="labelPrint" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.doc.recv" dataField="docReceived" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.manf.final" dataField="manFinal" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.dls.final" dataField="dlsFinal" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.pouch.start" dataField="pouchStart" [width]="90" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.pouch.comp" dataField="pouchComplete" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.chk.out" dataField="pouchCheckout" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="export.flight.dlv.to.ac" dataField="pouchDelvdToAC" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="g.location" dataField="changedBayLocation" [width]="100" cellsAlign="center"
+            [cellsRenderer]="cellsRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="export.flight.pouch.id" dataField="pouchesInFlt" [width]="100" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="export.flight.disc" dataField="disc" [width]="60" cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-window #gpsWindow [width]="700" [height]="550" title="flightViewDashboard.gps.location.information">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-map [latitude]="gps_latitude" [longitude]="gps_longitude" [width]="650" [height]="480" [zoom]="17">
+          </ngc-map>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

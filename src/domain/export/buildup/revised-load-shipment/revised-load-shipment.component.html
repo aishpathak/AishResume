@@ -1,0 +1,804 @@
+<ngc-titlebar title='load.screen.loadshipment' (save)="onSave()" [disableSave]="!flightFlag" (clear)="OnClear($event)"
+  (cancel)="onCancel()">
+</ngc-titlebar>
+<form [formGroup]='LoadShipmentForm'>
+  <ngc-row>
+    <ngc-column column='4'>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column='3'>
+
+            <ngc-label value='flight.Flight'></ngc-label>
+            <div>
+              <ngc-flightkeyinput accessEnableOn="r" [width]="90" formControlName="flight_key" upperCase="true" required
+                (ngModelChange)="onFlightKey()">
+              </ngc-flightkeyinput>
+            </div>
+          </ngc-column>
+          <ngc-column column='3.5' align='left'>
+            <ngc-label value='flight.date'></ngc-label>
+            <div>
+              <ngc-datetimeinput accessEnableOn="r" onlyDate='true' required [width]="80" formControlName="flightDate"
+                (ngModelChange)="onFlightKey()">
+              </ngc-datetimeinput>
+            </div>
+          </ngc-column>
+          <ngc-column column='3' align='right'>
+            <div align='center'>
+              <ngc-label label="flight.segment"></ngc-label>
+            </div>
+            <div align='right'>
+              <ngc-dropdownlist accessEnableOn="r" required [width]="90" sourceId="LOADSHIPMENT_SEGMENT"
+                (select)="selectSegmentId($event)" [sourceParameters]="flightKeyforDropdown" [noCache]="true"
+                sourceType="query" formControlName="segment_ID" placeholder="placeholder.select" [dropDownWidth]="80"
+                [autoSelect]="true"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column align='right'>
+            <br />
+            <div>
+              <ngc-button accessEnableOn="r" value='g.search' (click)="onSearch()"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <br />
+      <ngc-container *ngIf='flightFlag' type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value='flight.Flight'></ngc-label>
+            <div>
+              <ngc-display formControlName='flightKey'></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value='flight.date'></ngc-label>
+            <div>
+              <ngc-display [onlyDate]="true" formControlName='flightOriginDate'></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value='flight.std'></ngc-label>
+            <div>
+              <ngc-display formControlName='std'></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value='flight.etd'></ngc-label>
+            <div>
+              <ngc-display formControlName='etd'></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value='flight.segment'></ngc-label>
+            <div>
+              <ngc-display formControlName='segment' color="blue"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <br />
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column *ngIf="loadByULD">
+            <ngc-label label="loadshipment.label.yet.to.be.load"></ngc-label>
+            <ngc-datatable formArrayName="toBeLoadedList" [height]="500" [pageable]="false"
+              (itemSelect)="onSelectCheckBox($event)" [enablePageSizeHeight]="false" [columnsHeight]="40">
+              <ngc-data-column text="g.sel" dataField="select" type="check" [width]="30" cellsAlign="center">
+              </ngc-data-column>
+              <ngc-data-column text="g.shipmentNumber" dataField="shipmentNumber" cellsAlign="left" [width]="120">
+              </ngc-data-column>
+              <ngc-data-column text="g.dest" dataField="origin" [width]="40" cellsAlign="left"></ngc-data-column>
+              <ngc-data-column text="g.org" dataField="destination" [width]="40" cellsAlign="left">
+              </ngc-data-column>
+              <ngc-data-column text="awb.booking.br.pieces.weight" dataField="bookingPiecesWeight" [width]="100"
+                cellsAlign="left" feature="Exp.Bu.LoadingWithBooking">
+              </ngc-data-column>
+              <ngc-data-column text="load.prema.pcs.wgt" dataField="premanPiecesWeight" [width]="70" cellsAlign="left"
+                feature="Exp.Bu.LoadingWithPremanifest">
+              </ngc-data-column>
+              <ngc-data-column text="export.load.available.pieces.weight" dataField="remainingPiecesWeight" [width]="70"
+                cellsAlign="left" [width]="2" feature="Exp.Bu.LoadingWithBooking"></ngc-data-column>
+              <ngc-data-column text="export.load.available.pieces.weight" dataField="remainingPiecesWeightPreman"
+                [width]="80" cellsAlign="left" [width]="2" feature="Exp.Bu.LoadingWithPremanifest"></ngc-data-column>
+              <ngc-data-column text="g.shc" dataField="shcs" cellsAlign="center"></ngc-data-column>
+            </ngc-datatable>
+          </ngc-column>
+          <ngc-column *ngIf="loadType==='AWB'">
+            <ngc-label label="export.assign.uld.trolley.to.flight"></ngc-label>
+            <ngc-datatable formArrayName="assignedULDTrollies" [height]="500" [pageable]="false"
+              (itemSelect)="onSelectULDCheckBox($event)" [enablePageSizeHeight]="false">
+              <ngc-data-column text="g.select" dataField="checkBox" type="check" cellsAlign="center" [width]="30">
+              </ngc-data-column>
+              <ngc-data-column text="uld.uld.trolley" dataField="assUldTrolleyNo" cellsAlign="center" [width]="100">
+              </ngc-data-column>
+              <ngc-data-column text="uld.contentcode" dataField="contentCode" cellsAlign="center" [width]="35">
+              </ngc-data-column>
+              <ngc-data-column text="uld.heightcode" dataField="heightCode" cellsAlign="center" [width]="35">
+              </ngc-data-column>
+              <ngc-data-column text="uld.phc" dataField="phcFlag" cellsAlign="center" type="icon" iconType="yesno"
+                [width]="20"></ngc-data-column>
+
+            </ngc-datatable>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-column>
+    <ngc-column column='8' style="padding-left:6px">
+      <ngc-row>
+        <ngc-column style="padding-left:6px" column='1' *ngIf='flightFlag'>
+          <br />
+          <div>
+            <ngc-radiobutton groupName="sel" formControlName="loadbyULD" (ngModelChange)="onUldClick(1)">
+              <ngc-label label="g.uld"></ngc-label>
+            </ngc-radiobutton>
+          </div>
+          <div>
+            <ngc-label label=" "></ngc-label>
+          </div>
+          <div>
+            <ngc-radiobutton groupName="sel" formControlName="loadbyAWB" (ngModelChange)="onUldClick(1)">
+              <ngc-label label="g.awb"></ngc-label>
+            </ngc-radiobutton>
+          </div>
+        </ngc-column>
+        <ngc-column column='7' style="padding-left:12px" *ngIf="loadType ==='AWB'">
+          <ngc-label label="loadshipment.label.loading"></ngc-label>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="awb.awbnumber" [width]="35"></ngc-label>
+                </th>
+                <th colspan="2">
+                  <ngc-label label="g.total" [width]="35"></ngc-label>
+                </th>
+                <th colspan="2">
+                  <ngc-label label="export.load.remaining.to.load" [width]="35"></ngc-label>
+                </th>
+              </tr>
+              <tr>
+                <th colspan="1">
+                  <ngc-label label="" [width]="35"></ngc-label>
+                </th>
+                <th colspan="1">
+                  <ngc-label label="awb.pieces" [width]="10"></ngc-label>
+                </th>
+                <th colspan="1">
+                  <ngc-label label="awb.weight" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.pieces" [width]="10"></ngc-label>
+                </th>
+
+                <th colspan="1">
+                  <ngc-label label="awb.weight" [width]="18"></ngc-label>
+                </th>
+
+              </tr>
+            </thead>
+            <!-- Awb level Array start from here -->
+            <tbody formArrayName="shipmentToLoad">
+              <ng-container *ngFor="let record of LoadShipmentForm.get('shipmentToLoad').controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td>
+                    <ngc-lov formControlName="shipmentNumber" [sourceId]='awbLOVSourceId' title='g.shipment.numbers'
+                      [width]="110" dataField='code' displayField='code' (select)="onSelectAWB($event,1)" required
+                      patternName='alphanum'>
+                      <ngc-data-column text="g.shipment.numbers" dataField="code" [width]="80"></ngc-data-column>
+                    </ngc-lov>
+                  </td>
+
+                  <td>
+                    <ngc-piecesdisplay formControlName="assignedPieces" [width]="25"></ngc-piecesdisplay>
+                  </td>
+                  <td>
+                    <ngc-weightdisplay formControlName="assignedWeight" [width]="25"></ngc-weightdisplay>
+                  </td>
+                  <td>
+                    <ngc-piecesdisplay formControlName="remainingPieces" [width]="25"></ngc-piecesdisplay>
+                  </td>
+                  <td>
+                    <ngc-weightdisplay formControlName="remainingWeight" [width]="25"></ngc-weightdisplay>
+                  </td>
+                </tr>
+                <!-- AWB level by array ends  here -->
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+        <ngc-column column='7' style="padding-left:12px" *ngIf="loadType ==='ULD'  && flightFlag">
+          <!--<ngc-container type="box" *ngIf="loadByULD">-->
+          <ngc-container type="box">
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="loadshipment.label.loading"></ngc-label>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column *ngIf="this.LoadShipmentForm.get('contentCode').value !== 'M'">
+                <ngc-label label='loadshipment.label.phc.indicator'></ngc-label>
+                <div>
+                  <ngc-checkbox formControlName="phcIndicator" accessSectionId="PHC_CHECK_BOX"></ngc-checkbox>
+                </div>
+              </ngc-column>
+
+              <ngc-column>
+                <ngc-label label='loadshipment.label.uld.trolley'></ngc-label>
+                <div>
+                  <ngc-lov formControlName="assUldTrolleyNo" sourceId='ULD_TROLLEY_NO_SEGMENT' title='uld.uldNumbers'
+                    [width]="110" dataField='code' (select)="onSelect($event,1)" [sourceParameters]="uldSourceParameter"
+                    [noCache]="true" patternName='alphanum'>
+                    <ngc-data-column text="uld.uldNumbers" dataField="code" [width]="80"></ngc-data-column>
+                    <!--<ngc-data-column text="uld.uldNumbers" dataField="param4" [width]="80"></ngc-data-column>-->
+                  </ngc-lov>
+                </div>
+              </ngc-column>
+
+              <ngc-column align='center'>
+                <ngc-label label='contentcode'></ngc-label>
+                <div>
+                  <ngc-dropdownlist sourceId="WH_CONTENTCODE" [width]='100' sourceType="query" [dropDownHeight]="150"
+                    [dropDownWidth]="55" formControlName='contentCode'>
+                  </ngc-dropdownlist>
+                </div>
+              </ngc-column>
+              <ngc-column *ngIf="!this.LoadShipmentForm.get('trolleyInd').value ">
+                <ngc-label label='loadshipment.label.contour.code'></ngc-label>
+                <div>
+                  <ngc-dropdownlist sourceId="CONTOURCODE" [width]='100' [dropDownHeight]="150" [dropDownWidth]="80"
+                    sourceType="query" formControlName='heightCode'></ngc-dropdownlist>
+                </div>
+              </ngc-column>
+              <ngc-column *ngIf="this.LoadShipmentForm.get('contentCode').value === 'M' ">
+                <ngc-label label=''></ngc-label>
+
+              </ngc-column>
+              <ngc-column *ngIf="this.LoadShipmentForm.get('trolleyInd').value ">
+                <ngc-label label=''></ngc-label>
+
+              </ngc-column>
+
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+        <ngc-column column='1'></ngc-column>
+
+        <ngc-column column='1' *ngIf='flightFlag'>
+          <br />
+          <ngc-button label='loadshipment.label.buildup.completed' (click)='onBuildUpCompleted()'
+            feature="Exp.Bu.LoadingWithBooking"> </ngc-button>
+          <ngc-button label='load.buildupcomplete.uld' (click)='onBuildUpCompletedByULD()'
+            feature="Exp.Bu.ULDBuildUpComplete" *ngIf="!checkUldBuildUpFlag"> </ngc-button>
+          <ngc-button label='load.buildupuncomplete.uld' (click)='onBuildUpCompletedByULD()'
+            feature="Exp.Bu.ULDBuildUpComplete" *ngIf="checkUldBuildUpFlag">
+          </ngc-button>
+        </ngc-column>
+        <ngc-column column='2'>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column='1'>
+        </ngc-column>
+        <ngc-column column='7' style="padding-left:12px" *ngIf="loadedShipmentsByULD">
+          <br />
+          <ngc-label label="loadshipment.label.loaded.shipment"></ngc-label>
+          <ngc-table style="height: 500px; overflow-y: scroll;">
+            <thead>
+              <th align='left' [width]="10">
+                <ngc-label value='awb.awbnumber'> </ngc-label>
+              </th>
+              <th align='left' [width]="30">
+                <ngc-label value='awb.loaded.pieces'> </ngc-label>
+              </th>
+              <th align='left' [width]="35">
+                <ngc-label value='awb.loaded.weight'> </ngc-label>
+              </th>
+              <th align='left' [width]="40">
+                <ngc-label value='g.shc'> </ngc-label>
+              </th>
+            </thead>
+            <tbody formArrayName="loadedUldList">
+              <ng-container *ngFor="let record of LoadShipmentForm.get('loadedUldList').controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td align='center'>
+                    <ngc-display formControlName="shipmentNumber" [width]="10"></ngc-display>
+                  </td>
+                  <td align='center'>
+                    <ngc-piecesdisplay formControlName="loadedPieces" [width]="20"></ngc-piecesdisplay>
+                  </td>
+                  <td align='center'>
+                    <ngc-weightdisplay formControlName="loadedWeight" [width]="20"></ngc-weightdisplay>
+                  </td>
+                  <td align='center'>
+                    <ngc-display formControlName="shcs" [width]="40"></ngc-display>
+                  </td>
+                </tr>
+              </ng-container>
+              <tr class='greyBack'>
+                <td style="border-right: 0;">
+                  <ngc-label value='loadshipment.label.total.pieces.weight'>
+                  </ngc-label>
+                </td>
+                <td style="border-right: 0; border-left: 0; " align="center">
+                  <ngc-piecesdisplay [value]="this.LoadShipmentForm.get('totalLoadedPiecestoDisplay').value">
+                  </ngc-piecesdisplay>
+                </td>
+                <td style="border-right: 0; border-left: 0; " align="center">
+                  <ngc-weightdisplay [value]="this.LoadShipmentForm.get('totalLoadedWeighttoDisplay').value">
+                  </ngc-weightdisplay>
+                </td>
+                <td style="border-left: 0; ">
+                </td>
+
+              </tr>
+            </tbody>
+          </ngc-table>
+
+
+        </ngc-column>
+        <ngc-column column='7' style="padding-left:12px" *ngIf="loadedShipmentsByAWB">
+          <br />
+          <ngc-label label="loadshipment.label.uld.shipments.loaded.in"></ngc-label>
+
+          <ngc-table>
+            <thead>
+              <th align='left' [width]="10">
+                <ngc-label value='uld.uld.trolley'> </ngc-label>
+              </th>
+              <th align='left' [width]="30">
+                <ngc-label value='awb.loaded.pieces'> </ngc-label>
+              </th>
+              <th align='left' [width]="35">
+                <ngc-label value='awb.loaded.weight'> </ngc-label>
+              </th>
+              <th align='left' [width]="40">
+                <ngc-label value='g.shc'> </ngc-label>
+              </th>
+            </thead>
+            <tbody formArrayName="loadedUldList">
+              <ng-container *ngFor="let record of LoadShipmentForm.get('loadedUldList').controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td align='center'>
+                    <ngc-display formControlName="assUldTrolleyNo" [width]="10"></ngc-display>
+                  </td>
+                  <td align='center'>
+                    <ngc-piecesdisplay formControlName="loadedPieces" [width]="20"></ngc-piecesdisplay>
+                  </td>
+                  <td align='center'>
+                    <ngc-weightdisplay formControlName="loadedWeight" [width]="20"></ngc-weightdisplay>
+                  </td>
+                  <td align='center'>
+                    <ngc-display formControlName="shcs" [width]="40"></ngc-display>
+                  </td>
+                </tr>
+              </ng-container>
+              <tr class='greyBack'>
+                <td style="border-right: 0;">
+                  <ngc-label value='loadshipment.label.total.loaded.pieces.weight'>
+                  </ngc-label>
+                </td>
+                <td style="border-right: 0; border-left: 0; " align="center">
+                  <ngc-piecesdisplay [value]="this.LoadShipmentForm.get('totalLoadedPiecestoDisplay').value">
+                  </ngc-piecesdisplay>
+
+                </td>
+                <td style="border-right: 0; border-left: 0; " align="center">
+                  <ngc-weightdisplay [value]="this.LoadShipmentForm.get('totalLoadedWeighttoDisplay').value">
+                  </ngc-weightdisplay>
+                </td>
+                <td style="border-left: 0; ">
+                </td>
+
+              </tr>
+            </tbody>
+          </ngc-table>
+
+        </ngc-column>
+
+        <ngc-column column='2'>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-container *ngIf="loadType ==='AWB' && !loadedShipmentsByAWB">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value=''>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value=''>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-container *ngIf="loadType ==='ULD' && flightFlag && !loadedShipmentsByULD">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value=''>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value=''>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-row>
+        <ngc-column *ngIf="loadedShipmentsByAWB" align="right">
+          <ngc-button [disabled]="this.LoadShipmentForm.get('loadedUldList').length < 1"
+            value='loadshipment.label.updateWeight' (click)="updateWeight()"></ngc-button>
+        </ngc-column>
+        <ngc-column column='4'>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column *ngIf="loadByULD && loadType ==='ULD'">
+          <ngc-label label="loadshipment.label.shipment.to.be.loaded"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column *ngIf="loadType==='AWB'">
+          <ngc-label label="loadshipment.label.uld.to.load.shipment.to"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column='7' *ngIf="loadType==='AWB'">
+          <ngc-container type="box">
+
+            <ngc-row>
+              <ngc-column *ngIf="this.LoadShipmentForm.get('contentCode').value !== 'M'">
+                <ngc-label label='loadshipment.label.phc.indicator'></ngc-label>
+                <div>
+                  <ngc-checkbox formControlName="phcIndicator" accessSectionId="PHC_CHECK_BOX"></ngc-checkbox>
+                </div>
+              </ngc-column>
+              <ngc-column>
+                <ngc-label label='loadshipment.label.uld.trolley'></ngc-label>
+                <div>
+                  <ngc-input *ngIf="disableULD" formControlName='assUldTrolleyNo' [disabled]='true' [width]='120'>
+                  </ngc-input>
+                  <ngc-uldinput *ngIf="!disableULD" formControlName='assUldTrolleyNo'
+                    (ngModelChange)="onSelect($event,1)"></ngc-uldinput>
+                </div>
+              </ngc-column>
+
+              <ngc-column align='center'>
+                <ngc-label label='contentcode'></ngc-label>
+                <div>
+                  <ngc-dropdownlist sourceId="WH_CONTENTCODE" [width]='60' sourceType="query" [dropDownHeight]="150"
+                    [dropDownWidth]="55" formControlName='contentCode'>
+                  </ngc-dropdownlist>
+                </div>
+              </ngc-column>
+
+              <ngc-column *ngIf="!this.LoadShipmentForm.get('trolleyInd').value">
+                <ngc-label label='loadshipment.label.contour.code'></ngc-label>
+                <div>
+                  <ngc-dropdownlist sourceId="CONTOURCODE" [width]='85' [dropDownHeight]="150" [dropDownWidth]="80"
+                    sourceType="query" formControlName='heightCode'></ngc-dropdownlist>
+                </div>
+              </ngc-column>
+              <ngc-column *ngIf="this.LoadShipmentForm.get('contentCode').value === 'M'">
+                <ngc-label label=''></ngc-label>
+
+              </ngc-column>
+              <ngc-column *ngIf="this.LoadShipmentForm.get('trolleyInd').value">
+                <ngc-label label=''></ngc-label>
+
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column *ngIf="loadType==='AWB'">
+          <ngc-label value=''>
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column *ngIf="loadByULD || loadByAWB">
+          <!--<ngc-container>-->
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="loadshipment.label.shipment" [width]="35"></ngc-label>
+                  <ngc-label label="loadshipment.label.number" [width]="35"></ngc-label>
+                </th>
+
+                <th *ngIf="loadType==='ULD'">
+                  <ngc-label label="" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.shipment" [width]="20"></ngc-label>
+                  <ngc-label label="loadshipment.label.location" [width]="20"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.warehouse" [width]="20"></ngc-label>
+                  <ngc-label label="loadshipment.label.location" [width]="20"></ngc-label>
+                </th>
+                <th feature="Exp.PartSuffix" *ngIf="sqCarrierGroup">
+                  <ngc-label label="awb.part.suffix" [width]="20"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.location" [width]="15"></ngc-label>
+                  <ngc-label label="g.pieces" [width]="15"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="loadshipment.label.location" [width]="15"></ngc-label>
+                  <ngc-label label="g.weight" [width]="15"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="dryIce" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.pieces" [width]="18"></ngc-label>
+                  <ngc-label label="export.load.to.move" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.weight" [width]="18"></ngc-label>
+                  <ngc-label label="export.load.to.move" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="export.load.dry.ice" [width]="18"></ngc-label>
+                  <ngc-label label="export.load.to.move" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.shc" [width]="18"></ngc-label>
+                </th>
+                <th>
+                  <!--<ngc-label label="loadshipment.label.tag.number" [width]="20"></ngc-label>-->
+                  <ngc-label label="loadshipment.label.tag" [width]="20"></ngc-label>
+                  <ngc-label label="loadshipment.label.number" [width]="20"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="loadshipment.label.trm" [width]="20"></ngc-label>
+                  <ngc-label label="loadshipment.label.number" [width]="20"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="import.cc.code" [width]="18" feature="Exp.Bu.LoadingWithPremanifest"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <!-- Awb level Array start from here -->
+            <tbody formArrayName="uldShipmentArray">
+              <ng-container *ngFor="let record of LoadShipmentForm.get('uldShipmentArray').controls; let index=index"
+                [formGroupName]="index">
+                <!--<tr *ngIf="loadType==='ULD'">-->
+                <tr>
+                  <td>
+                    <ngc-display formControlName="shipmentNumber" [width]="35"></ngc-display>
+                  </td>
+                  <!--<td>
+                    <ngc-piecesdisplay formControlName="pieces" [width]="25"></ngc-piecesdisplay>
+                  </td>
+                  <td>
+                    <ngc-weightdisplay formControlName="weight" [width]="25"></ngc-weightdisplay>
+                  </td>-->
+                  <td *ngIf="loadType==='ULD'">
+                    <ngc-link (linkClick)="onDeleteShipment(index)" iconType="delete"></ngc-link>
+                  </td>
+                  <td colspan="12" *ngIf="loadType==='ULD' && sqCarrierGroup ">
+                  </td>
+                  <td colspan="13" *ngIf="loadType==='AWB' && sqCarrierGroup">
+                  </td>
+                </tr>
+                <!-- Shipment level array start from here -->
+                <ng-container formArrayName="uldInventory">
+                  <ng-container *ngFor="let childRecord of record.get('uldInventory').controls; let subIndex=index"
+                    [formGroupName]="subIndex">
+                    <tr>
+                      <td colspan="2" *ngIf="loadType==='ULD'">
+                      </td>
+                      <td colspan="1" *ngIf="loadType==='AWB'">
+                      </td>
+                      <td>
+                        <ngc-display formControlName="shipmentLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="warehouseLocation"></ngc-display>
+                      </td>
+                      <td feature="Exp.PartSuffix" *ngIf="childRecord.get('sqCarrierGroup').value">
+                        <ngc-display formControlName="partSuffix"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-piecesdisplay formControlName="locationPiecs" [width]="50"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="locationWeight" [width]="50"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="dryIceWeight" [width]="25"></ngc-weightdisplay>
+                      </td>
+                      <td>
+
+                        <ngc-piecesinput formControlName="movePiecs"
+                          (ngModelChange)="onPiecesChange($event,index,subIndex)">
+                        </ngc-piecesinput>
+                      </td>
+                      <td>
+                        <ngc-weightinput [defaultZero]="false" formControlName="moveWeight">
+                        </ngc-weightinput>
+                      </td>
+                      <td>
+                        <ngc-weightinput [defaultZero]="false" formControlName="moveDryIce"></ngc-weightinput>
+
+                      </td>
+                      <td>
+                        <ng-container *ngIf="6> childRecord.get('dropDownShcList').value.length">
+                          <ngc-dropdownlist [autoSelect]="true" [multiSelect]="true" formControlName="shcList"
+                            [source]="childRecord.get('dropDownShcList').value" [width]='85' [dropDownHeight]="150"
+                            [dropDownWidth]="80">
+                          </ngc-dropdownlist>
+                        </ng-container>
+                        <ng-container *ngIf="childRecord.get('dropDownShcList').value.length > 5">
+                          <ngc-dropdownlist [autoSelect]="true" [multiSelect]="true" formControlName="shcList"
+                            [source]="childRecord.get('dropDownShcList').value" [width]='85' [dropDownHeight]="150"
+                            [dropDownWidth]="80">
+                          </ngc-dropdownlist>
+                        </ng-container>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist [multiSelect]="true" formControlName="tagNumberList" [dropDownWidth]="80"
+                          [source]="childRecord.get('dropDownTagNumberList').value" [width]="80"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="trmNumber"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="clearanceInfo"></ngc-display>
+                      </td>
+
+                    </tr>
+                  </ng-container>
+                </ng-container>
+                <!-- Shipment level array ends here -->
+              </ng-container>
+              <!-- AWB level by array ends  here -->
+            </tbody>
+          </ngc-table>
+          <ngc-container type="tab" *ngIf="loadByAWB">
+            <ngc-row>
+              <ngc-column align="left">
+                <ngc-label value="loadshipment.label.tobe.loaded.pieces.weight"></ngc-label>
+                <!--<ngc-display formControlName='totalToBeloaded'></ngc-display>-->
+                <ngc-piecesdisplay formControlName="totalToBeloadedPieces"></ngc-piecesdisplay>
+                <ngc-display [value]="'/'"></ngc-display>
+                <ngc-weightdisplay formControlName="totalToBeloadedWeight"></ngc-weightdisplay>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+          <!--</ngc-container>-->
+          <ngc-container type="tab" *ngIf="loadByULD || loadByAWB">
+            <ngc-row>
+              <ngc-column align="right">
+                <ngc-button [disabled]="this.LoadShipmentForm.get('uldShipmentArray').length < 1 "
+                  value='loadshipment.label.load' (click)='onLoad()'></ngc-button>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-column>
+      </ngc-row>
+    </ngc-column>
+  </ngc-row>
+  <ngc-window #updateWeightWindow [showCloseButton]="true" [width]="800" [height]='500'
+    title="export.load.update.loaded.weight">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.uldTrolleyNumber" [width]="35"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.awbnumber" [width]="35"></ngc-label>
+                </th>
+                <th *ngIf="sqCarrierGroup">
+                  <ngc-label label="awb.part.suffix" [width]="35"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.loaded.pieces" [width]="35"></ngc-label>
+                </th>
+                <th>
+
+                  <ngc-label label="awb.loaded.weight" [width]="35"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label label="g.shc" [width]="35"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody formArrayName="updateLoadedWeightArray">
+              <tr *ngFor="let record of LoadShipmentForm.get('updateLoadedWeightArray').controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="assUldTrolleyNo" [width]="35"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="shipmentNumber" [width]="35"></ngc-display>
+                </td>
+                <td *ngIf="sqCarrierGroup">
+                  <ngc-display formControlName="partSuffix">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="loadedPieces" [width]="35"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightinput formControlName="loadedWeight" (ngModelChange)="onUpdateWeightChange($event,index)">
+                  </ngc-weightinput>
+                </td>
+
+                <td>
+                  <ngc-shcinput formControlName="newShcList"></ngc-shcinput>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.load.total.loaded.weight"> </ngc-label>
+          <div>
+            <ngc-display [value]="totalPieces +'/'"></ngc-display>
+            <ngc-weightdisplay [value]="totalShipmentWeightBeforeUpdate" decimalDigits="1"> </ngc-weightdisplay>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="export.load.difference.weight"> </ngc-label>
+          <div>
+            <ngc-display [value]="'0' +'/'"></ngc-display>
+            <ngc-weightdisplay [value]="totalShipmentWeightAfterUpdate"> </ngc-weightdisplay>
+          </div>
+        </ngc-column>
+        <ngc-column align="right">
+          <ngc-button value='loadshipment.label.update'
+            [disabled]="this.LoadShipmentForm.get('updateLoadedWeightArray').length < 1 "
+            (click)='onUpdateWeightButton()'></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <!-- Update Loaded weight window ends here -->
+
+  <ngc-footer>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column align="left">
+          <ngc-button value='export.load.book.multiple.btn' (click)='onMultipleShipment()'></ngc-button>
+          <ngc-button label='export.load.ecc.flight.planner.list.btn' (click)='onClickFlightPlanner()'> </ngc-button>
+          <ngc-button label='export.load.assign.uld.trolley.btn' (click)="routeToAssignUld()"></ngc-button>
+          <ngc-button label='export.load.update.dls.btn' (click)="routeToUpdateDLS()"></ngc-button>
+          <ngc-button label='export.load.unload.shipment.btn' (click)="routeToUnloadShipment()"></ngc-button>
+          <ngc-button label='export.load.shipment.information.btn' (click)='onClickShipmentInformation()'> </ngc-button>
+          <ngc-button label='export.load.notoc.btn' (click)='routeToNOTOC()'> </ngc-button>
+          <ngc-button label='Load.Shipment.Accessary' (click)='routeToAccessary()'
+            feature="Exp.Bu.LoadingWithPremanifest"> </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-footer>
+</form>
+<!-- Load Shipment Form ends here-->

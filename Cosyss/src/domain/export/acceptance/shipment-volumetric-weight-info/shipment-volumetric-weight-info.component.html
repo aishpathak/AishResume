@@ -1,0 +1,257 @@
+<ngc-titlebar title="shipment.volumetric.weight.information.title" (print)="onDownloadReport($event)"
+  (clear)="onClear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="searchVolumetricInfoForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <div>
+          <ngc-label label="awb.carrier"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" formControlName="carrier" sourceId='CARRIER' title='AIRLINE' dataField='code'
+          [width]="50" uppercase='true'>
+          <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <div>
+          <ngc-label label="agent.agent"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" formControlName="agentname" sourceId="CUSTOMER_LIST_AGT" title="g.customer.list"
+          dataField="code" [width]="90" accessEnableOn="r">
+          <ngc-data-column text="customer.code" dataField="code" [width]="100"></ngc-data-column>
+          <ngc-data-column text="g.customer.full.name" dataField="desc" [width]="150"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <div>
+          <ngc-label label="g.awb"></ngc-label>
+        </div>
+        <ngc-awbinput accessEnableOn="r" formControlName="awbNumber" [width]="100"></ngc-awbinput>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <div>
+          <ngc-label label="export.acceptance.from.date"></ngc-label>
+        </div>
+        <ngc-datetimeinput accessEnableOn="r" [showTimeButton]="true" [showCalendarButton]="true"
+          formControlName="accFromDate" accessEnableOn="r"></ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <div>
+          <ngc-label label="export.acceptance.to.date"></ngc-label>
+        </div>
+        <ngc-datetimeinput accessEnableOn="r" [showTimeButton]="true" [showCalendarButton]="true"
+          formControlName="accToDate" [showCalendarButton]="true" accessEnableOn="r">
+        </ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" value="g.search" iconType="search" [width]="140" (click)="onSearch($event)">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="volumetricScannerForm">
+  <ngc-container *ngIf="showDataFlag">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-radiobutton accessEnableOn="r" formControlName="toleranceexceed" (ngModelChange)="onFilterVolumetricDetail($event)"
+          groupName='sel'>
+          <ngc-label label="export.volumetric.weightinfo.tolerance.exceed"></ngc-label>
+        </ngc-radiobutton>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-radiobutton accessEnableOn="r" formControlName="weightDifference" (ngModelChange)="onFilterVolumetricDetail($event)"
+          groupName='sel'>
+          <ngc-label label="export.volumetric.weightinfo.weight.diff"></ngc-label>
+        </ngc-radiobutton>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-radiobutton accessEnableOn="r" formControlName="volWgtexceedShipWgt" (ngModelChange)="onFilterVolumetricDetail($event)"
+          groupName='sel'>
+          <ngc-label label="export.volumetric.weightinfo.vol.exceed.chargeable"></ngc-label>
+        </ngc-radiobutton>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-radiobutton accessEnableOn="r" formControlName="allVolumetricShipments" (ngModelChange)="onFilterVolumetricDetail($event)"
+          groupName='sel'>
+          <ngc-label label="export.volumetric.weightinfo.all.shipments"></ngc-label>
+        </ngc-radiobutton>
+      </ngc-column>
+      
+
+    </ngc-row>
+    <ngc-row>
+
+      <ngc-column>
+        <ngc-edittable formArrayName="volumetricWeightSummary">
+          <ngc-data-column dataField="awbNumber" text="awb.awbnumber">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link accessEnableOn="r" [formControlName]='name' (linkClick)="onClick(group)"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="carrier" text="g.carrier">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="agentCode" text="agent.agentCode">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="agentname" text="agent.agentName">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="awbpcs" cellsAlign="right" text="export.volumetric.weightinfo.awb.pc">
+          </ngc-data-column>
+
+          <ngc-data-column type="displayWeight" dataField="awbwgt" cellsAlign="right" text="export.volumetric.weightinfo.awb.wt">
+          </ngc-data-column>
+
+          <ngc-data-column type="displayWeight" dataField="chargewgt" cellsAlign="right" text="export.volumetric.weightinfo.charge.wgt">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="declaredVolume" cellsAlign="right" text="export.volumetric.weightinfo.declared.voulme">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="shc" text="g.shc">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="accptpcs" cellsAlign="right" text="export.volumetric.weightinfo.accpt.pcs">
+          </ngc-data-column>
+
+          <ngc-data-column type="displayWeight" dataField="accptwgt" cellsAlign="right" text="export.volumetric.weightinfo.accpt.wgt">
+          </ngc-data-column>
+
+          <ngc-data-column type="displayWeight" dataField="accptvolwgt" cellsAlign="right" text="export.volumetric.weightinfo.accpt.vol.wgt">
+          </ngc-data-column>
+
+          <ngc-data-column type="displayWeight" dataField="wgtdiff" cellsAlign="right" text="export.volumetric.weightinfo.wgt.diff">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="toleranceexceed" cellsAlign="center" text="export.volumetric.weightinfo.tolerance.exceed.br">
+          </ngc-data-column>
+
+          <ngc-data-column type=" text" dataField="accptdatetime" text="export.volumetric.weightinfo.accpt.datetime">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="tvolumetricScannerName" text="g.scanner">
+          </ngc-data-column>
+
+          <ngc-data-column type="text" dataField="ttexture" text="g.texture">
+          </ngc-data-column>
+          <ngc-data-column type="text" dataField="toddSize" text="export.volumetric.weightinfo.odd.size">
+          </ngc-data-column>
+
+
+          <ngc-data-column cellsAlign="center" type="text" dataField="manualscan" text="g.manual">
+          </ngc-data-column>
+          <ngc-data-column text="Images" dataField="image">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-link [formControlName]='name' iconType="edit" (linkClick)="onOpen(group)"></ngc-link>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-window width="1600" height='400' #displayChildData title="export.volumetric.weight.details" [showCloseButton]="true">
+    <ngc-container type="tab" *ngIf="showChildDataFlag">
+      <ngc-row>
+        <ngc-column align="left">
+          <ngc-button label="g.report" (click)="onDownloadVolumetricReport($event)"></ngc-button>
+        </ngc-column>
+        <ngc-column [column]="7">
+          <ngc-label label="export.volumetric.weightinfo.awb"></ngc-label>
+          <ngc-label label=""></ngc-label>
+          <ngc-label label=""></ngc-label>
+          <ngc-label value={{awbNumber}}></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable width=60% formArrayName="volumetricWeightDetail" (linkClick)="onLinkClick($event)">
+
+            <ngc-data-column [width]="30" type="text" cellsAlign="right" dataField="pieces" text="g.pieces">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="30" type="text" cellsAlign="right" dataField="length" text="awb.length">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="30" type="text" cellsAlign="right" dataField="width" text="awb.width">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="30" type="text" cellsAlign="right" dataField="height" text="awb.height">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="30" type="text" cellsAlign="right" dataField="skidHeight" text="export.volumetric.weightinfo.skid.height">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="30" type="text" cellsAlign="center" dataField="manualScan" text="export.volumetric.weightinfo.manual.scan">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="50" type="text" dataField="reason" text="g.reason">
+            </ngc-data-column>
+            <ngc-data-column [width]="50" type="text" dataField="volumetricScannerName" text="g.scanner">
+            </ngc-data-column>
+
+            <ngc-data-column [width]="50" type="text" dataField="texture" text="g.texture">
+            </ngc-data-column>
+            <ngc-data-column [width]="50" type="text" dataField="oddSize" text="export.volumetric.weightinfo.odd.size">
+            </ngc-data-column>
+
+        
+
+            <ngc-data-column [width]="40" type="displayWeight" cellsAlign="right" dataField="volumetricWeight"
+              text="export.volumetric.weight">
+            </ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-window [width]="1200" height='400' #displayChildDataImages title="g.uploaded.images" [showCloseButton]="true">
+    <ngc-container type="tab" *ngIf="showChildDataFlag1">
+      <ngc-row>
+
+        <ngc-column [column]="7">
+          <ngc-label label="export.volumetric.weightinfo.awb"></ngc-label>
+          <ngc-label label=""></ngc-label>
+          <ngc-label label=""></ngc-label>
+          <ngc-label value={{awbNumber}}></ngc-label>
+
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ng-container formArrayName="fileUpload">
+            <ngc-fileupload #mainFlies accept="*/*" viewMode="readonly" entityType="AWB" [entityKey]="entityKeyData"
+              [associatedTo]="associatedTo" stage="INTERFACE">
+            </ngc-fileupload>
+          </ng-container>
+
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report format='xls' #VolumetricDetailReport title="g.report"  reportId='volumetricWeightDetail'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report format='xls' #VolumetricScannerReport title="g.report"  reportId='volumetricWeightSummary'
+     [reportParameters]='childreportParameters'>
+  </ngc-report>
+</form>

@@ -1,0 +1,637 @@
+<form [formGroup]="cargoSurvey">
+    <ngc-titlebar title='cargoSurvey.title' (save)="onSave()" [disableSave]="disableSave" (clear)="onClear($event)"
+        (cancel)="redirectTo()"></ngc-titlebar>
+    <ngc-container type="header">
+        <ngc-row>
+            <ngc-column [column]="2">
+                <ngc-label label='tracing.surveyNumber'></ngc-label>
+                <div>
+                    <ngc-display formControlName="surveyNo">
+
+                    </ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label='cargoSurvey.status'></ngc-label>
+                <div>
+                    <ngc-display formControlName="status"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column></ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label='cargoSurvey.surveyStartDateTime'></ngc-label>
+                <div>
+                    <ngc-display formControlName="startedDateTime"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label='cargoSurvey.surveyEndDateTime'></ngc-label>
+                <div>
+                    <ngc-display formControlName="endDateTime"></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <br />
+        <br />
+        <ngc-row>
+            <ngc-column [column]="1">
+                <ngc-label label='cargoSurvey.carrierGroup'></ngc-label>
+                <div>
+                    <ngc-dropdownlist formControlName="carrierGp" sourceId="CARRIER_GROUP" sourceType="query"
+                        [width]="100"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="3">
+                <ngc-label label="cargoSurvey.surveyFor"></ngc-label>
+                <div>
+                    <ngc-shipmentinput [shipmentType]="this.cargoSurvey.get('surveyForName').value"
+                        formControlName='referenceNo' (select)='setShipmentType($event)'></ngc-shipmentinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1" formGroupName="surveyFor">
+                <ngc-label label='cargoSurvey.hawbNumber'></ngc-label>
+                <!-- <div formGroupName="hawb">
+                    <ngc-alphanuminput formControlName="hawbNumber" [width]="100"></ngc-alphanuminput>
+                </div> -->
+
+                <div formGroupName="hawb">
+                    <ngc-lov formControlName="hawbNumber" accessEnableOn="r" [noCache]="true" title="g.hawbNumber"
+                        displayMember="code" dataField='code' sourceType='query' sourceId="HWBNUMBER" [width]="100"
+                        [sourceParameters]="{'parameter1': cargoSurvey.get(['referenceNo']).value,r:variable}"
+                        (select)="onhawbSelect($event)" maxlength="16">
+                        <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>̥
+            <ngc-column [column]="1">
+                <ngc-label label='cargoSurvey.placeOfSurvey'></ngc-label>
+                <div>
+                    <ngc-dropdownlist formControlName="placeOfsurvey" sourceId="HANDLINGAREA" sourceType="query"
+                        [width]="100"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1" align="right">
+                <br>
+                <ngc-button *ngIf="next" label="cargoSurvey.next" [disabled]="disableBtn" (click)="getShipment()">
+                </ngc-button>
+            </ngc-column>
+            <ngc-column></ngc-column>
+            <ngc-column></ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label></ngc-label>
+                <div align="right">
+                    <ngc-button *ngIf="(!next)" label="PrintReport" (click)="onGenerateReport()">
+                    </ngc-button>
+                    <ngc-report #reportWindow *ngIf="(!next)" title="g.report" reportId='ConductCargoSurvey'
+                        [showPrinters]="false" [reportParameters]="reportParam" [disabled]='true' iconType='report'>
+                    </ngc-report>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <!-- HAWB -->
+    <ngc-container *ngIf="checkReference" type="section" formGroupName="surveyFor">
+        <ngc-row>
+            <ng-container>
+                <ngc-column [column]="1">
+                    <ngc-label label={{labelValuePieces}}></ngc-label>
+                    <div>
+                        <ngc-piecesinput formControlName="noOfPieces" decimalDigits="0" [min]="0"></ngc-piecesinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                    <ngc-label label={{labelValueWeight}}></ngc-label>
+                    <div>
+                        <ngc-weightinput formControlName="refWeight" [min]="0"></ngc-weightinput>
+                    </div>
+                </ngc-column>
+            </ng-container>
+            <ng-container formGroupName="hawb">
+
+                <ngc-column [column]="1">
+                    <ngc-label label='cargoSurvey.hawbPieces'></ngc-label>
+                    <div>
+                        <ngc-piecesinput [disabled]="!this.cargoSurvey.get(['surveyFor', 'hawb', 'hawbNumber']).value"
+                            formControlName="pieces" [min]="0" decimalDigits="0"></ngc-piecesinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                    <ngc-label label='cargoSurvey.hawbWeight'></ngc-label>
+                    <div>
+                        <ngc-weightinput [disabled]="!this.cargoSurvey.get(['surveyFor', 'hawb', 'hawbNumber']).value"
+                            formControlName="weight" [min]="0"></ngc-weightinput>
+                    </div>
+                </ngc-column>
+            </ng-container>
+            <ng-container formGroupName="impFlight">
+                <ngc-column [column]="1">
+                    <ngc-label label='g.flight'></ngc-label>
+                    <div>
+
+                        <ngc-flightkeyinput (ngModelChange)="clearDate()" formControlName="flightKey" [width]="100">
+                        </ngc-flightkeyinput>
+                    </div>
+                </ngc-column>
+                <ngc-column [column]="1">
+                    <ngc-label label='cargoSurvey.date'></ngc-label>
+                    <div>
+                        <ngc-dateinput [disabled]="!this.cargoSurvey.get(['surveyFor','impFlight','flightKey']).value"
+                            formControlName="flightOriginDate"></ngc-dateinput>
+                    </div>
+                </ngc-column>
+            </ng-container>
+            <ngc-column [column]="1">
+                <ngc-label label='cargoSurvey.upliftStation'></ngc-label>
+                <div>
+                    <ngc-alphainput formControlName="originStation" [width]="60"></ngc-alphainput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label='cargoSurvey.dischargeStation'></ngc-label>
+                <div>
+                    <ngc-alphainput formControlName="destinationStation" [width]="60"></ngc-alphainput>
+                </div>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align="right">
+                <ngc-button (click)="cancelAndRestoreSurvey('Open')" label={{buttonValue}} [disabled]="enableBtn">
+                </ngc-button>
+                <ngc-button (click)="finalizeSurvey('Finalized')" label="finalize.finalize"
+                    [disabled]="disableOnFinalize"></ngc-button>
+                <ngc-button *ngIf="!iscreatenew" (click)="unfinalizeSurvey()" label="finalize.unfinalize"
+                    [disabled]="!disableOnFinalize">
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <!-- Shipment -->
+
+    <ngc-container *ngIf="checkReference" type="section">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label='cargoSurvey.shipment'></ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+                <ngc-button (click)="addRow()" label="g.add.row.r" [disabled]="disableBtn">
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <ngc-label label="cargoSurvey.invoice/PackingListNumber"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label='cargoSurvey.quantityDamaged/Lost'></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label label="cargoSurvey.natureOfGoods"></ngc-label>
+                            </th>
+
+                            <th>
+                                <ngc-label label="cargoSurvey.addPackingDetails"></ngc-label>
+                            </th>
+
+                            <th>
+                                <ngc-label></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName="shipments">
+                        <ng-container *ngFor="let item of cargoSurvey.get('shipments').controls; let index =index">
+                            <tr [formGroupName]="index">
+                                <td>
+                                    <ngc-alphanuminput formControlName="invoiceNo" maxLength="15">
+                                    </ngc-alphanuminput>
+                                </td>
+                                <td>
+                                    <div>
+                                        <ngc-numberinput #numberChanges [width]="90"
+                                            formControlName="quantityDamagedLost" (input)="compareQuntityItem()"
+                                            decimalDigits="0"></ngc-numberinput>
+                                    </div>
+                                </td>
+                                <td>
+                                    <ngc-alphanuminput formControlName="natureOfGoods" maxLength="25"
+                                        [allowSpace]="true"></ngc-alphanuminput>
+                                </td>
+
+
+                                <td align="center">
+                                    <ngc-link *ngIf="disableBtn" (linkClick)="onModelOpen($event, index)"
+                                        iconType="view"></ngc-link>
+                                    <ngc-link *ngIf="!disableBtn" (linkClick)="onModelOpen($event, index)"
+                                        iconType="edit"></ngc-link>
+                                </td>
+
+                                <td align="center">
+                                    <ngc-link (linkClick)="onDelete(index)" iconType="delete" [disabled]="disableBtn">
+                                        <ngc-i18n value="g.delete"></ngc-i18n>
+                                    </ngc-link>
+                                </td>
+                            </tr>
+                        </ng-container>
+                    </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <!-- Survey Details & Signature -->
+    <ngc-container *ngIf="checkReference" type="section">
+        <ngc-row>
+            <ngc-column>
+                <ngc-container formGroupName="surveyDetails" title="cargoSurvey.surveyDetails">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label='tracing.surveypieces'></ngc-label>
+
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-piecesinput formControlName="pieces" decimalDigits="0" [min]="0"></ngc-piecesinput>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label='tracing.surveyweight'></ngc-label>
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-weightinput formControlName="weight" [min]="0"></ngc-weightinput>
+
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label=''></ngc-label>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label='tracing.surveyedpieces'></ngc-label>
+
+                        </ngc-column>
+                        <ngc-column>
+
+                            <ngc-piecesinput formControlName="diffPieces"></ngc-piecesinput>
+
+                        </ngc-column>
+                        <ngc-column>
+                            <ngc-label label='tracing.weight.diff'></ngc-label>
+                        </ngc-column>
+                        <ngc-column>
+
+                            <ngc-weightinput formControlName="diffWeight"></ngc-weightinput>
+
+                        </ngc-column>
+                    </ngc-row>
+
+                </ngc-container>
+                <br />
+                <br />
+                <ngc-container *ngIf="checkReference" formArrayName="questionnairList">
+                    <ngc-row [width]="200">
+                        <ngc-label label='&nbsp;&nbsp;'></ngc-label>
+                    </ngc-row>
+                    <ng-container *ngFor="let item of cargoSurvey.get('questionnairList').controls; let index =index"
+                        [formGroupName]="index">
+                        <ngc-row>
+                            <ngc-column [column]="3">
+                                <ngc-display formControlName="question"></ngc-display>
+                            </ngc-column>
+                            <ngc-column [column]="3">
+                                <ngc-dropdownlist (select)="questionnairListHandler($event,index)"
+                                    formControlName="responseFlag" sourceId="Questionnaire$Response" required>
+                                </ngc-dropdownlist>
+                            </ngc-column>
+                            <!--Remarks-->
+                            <!--Remarks-->
+                            <ngc-column aligh="right"
+                                *ngIf="cargoSurvey.get(['questionnairList',index,'responseFlag']).value == '1'">
+                                <ngc-label label='g.remarks'></ngc-label>&nbsp;
+                                <ngc-input formControlName="remarks" [width]="270" [maxlength]='65' [allowSpace]="true">
+                                </ngc-input>
+
+                            </ngc-column>
+                        </ngc-row>
+                        <br />
+                    </ng-container>
+                </ngc-container>
+            </ngc-column>
+            <ngc-column *ngIf="checkReference">
+                <ngc-container formGroupName="signatureAndPayment" title="cargoSurvey.signatureAndPayments">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-container formGroupName="consignee">
+                                <ngc-row>
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent' emphasis="md"></ngc-label>
+                                    </ngc-column>
+                                </ngc-row>
+                                <ngc-row>
+                                    <ngc-column>
+                                        <ngc-label entityAttribute='Imp.Tracing.Icnumber'></ngc-label>
+
+                                        <div>
+                                            <ngc-alphanuminput formControlName="icNo"
+                                                entityAttribute="Customer.PersonalIdentificationNumber"
+                                                (ngModelChange)="onChangeIC($event)">
+                                            </ngc-alphanuminput>
+                                            <br>
+                                            <i>(Last FOUR Characters)</i>
+                                            <br>
+                                            <ngc-button value='import.validate.v' (click)="validateAirportPass($event)">
+                                            </ngc-button>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column>
+                                        <ngc-label entityAttribute="Imp.Tracing.AuthorisedPersonName"></ngc-label>
+                                        <div>
+                                            <ngc-input formControlName="name" patternName='alphanumspace'
+                                                entityAttribute="Customer.AuthorisedPersonName">
+                                            </ngc-input>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent.designation'></ngc-label>
+                                        <div>
+                                            <ngc-alphainput formControlName="designation" [allowSpace]="true">
+                                            </ngc-alphainput>
+                                        </div>
+                                    </ngc-column>
+
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent.signature'></ngc-label>
+                                        <div>
+                                            <ngc-signaturepad formControlName="signature"></ngc-signaturepad>
+                                        </div>
+                                    </ngc-column>
+                                </ngc-row>
+                            </ngc-container>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-container formGroupName="witnessBy">
+                                <ngc-row>
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.witnessedBy' emphasis="md"></ngc-label>
+                                    </ngc-column>
+                                </ngc-row>
+                                <ngc-row>
+                                    <ngc-column>
+                                        <ngc-label entityAttribute='Imp.Tracing.Icnumber'></ngc-label>
+
+
+                                        <div>
+                                            <ngc-alphanuminput formControlName="icNo"
+                                                entityAttribute="Customer.PersonalIdentificationNumber"
+                                                (ngModelChange)="validateWitnessAirportPass($event)">
+                                            </ngc-alphanuminput>
+                                            <br>
+                                            <i>(Last FOUR Characters)</i>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column>
+                                        <ngc-label entityAttribute="Imp.Tracing.AuthorisedPersonName"></ngc-label>
+                                        <div>
+                                            <ngc-alphainput formControlName="name" [allowSpace]="true">
+                                            </ngc-alphainput>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent.designation'></ngc-label>
+                                        <div>
+                                            <ngc-alphainput formControlName="designation" [allowSpace]="true">
+                                            </ngc-alphainput>
+                                        </div>
+                                    </ngc-column>
+
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent.signature'></ngc-label>
+                                        <div>
+                                            <ngc-signaturepad formControlName="signature"></ngc-signaturepad>
+                                        </div>
+                                    </ngc-column>
+                                </ngc-row>
+                            </ngc-container>
+                        </ngc-column>
+                    </ngc-row>
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-container formGroupName="surveyBy">
+                                <ngc-row>
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.surveyBy' emphasis="md"></ngc-label>
+                                    </ngc-column>
+                                </ngc-row>
+                                <ngc-row>
+                                    <ngc-column>
+                                        <ngc-label label='tracing.loggedin.user'></ngc-label>
+                                        <div>
+                                            <ngc-alphanuminput formControlName="icNo" [disabled]=true
+                                                (ngModelChange)="validateWitnessAirportPass($event)">
+                                            </ngc-alphanuminput>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column>
+                                        <ngc-label label='g.name'></ngc-label>
+                                        <div>
+                                            <ngc-alphainput formControlName="name" [disabled]=true></ngc-alphainput>
+                                        </div>
+                                    </ngc-column>
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent.designation'></ngc-label>
+                                        <div>
+                                            <ngc-alphainput formControlName="designation" [allowSpace]="true">
+                                            </ngc-alphainput>
+                                        </div>
+                                    </ngc-column>
+
+                                    <ngc-column>
+                                        <ngc-label label='cargoSurvey.consignee/agent.signature'></ngc-label>
+                                        <div>
+                                            <ngc-signaturepad formControlName="signature"></ngc-signaturepad>
+                                        </div>
+                                    </ngc-column>
+                                </ngc-row>
+                            </ngc-container>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+                <ngc-container *ngIf="checkReference" formGroupName="cargoOfficialReceiptInfo">
+                    <ngc-row>
+                        <ngc-column>
+                            <ngc-label label='cargoSurvey.cargoOfficialReceipt'></ngc-label>
+                            <div>
+                                <ngc-input formControlName="cargoOfficialReceipt"></ngc-input>
+                            </div>
+                        </ngc-column>
+
+                    </ngc-row>
+                    <ngc-row *ngIf="!iscreatenew">
+                        <ngc-column formArrayName="emails" [column]="9">
+                            <ngc-label label='cargoSurvey.email'></ngc-label>
+                            <div>
+                                <ngc-table>
+                                    <tbody>
+                                        <tr *ngFor="let item of cargoSurvey.get('cargoOfficialReceiptInfo').get('emails').controls; let index =index"
+                                            [formGroupName]="index" [width]='376'>
+                                            <td>
+                                                <ngc-emailinput formControlName="email" maxLength='50' [width]='375'>
+                                                </ngc-emailinput>
+                                            </td>
+
+                                            <td>
+                                                <ngc-link (linkClick)="deleteEmail($event, index)" iconType="delete"
+                                                    [disabled]="disableBtn">
+                                                    <ngc-i18n value="g.delete"></ngc-i18n>
+                                                </ngc-link>
+                                            </td>
+                                        </tr>
+                                    </tbody>
+                                </ngc-table>
+                            </div>
+                        </ngc-column>
+                        <ngc-column align="right" [column]="2">
+                            <br>
+                            <ngc-button (click)="addEmail()" label="cargoSurvey.add" iconType="add"></ngc-button>
+                            <br>
+                            <br>
+                            <ngc-button (click)="sendEmail()" label="tracing.send" iconType="send"
+                                [disabled]="!disableOnFinalize"></ngc-button>
+                        </ngc-column>
+                    </ngc-row>
+                </ngc-container>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-window #packingDetails title="cargoSurvey.addPackingDetails" [width]="1000" [height]="600">
+        <ngc-capturephoto *ngIf='modelOpenFlag' title="tracing.capture.photo"
+            [entityType]="this.cargoSurvey.get('surveyForName').value"
+            [entityKey]="this.cargoSurvey.get('referenceNo').value+'_'+this.cargoSurvey.get(['shipments', this.itemIndex, 'transactionSequenceNo']).value"
+            [associatedTo]="this.cargoSurvey.get('surveyNo').value" stage="Survey">
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column>
+                        <ngc-label label="tracing.select.item"></ngc-label>
+                        <div>
+                            <ngc-dropdownlist #itemNameDropDown formControlName="item" [width]="50"
+                                [source]="itemNameList" valueMember="code" displayMember="desc"></ngc-dropdownlist>
+                        </div>
+                    </ngc-column>
+                    <ngc-column align="right">
+                        <div>
+                            <ngc-button priority="primary" (click)="addNewItem(itemIndex)" value="g.addNew">
+                            </ngc-button>
+                            <ngc-button priority="primary"
+                                (click)="deleteItem(itemNameListHashMap[cargoSurvey.get('item').value])"
+                                value="g.delete">
+                            </ngc-button>
+                        </div>
+                    </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                    <ngc-column>
+                        <ng-container formArrayName="itemList">
+                            <ng-container *ngFor="let item  of cargoSurvey.get('itemList').controls;let itemIndex=index"
+                                [formGroupName]="itemIndex">
+                                <ng-container
+                                    *ngIf="itemIndex == itemNameListHashMap[cargoSurvey.get('item').value] && item.get('packingDetails')">
+                                    <ngc-container formArrayName="packingDetails">
+                                        <ngc-row
+                                            *ngFor="let pack  of item.get('packingDetails').controls;let packIndex=index"
+                                            [formGroupName]="packIndex">
+                                            <ngc-column>
+                                                <ngc-accordion>
+                                                    <ngc-accordion-card
+                                                        [selected]='showAccordion(pack,packIndex,itemIndex)'
+                                                        [title]="pack.get('packing').value">
+                                                        <ngc-container>
+                                                            <ngc-row formArrayName="packingConditions">
+                                                                <ng-container
+                                                                    *ngFor="let condition of pack.get('packingConditions').controls;let conditionIndex=index"
+                                                                    [formGroupName]="conditionIndex">
+                                                                    <ngc-column [column]="4">
+                                                                        <ngc-checkbox
+                                                                            formControlName="packingConditionFlag">
+                                                                            <ngc-display
+                                                                                [value]="condition.get('packingCondition').value">
+                                                                            </ngc-display>
+                                                                            <ngc-label label=""></ngc-label>
+                                                                        </ngc-checkbox>
+                                                                    </ngc-column>
+                                                                </ng-container>
+
+                                                            </ngc-row>
+                                                        </ngc-container>
+                                                        <ngc-container>
+                                                            <ngc-row>
+                                                                <ngc-column>
+                                                                    <ngc-label label='g.remarks'></ngc-label>&nbsp;
+                                                                    <ngc-input formControlName="remarks" [width]="570"
+                                                                        [maxlength]='65' [allowSpace]="true">
+                                                                    </ngc-input>
+
+                                                                </ngc-column>
+                                                            </ngc-row>
+                                                        </ngc-container>
+                                                    </ngc-accordion-card>
+                                                </ngc-accordion>
+                                            </ngc-column>
+                                        </ngc-row>
+                                    </ngc-container>
+                                </ng-container>
+                            </ng-container>
+                        </ng-container>
+                    </ngc-column>
+                </ngc-row>
+
+
+                <!-- Content Goes Here -->
+                <ngc-row>
+                    <ngc-column>
+                        <ngc-label label="cargoSurvey.other"></ngc-label>
+                        <div>
+                            <ngc-textarea formControlName="other" [maxLength]="400" [height]='80' [width]="650">
+                            </ngc-textarea>
+                        </div>
+                    </ngc-column>
+                </ngc-row>
+
+            </ngc-container>
+        </ngc-capturephoto>
+        <ngc-window-footer>
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column align="right">
+                        <ngc-button priority="primary" (click)="storeShipmentItem()" value="g.save"></ngc-button>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+
+
+    <ngc-window #sendReport title="tracing.add.emails" [width]="1000" [height]="600">
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-display>
+                        <ngc-label label='tracing.no.email.found'></ngc-label>
+                    </ngc-display>
+                </ngc-column>
+            </ngc-row>
+            <!-- Content Goes Here -->
+        </ngc-container>
+        <ngc-window-footer>
+            <ngc-container type="tab">
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+
+</form>
+<app-duplicatenamepopup #duplicateNamePopup (onConfirmNewEntry)="onConfirmNewEntry($event)"
+    (onNameSelect)="onNameSelect($event)"></app-duplicatenamepopup>

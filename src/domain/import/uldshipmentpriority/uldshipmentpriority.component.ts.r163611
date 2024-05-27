@@ -1,0 +1,383 @@
+import { Component, ElementRef, NgZone, OnInit, ViewContainerRef, ViewChild } from '@angular/core';
+import { ActivatedRoute, Router } from '@angular/router';
+import { ImportService } from '../import.service';
+import { NgcPage, NgcFormGroup, NgcFormControl, NgcFormArray, NgcWindowComponent, PageConfiguration, NgcUtility, NgcReportComponent, ReactiveModel } from "ngc-framework";
+import {
+  ArrivalManifestFlight,
+  SegmentData,
+  UldModel,
+  ShipmentModel,
+  ArrivalManifestData
+} from "../import.sharedmodel";
+
+@Component({
+  selector: 'app-uldshipmentpriority',
+  templateUrl: './uldshipmentpriority.component.html',
+  styleUrls: ['./uldshipmentpriority.component.css']
+})
+
+@PageConfiguration({
+  trackInit: true,
+  callNgOnInitOnClear: true,
+  autoBackNavigation: true,
+  restorePageOnBack: false,
+  dontRestoreOnBrowserBack: false
+})
+
+export class UldshipmentpriorityComponent extends NgcPage {
+
+
+  @ViewChild('emailSendingWindow') emailSendingWindow: NgcWindowComponent;
+  @ViewChild('reportWindow')
+  reportWindow: NgcReportComponent;
+  reportParameters: any = new Object();
+
+  resp: any;
+  segmentInformation: any[] = [];
+  isShipmentInformation: boolean;
+  uldInformation: any[] = [];
+  shipmentInformation: any[] = [];
+  shcCode: string;
+  displayResults: boolean = false;
+
+  constructor(
+    appZone: NgZone,
+    appElement: ElementRef,
+    appContainerElement: ViewContainerRef,
+    private importService: ImportService,
+    private router: Router,
+    private activatedRoute: ActivatedRoute
+  ) {
+    super(appZone, appElement, appContainerElement);
+  }
+
+  ngOnInit() {
+    super.ngOnInit();
+  }
+
+  private uldShipmentPriorityData: NgcFormGroup = new NgcFormGroup({
+    searchData: new NgcFormGroup({
+      flightNumber: new NgcFormControl(),
+      flightDate: new NgcFormControl(),
+      shipmentNumber: new NgcFormControl(),
+      uldNumber: new NgcFormControl(),
+    }),
+
+    flightData: new NgcFormGroup({
+      flightNumber: new NgcFormControl(),
+      flightDate: new NgcFormControl(),
+      sta: new NgcFormControl(),
+      eta: new NgcFormControl(),
+      ata: new NgcFormControl(),
+      aircraftRegCode: new NgcFormControl(),
+      flightStatus: new NgcFormControl(),
+      typeReport: new NgcFormControl(),
+      routingInfo: new NgcFormControl()
+    }),
+
+    uldResultList: new NgcFormArray([
+      new NgcFormGroup({
+        boardingPoint: new NgcFormControl(),
+        uldNumber: new NgcFormControl(),
+        shipmentNumber: new NgcFormControl(),
+        origin: new NgcFormControl(),
+        destination: new NgcFormControl(),
+        shipmentDescriptionCode: new NgcFormControl(),
+        piece: new NgcFormControl(),
+        weight: new NgcFormControl(0.0),
+        weightUnitCode: new NgcFormControl(),
+        totalPieces: new NgcFormControl(),
+        natureOfGoodsDescription: new NgcFormControl(),
+        shc: new NgcFormControl(),
+        shcCode: new NgcFormControl(),
+        flagCRUD: new NgcFormControl(),
+        priority: new NgcFormControl(),
+        typeOfShipment: new NgcFormControl(),
+        rhoTowingGroupUldPriority: new NgcFormControl(),
+        rhoTowingGroupPriority: new NgcFormControl(),
+        breakdownHandlingForm: new NgcFormControl(),
+        priorityOptions: new NgcFormControl(),
+        priorityRemarks: new NgcFormControl(),
+      })
+    ]),
+  });
+
+  private emailFormGroup: NgcFormGroup = new NgcFormGroup({
+    groupCode: new NgcFormControl(),
+  })
+
+
+
+
+  public onSearch(): void {
+
+    this.displayResults = false;
+    let flightSearchData: ArrivalManifestFlight = new ArrivalManifestFlight();
+    flightSearchData.flightNumber = this.uldShipmentPriorityData.get("searchData.flightNumber").value;
+    flightSearchData.flightDate = this.uldShipmentPriorityData.get("searchData.flightDate").value;
+    flightSearchData.shipmentNumber = this.uldShipmentPriorityData.get("searchData.shipmentNumber").value;
+    flightSearchData.uldNumber = this.uldShipmentPriorityData.get("searchData.uldNumber").value;
+    flightSearchData.segmentId = 0;
+
+    if (
+      flightSearchData.flightNumber == null || flightSearchData.flightDate == null
+    ) {
+      this.uldShipmentPriorityData.validate();
+      this.showErrorStatus("error.import.enter.mandatory.fields");
+      return;
+    }
+
+    this.importService.fetchArrivalSearchDetails(flightSearchData).subscribe(
+      data => {
+        this.resp = data.data;
+        //console.log(data);
+        if (this.showResponseErrorMessages(data)) {
+          return;
+        }
+        if (!this.showResponseErrorMessages(data)) {
+          if (!data.data) {
+            this.showErrorStatus("no.record.found");
+            this.displayResults = false;
+            return;
+          }
+        }
+
+        data.data.flightDate = this.uldShipmentPriorityData.get("searchData.flightNumber").value;
+        data.data.flightNumber = this.uldShipmentPriorityData.get("searchData.flightDate").value;
+
+        for (let item = 0; item < data.data.segments.length; item++) {
+          for (let index = 0; index < data.data.segments[item].manifestedUlds.length; index++) {
+            for (let k = 0; k < data.data.segments[item].manifestedUlds[index].shipments.length; k++) {
+              this.shipmentInformation.push(data.data.segments[item].manifestedUlds[index].shipments[k]);
+            }
+            this.uldInformation.push(data.data.segments[item].manifestedUlds[index]);
+          }
+          this.segmentInformation.push(data.data.segments[item]);
+        }
+        for (let item = 0; item < this.shipmentInformation.length; item++) {
+          if (this.shipmentInformation[item].shc.length > 0) {
+            this.shcCode = "";
+            for (let index = 0; index < this.shipmentInformation[item].shc.length; index++) {
+              this.shcCode += " " + this.shipmentInformation[item].shc[index].specialHandlingCode;
+            }
+            this.shipmentInformation[item].shcCode = this.shcCode;
+          }
+        }
+        //loose Cargo shc Code
+        for (let item = 0; item < data.data.segments.length; item++) {
+          for (let index = 0; index < data.data.segments[item].bulkShipments.length; index++) {
+            if (data.data.segments[item].bulkShipments[index].shc.length > 0) {
+              this.shcCode = "";
+              for (let shcData = 0; shcData < data.data.segments[item].bulkShipments[index].shc.length; shcData++) {
+                this.shcCode += " " + data.data.segments[item].bulkShipments[index].shc[shcData].specialHandlingCode;
+              }
+              data.data.segments[item].bulkShipments[index].shcCode = this.shcCode;
+            }
+          }
+        }
+
+        this.uldShipmentPriorityData.get("flightData").patchValue(data.data);
+        this.bindData(data.data.segments);
+
+      },
+      error => {
+        this.showErrorStatus(error);
+      }
+    );
+  }
+
+
+  bindData(segments: Array<any>) {
+    this.segmentInformation = [];
+    let count = 0;
+    for (const segment of segments) {
+      count++;
+      let bulKShipmentCount = 0;
+      if (segment.bulkShipments.length > 0) {
+        this.isShipmentInformation = true;
+
+        for (let bulkShipment of segment.bulkShipments) {
+          let newShipment = Object.assign({}, bulkShipment);
+          newShipment["segmentId"] = segment["impArrivalManifestBySegmentId"];
+          newShipment["index"] = count + '. ' + segment["boardingPoint"];
+          if (bulKShipmentCount == 0) {
+            newShipment["boardingPoint"] = count + '. ' + segment["boardingPoint"];
+          } else {
+            newShipment["boardingPoint"] = '';
+          }
+          newShipment["uldCount"] = segment["uldCount"];
+          newShipment["looseCargoCount"] = segment["looseCargoCount"];
+          newShipment["cargoInULD"] = segment["cargoInULD"];
+          newShipment["segmentUldGruopDetailsCount"] = segment["segmentUldGruopDetailsCount"];
+          newShipment["segmentPieceCount"] = segment["segmentPieceCount"];
+          newShipment["segmentWeight"] = Number(NgcUtility.getDisplayWeight(segment["segmentWeight"]));
+          //set only for frst value
+          if (bulKShipmentCount == 0) {
+            newShipment["typeOfShipment"] = "Loose Shipment : " + "  Total Pieces-" + segment["totalBulkPieces"] + "&nbsp;&nbsp;Total Weight-" + Number(NgcUtility.getDisplayWeight(segment["totalBulkWeight"]));
+            newShipment["uldNumber"] = "Loose Shipment";
+          } else {
+            newShipment["uldNumber"] = "";
+            newShipment["typeOfShipment"] = "";
+          }
+          newShipment["uldRemarks"] = "";
+          newShipment["pieceCount"] = "";
+          newShipment["shipmentCount"] = "";
+          newShipment["pieceCount"] = null;
+
+          newShipment["weight"] = Number(NgcUtility.getDisplayWeight(newShipment["weight"]));
+
+          this.segmentInformation.push(newShipment);
+          bulKShipmentCount++;
+        }
+      }
+      for (let uld of segment.manifestedUlds) {
+        var uldNumbers: Array<string>[] = [];
+        for (let shipmentData of uld.shipments) {
+          let newShipment = Object.assign({}, shipmentData);
+          //
+          newShipment["segmentId"] = segment["impArrivalManifestBySegmentId"];
+          newShipment["index"] = count + '. ' + segment["boardingPoint"];
+          if (!uldNumbers.some(e => e === uld["uldNumber"])) {
+            newShipment["typeOfShipment"] = uld["uldNumber"] + "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;:" + "   Total Pieces-" + uld["pieceCount"] + "&nbsp;&nbsp;Total Weight-" + Number(NgcUtility.getDisplayWeight(uld["weight"]));
+            newShipment["uldNumber"] = uld["uldNumber"];
+            uldNumbers.push(uld["uldNumber"]);
+          } else {
+            newShipment["uldNumber"] = "";
+            newShipment["typeOfShipment"] = "";
+          }
+          newShipment["uldRemarks"] = uld["uldRemarks"];
+          newShipment["pieceCount"] = uld["pieceCount"];
+          if (!uldNumbers.some(e => e === uld["uldNumber"])) {
+            newShipment["boardingPoint"] = count + '. ' + segment["boardingPoint"];
+          } else {
+            newShipment["boardingPoint"] = "";
+          }
+          newShipment["uldCount"] = segment["uldCount"];
+          newShipment["looseCargoCount"] = segment["looseCargoCount"];
+          newShipment["cargoInULD"] = segment["cargoInULD"];
+          newShipment["segmentUldGruopDetailsCount"] = segment["segmentUldGruopDetailsCount"];
+          newShipment["segmentPieceCount"] = segment["segmentPieceCount"];
+          newShipment["segmentWeight"] = Number(NgcUtility.getDisplayWeight(segment["segmentWeight"]));
+          newShipment["shipmentCount"] = uld["shipmentCount"];
+          newShipment["pieceCount"] = uld["pieceCount"];
+
+          newShipment["segment"] = segment["impArrivalManifestBySegmentId"];
+          newShipment["weight"] = Number(NgcUtility.getDisplayWeight(newShipment["weight"]));
+
+          newShipment["rhoTowingGroupUldPriority"] = uld["rhoTowingGroupUldPriority"];
+
+          this.segmentInformation.push(newShipment);
+        }
+      }
+
+      if (segment.manifestedUlds.length == 0 && segment.bulkShipments.length == 0 && segment.nilCargo) {
+        let newShipment = Object.assign({}, null);
+        newShipment["boardingPoint"] = segment["boardingPoint"];
+        newShipment["index"] = count + '. ' + segment["boardingPoint"];
+        newShipment["uldNumber"] = "NIL Cargo";
+        newShipment["typeOfShipment"] = "NIL Cargo";
+        newShipment["uldRemarks"] = null;
+        newShipment["pieceCount"] = null;
+        newShipment["uldCount"] = null;
+        newShipment["looseCargoCount"] = null;
+        newShipment["cargoInULD"] = null;
+        newShipment["segmentUldGruopDetailsCount"] = null;
+        newShipment["segmentPieceCount"] = null;
+        newShipment["segmentWeight"] = null;
+        newShipment["shipmentCount"] = null;
+        newShipment["pieceCount"] = null;
+        newShipment["segment"] = null;
+        newShipment["weight"] = null;
+        newShipment["shipmentNumber"] = null;
+        newShipment["origin"] = null;
+        newShipment["destination"] = null;
+        newShipment["onwardMovement"] = null;
+        newShipment["shipmentDescriptionCode"] = null;
+        newShipment["piece"] = null;
+        newShipment["weightUnitCode"] = null;
+        newShipment["totalPieces"] = null;
+        newShipment["natureOfGoodsDescription"] = null;
+        newShipment["carrierDestination"] = null;
+        newShipment["shcCode"] = null;
+        newShipment["handledByMasterHouse"] = null;
+        newShipment["handledByDOMINT"] = null;
+
+        newShipment["rhoTowingGroupUldPriority"] = null;
+        newShipment["rhoTowingGroupPriority"] = null;
+        newShipment["breakdownHandlingForm"] = null;
+        newShipment["priorityOptions"] = null;
+        newShipment["priorityRemarks"] = null;
+
+        this.segmentInformation.push(newShipment);
+      }
+    }
+    if (this.segmentInformation.length > 0) {
+      this.displayResults = true;
+    } else {
+      this.displayResults = false;
+    }
+    (<NgcFormArray>this.uldShipmentPriorityData.get("uldResultList")).patchValue(
+      this.segmentInformation
+    );
+    console.log(this.segmentInformation);
+  }
+
+  onSave() {
+    let rawData = this.uldShipmentPriorityData.getRawValue();
+    console.log(rawData.uldResultList);
+    if (rawData.uldResultList.length == 0) {
+      this.showErrorStatus("no.record.found");
+      return;
+    }
+    rawData.uldResultList.forEach(element => {
+      element.flightKey = this.uldShipmentPriorityData.get("searchData.flightNumber").value;
+      element.flightDate = this.uldShipmentPriorityData.get("searchData.flightDate").value;
+      element.flightId = rawData.flightData.flightId;
+    });
+
+    this.importService.updateUldShipmentPriority(rawData.uldResultList).subscribe(response => {
+
+      if (!this.showResponseErrorMessages(response)) {
+        this.onSearch();
+        this.showSuccessStatus('shipment.updated.successfully');
+      }
+    }, (error) => {
+      this.showErrorStatus(error);
+    });
+
+  }
+
+
+  openEmailWindow() {
+    this.emailSendingWindow.open();
+  }
+
+  sendEmail() {
+    let data = this.emailFormGroup.getRawValue();
+
+    if (data.groupCode == null || data.groupCode == "") {
+      return;
+    }
+    data.flightNumber = this.uldShipmentPriorityData.get("searchData.flightNumber").value;
+    data.flightDate = this.uldShipmentPriorityData.get("searchData.flightDate").value;
+    data.shipmentNumber = this.uldShipmentPriorityData.get("searchData.shipmentNumber").value;
+    data.uldNumber = this.uldShipmentPriorityData.get("searchData.uldNumber").value;
+    this.importService.updateUldShipmentPrioritySendMail(data).subscribe(response => {
+
+      if (!this.showResponseErrorMessages(response)) {
+
+        this.showSuccessStatus('g.completed.successfully');
+      }
+    }, (error) => {
+      this.showErrorStatus(error);
+    });
+  }
+  public print() {
+    this.reportParameters.flightkey = this.uldShipmentPriorityData.get("searchData.flightNumber").value;
+    this.reportParameters.flightorigindate = this.uldShipmentPriorityData.get("searchData.flightDate").value;
+    this.reportParameters.customerId = this.getUserProfile().userLoginCode;
+    this.reportParameters.flightId = this.resp.flightId;
+    this.reportWindow.downloadReport();
+  }
+
+}

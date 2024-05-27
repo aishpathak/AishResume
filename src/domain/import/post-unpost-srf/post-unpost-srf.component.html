@@ -1,0 +1,496 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='post.unpost.srf' (cancel)="onBack($event)" [disablePrint]="printFlag==false">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label="srf.no"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="deliveryRequestOrderNo" [width]="130" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="5">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search" [disabled]="searchFlag"
+            #searchbutton></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showTable && !delivered">
+        <ngc-label label="g.printer"></ngc-label>
+        <div>
+          <ngc-printer [width]='200' formControlName="printerName"></ngc-printer>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showTable" align="right">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button value='extend.srf' (click)="onExtedSRF()" [disabled]="delivered"></ngc-button>
+          <ngc-button label='cancel.srf' (click)="onCancelSRF()" [disabled]="delivered"></ngc-button>
+          <ngc-button label='post.srf' (click)="onPostSRF()" [disabled]="delivered"></ngc-button>
+          <ngc-button label='unpost.srf' (click)="onUnpostSRF()" [disabled]="!delivered"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="postSRFForm">
+  <ng-container type="tab">
+    <ngc-container *ngIf="showTable" type="section">
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]='1'>
+          <ngc-label label="awbNo"></ngc-label>
+          <div>
+            <ngc-display formControlName="shipmentNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label="import.AwbPiecsWeight"></ngc-label>
+          <div>
+            <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>/
+            <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label="srf.no"></ngc-label>
+          </div>
+          <ngc-display formControlName="deliveryRequestOrderNo"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label="srf.issued"></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryRequestedOn" type="displayDateTime"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label="srf.expiry"></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryRequestedExpiredOn" type="displayDateTime"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='srf.status'></ngc-label>
+          <div>
+            <ngc-display formControlName="poStatus"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='cancel.srf'></ngc-label>
+          <div>
+            <ngc-display formControlName="cancelSrf"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='post.srf'></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveredOn" type="displayDateTime"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='import.natureOfGoods'></ngc-label>
+          <div>
+            <ngc-display formControlName="natureOfGoodsDescription"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='g.shc'></ngc-label>
+          <div>
+            <ngc-display formControlName="shc"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label="bank.endorsement"></ngc-label>
+          </div>
+          <ngc-checkbox formControlName="bankEndorsement" [width]="30" type="check" disabled="true"></ngc-checkbox>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="billing.bank"></ngc-label>
+          <div>
+            <ngc-display formControlName="bank"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]='1'>
+          <ngc-label label='import.consignee'></ngc-label>
+          <div>
+            <ngc-display formControlName="consigneeName"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label='agent.appointed.agent'></ngc-label>
+          </div>
+          <ngc-display [width]="200" formControlName="authorizedAppointedAgent"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label='g.iatacode'></ngc-label>
+          </div>
+          <ngc-display [width]="100" formControlName="authorizedAppointedAgentIATACode"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='cargo.arr'></ngc-label>
+          <div>
+            <ngc-display formControlName="cargoOfficeArrivalTime"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='cargo.del'></ngc-label>
+          <div>
+            <ngc-display formControlName="firstCargoDelivery"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='delivery.complete'></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryComplete"></ngc-display>
+          </div>
+        </ngc-column>
+
+        <ngc-column [column]='1'>
+          <ngc-label label="billing.collected.by"></ngc-label>
+          <div>
+            <ngc-display formControlName="receivingPartyName"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='hkid'></ngc-label>
+          <div>
+            <ngc-display [width]="100" formControlName="receivingPartyIdentificationNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label="truck.company"></ngc-label>
+          <div>
+            <ngc-display [width]="100" formControlName="truckerCompany"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label="truck.no"></ngc-label>
+          <div>
+            <ngc-display [width]="100" formControlName="truckNo"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='truck.dock.no'></ngc-label>
+          <div>
+            <ngc-display [width]="100" formControlName="truckDockNo"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='timeslot'></ngc-label>
+          <div>
+            <ngc-display [width]="100" formControlName="timeslot"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='srf.remarks'></ngc-label>
+          <div>
+            <ngc-display formControlName="poRemarks"> </ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+  <ngc-container title="delivery.shipment" type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column [column]='12'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]="50" cellsAlign="center" align="center">
+                <ngc-label label="import.sno"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="flt/Date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="ata"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="inv.pcs.wt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.man.pcs.wts"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="cir.type"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="cir.pcs.wt"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.cc"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="ce.remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="inventoryGroupInfoByFlight">
+            <ng-container *ngFor="let item of postSRFForm.controls.inventoryGroupInfoByFlight.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td align="center">
+                  <ngc-display formControlName="serialNo"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="flight"></ngc-display>/
+                  <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="dateATA"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="inventoryPiecesWeight"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="manifestPieceWeight"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="cirType"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="cirPieceWeight"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="clearenceInfo"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="ceRemarks"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container title="awb.charge.details" type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column [column]='12'>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="customs.serviceType"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.quantity"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.duration"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.amount"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="si.paid"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="bil.ReceiptNo"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="bil.report.paymentMode"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="chargeDetails">
+            <ng-container *ngFor="let item of postSRFForm.controls.chargeDetails.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td colspan="1.5">
+                  <ngc-display formControlName="serviceType"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="quantity"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="duration"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="amount"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="paid"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="receiptNo"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="paymentMode"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #cancelSRF title="cancel.srf" width="600" height="100" [cancelButton]="true">
+    <ngc-container formGroupName="cancelPo" type="tab">
+      <ngc-row>
+        <ngc-column column="4">
+          <ngc-label label="g.awbNumber"></ngc-label>
+          <div>
+            <ngc-display formControlName="shipmentNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column column="4">
+          <ngc-label label="srf.no"></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryRequestOrderNo"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="import.reason.for.cancellation"></ngc-label>
+          <div>
+            <ngc-dropdownlist formControlName="cancellationReason" sourceId="ReasonForCancellation" sourceType="query"
+              required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="saveCancelSRF()" label="cus.save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #unpostSRF title="unpost.srf" width="1200" height="200" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column [column]="12">
+          <ngc-table>
+            <thead>
+              <tr>
+                <th rowspan="2">
+                  <ngc-label label="pieces"></ngc-label>
+                </th>
+                <th rowspan="2">
+                  <ngc-label label="weight"></ngc-label>
+                </th>
+                <th rowspan="2">
+                  <ngc-label label="g.location"></ngc-label>
+                </th>
+                <th rowspan="2">
+                  <ngc-label label="imp.warehouseDestination"></ngc-label>
+                </th>
+                <th rowspan="2">
+                  <ngc-label label="g.warehouseLocation"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody formArrayName="locationDetails">
+              <ng-container *ngFor="let item of postSRFForm.controls.locationDetails.controls; let index=index"
+                [formGroupName]="index">
+                <tr>
+
+                  <td colspan="1.5">
+                    <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                  </td>
+                  <td colspan="1.5">
+                    <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                  </td>
+                  <td colspan="1.5">
+                    <ngc-movable-storage-location [shipmentNumber]="this.postSRFForm.get('shipmentNumber').value"
+                      formControlName="shipmentLocation" [width]="130">
+                    </ngc-movable-storage-location>
+                  </td>
+                  <td colspan="1.5">
+                    <ngc-locations-list entityAttribute="Gen.WareHouseDestination" [noTerminal]="terminalRequired"
+                      [displayOnlyLocation]="true" [width]="120" formControlName="warehouseLocation"
+                      [locationTypeList]="['STORAGE']" (select)="onLocationChange($event , index)">
+                    </ngc-locations-list>
+                  </td>
+                  <td colspan="1.5">
+                    <ngc-locations-list [displayOnlyLocation]="true" [width]="120" [sectorId]="sectorId"
+                      [locationTypeList]="['STORAGE']" formControlName="actualLocation">
+                    </ngc-locations-list>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="g.remarks"></ngc-label>
+          </div>
+          <ngc-input formControlName="cancellationReason" required width="500" [maxlength]="65">
+          </ngc-input>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="saveUnpostSRF()" label="g.save.e"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-footer [height]="50" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column align="left">
+        <ngc-button label='srf.monitoring' (click)="onSRFMonitoring()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-footer>
+</form>

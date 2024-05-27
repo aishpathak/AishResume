@@ -1,0 +1,583 @@
+<!-- bug-329 fix -->
+<ngc-titlebar title='exp.cargoManifestTitle' (save)="onUpdateFlightInfo()" [disableSave]="!data.flight"
+    (cancel)="onCancel()" (print)="onPrint('main',1)" [disablePrint]="!data.flight"></ngc-titlebar>
+<!-- bug-329 fix END -->
+<form [formGroup]="cargomanifestForm">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="date"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" [width]='100' formControlName="flightOriginDate" required>
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)='onSearch()' label='g.search' iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+      <div>
+        <ngc-button label='export.piggyback.uld.report' feature='Exp.Bu.Manifest.ShowHouse' accessEnableOn="r" (click)="onPrintPiggyback('main',1)"></ngc-button>
+      </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='export.shipping.bill.report' feature='Exp.Bu.Manifest.PiggybackReport' accessEnableOn="r" (click)="onPrintShipmentBilling('main',1)"></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button label='export.xray.details.report' feature='Exp.Bu.Manifest.XRAYReport' accessEnableOn="r"
+            (click)="onPrintXrayDetails('main',1)"></ngc-button>
+        </div>
+      </ngc-column>
+
+
+    </ngc-row>
+    <ngc-row *ngIf="data.flight" formGroupName="flight">
+      <ngc-column [column]="1">
+        <ngc-label label="flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKey"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightOriginDate" [onlyDate]=true></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="std"></ngc-label>
+        <div>
+          <ngc-display formControlName="std"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="etd"></ngc-label>
+        <div>
+          <ngc-display formControlName="etdDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status" color="blue" emphasis='lg'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="discrepancy"></ngc-label>
+        <div>
+          <ngc-display></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label="aircraftRegistration"></ngc-label>
+        <div>
+          <ngc-input formControlName="aircraftRegistration" [width]="120" maxlength='10'></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-display formControlName="reportFlight"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container
+    *ngIf="(mainList?.length>0)||(separateList?.length>0)||(supplementaryList?.length>0)||(courierList?.length>0)||nilCargo"
+    type='box'>
+    <ngc-row>
+      <ngc-column [grid48]="true" [column]="15"></ngc-column>
+      <ngc-column [grid48]="true" [column]="8" align="right">
+        <ngc-button label='add.manifest.remark' (click)="addManifestRemark()"></ngc-button>
+      </ngc-column>
+      <ngc-column [grid48]="true" [column]="5.5" align="right">
+        <ngc-button label='reCreateManifest' (click)="onReCreate()" #recreatebutton
+          [disabled]="(data.flight && (data.flight.manifestCompleteFlag || data.flight.flightCompleteFlag) )">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column [grid48]="true" [column]="7" align="right">
+        <ngc-button label='createSupplementary' (click)="onSupplementary()" #supplementarybutton
+          [disabled]="(data.flight && data.flight.flightCompleteFlag)"></ngc-button>
+      </ngc-column>
+      <ngc-column [grid48]="true" [column]="5" align="right">
+        <ngc-button label='deleteSeparate' (click)="onDeleteSeparate()" #deleteseparatebutton
+          [disabled]="(separateList.length<=0 ||(data.flight && data.flight.flightCompleteFlag))"></ngc-button>
+      </ngc-column>
+      <ngc-column [grid48]="true" [column]="5">
+        <ngc-button label='exp.releaseControl' (click)="onReleaseManifest()"
+          [disabled]="(data.flight && data.flight.flightCompleteFlag)"></ngc-button>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs>
+          <div ngc-tab-card title='mainManifest'>
+            <ngc-container>
+              <ngc-row>
+
+              </ngc-row>
+
+              <ngc-row>
+                <ngc-column>
+                  <ngc-datatable formArrayName="mainManifestList" [groups]="['segmentId','uldNumber']"
+                    [showAggregates]="true" [pageable]="false" [widthInPixels]="true"
+                    [groupsRenderer]="mainGroupsRenderer" (groupSelect)="onClickHandler($event)"
+                    (itemSelect)="onSelectMainCheckBox($event)" [showToolbar]="false"
+                    (linkClick)="openShipmentInfoPage($event)" [enablePageSizeHeight]="false">
+                    <ngc-data-column text="g.select" dataField="select" [width]="50" type="check" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="Shipment No." dataField="shipmentNumber" [width]="120" cellsAlign="left"
+                      align="center" type="link"></ngc-data-column>
+                    <ngc-data-column text="uldnumber" dataField="uldNumber" [width]="150" cellsAlign="center"
+                      align="center" [hidden]="true"></ngc-data-column>
+                    <ngc-data-column feature="Exp.PartSuffix" text="awb.prt.sfx" dataField="partSuffix" [width]="80"
+                      cellsAlign="center" align="center"></ngc-data-column>
+                    <ngc-data-column text="awb.prt.shipment" dataField="partShipment" [width]="120" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.loaded.pcs" dataField="loadedPieces" [width]="100"
+                      cellsAlign="center" align="center" [aggregates]="['sum']" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.total.pcs" dataField="totalPieces" [width]="90"
+                      cellsAlign="center" align="center" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.loaded.wt" dataField="loadedWeight" [width]="100"
+                      cellsAlign="center" align="center" type="displayWeight" [aggregates]="['sum']">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.total.wt" dataField="totalWeight" [width]="90"
+                      cellsAlign="center" align="center" type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="awb.nog" dataField="natureOfGoods" [width]="120" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shcs" [width]="120" align="center"></ngc-data-column>
+                    <ngc-data-column text="origin" dataField="origin" [width]="80" cellsAlign="center" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="destination" dataField="destination" [width]="100" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="transferType" dataField="transferType" [width]="120" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="manifestRemarks" dataField="manifestRemark" [width]="140" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="tagInformation" dataField="tagNumbers" [width]="190" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="segment" dataField="segment" [width]="120" cellsAlign="center" align="center"
+                      [hidden]="true"></ngc-data-column>
+                    <ngc-data-column text="segmentId" dataField="segmentId" [width]="120" cellsAlign="center"
+                      align="center" [hidden]="true">
+                    </ngc-data-column>
+                    <ngc-data-column text="shipmentType" dataField="shipmentType" [width]="120" cellsAlign="center"
+                      align="center" [hidden]="true"></ngc-data-column>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            <ngc-footer>
+              <ngc-container type="tab">
+                <ngc-row>
+                  <ngc-column align="right" [column]="12">
+                    <ngc-button label='createSeparate' (click)="onSeparate('main')"
+                      [disabled]="data.flight && data.flight.flightCompleteFlag"></ngc-button>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-footer>
+          </div>
+          <div ngc-tab-card title='export.separateManifest'>
+            <ngc-container *ngIf="separateList.length">
+              <ngc-row>
+                <ngc-column formArrayName="separateList">
+                  <ngc-table *ngFor="let item of cargomanifestForm.controls.separateList.controls; let index=index"
+                    [formGroupName]="index">
+                    <thead>
+                      <tr>
+                        <td>
+                          <ngc-container>
+                            <ngc-row>
+                              <ngc-column [grid36]="true" [column]="1" align="center">
+                                <ngc-display formControlName="tenantId"></ngc-display>
+                              </ngc-column>
+                              <ngc-column [grid48]="true" [column]="1" align="center">
+                                <ngc-label label="-"></ngc-label>
+                              </ngc-column>
+                              <ngc-column [grid36]="true" [column]="1" align="center">
+                                <ngc-display formControlName="segment"></ngc-display>
+                              </ngc-column>
+                              <ngc-column [grid36]="true" [column]="4" align="center">
+                                <ngc-label label="manifest.manifestedPieces"></ngc-label>
+                              </ngc-column>
+                              <ngc-column [grid36]="true" [column]="2" align="center">
+                                <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                              </ngc-column>
+                              <ngc-column [grid36]="true" [column]="4" align="center">
+                                <ngc-label label="manifest.manifestedWeight"></ngc-label>
+                              </ngc-column>
+                              <ngc-column [grid36]="true" [column]="2" align="center">
+                                <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                              </ngc-column>
+                              <ngc-column [grid36]="true" [column]="2" align="center">
+                                <ngc-label label="expbu.version"></ngc-label>
+                              </ngc-column>
+                              <ngc-column [grid48]="true" [column]="1" align="center">
+                                <ngc-label label="-"></ngc-label>
+                              </ngc-column>
+                              <ngc-column [grid48]="true" [column]="1" align="center">
+                                <ngc-display formControlName="versionNo"></ngc-display>
+                              </ngc-column>
+                            </ngc-row>
+                          </ngc-container>
+                        </td>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ngc-container>
+                            <ngc-row>
+                              <ngc-column [grid24]="true" [column]="5">
+                                <ngc-label label="exp.connectingFlight"></ngc-label>
+                              </ngc-column>
+                            </ngc-row>
+                            <ngc-row>
+                              <ngc-column [grid24]="true" [column]="6">
+                                <ngc-table>
+                                  <thead>
+                                    <tr>
+                                      <th>
+                                        <ngc-label label="flight"></ngc-label>
+                                      </th>
+                                      <th>
+                                        <ngc-label label="date"></ngc-label>
+                                      </th>
+                                      <th>
+                                        <ngc-label label="destination"></ngc-label>
+                                      </th>
+                                      <th>
+                                        <ngc-label></ngc-label>
+                                      </th>
+                                    </tr>
+                                  </thead>
+                    <tbody formArrayName="connectingFlight">
+                      <tr *ngFor="let flightItem of item.controls.connectingFlight.controls; let flightIndex=index"
+                        [formGroupName]="flightIndex">
+                        <td>
+                          <ngc-input formControlName="flightKey" [width]="90" required></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-datetimeinput formControlName="flightDate" [width]="100" required></ngc-datetimeinput>
+                        </td>
+                        <td>
+                          <ngc-input formControlName="destination" [width]="50" required></ngc-input>
+                        </td>
+                        <td>
+                          <ngc-link (linkClick)="onConnectingFlightDelete(index,flightIndex)">
+                            <ngc-icon type="delete" value="true" true-color="grey"></ngc-icon>
+                          </ngc-link>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="export.booking.additional.information"></ngc-label>
+                  <div>
+                    <ngc-input width="800" formControlName="additionalInformation" [maxlength]="65"></ngc-input>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [grid24]="true" [column]="6" align="right">
+                  <ngc-button label="g._add" (click)="onConnectingFlightAdd(index)"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-button label='export.cargo.manifest.print.manifest' accessEnableOn="r"
+                    (click)="onPrintSeparate('separate',item.controls.versionNo.value)"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row *ngIf="item.controls.awb.length">
+                <ngc-column>
+                  <ngc-datatable formArrayName="awb" [groups]="['uldNumber']" [groupsRenderer]="groupsRenderer"
+                    (groupSelect)="onClickHandlerSeparate($event)"
+                    [showAggregates]="true" [aggregatesHeight]="30" [showToolbar]="false" [widthInPixels]="true"
+                    (linkClick)="openShipmentInfoPage($event)"  (itemSelect)="onSelectSeprateCheckBox($event,index)"
+                    [enablePageSizeHeight]="false">
+                    <ngc-data-column text="" dataField="select" [width]="60" type="check" cellsAlign="center"
+                      align="center" checkAll="true"></ngc-data-column>
+                    <ngc-data-column text="Shipment No." dataField="shipmentNumber" [width]="120" cellsAlign="left"
+                      align="center" type="link"></ngc-data-column>
+                    <ngc-data-column text="uldnumber" dataField="uldNumber" [width]="150" cellsAlign="center"
+                      align="center" [hidden]="true"></ngc-data-column>
+                    <ngc-data-column feature="Exp.PartSuffix" text="awb.prt.sfx" dataField="partSuffix" [width]="100"
+                      cellsAlign="center" align="center"></ngc-data-column>
+                    <ngc-data-column text="awb.prt.shipment" dataField="partShipment" [width]="120" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.loaded.pcs" dataField="loadedPieces" [width]="100"
+                      cellsAlign="center" align="center" [aggregates]="['sum']" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.total.pcs" dataField="totalPieces" [width]="100"
+                      cellsAlign="center" align="center" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.loaded.wt" dataField="loadedWeight" [width]="100"
+                      cellsAlign="center" align="center" type="displayWeight" [aggregates]="['sum']">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.cargo.manifest.total.wt" dataField="totalWeight" [width]="120"
+                      cellsAlign="center" align="center" type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="awb.nog" dataField="natureOfGoods" [width]="120" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="g.shc" dataField="shcs" [width]="60" align="center"></ngc-data-column>
+                    <ngc-data-column text="origin" dataField="origin" [width]="80" cellsAlign="center" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="destination" dataField="destination" [width]="100" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="transferType" dataField="transferType" [width]="120" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="manifestRemarks" dataField="manifestRemark" [width]="140" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="tagInformation" dataField="tagNumbers" [width]="190" cellsAlign="center"
+                      align="center"></ngc-data-column>
+                    <ngc-data-column text="segment" dataField="segment" [width]="120" cellsAlign="center" align="center"
+                      [hidden]="true"></ngc-data-column>
+                    <ngc-data-column text="shipmentType" dataField="shipmentType" [width]="120" cellsAlign="center"
+                      align="center" [hidden]="true"></ngc-data-column>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+            </td>
+            </tr>
+            </tbody>
+            </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  </div>
+  <div ngc-tab-card title='export.supplementaryManifest'>
+    <ngc-container *ngIf="supplementaryList.length">
+      <ngc-row>
+        <ngc-column>
+          <ngc-accordion formArrayName="supplementaryList" [height]="500" width="100%">
+            <ngc-accordion-card
+              *ngFor="let item of cargomanifestForm.controls.supplementaryList.controls; let index=index"
+              [formGroupName]="index" [selected]="true">
+              <ngc-accordion-titlebar>
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-display formControlName="tenantId"></ngc-display>
+                      <ngc-label label="-"></ngc-label>
+                      <ngc-display formControlName="segment"></ngc-display>
+                      &nbsp;
+                      <ngc-label label="manifest.manifestedPieces"></ngc-label>
+                      <ngc-label label=" - "></ngc-label>
+                      <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      &nbsp;
+                      <ngc-label label="manifest.manifestedWeight"></ngc-label>
+                      <ngc-label label=" - "></ngc-label>
+                      <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      &nbsp;
+                      <ngc-label label="expbu.version"></ngc-label>
+                      <ngc-label label="-"></ngc-label>
+                      <ngc-display formControlName="versionNo"></ngc-display>
+                    </ngc-column>
+                  </ngc-row>
+                </ngc-container>
+              </ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row *ngIf="item.controls.awb.length">
+                  <ngc-column>
+                    <ngc-button label='export.cargo.manifest.print.manifest' accessEnableOn="r"
+                      (click)="onPrintSupp('Supplementary',item.controls.versionNo.value)"></ngc-button>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row *ngIf="item.controls.awb.length">
+                  <ngc-column>
+                    <ngc-datatable formArrayName="awb" [groups]="['uldNumber']" [groupsRenderer]="supplGroupsRenderer"
+                      (groupSelect)="onClickHandlerSupplementary($event)"
+                      [showToolbar]="false" [showAggregates]="true" [aggregatesHeight]="30" [widthInPixels]="true"
+                      (linkClick)="openShipmentInfoPage($event)"
+                      (itemSelect)="onSelectSupplementaryCheckBox($event,index)" [enablePageSizeHeight]="false">
+                      <ngc-data-column text="" dataField="select" [width]="60" type="check" cellsAlign="center"
+                        align="center" checkAll="true"></ngc-data-column>
+                      <ngc-data-column text="Shipment No." dataField="shipmentNumber" [width]="120" cellsAlign="left"
+                        align="center" type="link"></ngc-data-column>
+                      <ngc-data-column text="uldnumber" dataField="uldNumber" [width]="150" cellsAlign="center"
+                        align="center" [hidden]="true"></ngc-data-column>
+                      <ngc-data-column feature="Exp.PartSuffix" text="awb.prt.sfx" dataField="partSuffix" [width]="100"
+                        cellsAlign="center" align="center"></ngc-data-column>
+                      <ngc-data-column text="awb.prt.shipment" dataField="partShipment" [width]="120"
+                        cellsAlign="center" align="center"></ngc-data-column>
+                      <ngc-data-column text="export.cargo.manifest.loaded.pcs" dataField="loadedPieces" [width]="100"
+                        cellsAlign="center" align="center" [aggregates]="['sum']" type="displayPieces">
+                      </ngc-data-column>
+                      <ngc-data-column text="export.cargo.manifest.total.pcs" dataField="totalPieces" [width]="100"
+                        cellsAlign="center" align="center" type="displayPieces"></ngc-data-column>
+                      <ngc-data-column text="export.cargo.manifest.loaded.wt" dataField="loadedWeight" [width]="100"
+                        cellsAlign="center" align="center" type="displayWeight" [aggregates]="['sum']">
+                      </ngc-data-column>
+                      <ngc-data-column text="export.cargo.manifest.total.wt" dataField="totalWeight" [width]="120"
+                        cellsAlign="center" align="center" type="displayWeight"></ngc-data-column>
+                      <ngc-data-column text="awb.nog" dataField="natureOfGoods" [width]="120" cellsAlign="center"
+                        align="center"></ngc-data-column>
+                      <ngc-data-column text="g.shc" dataField="shcs" [width]="60" align="center"></ngc-data-column>
+                      <ngc-data-column text="origin" dataField="origin" [width]="80" cellsAlign="center" align="center">
+                      </ngc-data-column>
+                      <ngc-data-column text="destination" dataField="destination" [width]="100" cellsAlign="center"
+                        align="center"></ngc-data-column>
+                      <ngc-data-column text="transferType" dataField="transferType" [width]="120" cellsAlign="center"
+                        align="center"></ngc-data-column>
+                      <ngc-data-column text="manifestRemarks" dataField="manifestRemark" [width]="140"
+                        cellsAlign="center" align="center"></ngc-data-column>
+                      <ngc-data-column text="tagInformation" dataField="tagNumbers" [width]="190" cellsAlign="center"
+                        align="center"></ngc-data-column>
+                      <ngc-data-column text="segment" dataField="segment" [width]="120" cellsAlign="center"
+                        align="center" [hidden]="true"></ngc-data-column>
+                      <ngc-data-column text="shipmentType" dataField="shipmentType" [width]="120" cellsAlign="center"
+                        align="center" [hidden]="true"></ngc-data-column>
+                    </ngc-datatable>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-card>
+          </ngc-accordion>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </div>
+  <div ngc-tab-card title='export.cargo.manifest.courier.manifest'>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <ngc-button label='export.cargo.manifest.print.manifest.button' accessEnableOn="r"
+            (click)="onPrintCourier('Courier',1)"></ngc-button>
+        </ngc-column>
+
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="courierList" [groups]="['segment','uldNumber']" [showAggregates]="true"
+            [pageable]="false" [widthInPixels]="true" [groupsRenderer]="courierGroupsRenderer"
+            (groupSelect)="onClickCourierHandler($event)" (itemSelect)="onSelectCourierCheckBox($event)" [showToolbar]="false"
+            (linkClick)="openShipmentInfoPage($event)" [enablePageSizeHeight]="false">
+            <ngc-data-column text="g.select" dataField="select" [width]="60" type="check" cellsAlign="center"
+              align="center" [pinned]="true"></ngc-data-column>
+            <ngc-data-column text="Shipment No." dataField="shipmentNumber" [width]="120" cellsAlign="left"
+              align="center" type="link"></ngc-data-column>
+            <ngc-data-column text="uldnumber" dataField="uldNumber" [width]="150" cellsAlign="center" align="center"
+              [hidden]="true"></ngc-data-column>
+            <ngc-data-column feature="Exp.PartSuffix" text="awb.prt.sfx" dataField="partSuffix" [width]="100"
+              cellsAlign="center" align="center">
+            </ngc-data-column>
+            <ngc-data-column text="awb.prt.shipment" dataField="partShipment" [width]="120" cellsAlign="center"
+              align="center"></ngc-data-column>
+            <ngc-data-column text="export.cargo.manifest.loaded.pcs" dataField="loadedPieces" [width]="100"
+              cellsAlign="center" align="center" [aggregates]="['sum']" type="displayPieces"></ngc-data-column>
+            <ngc-data-column text="export.cargo.manifest.total.pcs" dataField="totalPieces" [width]="100"
+              cellsAlign="center" align="center" type="displayPieces"></ngc-data-column>
+            <ngc-data-column text="export.cargo.manifest.loaded.wt" dataField="loadedWeight" [width]="100"
+              cellsAlign="center" align="center" type="displayWeight" [aggregates]="['sum']">
+            </ngc-data-column>
+            <ngc-data-column text="export.cargo.manifest.total.wt" dataField="totalWeight" [width]="120"
+              cellsAlign="center" align="center" type="displayWeight"></ngc-data-column>
+            <ngc-data-column text="awb.nog" dataField="natureOfGoods" [width]="120" cellsAlign="center" align="center">
+            </ngc-data-column>
+            <ngc-data-column text="g.shc" dataField="shcs" [width]="60" align="center"></ngc-data-column>
+            <ngc-data-column text="origin" dataField="origin" [width]="80" cellsAlign="center" align="center">
+            </ngc-data-column>
+            <ngc-data-column text="destination" dataField="destination" [width]="100" cellsAlign="center"
+              align="center"></ngc-data-column>
+            <ngc-data-column text="transferType" dataField="transferType" [width]="120" cellsAlign="center"
+              align="center"></ngc-data-column>
+            <ngc-data-column text="manifestRemarks" dataField="manifestRemark" [width]="140" cellsAlign="center"
+              align="center"></ngc-data-column>
+            <ngc-data-column text="tagInformation" dataField="tagNumbers" [width]="190" cellsAlign="center"
+              align="center"></ngc-data-column>
+            <ngc-data-column text="segment" dataField="segment" [width]="120" cellsAlign="center" align="center"
+              [hidden]="true"></ngc-data-column>
+            <ngc-data-column text="shipmentType" dataField="shipmentType" [width]="120" cellsAlign="center"
+              align="center" [hidden]="true"></ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right" [column]="12">
+            <ngc-button label='createSeparate' (click)="onSeparate('courier')" #separatebutton
+              [disabled]="data.flight && data.flight.flightCompleteFlag"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-footer>
+  </div>
+  </ngc-tabs>
+  </ngc-column>
+  </ngc-row>
+  </ngc-container>
+  <ngc-report format='pdf' #reportWindow title="Manifest"  reportId='cargoManifest07_report'
+     [reportParameters]='reportParameters'> </ngc-report> 
+  <ngc-report format='pdf' #reportWindow2 title="Manifest"  reportId='cargoManifest_report'
+     [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf' #reportWindow1 title="Manifest"  reportId='CourierManifest'
+     [reportParameters]='reportParameters'></ngc-report>
+
+  <ngc-report format='pdf' #reportWindow3 title="Manifest"  reportId='Shipping_bill_report'
+     [reportParameters]='reportParameters'> </ngc-report>
+
+  <ngc-report format='pdf' #reportWindow4 title="Manifest"  reportId='piggyback_uld_report'
+       [reportParameters]='reportParameters'> </ngc-report>
+
+  <ngc-report format='pdf' #reportWindow5 title="Manifest"  reportId='Xray_details'
+     [reportParameters]='reportParameters'> </ngc-report>
+      
+  
+</form>
+<!-- Add Remark Window Section STARTS  -->
+<ngc-window #addRMKWindow [height]="370" [width]="700" title="Add Manifest RMK" [showCloseButton]="true"
+  (close)="closeAddWindow()">
+  <ngc-container  [formGroup]="windowForm">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column [column]="8">
+              <ngc-label label="g.remark"></ngc-label>
+              <div>
+                <ngc-input formControlName="remark" [width]="350" maxlength='65'></ngc-input>
+              </div>
+            </ngc-column>
+            <ngc-column [column]="1.5">
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button label='manifest.rmk.shortcut.save' accessEnableOn="r" (click)='onSaveRemark()' >
+                </ngc-button>
+              </div>
+            </ngc-column>
+            <ngc-column [column]="1.5">
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button label='manifest.rmk.shortcut.close' accessEnableOn="r" (click)='closeAddWindow()' >
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-window>
+<!-- Add Remark Window Section Ends  -->

@@ -1,0 +1,2869 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="exp.acceptance.service" (save)="onSave($event)" (clear)="onClear($event)" (cancel)="onCancel()">
+  </ngc-titlebar>
+  <!-- [disableSave]="disabeSaveFlag" -->
+  <ngc-container type='square'>
+    <ngc-row>
+      <ngc-column column="1.5">
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-alphanuminput [disabled]="afterSuccessSearchFlag" [width]="100" [maxlength]='11'
+          formControlName="awbNumber" accessEnableOn="r">
+        </ngc-alphanuminput>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div style="padding-top: 8px">
+          <ngc-checkbox accessEnableOn="r" formControlName="blockSpace"></ngc-checkbox>
+          <ngc-label label="awb.block.space"></ngc-label>
+        </div>
+        <div style="padding-top: 8px">
+          <ngc-checkbox accessEnableOn="r" formControlName="svc"></ngc-checkbox>
+          <ngc-label label="g.svc"></ngc-label>
+        </div>
+
+      </ngc-column>
+      <ngc-column column="1.5">
+        <div>
+          <ngc-label label="exp.servicenum"></ngc-label>
+        </div>
+        <ngc-alphanuminput [disabled]="afterSuccessSearchFlag" [width]="100" formControlName="serviceNumber"
+          accessEnableOn="r">
+        </ngc-alphanuminput>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="exp.acceptance.type"></ngc-label>
+        </div>
+        <ngc-dropdownlist [disabled]="afterSuccessSearchFlag" (select)="onSelectAcceptanceType($event)"
+          formControlName="acceptanceType" sourceId="CARGO_ACCEPTANCE_TYPE" sourceType="query" [displayMember]="desc"
+          accessEnableOn="r">
+        </ngc-dropdownlist>
+      </ngc-column>
+      <ngc-column *ngIf="showTrnashipmentCourierFlag">
+        <div>
+          <ngc-label label="exp.acceptance.incoming.flight"></ngc-label>
+        </div>
+        <ngc-input [disabled]="afterSuccessSearchFlag" [maxlength]='8' formControlName="incomingFlight"
+          accessEnableOn="r"></ngc-input>
+      </ngc-column>
+      <ngc-column *ngIf="showTrnashipmentCourierFlag">
+        <div>
+          <ngc-label label="exp.acceptance.incoming.flight.date"></ngc-label>
+        </div>
+        <ngc-datetimeinput [disabled]="afterSuccessSearchFlag" formControlName="incomingFlightDate" accessEnableOn="r">
+        </ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button [disabled]="afterSuccessSearchFlag" value="g.search" iconType="search" (click)="onSearch($event)"
+          accessEnableOn="r">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=" "></ngc-label>
+        </div>
+        <ngc-button label="export.all.service.no" (click)="onServiceNumber($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showAcceptanceData">
+    <ngc-row>
+      <ngc-column>
+        <!--// DNATA FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showTerminalToTerminalFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <!-- [disabled]='agentCode' -->
+              <ngc-lov [validOnly]="true" required (select)="onAgentNameAutoFill($event, desc)"
+                formControlName="agentCode" sourceId="SQL_COMPANY_AGENT_LIST_GHA" title="g.customer.list"
+                dataField="code" [width]="100">
+                <ngc-data-column text="exp.acceptance.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                <ngc-data-column text="exp.acceptance.agent.name" dataField="desc" [width]="80"></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-input [disabled]='agentName' formControlName="agentName" required></ngc-input>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.accpt.trmnumber"></ngc-label>
+              </div>
+              <ngc-input formControlName="trmNumber" [maxlength]='15' required></ngc-input>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="import.transfer.incoming.carrier"></ngc-label>
+              <div>
+                <ngc-lov required [width]="50" formControlName="incomingFlightCarrier" upperCase="true" noCache="true"
+                  sourceId='CARRIER_OPT' title='flight.carrierType' dataField="code" displayMember="code"
+                  accessEnableOn="r">
+                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                  </ngc-data-column>
+                  <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                  </ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.number"></ngc-label>
+
+              <div>
+                <ngc-flightkeyinput [width]="100" formControlName="incomingFlightNumber" [noCarrier]="true"
+                  upperCase="true" accessEnableOn="r">
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.date"></ngc-label>
+              <div>
+                <ngc-dateinput formControlName="incomingFlightDate" [width]="100" accessEnableOn="r">
+                </ngc-dateinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="!requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractor.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.accpt.trmnumber"></ngc-label>
+              </div>
+              <ngc-input formControlName="trmNumber" [maxlength]='15' required></ngc-input>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="import.transfer.incoming.carrier"></ngc-label>
+              <div>
+                <ngc-lov required [width]="50" formControlName="incomingFlightCarrier" upperCase="true" noCache="true"
+                  sourceId='CARRIER_OPT' title='flight.carrierType' dataField="code" displayMember="code"
+                  accessEnableOn="r">
+                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                  </ngc-data-column>
+                  <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                  </ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.number"></ngc-label>
+
+              <div>
+                <ngc-flightkeyinput [width]="100" formControlName="incomingFlightNumber" [noCarrier]="true"
+                  upperCase="true" accessEnableOn="r">
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.date"></ngc-label>
+              <div>
+                <ngc-dateinput formControlName="incomingFlightDate" [width]="100" accessEnableOn="r">
+                </ngc-dateinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="g.shipmentType"></ngc-label>
+              </div>
+              <ngc-dropdownlist sourceId="Acceptance_Type$Cargo_Shipment_Type" formControlName="shipmentType">
+              </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="awb.awbnumber"></ngc-label>
+              </div>
+              <ngc-input [maxlength]='11' formControlName="addedShipmentNumber"></ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label=""></ngc-label>
+              </div>
+              <ngc-button label="awb.add.shipment" (click)="onAddShipment($event)"></ngc-button>
+            </ngc-column>
+            <ngc-column column="3">
+
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon align="right" type="yesno" [value]="item.get(['eawb']).value" true-color="grey">
+                      </ngc-icon>
+                      <!-- <ngc-icon type="yesno" formControlName="eawb" [value]="item.get(['eawb']).value"></ngc-icon> -->
+                    </td>
+                    <td align="center">
+                      <ngc-icon align="right" type="yesno" [value]="item.get(['fwbReceived']).value" true-color="grey">
+                      </ngc-icon>
+                      <!-- <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value"></ngc-icon> -->
+                    </td>
+                    <td align="center">
+                      <ngc-icon align="right" type="yesno" [value]="item.get(['fhlReceived']).value" true-color="grey">
+                      </ngc-icon>
+                      <!-- <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value"></ngc-icon> -->
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-dropdownlist accessEnabledOn="r" width="80" displayMember="code"
+                            formControlName="rcarTypeCode"
+                            disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                            sourceId='RCAR_CODE_WITH_FILTER' sourceType='query' [dropDownWidth]="80"
+                            [sourceParameters]="{ 'parameter1': form.get('agentCode').value}">
+                          </ngc-dropdownlist>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <!-- <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="Admin$ExemptionCode"
+                          displayMember="code"></ngc-dropdownlist> -->
+                        <!-- sourceId='DISPLAY_CARRIER_CODE' sourceType='query' -->
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="editButtonFlag"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <ngc-link (click)="deleteShipmntSummary(index)" iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <!--// ECC FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showEccFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <ngc-lov [validOnly]="true" required (select)="onAgentNameAutoFill($event, desc)"
+                formControlName="agentCode" sourceId="COMPANY_AGENT_LIST" title="g.customer.list" [disabled]='agentCode'
+                dataField="code" [width]="100">
+                <ngc-data-column text="exp.acceptance.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                <ngc-data-column text="exp.acceptance.agent.name" dataField="desc" [width]="80"></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentName" required></ngc-display>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="!requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationNumber" [minlength]='5' [maxlength]='5'>
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractor.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [maxlength]='35'></ngc-input>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="g.shipmentType"></ngc-label>
+              </div>
+              <ngc-dropdownlist sourceId="Acceptance_Type$Cargo_Shipment_Type" formControlName="shipmentType">
+              </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="awb.awbnumber"></ngc-label>
+              </div>
+              <ngc-input [maxlength]='11' formControlName="addedShipmentNumber"></ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label=""></ngc-label>
+              </div>
+              <ngc-button label="awb.add.shipment" (click)="onAddShipment($event)"></ngc-button>
+            </ngc-column>
+            <ngc-column column="3">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+
+                        <ngc-dropdownlist width="80"
+                          disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                          displayMember="code" formControlName="rcarTypeCode" sourceId='RCAR_CODE_WITH_FILTER'
+                          sourceType='query' [dropDownWidth]="80"
+                          [sourceParameters]="{ 'parameter1': form.get('agentCode').value}">
+                        </ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" [dropDownWidth]="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" [dropDownWidth]="80" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <!-- <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="Admin$ExemptionCode"
+                          displayMember="code"></ngc-dropdownlist> -->
+                        <!-- sourceId='DISPLAY_CARRIER_CODE' sourceType='query' -->
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' [dropDownWidth]="80" displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="editButtonFlag"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <ngc-link (click)="deleteShipmntSummary(index)" iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// LOCAL COURIER FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showLocalCourierFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <ngc-lov [validOnly]="true" required (select)="onAgentNameAutoFill($event, desc)"
+                formControlName="agentCode" sourceId="COMPANY_AGENT_LIST" title="g.customer.list" [disabled]='agentCode'
+                dataField="code" [width]="100">
+                <ngc-data-column text="exp.acceptance.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                <ngc-data-column text="exp.acceptance.agent.name" dataField="desc" [width]="80"></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentName" required></ngc-display>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="4">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-dropdownlist width="80" displayMember="code" formControlName="rcarTypeCode"
+                            disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                            sourceId='RCAR_CODE_WITH_FILTER' sourceType='query' [dropDownWidth]="80"
+                            [sourceParameters]="{ 'parameter1': form.get('agentCode').value}"></ngc-dropdownlist>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="editButtonFlag"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <ngc-link (click)="deleteShipmntSummary(index)" iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// TRUCKING SURF FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showTruckingSurfFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <!-- <ngc-input formControlName="agentCode" required></ngc-input> -->
+              <ngc-lov [validOnly]="true" required (select)="onAgentNameAutoFill($event, desc)"
+                formControlName="agentCode" sourceId="SQL_COMPANY_AGENT_LIST_GHA" title="g.customer.list"
+                [disabled]='agentCode' dataField="code" [width]="100">
+                <ngc-data-column text="exp.acceptance.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                <ngc-data-column text="exp.acceptance.agent.name" dataField="desc" [width]="80"></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-input required formControlName="agentName"></ngc-input>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumber" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphaspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="!requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationNumber" [minlength]='5' [maxlength]='5'>
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractor.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [maxlength]='35'></ngc-input>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="g.shipmentType"></ngc-label>
+              </div>
+              <ngc-dropdownlist sourceId="Acceptance_Type$Cargo_Shipment_Type" formControlName="shipmentType">
+              </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="awb.awbnumber"></ngc-label>
+              </div>
+              <ngc-input [maxlength]='11' formControlName="addedShipmentNumber"></ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label=""></ngc-label>
+              </div>
+              <ngc-button label="awb.add.shipment" (click)="onAddShipment($event)"></ngc-button>
+            </ngc-column>
+            <ngc-column column="3">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-dropdownlist width="80" displayMember="code" formControlName="rcarTypeCode"
+                            disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                            sourceId='RCAR_CODE_WITH_FILTER' sourceType='query' [dropDownWidth]="80"
+                            [sourceParameters]="{ 'parameter1': form.get('agentCode').value}"></ngc-dropdownlist>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="editButtonFlag"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <ngc-link (click)="deleteShipmntSummary(index)" iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// TRUCKING FLIGHT FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showTruckingFlightFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <ngc-lov [validOnly]="true" (select)="onAgentNameAutoFill($event, desc)" formControlName="agentCode"
+                sourceId="SQL_COMPANY_AGENT_LIST_GHA" title="g.customer.list" [disabled]='agentCode' dataField="code"
+                [width]="100">
+                <ngc-data-column text="exp.acceptance.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                <ngc-data-column text="exp.acceptance.agent.name" dataField="desc" [width]="80"></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="agentName">
+              </ngc-input>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label="import.transfer.incoming.carrier"></ngc-label>
+              <div>
+                <ngc-lov required [width]="50" (ngModelChange)="checkIncomingFlight(event)"
+                  formControlName="incomingFlightCarrier" upperCase="true" noCache="true" sourceId='CARRIER_OPT'
+                  title='flight.carrierType' dataField="code" displayMember="code" accessEnableOn="r">
+                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                  </ngc-data-column>
+                  <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                  </ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.number"></ngc-label>
+
+              <div>
+                <ngc-flightkeyinput [width]="100" (ngModelChange)="checkIncomingFlight(event)"
+                  formControlName="incomingFlightNumber" [noCarrier]="true" upperCase="true" required
+                  accessEnableOn="r">
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.date"></ngc-label>
+              <div>
+                <ngc-dateinput required formControlName="incomingFlightDate"
+                  (ngModelChange)="checkIncomingFlight(event)" [width]="100" accessEnableOn="r">
+                </ngc-dateinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="!requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationNumber" [minlength]='5' [maxlength]='5'>
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractor.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [maxlength]='35'></ngc-input>
+            </ngc-column>
+
+            <ngc-column column="1">
+              <ngc-label label="import.transfer.incoming.carrier"></ngc-label>
+              <div>
+                <ngc-lov required formControlName="incomingFlightCarrier" [width]="50" upperCase="true" noCache="true"
+                  sourceId='CARRIER_OPT' title='flight.carrierType' dataField="code" displayMember="code"
+                  accessEnableOn="r">
+                  <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                  </ngc-data-column>
+                  <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                  </ngc-data-column>
+                </ngc-lov>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label="flight.incoming.flight.number"></ngc-label>
+
+              <div>
+                <ngc-flightkeyinput [width]="100" formControlName="incomingFlightNumber" [noCarrier]="true"
+                  upperCase="true" required accessEnableOn="r">
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label=""></ngc-label>
+              <div>
+                <ngc-dateinput required formControlName="incomingFlightDate" [width]="100" accessEnableOn="r">
+                </ngc-dateinput>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="g.shipmentType"></ngc-label>
+              </div>
+              <ngc-dropdownlist sourceId="Acceptance_Type$Cargo_Shipment_Type" formControlName="shipmentType">
+              </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="awb.awbnumber"></ngc-label>
+              </div>
+              <ngc-input [maxlength]='11' formControlName="addedShipmentNumber"></ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label=""></ngc-label>
+              </div>
+              <ngc-button label="awb.add.shipment" (click)="onAddShipment($event)"></ngc-button>
+            </ngc-column>
+            <ngc-column column="3">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-dropdownlist width="80" displayMember="code" formControlName="rcarTypeCode"
+                            sourceId='RCAR_CODE_WITH_FILTER'
+                            disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                            sourceType='query' [dropDownWidth]="80"
+                            [sourceParameters]="{ 'parameter1': form.get('agentCode').value}"></ngc-dropdownlist>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="editButtonFlag"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <ngc-link (click)="deleteShipmntSummary(index)" iconType="delete"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// PRE LODGE FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showPreLodgeShipmentFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentCode"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentName" required></ngc-display>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput required formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input required formControlName="authorizationIdentificationName" [width]="300"
+                patternName='alphanumspace' entityAttribute="Customer.AuthorisedPersonName"></ngc-input>
+            </ngc-column>
+            <ngc-column column="4">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.start.estart"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-display formControlName="rcarTypeCode"></ngc-display>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="play" value="true" trueColor="grey" align="centre"
+                        *ngIf="!form.get('authorizationIdentificationName').value && !form.get('authorizationIdentificationNumber').value">
+                      </ngc-icon>
+                      <ng-container
+                        *ngIf="form.get('authorizationIdentificationName').value && form.get('authorizationIdentificationNumber').value">
+                        <ng-container *ngIf="item.get(['shipment', 'customStatus']).value === 'OPEN'">
+                          <ngc-link (linkClick)="startEacceptanceParent(index)" type="link">
+                            <ngc-icon type="play" value="true" trueColor="green" align="centre"></ngc-icon>
+                          </ngc-link>
+                        </ng-container>
+                        <ng-container *ngIf="item.get(['shipment', 'customStatus']).value !== 'OPEN'">
+                          <ngc-icon type="play" value="true" trueColor="grey" align="centre"></ngc-icon>
+                        </ng-container>
+                      </ng-container>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="form.get('authorizationIdentificationName').value && form.get('authorizationIdentificationNumber').value && item.get(['shipment', 'customStatus']).value !== 'SERVICING'"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// NAWB FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showNawbShipmentFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentCode"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentName" required></ngc-display>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName">
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="3">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.start.estart"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-dropdownlist width="80" displayMember="code" formControlName="rcarTypeCode"
+                            sourceId='RCAR_CODE_WITH_FILTER'
+                            disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                            sourceType='query' [dropDownWidth]="80"
+                            [sourceParameters]="{ 'parameter1': form.get('agentCode').value}"></ngc-dropdownlist>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-icon type="play" value="true" trueColor="grey" align="centre" *ngIf="(!form.get('authorizationIdentificationName').value && !form.get('authorizationIdentificationNumber').value)
+                          ||form.get('authorizationIdentificationName').value === 'NAWB_SHIPMENT'">
+                      </ngc-icon> -->
+                      <ng-container>
+                        <ng-container *ngIf="item.get(['shipment', 'customStatus']).value === 'OPEN'">
+                          <ngc-link (linkClick)="startEacceptanceParent(index)" type="link">
+                            <ngc-icon type="play" value="true" trueColor="green" align="centre"></ngc-icon>
+                          </ngc-link>
+                        </ng-container>
+                        <ng-container *ngIf="item.get(['shipment', 'customStatus']).value !== 'OPEN'">
+                          <ngc-icon type="play" value="true" trueColor="grey" align="centre"></ngc-icon>
+                        </ng-container>
+                      </ng-container>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="form.get('authorizationIdentificationName').value && form.get('authorizationIdentificationNumber').value && item.get(['shipment', 'customStatus']).value !== 'SERVICING'"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// TRANSHIPMENT COURIER FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showTrnashipmentCourierFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <!--<ngc-display formControlName="agentCode" required></ngc-display>-->
+              <ngc-lov [validOnly]="true" [autoSelect]=true required (select)="onAgentNameAutoFill($event, desc)"
+                formControlName="agentCode" sourceId="SQL_COMPANY_AGENT_LIST_GHA" title="g.customer.list"
+                dataField="code" [width]="100">
+                <ngc-data-column text="exp.acceptance.agent.code" dataField="code" [width]="50"></ngc-data-column>
+                <ngc-data-column text="exp.acceptance.agent.name" dataField="desc" [width]="80"></ngc-data-column>
+              </ngc-lov>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="agentName" required></ngc-input>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput required formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [width]="300" patternName='alphanumspace'
+                entityAttribute="Customer.AuthorisedPersonName" required></ngc-input>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row *ngIf="!requiredContractorAuthorizationFlag">
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationNumber" [minlength]='5' [maxlength]='5'>
+              </ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractor.name"></ngc-label>
+              </div>
+              <ngc-input formControlName="authorizationIdentificationName" [maxlength]='35'></ngc-input>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-dropdownlist sourceId="Acceptance_Type$Cargo_Shipment_Type" formControlName="shipmentType">
+              </ngc-dropdownlist>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-input [maxlength]='11' formControlName="addedShipmentNumber"></ngc-input>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-button label="awb.add.shipment" (click)="onAddShipment($event)"></ngc-button>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-dropdownlist width="80" displayMember="code" formControlName="rcarTypeCode"
+                            sourceId='RCAR_CODE_WITH_FILTER'
+                            disabled="{{form.get(['shipmentSummary', index, 'shipment', 'customStatus']).value =='ACCEPTED'}}"
+                            sourceType='query' [dropDownWidth]="80"
+                            [sourceParameters]="{ 'parameter1': form.get('agentCode').value}"></ngc-dropdownlist>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="editButtonFlag"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+
+        <!--// E-READY FLOW STARTS HERE //-->
+        <ngc-container *ngIf="showEReadyShipmentFlag">
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.servicenum"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceNumber"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentCode"></ngc-display>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptance.agent.name"></ngc-label>
+              </div>
+              <ngc-display formControlName="agentName" required></ngc-display>
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="exp.acceptence.servicecreationdate"></ngc-label>
+              </div>
+              <ngc-display formControlName="serviceCreationDate"></ngc-display>
+            </ngc-column>
+            <ngc-column *ngIf="collectFlag">
+              <div>
+                <ngc-label emphasis="lg" color="red" label="awb.acceptance.customer.cash.collect"></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="exp.acceptence.contractoric.airportpass"></ngc-label>
+              </div>
+              <ngc-alphanuminput required formControlName="authorizationIdentificationNumber"
+                entityAttribute="Customer.PersonalIdentificationNumberSearch" (ngModelChange)="onChangeIC($event)">
+              </ngc-alphanuminput>
+            </ngc-column>
+            <ngc-column column="1">
+              <div>
+                <ngc-label label=" "></ngc-label>
+              </div>
+              <ngc-button [disabled]="onValidateFlag" label="exp.acceptance.validate" (click)="onValidate()">
+              </ngc-button>
+            </ngc-column>
+            <ngc-column column="2">
+              <div>
+                <ngc-label label="Customer.AuthorisedPersonName"></ngc-label>
+              </div>
+              <ngc-input required formControlName="authorizationIdentificationName" [width]="300"
+                patternName='alphanumspace' [maxlength]='35'></ngc-input>
+            </ngc-column>
+            <ngc-column column="3">
+            </ngc-column>
+            <ngc-column>
+              <div>
+                <ngc-label label="g.printer"></ngc-label>
+              </div>
+              <ngc-printer [width]='200' formControlName="printerQueueName" [printerTypeList]="['AWB']"
+                [autoSelectOnSingle]=true (select)="onSelectPrinter($event)" required>
+              </ngc-printer>
+            </ngc-column>
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label=" ">
+              </ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label=" "></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="awb.awbnumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.std"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.des"></ngc-label>
+                    </th>
+                    <th width="20">
+                      <ngc-label label="exp.acceptance.bookingstatus"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.eawb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fwb"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.fhl"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.weight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="export.book.natureofgoods"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.shc"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.rcar"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.awbreceived"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.pouch"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.exemp.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.status"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.acceptance.start.estart"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="exp.reject"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.edit"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentSummary">
+                  <tr *ngFor="let item of form.getList('shipmentSummary'); let index=index" [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="select"></ngc-checkbox>
+                    </td>
+                    <td formGroupName="acceptanceService">
+                      <ngc-display formControlName="shipmentNumber"></ngc-display>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <ng-container formGroupName="flight">
+                        <td>
+                          <ngc-display formControlName="flightNumber" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="flightDate" [onlyDate]="true"
+                            *ngIf="item.get('shipment.flight').value!==null"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="std" *ngIf="item.get('shipment.flight').value!==null">
+                          </ngc-display>
+                        </td>
+                      </ng-container>
+                      <td>
+                        <ngc-display formControlName="destination" *ngIf="item.get('shipment.flight').value!==null">
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="bookingStatus"></ngc-display>
+                      </td>
+                    </ng-container>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="eawb" *ngIf="item.get(['eawb']).value"></ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fwbReceived" *ngIf="item.get(['fwbReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="yesno" formControlName="fhlReceived" *ngIf="item.get(['fhlReceived']).value">
+                      </ngc-icon>
+                    </td>
+                    <ng-container formGroupName="shipment">
+                      <td>
+                        <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="natureOfGoods"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="concatSHC"></ngc-display>
+                      </td>
+                      <td>
+                        <div>
+                          <ngc-display formControlName="rcarTypeCode"></ngc-display>
+                        </div>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="awbReceived"
+                          sourceId="Acceptance_Type$AWBReceived" required></ngc-dropdownlist>
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" dropDownWidth="50" formControlName="pouchReceived"
+                          sourceId="Cargo_Handling$Cargo_Handling"></ngc-dropdownlist>
+
+                      </td>
+                      <td>
+                        <ngc-dropdownlist width="80" formControlName="exemptionCode" sourceId="KEY_RCAR_ACES_AED"
+                          sourceType='query' displayMember="code">
+                        </ngc-dropdownlist>
+                      </td>
+                    </ng-container>
+                    <td formGroupName="shipment">
+                      <ngc-display formControlName="customStatus"></ngc-display>
+                    </td>
+                    <td align="center">
+                      <ngc-icon type="play" value="true" trueColor="grey" align="centre"
+                        *ngIf="!form.get('authorizationIdentificationName').value && !form.get('authorizationIdentificationNumber').value">
+                      </ngc-icon>
+                      <ng-container
+                        *ngIf="form.get('authorizationIdentificationName').value && form.get('authorizationIdentificationNumber').value">
+                        <ng-container *ngIf="item.get(['shipment', 'customStatus']).value === 'OPEN'">
+                          <ngc-link (linkClick)="startEacceptanceParent(index)" type="link">
+                            <ngc-icon type="play" value="true" trueColor="green" align="centre"></ngc-icon>
+                          </ngc-link>
+                        </ng-container>
+                        <ng-container *ngIf="item.get(['shipment', 'customStatus']).value !== 'OPEN'">
+                          <ngc-icon type="play" value="true" trueColor="grey" align="centre"></ngc-icon>
+                        </ng-container>
+                      </ng-container>
+                    </td>
+                    <td align="center">
+                      <ngc-link (linkClick)="rejectShipment(index)" type="link">
+                        <ngc-icon type="ban" value="Y" trueColor="red"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                    <td align="center">
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="form.get('authorizationIdentificationName').value && form.get('authorizationIdentificationNumber').value && item.get(['shipment', 'customStatus']).value !== 'SERVICING'"> -->
+                      <!-- <ngc-link type="link" (linkClick)="onEdit(index)" [disabled]="form.get('authorizationIdentificationName').value && form.get('authorizationIdentificationNumber').value && item.get(['shipment', 'customStatus']).value !== 'SERVICING'"> -->
+                      <ngc-link type="link" (linkClick)="onEdit(index)">
+                        <ngc-icon type="edit" value="true"></ngc-icon>
+                      </ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+  <!--// WINDOW POP UP FOR LIST OF SERVICE NUMBER //-->
+  <ngc-window #serviceNumberListWindow width="900" height="500" title="export.list.service.numbers"
+    [cancelButton]="true">
+    <ngc-container>
+      <ngc-row>
+        <ngc-column>
+          <div>
+            <ngc-label label="exp.servicenum"></ngc-label>
+          </div>
+          <ngc-input formControlName="serviceNumber"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="exp.acceptance.service.terminal"></ngc-label>
+          </div>
+          <ngc-input formControlName="serviceTerminal"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="exp.acceptance.agent.code"></ngc-label>
+          </div>
+          <ngc-input formControlName="agentCode"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label="exp.acceptance.status"></ngc-label>
+          </div>
+          <ngc-input formControlName="status"></ngc-input>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label=" "></ngc-label>
+          </div>
+          <ngc-button label="g.search" iconType="Search" (click)="onSearchFilter($event)"></ngc-button>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-label label=" "></ngc-label>
+          </div>
+          <ngc-button label="g.clear" (click)="onClearFilter($event)"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=" ">
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-datatable formArrayName="serviceNumberList" [height]="375" (linkClick)="onLinkClick($event)">
+            <ngc-data-column text="export.serviceNumber" dataField="serviceNumber" [width]='100' align="center"
+              type="link" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="exp.acceptance.agent.code" dataField="agentCode" [width]='100' align="center"
+              type="link" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="exp.acceptance.agent.name" dataField="agentName" [width]='100' align="center"
+              type="link" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="date" dataField="serviceCreationDate" [width]='100' align="center" type="displayDate"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="exp.acceptance.status" dataField="status" [width]='100' align="center" type="link"
+              cellsAlign="center"></ngc-data-column>
+          </ngc-datatable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<app-duplicatenamepopup #duplicateNamePopup (onConfirmNewEntry)="onConfirmNewEntry($event)"
+  (onNameSelect)="onNameSelect($event)"></app-duplicatenamepopup>
+<ngc-footer>
+  <ngc-row>
+    <ngc-column column="1.5">
+      <ngc-button label="cargo.planner" (click)='onClickFlightPlanner()'> </ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showTerminalToTerminalFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showEccFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="1.5" *ngIf="showLocalCourierFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="1.5" *ngIf="showTruckingSurfFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showTruckingFlightFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showPreLodgeShipmentFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showNawbShipmentFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showTrnashipmentCourierFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="2" *ngIf="showEReadyShipmentFlag">
+      <ngc-button label="cargo.accept" (click)='onClickOfFreightAcceptance($event)'></ngc-button>
+    </ngc-column>
+    <ngc-column column="1.5">
+      <ngc-button label="cargo.accpt.dgdeclaration" (click)="routeToDG($event)">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

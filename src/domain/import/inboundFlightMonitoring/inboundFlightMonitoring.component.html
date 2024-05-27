@@ -1,0 +1,177 @@
+<form [formGroup]="InboundFlightMonitoringSerach">
+  <ngc-titlebar title='import.title.inbound.flight.monitoring' (clear)="onClear($event)" (cancel)="onCancel($event)"
+    (print)="onprintPDF($event)"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.terminal"> </ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="terminals"  sourceId="WAREHOUSE_TERMINAL" [width]="100"
+            sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="2">
+        <ngc-label label="g.fromDate"> </ngc-label>
+        <div>
+          <ngc-datetimeinput (ngModelChange)="onFromDateChange()" accessEnableOn="r" formControlName="fromDate"
+            [showCalendarButton]="true"  [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.toDate"> </ngc-label>
+        <div>
+          <ngc-datetimeinput [min]='InboundFlightMonitoringSerach.controls.fromDate.value' accessEnableOn="r"
+            formControlName="toDate" [showCalendarButton]="true"  [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.carrier.group"> </ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100" [noCache]="true" (select)="onCarierGroup($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <ngc-label label="g.carrier"> </ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="carrier" (ngModelChange)="getCarrierCodeByCarrierGroup($event)"
+            upperCase='true' sourceId='CARRIER' sourceType='query' title="g.carrier"
+            [sourceParameters]="carrierGroupCodeParam" dataField='code' [width]="60" [noCache]="true">
+            <ngc-data-column text="g.carrier" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrier" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <ngc-label label="import.account.type"> </ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="acType" [width]="100" upperCase="true" [dropDownWidth]="60"
+            sourceId="AIR" dataField="code" displayMember="code" title="flight.aircraft">
+            <ngc-data-column text="flight.aircraftCode" dataField="code" [width]="100">
+            </ngc-data-column>
+            <ngc-data-column text="flight.aircraftName" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.flight"> </ngc-label>
+        <div>
+          <ngc-flightkeyinput [width]="100" formControlName="flight" (ngModelChange)="onFlightChange()"
+            accessEnableOn="r">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="g.date"> </ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="date" [width]="100"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)='onSearch()' iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-label label='auto.refresh.pause'></ngc-label>
+        <ngc-switchbutton formControlName="auto" (ngModelChange)="onAutoRefresh($event)" onLabel="ON">
+        </ngc-switchbutton>
+        <!--<ngc-button value="val.auto" (click)="onAutoRefresh($event)">
+        </ngc-button>-->
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <!-- [rowCellsStyleRenderer]="rowCellsStyleRenderer" -->
+        <ngc-datatable formArrayName="InboundFlightMonitoringModel" *ngIf="showTable" [pageSize]="15">
+          <ngc-data-column text="g.flight" dataField="flight" align="center" cellsAlign="center" [width]="90">
+          </ngc-data-column>
+          <ngc-data-column text="g.date" dataField="date" type="displayDate" align="center" cellsAlign="center"
+            [width]="100"></ngc-data-column>
+          <ngc-data-column text="Last<br>Board Point" tooltip="Last Board Point" dataField="lastBoardPoint"
+            align="center" cellsAlign="center" [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.sta" dataField="sta" align="center" type="displayTime" cellsAlign="center"
+            [width]="80"></ngc-data-column>
+          <ngc-data-column text="import.eta" dataField="eta" align="center" type="displayTime" cellsAlign="center"
+            [width]="80"></ngc-data-column>
+          <ngc-data-column text="import.ata" dataField="ata" align="center" type="displayTime" cellsAlign="center"
+            [width]="80"></ngc-data-column>
+          <ngc-data-column text="import.account.type" dataField="acType" align="center" cellsAlign="center"
+            [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="import.through.transit.finalized" tooltip="Through Transit Finalized" dataField="tth"
+            align="center" cellsAlign="center" [width]="100"></ngc-data-column>
+          <ngc-data-column text="A/C Reg" tooltip="A/C Registration" dataField="acRegistration" align="center"
+            cellsAlign="center" [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.start.date.time.br" tooltip="Ramp Start Date/Time" dataField="rampStartDateTime"
+            type="displayDateTime" align="center" cellsAlign="center" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="import.ramp.complete.date.time.br" tooltip="Ramp Complete Date/Time"
+            dataField="rampCompleteDateTime" type="displayDateTime" align="center" cellsAlign="center" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="import.document.start.date.time.br" tooltip="Document Start Date/Time"
+            dataField="documentStartDateTime" type="displayDateTime" align="center" cellsAlign="center" [width]="110">
+          </ngc-data-column>
+          <ngc-data-column text="import.document.complete.date.time.br" tooltip="Document Complete Date/Time"
+            dataField="documentCompleteDateTime" type="displayDateTime" align="center" cellsAlign="center"
+            [width]="110"></ngc-data-column>
+          <ngc-data-column text="import.breakdown.start.date.time.br" tooltip="Breakdown Start Date/Time"
+            dataField="breakdownStartDateTime" type="displayDateTime" align="center" cellsAlign="center" [width]="120">
+          </ngc-data-column>
+          <ngc-data-column text="import.breakdown.complete.date.time.br" tooltip="Breakdown Complete Date/Time"
+            dataField="breakdownCompleteDateTime" type="displayDateTime" align="center" cellsAlign="center"
+            [width]="120"></ngc-data-column>
+          <ngc-data-column text="import.fdl.finalized.date.time.br" tooltip="FDL Finalized Date/Time"
+            dataField="flightDiscrepancyListSentAt" type="displayDateTime" align="center" cellsAlign="center"
+            [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.flight.complete.date.time.br" tooltip="Flight Complete Date/Time"
+            dataField="flightCompleteDateTime" type="displayDateTime" align="center" cellsAlign="center" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="import.flight.close.date.time.br" tooltip="Flight Close Date/Time"
+            dataField="flightCloseDateTime" type="displayDateTime" align="center" cellsAlign="center" [width]="100">
+          </ngc-data-column>
+          <ngc-data-column text="mb.nilcargo" tooltip="NIL Cargo" dataField="nilCargo" align="center"
+            cellsAlign="center" [width]="100"></ngc-data-column>
+          <ngc-data-column text="import.inbound.flight.canx" tooltip="Cancelled" dataField="cancelled" align="center"
+            cellsAlign="center" [width]="100"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column column="10" align="right" *ngIf="showTable">
+        <ngc-label label=''></ngc-label>
+        <div>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" align="right" *ngIf="showTable">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.export.to.excel' accessEnableOn="r" (click)='onprintexcel($event)'></ngc-button>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column align="right" *ngIf="showTable">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='Export to PDF' accessEnableOn="r" (click)='onprintPDF($event)'></ngc-button>
+        </div>
+      </ngc-column> -->
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow2 format='xls'  title="g.report"  reportId='Inbound_Flight_Monitoring'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+  <ngc-report #reportWindow3  title="g.report"  reportId='Inbound_Flight_Monitoring'
+     [reportParameters]='reportParameters' dataSource='transactional'>
+  </ngc-report>
+</form>

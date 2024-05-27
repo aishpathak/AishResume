@@ -1,0 +1,1462 @@
+<ngc-titlebar title="fwb.eyeballcheck" (save)="onSave($event)" (clear)="onClear($event)" (cancel)='backToHome($event)'>
+</ngc-titlebar>
+<form [formGroup]="fwbDataValidationSearchForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.awbNumber"></ngc-label>
+        <div>
+          <ngc-awbinput formControlName="awbNumber" [width]='110' accessEnableOn="r" required>
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" align="right" *ngIf="onSuccess">
+        <ngc-label label="fwb.reject.reason"></ngc-label>
+        <div>
+          <ngc-dropdownlist [noCache]="true" [multiSelect]="true" sourceId="General$Reject_Reason"
+            formControlName="rejectReason" [dropDownWidth]="200" [width]="200" (select)="getRejectReason($event)"
+            accessEnableOn="r">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" align="right" *ngIf="onSuccess">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button label="eyeball.checkUncheckAll" (click)="checkUncheck($event)">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5" align="right" *ngIf="onSuccess">
+        <ngc-label label="&nbsp;"></ngc-label>
+        <div>
+          <ngc-button value="fwb.confirm" accessEnableOn="r" (click)="confirmRequest()">
+          </ngc-button>&nbsp;
+          <ngc-button value="req.reject" accessEnableOn="r" (click)="rejectRequest()"
+            feature="Edi.FWB.RejectDataValidation">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="fwbDataValidationForm" *ngIf="onSuccess">
+  <ngc-container type="tab" title="validation.summary">
+    <ngc-row>
+      <ngc-column column='4'>
+        <ngc-label label='fwb.fhl.pieces.weight'></ngc-label>
+        <div>
+          <ng-container
+            *ngIf="(fwbDataValidationForm.get('fwbPieces').value == fwbDataValidationForm.get('fhlPieces').value)&&(fwbDataValidationForm.get('fwbWeight').value == fwbDataValidationForm.get('fhlWeight').value);
+                                                                                                                                else  fhldisplaypieceweight">
+            <ngc-piecesdisplay formControlName="fwbPieces" color="green"></ngc-piecesdisplay>/
+            <ngc-piecesdisplay formControlName="fhlPieces" color="green"></ngc-piecesdisplay>/
+            <ngc-weightdisplay formControlName="fwbWeight" color="green"></ngc-weightdisplay>/
+            <ngc-weightdisplay formControlName="fhlWeight" color="green"></ngc-weightdisplay>
+          </ng-container>
+          <ng-template #fhldisplaypieceweight>
+            <ngc-piecesdisplay formControlName="fwbPieces" color="red"></ngc-piecesdisplay>/
+            <ngc-piecesdisplay formControlName="fhlPieces" color="red"></ngc-piecesdisplay>/
+            <ngc-weightdisplay formControlName="fwbWeight" color="red"></ngc-weightdisplay>/
+            <ngc-weightdisplay formControlName="fhlWeight" color="red"></ngc-weightdisplay>
+          </ng-template>
+        </div>
+      </ngc-column>
+      <ngc-column column='4'>
+        <ngc-label label='fwb.rcl.destination'></ngc-label>
+        <div>
+          <ng-container
+            *ngIf="fwbDataValidationForm.get('fwbDestination').value == fwbDataValidationForm.get('rclDestination').value;
+                                                                                                                else  displaydestination">
+            <ngc-display formControlName="fwbDestination" color="green"></ngc-display>/
+            <ngc-display formControlName="rclDestination" color="green"></ngc-display>
+          </ng-container>
+          <ng-template #displaydestination>
+            <ngc-display formControlName="fwbDestination" color="red"></ngc-display>/
+            <ngc-display formControlName="rclDestination" color="red"></ngc-display>
+          </ng-template>
+        </div>
+      </ngc-column>
+      <ngc-column column='4'>
+        <ngc-label label='issuing.carrier.RA.code'></ngc-label>
+        <div>
+          <ng-container
+            *ngIf="fwbDataValidationForm.get('issuingCarrier').value == fwbDataValidationForm.get('raCode').value;
+                                                                                                                else  displaycode">
+            <ngc-display formControlName="issuingCarrier" color="green"></ngc-display>/
+            <ngc-display formControlName="raCode" color="green"></ngc-display>
+          </ng-container>
+          <ng-template #displaycode>
+            <ngc-display formControlName="issuingCarrier" color="red"></ngc-display>/
+            <ngc-display formControlName="raCode" color="red"></ngc-display>
+          </ng-template>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='4'>
+        <ngc-label label='fwb.fhl.slac'></ngc-label>
+        <div>
+          <ng-container *ngIf="fwbDataValidationForm.get('fwbSlac').value == fwbDataValidationForm.get('fhlSlac').value;
+                                                                                                else  displayslac">
+            <ngc-display formControlName="fwbSlac" color="green"></ngc-display>/
+            <ngc-display formControlName="fhlSlac" color="green"></ngc-display>
+          </ng-container>
+          <ng-template #displayslac>
+            <ngc-display formControlName="fwbSlac" color="red"></ngc-display>/
+            <ngc-display formControlName="fhlSlac" color="red"></ngc-display>
+          </ng-template>
+        </div>
+      </ngc-column>
+      <ngc-column column='4'>
+        <ngc-label label='fwb.rcl.pieces.weight'></ngc-label>
+        <div>
+          <ng-container
+            *ngIf="(fwbDataValidationForm.get('fwbPieces').value == fwbDataValidationForm.get('rclPieces').value)&&(fwbDataValidationForm.get('fwbWeight').value == fwbDataValidationForm.get('rclWeight').value);
+                                                                                                                                                else  rcldisplaypieceweight">
+            <ngc-piecesdisplay formControlName="fwbPieces" color="green"></ngc-piecesdisplay>/
+            <ngc-piecesdisplay formControlName="rclPieces" color="green"></ngc-piecesdisplay>/
+            <ngc-weightdisplay formControlName="fwbWeight" color="green"></ngc-weightdisplay>/
+            <ngc-weightdisplay formControlName="rclWeight" color="green"></ngc-weightdisplay>
+          </ng-container>
+          <ng-template #rcldisplaypieceweight>
+            <ngc-piecesdisplay formControlName="fwbPieces" color="red"></ngc-piecesdisplay>/
+            <ngc-piecesdisplay formControlName="rclPieces" color="red"></ngc-piecesdisplay>/
+            <ngc-weightdisplay formControlName="fwbWeight" color="red"></ngc-weightdisplay>/
+            <ngc-weightdisplay formControlName="rclWeight" color="red"></ngc-weightdisplay>
+          </ng-template>
+        </div>
+      </ngc-column>
+      <ngc-column column='4'>
+        <ngc-label label='postal.code.us/eu'></ngc-label>
+        <div>
+          <ngc-display formControlName="postalCode"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='4'>
+        <ngc-label label='import.chargeable.weight'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="chargeableWeight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle" title="export.accpt.awb_info">
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-display formControlName="awbNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='g.origin'></ngc-label>&nbsp;
+        <ngc-checkbox value={{myFlagResponse.validOrigin}}
+          (click)="changeValue(myFlagResponse.validOrigin, 'validOrigin')">
+        </ngc-checkbox>
+        <div>
+          <ngc-display formControlName="origin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='g.destination'></ngc-label>&nbsp;
+        <ngc-checkbox value={{myFlagResponse.validDestination}}
+          (click)="changeValue(myFlagResponse.validDestination, 'validDestination')"></ngc-checkbox>
+        <div>
+          <ngc-display formControlName="destination"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='awb.volume.code'></ngc-label>
+        <div>
+          <ngc-display formControlName="volumeUnitCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='import.fwb.shipper.certification'></ngc-label>
+        <div>
+          <ngc-display formControlName="shpCertificateSign"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='awb.volume.amount'></ngc-label>
+        <div>
+          <ngc-currencydisplay [noSymbol]="true" formControlName="volumeAmount"></ngc-currencydisplay>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label label='export.NAWB.carrier.execution.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="carriersExecutionDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='g.pieces'></ngc-label>
+        <div>
+          <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='import.fwb.density.group'></ngc-label>
+        <div>
+          <ngc-display formControlName="densityGroupCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='import.fwb.carrier.execution.place'></ngc-label>
+        <div>
+          <ngc-display formControlName="carriersExecutionPlace"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='g.weight'></ngc-label>
+        <div>
+          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='g.natureOfGoods'></ngc-label>
+        <div>
+          <ngc-display formControlName="natureOfGoodsDescription"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label label='exp.authorization.signature'></ngc-label>
+        <div>
+          <ngc-display formControlName="carriersExecutionAuthSign"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='g.weightCode'></ngc-label>
+        <div>
+          <ngc-display formControlName="weightUnitCode"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label='import.customorigin'></ngc-label>
+        <div>
+          <ngc-display formControlName="customOrigin"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2' formArrayName="shcode">
+        <ngc-label label='import.shc.code'></ngc-label>&nbsp;
+        <ngc-checkbox value={{myFlagResponse.validSpecialHandlingCode}}
+          (click)="changeValue(myFlagResponse.validSpecialHandlingCode, 'validSpecialHandlingCode')"></ngc-checkbox>
+        <div>
+          <ngc-column *ngFor="let item of fwbDataValidationForm.get('shcode').controls; let index=index"
+            [formGroupName]="index">
+            <ngc-display formControlName="specialHandlingCode"></ngc-display>
+            <ngc-display value=","></ngc-display>
+          </ngc-column>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- // FLight BOOKING ARRAY -->
+  <ngc-container type="tab" title="export.NAWB.flight.booking.routing">
+    <ngc-row>
+      <ngc-column column='2' formArrayName="flightBooking">
+        <ngc-label label='g.flightKey'></ngc-label>
+        <div *ngFor="let item of fwbDataValidationForm.get('flightBooking').controls; let index=index"
+          [formGroupName]="index">
+          <ngc-display formControlName="carrierCode"></ngc-display>
+          <ngc-display formControlName="flightNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='2' formArrayName="flightBooking">
+        <ngc-label label='g.FlightDate'></ngc-label>
+        <div *ngFor="let item of fwbDataValidationForm.get('flightBooking','flightDate').controls; let index=index"
+          [formGroupName]="index">
+          <ngc-display formControlName="flightDate"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column='6'>
+        <ng-container formArrayName="routing" title="awb.routing">
+          <ngc-row>
+            <ngc-column column="4">
+              <div>
+                <ngc-label label='awb.firstdestination'></ngc-label>
+              </div>
+            </ngc-column>
+            <ngc-column column="4">
+              <div>
+                <ngc-label label='import.fwb.onwards.destination'></ngc-label>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ng-container *ngFor="let item of fwbDataValidationForm.get('routing').controls; let index=index"
+              [formGroupName]="index">
+              <ngc-column *ngIf="index === 0">
+                <ngc-label label='g.destination'></ngc-label>
+                <div>
+                  <ngc-display formControlName="airportCode"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column *ngIf="index === 0">
+                <ngc-label label='g.carrier'></ngc-label>
+                <div>
+                  <ngc-display formControlName="carrierCode"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column *ngIf="index !== 0">
+                <ngc-label label='g.destination'></ngc-label>
+                <div>
+                  <ngc-display formControlName="airportCode"></ngc-display>
+                </div>
+              </ngc-column>
+              <ngc-column *ngIf="index !== 0">
+                <ngc-label label='g.carrier'></ngc-label>
+                <div>
+                  <ngc-display formControlName="carrierCode"></ngc-display>
+                </div>
+              </ngc-column>
+            </ng-container>
+          </ngc-row>
+        </ng-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="shp.info" formGroupName="shipperInfo">
+          <ngc-row>
+            <ngc-column column="3">
+              <ngc-label label='g.accountNumber'></ngc-label>
+              <div>
+                <ngc-display formControlName="customerAccountNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label='g.name'></ngc-label>
+              <div>
+                <ngc-display formControlName="customerName"> </ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.address'></ngc-label>
+              <div>
+                <ngc-display formControlName="streetAddress1"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.place'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validShipperCustomerPlace}}
+                (click)="changeValue(myFlagResponse.validShipperCustomerPlace, 'validShipperCustomerPlace')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="customerPlace"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row formGroupName="customerAddressInfo">
+            <ngc-column column="3">
+              <ngc-label label='g.postalCode'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validShipperPostalCode}}
+                (click)="changeValue(myFlagResponse.validShipperPostalCode, 'validShipperPostalCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="postalCode" [width]="120"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label='g.country'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validShipperCountryCode}}
+                (click)="changeValue(myFlagResponse.validShipperCountryCode, 'validShipperCountryCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="countryCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label="g.state"></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validShipperStateCode}}
+                (click)="changeValue(myFlagResponse.validShipperStateCode, 'validShipperStateCode')"></ngc-checkbox>
+              <div>
+                <ngc-display formControlName="stateCode"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row formGroupName="customerAddressInfo">
+            <ngc-column formArrayName="customerContactInfo">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="contact.info.type.no"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="3">
+                  <ngc-label label='g.type'></ngc-label>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-label label='import.detail'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row
+                *ngFor="let item of fwbDataValidationForm.get(['shipperInfo','customerAddressInfo','customerContactInfo']).controls; let index=index"
+                [formGroupName]="index">
+                <ngc-column column="3">
+                  <ngc-display formControlName="contactIdentifier"></ngc-display>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-display formControlName="contactDetail"></ngc-display>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container title="cons.info" type="tab" formGroupName="consigneeInfo">
+          <ngc-row>
+            <ngc-column column="3">
+              <ngc-label label='g.accountNumber'></ngc-label>
+              <div>
+                <ngc-display formControlName="customerAccountNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label='g.name'></ngc-label>
+              <div>
+                <ngc-display formControlName="customerName"> </ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.address'></ngc-label>
+              <div>
+                <ngc-display formControlName="streetAddress1"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.place'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validConsigneeCustomerPlace}}
+                (click)="changeValue(myFlagResponse.validConsigneeCustomerPlace, 'validConsigneeCustomerPlace')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="customerPlace"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.postalCode'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validConsigneePostalCode}}
+                (click)="changeValue(myFlagResponse.validConsigneePostalCode, 'validConsigneePostalCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="postalCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.country'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validConsigneeCountryCode}}
+                (click)="changeValue(myFlagResponse.validConsigneeCountryCode, 'validConsigneeCountryCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="countryCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label="g.state"></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validConsigneeStateCode}}
+                (click)="changeValue(myFlagResponse.validConsigneeStateCode, 'validConsigneeStateCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="stateCode"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row formGroupName="customerAddressInfo">
+            <ngc-column formArrayName="customerContactInfo">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="contact.info.type.no"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="3">
+                  <ngc-label label='g.type'></ngc-label>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-label label='import.detail'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row
+                *ngFor="let item of fwbDataValidationForm.get(['consigneeInfo','customerAddressInfo','customerContactInfo']).controls; let index=index"
+                [formGroupName]="index">
+                <ngc-column column="3">
+                  <ngc-display formControlName="contactIdentifier"></ngc-display>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-display formControlName="contactDetail"></ngc-display>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="agent.notify" formGroupName="alsoNotify">
+          <ngc-row>
+            <ngc-column column="3">
+              <ngc-label label='g.accountNumber'></ngc-label>
+              <div>
+                <ngc-display formControlName="customerAccountNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label='g.name'></ngc-label>
+              <div>
+                <ngc-display formControlName="customerName"> </ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.address'></ngc-label>
+              <div>
+                <ngc-display formControlName="streetAddress1"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3" formGroupName="customerAddressInfo">
+              <ngc-label label='g.place'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validAlsoNotifyCustomerPlace}}
+                (click)="changeValue(myFlagResponse.validAlsoNotifyCustomerPlace, 'validAlsoNotifyCustomerPlace')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="customerPlace"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row formGroupName="customerAddressInfo">
+            <ngc-column column="3">
+              <ngc-label label='g.postalCode'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validAlsoNotifyPostalCode}}
+                (click)="changeValue(myFlagResponse.validAlsoNotifyPostalCode, 'validAlsoNotifyPostalCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="postalCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label='g.country'></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validAlsoNotifyCountryCode}}
+                (click)="changeValue(myFlagResponse.validAlsoNotifyCountryCode, 'validAlsoNotifyCountryCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="countryCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column="3">
+              <ngc-label label="g.state"></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validAlsoNotifyStateCode}}
+                (click)="changeValue(myFlagResponse.validAlsoNotifyStateCode, 'validAlsoNotifyStateCode')">
+              </ngc-checkbox>
+              <div>
+                <ngc-display formControlName="stateCode"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row formGroupName="customerAddressInfo">
+            <ngc-column formArrayName="customerContactInfo">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="contact.info.type.no"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column column="3">
+                  <ngc-label label='g.type'></ngc-label>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-label label='import.detail'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row
+                *ngFor="let item of fwbDataValidationForm.get(['alsoNotify','customerAddressInfo','customerContactInfo']).controls; let index=index"
+                [formGroupName]="index">
+                <ngc-column column="3">
+                  <ngc-display formControlName="contactIdentifier"></ngc-display>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-display formControlName="contactDetail"></ngc-display>
+                </ngc-column>
+              </ngc-row>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="export.acc.info"></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validAccountingInformation}}
+                (click)="changeValue(myFlagResponse.validAccountingInformation, 'validAccountingInformation')">
+              </ngc-checkbox>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th [width]="100">
+                      <ngc-label label='export.NAWB.accounting.information.identifier'></ngc-label>
+                    </th>
+                    <th [width]="100">
+                      <ngc-label label='export.acc.info'></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="accountingInfo">
+                  <tr *ngFor="let item of fwbDataValidationForm.get('accountingInfo').controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-display formControlName="informationIdentifier"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="accountingInformation"></ngc-display>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="agent.information" formGroupName="agentInfo">
+          <ngc-row>
+            <ngc-column column='4'>
+              <ngc-label label='g.name'></ngc-label>
+              <div>
+                <ngc-display formControlName="agentName"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='g.place'></ngc-label>
+              <div>
+                <ngc-display formControlName="agentPlace"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='import.participantidentifier'></ngc-label>
+              <div>
+                <ngc-display formControlName="participantIdentifier"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column='4'>
+              <ngc-label label='g.accountNumber'></ngc-label>
+              <div>
+                <ngc-display formControlName="accountNumber"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='import.fwb.iata.cargo.agent.code'></ngc-label>
+              <div>
+                <ngc-display formControlName="iatacargoAgentNumericCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='import.fwb.iata.cargo.agent.cass.address'></ngc-label>
+              <div>
+                <ngc-display formControlName="iatacargoAgentCASSAddress"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container title="import.fwb.acc.cvd" formGroupName="chargeDeclaration">
+          <ngc-row>
+            <ngc-column column='4'>
+              <ngc-label label='import.ISOCurrencyCode'></ngc-label>
+              <div>
+                <ngc-display formControlName="currencyCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='g.chargeCode'></ngc-label>
+              <div>
+                <ngc-display formControlName="chargeCode"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='import.ChargeDeclaration'></ngc-label>
+              <div>
+                <ngc-display formControlName="prepaIdCollectChargeDeclaration"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column='4'>
+              <ngc-label label='import.fwb.declared.value.for.carriage'></ngc-label>
+              <div>
+                <ngc-display formControlName="carriageValueDeclaration"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='import.declared.value.for.customs'></ngc-label>
+              <div>
+                <ngc-display formControlName="customsValueDeclaration"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column column='4'>
+              <ngc-label label='import.fwb.amount.of.insurance'></ngc-label>
+              <div>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="insuranceValueDeclaration">
+                </ngc-currencydisplay>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="import.ssr" formArrayName="ssrInfo">
+          <ngc-row>
+            <ngc-column>
+              <div *ngFor="let item of fwbDataValidationForm.get('ssrInfo').controls; let index=index"
+                [formGroupName]="index">
+                <ngc-display formControlName="serviceRequestcontent"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container formArrayName="osiInfo">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="awb.otherservice"></ngc-label>&nbsp;
+              <ngc-checkbox value={{myFlagResponse.validOSI}}
+                (click)="changeValue(myFlagResponse.validOSI, 'validOSI')">
+              </ngc-checkbox>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <div *ngFor="let item of fwbDataValidationForm.get('osiInfo').controls; let index=index"
+                [formGroupName]="index">
+                <ngc-display formControlName="serviceRequestcontent"></ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle" title="import.fwb.rtd">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead align="center">
+            <tr>
+              <th>
+                <ngc-label label='import.rate.line.number.br'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.pc.rcp'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.gross.weight'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.weightCode'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.NAWB.rate.class'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.commodity.item.no'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='chargeable.weight'></ngc-label>
+                <ngc-checkbox value={{myFlagResponse.validChargeableWeight}}
+                  (click)="changeValue(myFlagResponse.validChargeableWeight, 'validChargeableWeight')">
+                </ngc-checkbox>
+              </th>
+              <th>
+                <ngc-label label='import.fwb.rate.charge'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.fwb.total.charge.amount.br'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="rateDescription">
+            <ng-container *ngFor="let item of fwbDataValidationForm.get('rateDescription').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display formControlName="rateLineNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="numberOfPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="grossWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName="weightUnitCode"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="rateClassCode"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="commodityItemNo"></ngc-display>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="chargeableWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-currencydisplay [noSymbol]="true" formControlName="rateChargeAmount">
+                  </ngc-currencydisplay>
+                </td>
+                <td>
+                  <ngc-currencydisplay [noSymbol]="true" formControlName="totalChargeAmount">
+                  </ngc-currencydisplay>
+                </td>
+              </tr>
+              <tr formArrayName="rateDescriptionOtherInfo">
+                <ngc-container>
+                  <ngc-row>
+                    <ngc-column>
+                      <ngc-table>
+                        <thead align="center">
+                          <tr>
+                            <th>
+                              <ngc-label label="import.harmonised.commodity.code"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="import.nature.of.goods.ng"></ngc-label>
+                            </th>
+                            <th>
+                              <ngc-label label="hwb.slac"></ngc-label>
+                            </th>
+                          </tr>
+                        </thead>
+          <tbody>
+            <tr *ngFor="let sitem of item.controls.rateDescriptionOtherInfo.controls let sindex=index"
+              [formGroupName]="sindex">
+              <td>
+                <ngc-display formControlName="harmonisedCommodityCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="natureOfGoodsDescription"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="slacCount"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  </tr>
+  </ng-container>
+  </tbody>
+  </ngc-table>
+  </ngc-column>
+  </ngc-row>
+  <ngc-row>
+    <ngc-column>
+    </ngc-column>
+  </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="awb.other.charges.due.agent">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label='import.pc.indicator.other.charges.br'></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label='import.other.charge.cod.br'></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label='import.charge.amount'></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="otherCharges">
+                  <tr *ngFor="let item of fwbDataValidationForm.get('otherCharges').controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-display formControlName="otherChargeIndicator"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="otherChargeCode"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="chargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container title="import.fwb.other.charges.due.airline">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label='import.pc.indicator.other.charges.br'></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label='import.other.charge.cod.br'></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label='import.charge.amount'></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="otherChargesCarrier">
+                  <tr *ngFor="let item of fwbDataValidationForm.get('otherChargesCarrier').controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-display formControlName="otherChargeIndicator"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="otherChargeCode"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay [noSymbol]="true" formControlName="chargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label='import.ppd.col'></ngc-label>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th width="150"></th>
+                    <th></th>
+                    <th>
+                      <ngc-label label="import.ppd.amount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="import.col.amount"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td width="150">
+                      <ngc-label label="import.total.weight.charge"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="import.fwb.wt"></ngc-label>
+                    </td>
+                    <td formGroupName="ppd">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true" formControlName="totalWeightChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td formGroupName="col">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true" formControlName="totalWeightChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="150">
+                      <ngc-label label="import.valuation.charge"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="fwb.vc"></ngc-label>
+                    </td>
+                    <td formGroupName="ppd">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true" formControlName="valuationChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td formGroupName="col">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true" formControlName="valuationChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="150">
+                      <ngc-label label="import.fwb.taxes"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="import.fwb.tx"></ngc-label>
+                    </td>
+                    <td formGroupName="ppd">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true" formControlName="taxesChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td formGroupName="col">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true" formControlName="taxesChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="150">
+                      <ngc-label label="fwb.agent.charge"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="import.fwb.oa"></ngc-label>
+                    </td>
+                    <td formGroupName="ppd">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true"
+                        formControlName="totalOtherChargesDueAgentChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td formGroupName="col">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true"
+                        formControlName="totalOtherChargesDueAgentChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="150">
+                      <ngc-label label="fwb.carrier.charge"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="import.fwb.oc"></ngc-label>
+                    </td>
+                    <td formGroupName="ppd">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true"
+                        formControlName="totalOtherChargesDueCarrierChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td formGroupName="col">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true"
+                        formControlName="totalOtherChargesDueCarrierChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                  <tr>
+                    <td width="150">
+                      <ngc-label label="fwb.total.charge"></ngc-label>
+                    </td>
+                    <td>
+                      <ngc-label label="import.fwb.ct"></ngc-label>
+                    </td>
+                    <td formGroupName="ppd">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true"
+                        formControlName="chargeSummaryTotalChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td formGroupName="col">
+                      <ngc-currencydisplay [width]='150' [noSymbol]="true"
+                        formControlName="chargeSummaryTotalChargeAmount">
+                      </ngc-currencydisplay>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-row>
+          <ngc-column>
+            <ngc-container type="tab" title="agent.agent.ref.data">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label='import.FileReference'></ngc-label>
+                  <div>
+                    <ngc-display formControlName="ardAgentReference"></ngc-display>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+          <ngc-column>
+            <ngc-container title="fwb.handling.party" formGroupName="fwbNominatedHandlingParty">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label='g.name'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='g.place'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ngc-display formControlName="handlingPartyName"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="handlingPartyPlace"></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-container type="tab" title="import.SRI" formGroupName="shipmentReferenceInfor">
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label='g.referenceNumber'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='import.Supplementary'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='import.ShipmentInformation'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <tr>
+                        <td>
+                          <ngc-display formControlName="referenceNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="supplementaryShipmentInformation1"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="supplementaryShipmentInformation2"></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="fwb.other.customs.info"></ngc-label>&nbsp;
+        <ngc-checkbox value={{myFlagResponse.validOCI}} (click)="changeValue(myFlagResponse.validOCI, 'validOCI')">
+        </ngc-checkbox>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label='g.iso.country.code'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.fwb.information.identifier.br'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.cust.sec.reg.con.info.id.br'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.supp.cust.sec.reg.con.info.br'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="otherCustomsInfo">
+            <tr *ngFor="let item of fwbDataValidationForm.get('otherCustomsInfo').controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="countryCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="informationIdentifier"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="csrciIdentifier"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="scrcInformation"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle" title="import.charges.in.destination.currency" formGroupName="chargeDestCurrency">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label='import.destination.currency.code'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.destination.currency.cc.charge'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.destination.charge.amount'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='awb.total.collect.charges'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='import.rate.of.exchange'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-display formControlName="destinationCurrencyCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="destinationCurrencyChargeAmount">
+                </ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="chargesAtDestinationChargeAmount">
+                </ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="totalCollectChargesChargeAmount">
+                </ngc-currencydisplay>
+              </td>
+              <td>
+                <ngc-currencydisplay [noSymbol]="true" formControlName="currencyConversionExchangeRate">
+                </ngc-currencydisplay>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" title="fwb.reference" formGroupName="senderReference">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th colspan="3">
+                <ngc-label align="center" value="import.sending.office.message.address"></ngc-label>
+              </th>
+              <th colspan="1">
+                <ngc-label align="center" value="import.sending.office.file.reference"></ngc-label>
+              </th>
+              <th colspan="3">
+                <ngc-label align="center" value="import.sending.participant.identification"></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th [width]="100">
+                <ngc-label value="import.airport.city.code"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label value="import.office.function.designator.br"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label value="import.company.designator"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="import.booking.file.reference.br"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="import.fwb.participant.identifier"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="import.participant.code"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="import.airport.city.code"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr>
+              <td>
+                <ngc-display [width]='35' formControlName="airportCityCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='35' formControlName="officeFunctionDesignator"></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='70' formControlName="companyDesignator"></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='140' formControlName="fileReference"></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='35' formControlName="refParticipantIdentifier"></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='150' formControlName="refParticipantCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='35' formControlName="refAirportCityCode"></ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="rectangle" title="import.other.participant.identification">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]="90" rowspan="2">
+                <ngc-label value='g.name'></ngc-label>
+              </th>
+              <th colspan="3">
+                <ngc-label align="center" value="import.other.participant.office.message.address"></ngc-label>
+              </th>
+              <th colspan="1">
+                <ngc-label value="import.other.participant.office.file.reference.br"></ngc-label>
+              </th>
+              <th colspan="3">
+                <ngc-label align="center" value="import.other.participant.identification"></ngc-label>
+              </th>
+            </tr>
+            <tr>
+              <th [width]="70">
+                <ngc-label value="import.fwb.airport.city.code.br"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label value="import.office.function.designator.br"></ngc-label>
+              </th>
+              <th [width]="50">
+                <ngc-label value="import.fwb.company.designator"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label value="import.other.participant.office.file.reference.br"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label value="import.participant.identifier.br"></ngc-label>
+              </th>
+              <th [width]="100">
+                <ngc-label value="import.participant.code"></ngc-label>
+              </th>
+              <th [width]="70">
+                <ngc-label value="import.fwb.airport.city.code.br"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="otherParticipantInfo">
+            <tr *ngFor="let item of fwbDataValidationForm.get('otherParticipantInfo').controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                <ngc-display formControlName="participantName">
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="airportCityCode">
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="officeFunctionDesignator">
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="companyDesignator">
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="fileReference">
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="opiParticipantIdentifier">
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="opiParticipantCode"></ngc-display>
+              </td>
+              <td>
+                <ngc-display formControlName="opiAirportCityCode">
+                </ngc-display>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #messageWindow [height]="650" [width]="1400" title="Reject FWB" [showCloseButton]="true"
+    (close)="closeMessageWindow()">
+    <ngc-container *ngIf="windowFlag" [formGroup]="messageForm">
+      <ngc-row>
+        <ngc-column [column]="10">
+          <div>
+            <ngc-textarea formControlName="fnaMessage" [width]="1000" [height]="500" upperCase="true">
+            </ngc-textarea>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <div>
+            <ngc-button value="fwb.send" (click)="sendEmail()"></ngc-button>
+            <ngc-button value="fwb.close" (click)="closeMessageWindow()"></ngc-button>
+          </div>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

@@ -1,0 +1,169 @@
+<ngc-titlebar title="billing.currencyExchangeMaster" (save)="onSaveExchangeRates($event)" (print)='generateReport()'
+  (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="currencyExchangeMasterForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column='2'>
+        <ngc-label value='g.currency'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='150' maxLength='3' formControlName="currencyCode" sourceId="CURRENCY" title="g.currency"
+            dataField='code' displayMember="code" [validOnly]='true'>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label value='g.carrier'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [width]='150' maxLength='3' formControlName="carrierCode" sourceId="CARRIER" title="g.carrier"
+            dataField='code' displayMember="desc" [validOnly]='true'>
+            <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column='1'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="actual" groupName="searchMode" checked="true">
+            <ngc-i18n value="bil.currencyMaster.actual" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column column='1'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="past" groupName="searchMode">
+            <ngc-i18n value="bil.currencyMaster.past" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column column='1'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" formControlName="future" groupName="searchMode">
+            <ngc-i18n value="bil.currencyMaster.future" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)='onExchangeRateSearch()'></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align='right' *ngIf="showRates">
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button value='g.add' iconType='add' (click)='onExchangeRateAdd()'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showRates">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table formArrayName="rateDetails">
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value='billing.serialno'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.currency.code'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.currencyDesc'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.carrierCode'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.validFrom'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.validTill'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='bil.exchangeRate'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.remarks'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.edit'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let item of currencyExchangeMasterForm.controls.rateDetails.controls; let index=index"
+              [formGroupName]="index">
+              <td>
+                {{index+1}}
+              </td>
+              <td>
+                <ngc-lov maxLength='3' required [width]='50' *ngIf="item.get('edit').value"
+                  (select)='currencyCodeChange($event, index)' formControlName="currencyCode" sourceId="CURRENCY"
+                  title="g.currency" dataField='code' displayMember="code" [validOnly]='true'>
+                  <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+                <ngc-display [width]='50' *ngIf="!item.get('edit').value" sourceId="CURRENCY"
+                  formControlName='currencyCode'></ngc-display>
+              </td>
+              <td>
+                <ngc-display [width]='100' sourceId="CURRENCY" sourceCategory="lov" formControlName='currencyCode'>
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-lov maxLength='3' [width]='50' *ngIf="item.get('edit').value" formControlName="carrierCode"
+                  sourceId="CARRIER" title="g.carrier" dataField='code' displayMember="desc" [validOnly]='true'>
+                  <ngc-data-column text="g.code" dataField="code" [width]="100"></ngc-data-column>
+                  <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                </ngc-lov>
+                <ngc-display [width]='50' *ngIf="!item.get('edit').value" formControlName='carrierCode'></ngc-display>
+              </td>
+              <td>
+                <ngc-dateinput required [width]='100' *ngIf="item.get('edit').value" formControlName='validFrom'>
+                </ngc-dateinput>
+                <ngc-display [width]='100' [onlyDate]='true' *ngIf="!item.get('edit').value"
+                  formControlName='validFrom'></ngc-display>
+              </td>
+              <td>
+                <ngc-dateinput [width]='100' *ngIf="item.get('edit').value" formControlName='validTill'></ngc-dateinput>
+                <ngc-display [width]='100' [onlyDate]='true' *ngIf="!item.get('edit').value"
+                  formControlName='validTill'></ngc-display>
+              </td>
+              <td align='right'>
+                <ngc-numberinput required [width]='120' [min]='0.00000000' [decimalDigits]='7'
+                  *ngIf="item.get('edit').value" formControlName='exchangeRate'>
+                </ngc-numberinput>
+                <ngc-display [width]='120' *ngIf="!item.get('edit').value" formControlName='exchangeRate'
+                  dataType='number' format='#.#######'>
+                </ngc-display>
+              </td>
+              <td>
+                <ngc-input [width]='500' [maxLength]='65' *ngIf="item.get('edit').value" formControlName='remarks'>
+                </ngc-input>
+                <ngc-display [width]='200' *ngIf="!item.get('edit').value" formControlName='remarks'></ngc-display>
+              </td>
+              <td>
+                <ngc-link [width]='100' iconType='edit' (linkClick)='onEdit(index)'></ngc-link>
+              </td>
+              <td>
+                <ngc-link [width]='100' iconType='delete' (linkClick)='onDelete(index)'></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-report #reportWindow  title="g.report"  reportId='CurrencyExchangeRate'  [reportParameters]='reportParameters'>
+    </ngc-report>
+  </ngc-container>
+</form>

@@ -1,0 +1,159 @@
+<ngc-titlebar title="exp.acasQueryTitle" (cancel)="onCancel()"></ngc-titlebar>
+<form [formGroup]="acasQueryForm" formName="acasQueryForm">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [grid72]="true" [column]="8">
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+           <ngc-flightkeyinput accessEnableOn="r" [autoFocus]="true" [width]="100" formControlName="flightKey"
+            upperCase="true">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid72]="true" [column]="8">
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName='flightDate'></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid72]="true" [column]="8">
+        <ngc-label label='g.awb'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName='shipmentNumber'></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [grid72]="true" [column]="8">
+        <ngc-label label='psnCode'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName='psnCode' [width]="100"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)='onSearch()' label='g.search' iconType="search" #searchbutton>
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="this.acasQueryForm.get('shipmentList').length>0" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="shipmentList" [pageSize]='15'>
+          <ngc-data-column text="g.select" dataField="select" type="check" [width]="50" cellsAlign="center" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="flight.Flight" dataField="flightKey" [width]="80" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="flight.std" dataField="std" [width]="100" type="displayDateTime" cellsAlign="left" align="left"></ngc-data-column>
+          <ngc-data-column text="awbnumber" dataField="shipmentNumber" [width]="100" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="customs.part.shipment" dataField="partShipment" [width]="30" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="agent" dataField="agentName" [width]="50" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="destination" dataField="destination" [width]="80" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="g.fwb" dataField="fwb" [width]="50" cellsAlign="left" align="left"></ngc-data-column>
+          <ngc-data-column text="uld" dataField="uld" [width]="100" cellsAlign="left" align="left"></ngc-data-column>
+          <ngc-data-column text="exp.awbPieces" dataField="awbPieces" [width]="80" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="exp.fwbfhlPieces" dataField="fwbfhlPieces" [width]="60" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="customs.screening" [width]="60" dataField="sentForScreening"></ngc-data-column>
+          <ngc-data-column text="psn" dataField="psnCode" [width]="50" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text="exp.byPass" dataField="byPassFlag" [width]="50" cellsAlign="left" align="left">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)='onScreening()' accessSectionId="100%screening" label='customs.100.screening'></ngc-button>
+        <ngc-button (click)='onByPass()' accessSectionId="Bypass" label='exp.byPass'></ngc-button>
+        <ngc-button (click)='onUndoByPass()' accessSectionId="Undo bypass" label='customs.undo.bypass'></ngc-button>
+        <ngc-button (click)='onCCNPortal()' label='customs.ccn.portal'></ngc-button>
+        <ngc-button (click)='onPSNHistory()' label='customs.psn.history'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="byPassRequestForm" formName="byPassRequestForm">
+  <ngc-window #bypassRequestForm [showCloseButton]="true" [width]="650" [height]="300" title="customs.reason.bypass.undo.bypass">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.reason"></ngc-label>
+          <div>
+            <ngc-textarea formControlName="remarks" [width]="300" [height]="50" required [maxLength]="60">
+            </ngc-textarea>
+          </div>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label='g.password'></ngc-label>
+          <div>
+            <ngc-passwordinput formControlName="password" required [width]="300"></ngc-passwordinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button label="mailbag.bypass" *ngIf="byPassButton" [width]="80" (click)="byPassShipment()"></ngc-button>
+          <ngc-button label="customs.undo.bypass" *ngIf="undoByPassBUtton" [width]="80" (click)="undoByPassShipment()">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+<form [formGroup]="psnHistoryForm" *ngIf="this.acasQueryForm.get('shipmentList').length>0">
+  <ngc-window #psnHistoryWindow (close)="onPsnHistoryWindowClose()" title="customs.psn.history.details" [width]="1200" [height]="500"
+    [showCloseButton]="true" align="center">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th style="width: 1px;">
+                  <ngc-label label="g.sNo"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.message"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="g.status"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="customs.rejected.reason"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="psnMessageLogSummary">
+              <tr *ngFor="let item of psnHistoryForm.controls.psnMessageLogSummary.controls; let index=index" [formGroupName]="index">
+                <td>
+                  {{index + 1}}
+                </td>
+                <td>
+                  <ngc-codeeditor formControlName="message" [height]="100"></ngc-codeeditor>
+                </td>
+                <td>
+                  <ngc-display formControlName="status"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="rejectReason"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  </form>

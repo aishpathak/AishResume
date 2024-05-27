@@ -1,0 +1,62 @@
+<ngc-container>
+    <ngc-row>
+        <ngc-column>
+            <ngc-display-constraint [newConstraintName]="newConstraintName" [constraintName]="constraintName">
+            </ngc-display-constraint>
+            <ngc-button iconType="edit" label="warehouse.handling.constraint" accessEnableOn="r"
+                (click)="onAddHandlingConstraints()"></ngc-button>
+         
+            <ngc-button iconType="refresh" (click)="onRequestRefresh()"></ngc-button>
+        </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="!sector.locationList.length">
+        <ngc-column>
+            <ngc-tabs (add)="onAddSector()" (select)='alertUser($event)'>
+                <ng-container *ngFor="let childSector of sector.sectorsList; let index=index">
+                    <ngc-tab-card [title]='childSector.sectorCode'>
+                        <ngc-terminal-sector (requestRefresh)="onCatchRequestRefresh($event, index)"
+                            *ngIf="currentSelectedIndex === index && childSector"
+                            [parentConstraintName]="getCurrentConstraint()"
+                            [parentConstraintId]="getCurrentConstraintId()"
+                            [allParentsNames]="allParentsNames+','+sector.sectorCode"
+                            [allParentsIds]="allParentsIds+','+sector.whsSectorId" [sector]="childSector">
+                        </ngc-terminal-sector>
+                    </ngc-tab-card>
+                </ng-container>
+            </ngc-tabs>
+        </ngc-column>
+    </ngc-row>
+</ngc-container>
+<!-- <ngc-locations ></ngc-locations> -->
+<ngc-container *ngIf="!sector.sectorsList.length" type="tab">
+    <ngc-row>
+        <ngc-column align="right">
+            <ngc-button label="warehouse.addlocation" (click)="onAddLocation()"></ngc-button>
+        </ngc-column>
+    </ngc-row>
+</ngc-container>
+<!-- {{sector.locationList.length}} -->
+<ngc-whs-location *ngIf="sector.locationList.length" (fetchNewLocationList)="onFetchNewLocationList($event)"
+    [parentConstraintName]="getCurrentConstraint()" [parentConstraintId]="getCurrentConstraintId()"
+    [allParentsNames]="allParentsNames+','+sector.sectorCode" [allParentsIds]="allParentsIds+','+sector.whsSectorId"
+    [sector]="sector" [locationList]="sector.locationList"></ngc-whs-location>
+<ngc-window #windowAssociateConstraint [width]="400" title="warehouse.associate.handling.constraint">
+    <ngc-associate-handling-constraint [currentConstraintId]="newConstraintId || constraintId"
+        [whsAssociateHandlingConstraintWithAreaId]="sector.whsAssociateHandlingConstraintWithAreaId"
+        (save)="onWindowCloseAssociateHandlingConstraint($event)" *ngIf="popUpWindowConfig.associateHandlingConstraint">
+    </ngc-associate-handling-constraint>
+</ngc-window>
+<ngc-window #windowAddLocation [width]="1200" [height]="600" title="warehouse.addlocation" [showCloseButton]="true">
+    <ngc-add-location (fetchNewLocationList)="onFetchNewLocationList($event)" *ngIf="popUpWindowConfig.addLocation">
+    </ngc-add-location>
+</ngc-window>
+
+<ngc-window #windowAddSectors [width]="1366" [height]="500" title="warehouse.add.sector" [showCloseButton]="true">
+    <ngc-add-sector *ngIf="popUpWindowConfig.addSectors"></ngc-add-sector>
+</ngc-window>
+
+
+
+<!-- <ngc-warehouse-configuration-sector [parentSectorModel]="sectorModel" [parentTerminalModel]="parentTerminalModel" [sectorModel]="sector"
+        [ancestorSectorsSectorCode]="ancestorSectorsSectorCode" [ancestorSectorsWhsSectorId]="ancestorSectorsWhsSectorId">
+    </ngc-warehouse-configuration-sector> -->

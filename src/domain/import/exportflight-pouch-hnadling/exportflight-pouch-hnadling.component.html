@@ -1,0 +1,193 @@
+<form [formGroup]="exportflightPouchform">
+    <ngc-titlebar title='imp.exp.lab.flight.pouch'>
+    </ngc-titlebar>
+    <ngc-container type="section" formGroupName="search">
+        <ngc-row>
+            <ngc-column [column]="1.2">
+                <ngc-label label='export.dateTimeFrom'></ngc-label>
+                <div>
+                    <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+                        formControlName="fromDate"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label label='export.dateTimeTo'></ngc-label>
+                <div>
+                    <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+                        formControlName="toDate"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="carrierColumn" [grid24]="true">
+                <ngc-label label="tracing.careerGrouplabel"></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup"
+                        sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA" sourceType="query" [width]="150" [noCache]="true">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2" [grid24]="true">
+                <ngc-label label='flight.flightKey'></ngc-label>
+                <div>
+                    <ngc-flightkeyinput accessEnableOn="r" formControlName="flightNo" [width]="150">
+                    </ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label label='g.FlightDate'></ngc-label>
+                <div>
+                    <ngc-dateinput formControlName="date" accessEnableOn="r" [width]="80"
+                        [min]="this.exportflightPouchform.get(['search', 'flightNo']).value"></ngc-dateinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2" [grid24]="true">
+                <ngc-label label='flightViewDashboard.pouchStatus' [width]="150"></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="pouchStatus"
+                        sourceId="FltExpPouchSts$FltExpPouchStsValues" [width]="100">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="1.2" [grid24]="true">
+                <ngc-label label='pax/frt' [width]="150"></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="paxfrt"
+                        sourceId="PaxFrtStatus$PaxFrtStatusValues" [width]="100">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="2" [grid24]="true">
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button (click)="onSearch()" value="g.search" accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section" formGroupName="search" *ngIf='displayData'>
+        <ngc-row>
+            <ngc-column [column]="1.2">
+                <ngc-label label="val.staff.id"></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" upperCase="true" formControlName="staffId" [maxlength]="15"
+                        [width]="100" [maxlength]="65">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label label="awb.remarks"></ngc-label>
+                <div>
+                    <ngc-remarksinput accessEnableOn="r" formControlName="remarks" [maxlength]="65" [width]="150">
+                    </ngc-remarksinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label label='export.dateTime'></ngc-label>
+                <div>
+                    <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" accessEnableOn="r"
+                        formControlName="dateTime"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button (click)="onConfirmPickUp()" value="imp.pouch.con.pickup" accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button (click)="onConfirmDeliver()" value="imp.pouch.con.deliver" accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="1.2">
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button (click)="onCancelPickUp()" value="imp.pouch.cancel.pickup" accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.2">
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button (click)="onCancelDeliver()" value="imp.pouch.cancel.deliver" accessEnableOn="r">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="box">
+        <ngc-row>
+            <ngc-column [column]="4">
+            </ngc-column>
+
+
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="box" *ngIf='displayData'>
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable formArrayName="flightPouchHandleDetaillList" (linkClick)="onLinkClick($event)"
+                    [enablePageSizeHeight]="false" [pageable]="true" [pageSize]="15" [pagerMode]="'advanced'"
+                    [columnsHeight]="45" [showToolbar]="true" [showPrint]="false" [showXLS]="false" [showPDF]="false"
+                    [showCSV]="false" [pagerMode]="'advanced'">
+                    <ngc-data-column text="&nbsp;" [width]='30' dataField="selectCheck" align="center"
+                        cellsAlign="center" type="check" [checkAll]="true">
+                    </ngc-data-column>
+
+                    <ngc-data-column text='flight.flight.no' dataField="flightNo" type="text" [width]="100"
+                        align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text='g.date' dataField="date" type="text" [width]="120" align="center"
+                        cellsAlign="center">
+                    </ngc-data-column>
+
+                    <ngc-data-column text="imp.pouch.time" [cellsStyleRenderer]="cellsStyleRenderer" dataField="time"
+                        [width]="100" cellsAlign="center" type="text" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="import.ac.reg" dataField="acReg" [width]="88" cellsAlign="center" type="text"
+                        align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text='import.bay' dataField="bay" [width]="88" align="center" cellsAlign="center"
+                        type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.status" dataField="status" [width]="100" cellsAlign="center"
+                        align="center" type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text="export.dest" dataField="destination" [width]="115" cellsAlign="center"
+                        type="text" align="center">
+                    </ngc-data-column>
+                    <ngc-data-column text='imp.pouch.time.pickup' dataField="pickup" [width]="120" align="center"
+                        cellsAlign="center" type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text='imp.pouch.cnx.pickup' dataField="cnxPickup" [width]="120" align="center"
+                        cellsAlign="center" type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text='cdh.title.delivery' dataField="deliver" [width]="120" align="center"
+                        cellsAlign="center" type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text='imp.pouch.lbl.cancel.deliver' dataField="cancelDeliver" [width]="120"
+                        align="center" cellsAlign="center" type="text">
+                    </ngc-data-column>
+
+                    <ngc-data-column text='awb.remarks' dataField="remarks" [width]="120" align="center"
+                        cellsAlign="center" type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text='imp.pouch.lbl.flt.status' dataField="fltStatus" [width]="120" align="centre"
+                        cellsalign="centre" type="text">
+                    </ngc-data-column>
+                    <ngc-data-column text='pax/frt' dataField="paxfrt" [width]="120" align="centre" cellsalign="centre"
+                        type="text">
+                    </ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>

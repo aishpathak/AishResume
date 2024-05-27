@@ -1,0 +1,544 @@
+<ngc-titlebar title="export.offload.summary.title" (cancel)="onCancel()" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="offloadForm">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='flight.Flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" formControlName='flightOriginDate'
+            [width]="100" required='true'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label>&nbsp</ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" #searchButton  (click)="fetchFlightULD()" value="g.search" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column="8">
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf='displayFlag'>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.Flight"></ngc-label>
+        </div>
+        <ngc-display formControlName='flight'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.date"></ngc-label>
+        </div>
+        <ngc-display formControlName='flightDate' [onlyDate]="true"></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.std"></ngc-label>
+        </div>
+        <ngc-display formControlName='std'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="flight.etd"></ngc-label>
+        </div>
+        <ngc-display formControlName='etd'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="paxCAO"></ngc-label>
+        </div>
+        <ngc-display formControlName='flightType'></ngc-display>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="abycRegistration"></ngc-label>
+        </div>
+        <ngc-display formControlName='aircraftRegistration'></ngc-display>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="g.status"></ngc-label>
+        </div>
+        <ngc-display formControlName='status'></ngc-display>
+      </ngc-column>
+      <ngc-column [column]='3'>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf='displayFlag' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]='100' *ngIf="shipmentSelectionFeatureEnabled">
+                <ngc-label label='g.sel'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.uld.trolley.number'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.awbnumber'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.origin'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.destination'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.handlingArea'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.shipment.br.location'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.warehouse.br.location'></ngc-label>
+              </th>
+              <th [width]='100' *ngIf="actualLocationFeatureEnabled">
+                <ngc-label label='Gen.ActualLocation'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.manifest.br.pieces'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.manifest.br.weight'></ngc-label>
+              </th>
+
+              <th [width]='100'>
+                <ngc-label label='export.offload.offload.br.pieces'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.offload.br.weight'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.transfer.type'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.shc'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.natureofgoods'></ngc-label>
+              </th>
+              <th [width]='100' *ngIf="addlLocationFeatureEnabled">
+                <ngc-label label='g.location'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.reason.for.br.offloading'></ngc-label>
+              </th>
+
+              <th [width]='100'>
+                <ngc-label label='g.remove'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container formArrayName="awbList">
+              <tr *ngFor="let item of offloadForm.controls.awbList.controls let index=index" [formGroupName]="index">
+                <td *ngIf="shipmentSelectionFeatureEnabled">
+                  <ngc-checkbox formControlName="select" (ngModelChange)="onSelectingUld(index, $event)"></ngc-checkbox>
+                </td>
+                <td>
+                  <ngc-display formControlName="uldNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="awbNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="origin"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="destination"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="terminal"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="offloadLocation"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="warehouselocation"></ngc-display>
+                </td>
+                <td *ngIf="actualLocationFeatureEnabled">
+                  <ngc-display formControlName="actualLocation"></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="manifestedPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="manifestedWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="offloadPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="offloadWeight"></ngc-weightdisplay>
+                </td>
+                <td>
+                  <ngc-display formControlName="tt"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="shc"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="natureOfGoods"></ngc-display>
+                </td>
+                <td align="center" *ngIf="addlLocationFeatureEnabled">
+                  <ng-container>
+
+                    <ngc-link (linkClick)="onOpenlocationdetailsWindow(item.get('expPreOffloadShipmentInfoId').value,
+                      item.get('shipmentId').value,
+                      item.get('expPreOffloadULDInfoId').value,
+                      index)" iconType="edit">
+                    </ngc-link>
+
+                  </ng-container>
+                </td>
+                <td>
+                  <ngc-display formControlName="reason"></ngc-display>
+                </td>
+
+                <td>
+                  <ngc-column>
+                    <ngc-button label="g.remove" (click)="deletePreOffloadLineItem(
+                                         item.get('expPreOffloadULDInfoId').value,
+                                         item.get('expPreOffloadShipmentInfoId').value)"></ngc-button>
+                  </ngc-column>
+                </td>
+              </tr>
+            </ng-container>
+            <tr>
+              <td *ngIf="actualLocationFeatureEnabled">
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+                <b>
+                  Total
+                </b>
+              </td>
+              <td *ngIf="actualLocationFeatureEnabled">
+              </td>
+              <td>
+                <b>
+                  <ngc-piecesdisplay formControlName='maniPieces' [width]='100'></ngc-piecesdisplay>
+                </b>
+              </td>
+              <td>
+                <b>
+                  <ngc-weightdisplay formControlName='maniWeight' [width]='100'></ngc-weightdisplay>
+                </b>
+              </td>
+              <td>
+                <b>
+                  <ngc-piecesdisplay formControlName='offPieces' [width]='100'></ngc-piecesdisplay>
+                </b>
+              </td>
+              <td>
+                <b>
+                  <ngc-weightdisplay formControlName='offWeight' [width]='100'></ngc-weightdisplay>
+                </b>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td *ngIf="actualLocationFeatureEnabled">
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='displayFlag' type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='export.offload.after.finalize'> </ngc-label>
+      </ngc-column>
+      <ngc-column column="6" align="right">
+        <ngc-button #finalizeButton  (click)="onFinalizeButton()" value="export.offload.finalize.shortcut"></ngc-button>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='displayFlag' type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th [width]='100'>
+                <ngc-label label='export.offload.uld.trolley.number'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.awbnumber'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.origin'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.destination'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.handlingArea'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.offload.br.pieces'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.offload.br.weight'></ngc-label>
+              </th>
+              <th [width]='100' *ngIf="shipmentLocationFeatureEnabled">
+                <ngc-label label='export.offload.shipment.br.location'></ngc-label>
+              </th>
+              <th [width]='100' *ngIf="warehouseLocationFeatureEnabled">
+                <ngc-label label='export.offload.warehouse.br.location'></ngc-label>
+              </th>
+              <th [width]='100' *ngIf="actualLocationFeatureEnabled">
+                <ngc-label label='Gen.ActualLocation'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.transfer.type'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='g.shc'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='awb.natureofgoods'></ngc-label>
+              </th>
+              <th [width]='100'>
+                <ngc-label label='export.offload.reason.for.offloading'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container formArrayName="offloadedList">
+              <tr *ngFor="let item of offloadForm.controls.offloadedList.controls let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="uldNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="awbNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="origin"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="destination"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="terminal"></ngc-display>
+                </td>
+                <td>
+                  <ngc-piecesdisplay formControlName="offloadPieces"></ngc-piecesdisplay>
+                </td>
+                <td>
+                  <ngc-weightdisplay formControlName="offloadWeight"></ngc-weightdisplay>
+                </td>
+                <td *ngIf="shipmentLocationFeatureEnabled">
+                  <ngc-display formControlName="offloadLocation"></ngc-display>
+                </td>
+                <td *ngIf="warehouseLocationFeatureEnabled">
+                  <ngc-display formControlName="warehouselocation"></ngc-display>
+                </td>
+                <td *ngIf="actualLocationFeatureEnabled">
+                  <ngc-display formControlName="actualLocation"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="tt"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="shc"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="natureOfGoods"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="reason"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            <tr>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+                <b>
+                  Total
+                </b>
+              </td>
+              <td>
+                <b>
+                  <ngc-piecesdisplay formControlName='doneOffPieces' [width]='100'></ngc-piecesdisplay>
+                </b>
+              </td>
+              <td>
+                <b>
+                  <ngc-weightdisplay formControlName='doneOffWeight' [width]='100'></ngc-weightdisplay>
+                </b>
+              </td>
+              <td *ngIf="actualLocationFeatureEnabled">
+              </td>
+              <td *ngIf="actualLocationFeatureEnabled">
+              </td>
+              <td *ngIf="actualLocationFeatureEnabled">
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+              <td>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<!-- popup for location details -->
+<form [formGroup]="offloadDetailsForm">
+  <ngc-window #locationdetailsWindow [width]="1000" [height]="400" title='export.offload.location.details'
+    [showCloseButton]="true">
+    <ngc-container *ngIf='displayFlag' type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th [width]='100'>
+                  <ngc-label label='awb.offload.pieces'></ngc-label>
+                </th>
+                <th [width]='100'>
+                  <ngc-label label='awb.offload.weight'></ngc-label>
+                </th>
+                <th [width]='100'>
+                  <ngc-label label='awb.shipment.location.br.bin.bt.uld.pd'></ngc-label>
+                </th>
+                <th [width]='100'>
+                  <ngc-label label='awb.whs.loc.br'></ngc-label>
+                </th>
+                <th [width]='100'>
+                  <ngc-label label='Gen.ActualLocation'></ngc-label>
+                </th>
+                <th [width]='100'></th>
+                <th></th>
+              </tr>
+            </thead>
+            <tbody formArrayName="piecesList">
+              <ng-container *ngFor="let item of offloadDetailsForm.controls.piecesList.controls let index=index"
+                [formGroupName]="index">
+                <tr>
+                  <td colspan="5">
+                    <ngc-label label='export.offload.uld'></ngc-label>
+                    <ngc-label formControlName='uldNumber'></ngc-label>/
+                    <ngc-label label='export.offload.location.awb'></ngc-label>
+                    <ngc-label formControlName='awbNumber'></ngc-label>
+                  </td>
+                  <td align="center">
+                    <ngc-button label='g.add' (click)="addoffloadlocation(index)"></ngc-button>
+                  </td>
+                  <td>
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+            <tbody formArrayName="offloadLocationsList">
+
+              <tr *ngFor="let item of offloadDetailsForm.controls.offloadLocationsList.controls let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-piecesinput [width]='100' [maxlength]="5" formControlName="offloadPieces" required="true"
+                    groupSize="0" (ngModelChange)="onPiecesChange($event,index)"></ngc-piecesinput>
+                </td>
+                <td>
+                  <ngc-weightinput [width]='100' [maxlength]="5" formControlName="offloadWeight" required="true"
+                    groupSize="0"></ngc-weightinput>
+                </td>
+                <td>
+                  <ngc-movable-storage-location upperCase="true" [maxlength]="12" [minlength]="3" [autoFocus]="true"
+                    [width]="130" formControlName="offloadLocation">
+                  </ngc-movable-storage-location>
+                </td>
+
+                <td>
+
+                  <ngc-locations-list [noTerminal]="true" [displayOnlyLocation]="true" [locationTypeList]="['STORAGE']"
+                    formControlName="warehouseLocation" [width]="120" (select)="onLocationChange($event , index)">
+                  </ngc-locations-list>
+                </td>
+                <td>
+                  <ngc-locations-list [displayOnlyLocation]="true" [width]="120" [sectorId]="sectorId"
+                    [locationTypeList]="['STORAGE']" formControlName="actualLocation">
+                  </ngc-locations-list>
+                </td>
+                <td></td>
+                <td>
+                  <ngc-button iconType="delete" (click)="ondeletelocation(index)"></ngc-button>
+                </td>
+              </tr>
+            </tbody>
+            <tbody>
+              <tr>
+                <td colspan="3" align="center">
+                  <ngc-button label='g.saveclose' (click)="onsaveandclose()">
+                  </ngc-button>
+                </td>
+                <td colspan="6" align="left">
+                  <ngc-button label='g.close' (click)="onclose()">
+                  </ngc-button>
+                </td>
+              </tr>
+
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+<ngc-footer>
+  <ngc-container type="tab">
+    <ngc-row *ngIf='displayFlag'>
+      <ngc-column>
+        <ngc-button accessEnableOn="r" (click)="onCancel()" value="export.offloadawb.uld.shortcut"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</ngc-footer>

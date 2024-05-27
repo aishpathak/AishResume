@@ -1,0 +1,329 @@
+<ngc-titlebar title='import.inboundFlightEForm' (clear)="onClear()" (cancel)="OnCancel()">
+</ngc-titlebar>
+<form [formGroup]="inboundFlightEFormSearch">
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="1.5">
+        <ngc-label label='import.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput formControlName="flightNumber" required="true" accessEnableOn="r" [width]="110">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5">
+        <ngc-label label='agent.createRoutingDate'></ngc-label>
+        <div>
+          <ngc-dateinput formControlName="flightDate" required="true" accessEnableOn="r" [width]="80"></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5" entityAttribute="Import.Arrival.ShcFliter">
+        <ngc-label label="g.shc"></ngc-label>
+        <div>
+          <ngc-lov formControlName="shc" [noCache]="true" [noValidation]="true" dataField='code'
+            sourceId="SHC_WITHOUT_GROUP" [width]="100" maxlength="16">
+            <ngc-data-column dataField="code" [width]="100"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]=" 2">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="onSearch()" value="display.search" accessEnableOn="r"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<!-- COMMENT FOR PURPOSE -->
+<form [formGroup]="inboundFlightEForm">
+  <ngc-container type="tab" *ngIf="isFlightInformation">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label='flight.inbound.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNo"></ngc-display>/
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.sta'></ngc-label>
+        <div>
+          <ngc-display formControlName="sta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.eta'></ngc-label>
+        <div>
+          <ngc-display formControlName="eta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.ata'></ngc-label>
+        <div>
+          <ngc-display formControlName="ata"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label="bil.requestedBy"></ngc-label>
+        <div>
+          <ngc-lov [disabled]="onSearchFlag" formControlName="carrierCode" [width]="50" upperCase="true" noCache="true"
+            sourceId='CARRIER_OPT' title='flight.carrierType' dataField="code" displayMember="code" accessEnableOn="r">
+            <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+            <ngc-data-column text="g.description" dataField="desc" [width]="150">
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div>
+          <ngc-button value="import.safehandling" (click)="onReport()"></ngc-button>
+          <ngc-button value="import.shipsideEform" (click)="onReport()"></ngc-button>
+          <ngc-button value="import.aprontrans_internal" (click)="onReport()"></ngc-button>
+          <ngc-button value="import.aprontrans_external" (click)="onReport()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!-- pURPOSE OF THIS CONTAINER -->
+  <ngc-container type="tab" *ngIf="isFlightInformation">
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable #mainTable formArrayName="uldResultList" [pageSize]="15"
+          [hierarchy]="[['connectingFlightInfo']]">
+          <ngc-data-column text="" dataField="select" [width]="10" type="check" align="center" cellsAlign="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] ==  0" [formGroupName]="indexes['root']">
+                <ngc-checkbox [formControlName]="name"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.sNo" [width]='5' align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ng-container>
+                  <ngc-label label="{{indexes['root'] + 1}}"></ngc-label>
+                </ng-container>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="imp.ULDNumber" dataField="uldNumber" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.ShipmentNumber" dataField="shipmentNumber" align="center" cellsAlign="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="org" dataField="carrierCode" align="center" cellsAlign="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="des" dataType="date" dataField="carrierDestination" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.p_d_s" dataType="date" dataField="shipmentDescriptionCode" cellsAlign="center"
+            align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.shc" dataField="shcCodes" cellsAlign="center" align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="pieces" dataType="date" dataField="totalPieces" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="weight" dataField="weight" cellsAlign="center" align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.constraint_code" dataField="constraintCode" cellsAlign="center" align="center"
+            [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.non_assisted_code" dataField="nonAssistedCarrier" cellsAlign="center"
+            align="center" [width]="50">
+            <ng-template let-name="name" let-indexes="indexes">
+              <ng-container *ngIf="indexes['connectingFlightInfo'] == 0" [formGroupName]="indexes['root']">
+                <ngc-display [formControlName]="name"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="import.connectingFlight_Info_Details" name="jobOrderDetails" align="center"
+            cellsAlign="center" [width]="50">
+            <ngc-data-column text="import.connectingOutingFlight" dataField="flightKey" cellsAlign="center"
+              align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                    <ng-container formArrayName="connectingFlightInfo">
+                      <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="g.FlightDate" dataField="flightDate" cellsAlign="center" align="center" [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                    <ng-container formArrayName="connectingFlightInfo">
+                      <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.segment" dataField="flightOffPoint" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                    <ng-container formArrayName="connectingFlightInfo">
+                      <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="val.transfer" dataField="transferType" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                    <ng-container formArrayName="connectingFlightInfo">
+                      <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.transfer_pieces" dataField="piece" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                    <ng-container formArrayName="connectingFlightInfo">
+                      <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="import.transfer_weight" dataField="weight" cellsAlign="center" align="center"
+              [width]="50">
+              <ng-template let-name="name" let-indexes="indexes">
+                <ng-container [formGroupName]="indexes['root']">
+                  <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                    <ng-container formArrayName="connectingFlightInfo">
+                      <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                        <ngc-display [formControlName]="name"></ngc-display>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <!-- <ngc-data-column text="import.constraint_code" dataField="constraintCode" cellsAlign="center" align="center"
+                          [width]="50">
+                          <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                              <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                                <ng-container formArrayName="connectingFlightInfo">
+                                  <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                                    <ngc-display [formControlName]="name"></ngc-display>
+                                  </ng-container>
+                                </ng-container>
+                              </ng-container>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column> -->
+            <!-- <ngc-data-column text="import.constraint_code" dataField="constraintCode" cellsAlign="center" align="center"
+                          [width]="50">
+                          <ng-template let-name="name" let-indexes="indexes">
+                            <ng-container [formGroupName]="indexes['root']">
+                              <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                                <ng-container formArrayName="connectingFlightInfo">
+                                  <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                                    <ngc-display [formControlName]="name"></ngc-display>
+                                  </ng-container>
+                                </ng-container>
+                              </ng-container>
+                            </ng-container>
+                          </ng-template>
+                        </ngc-data-column> -->
+            <!-- <ngc-data-column text="import.constraint_code" dataField="constraintCode" cellsAlign="center" align="center"
+                                      [width]="50">
+                                      <ng-template let-name="name" let-indexes="indexes">
+                                        <ng-container [formGroupName]="indexes['root']">
+                                          <ng-container *ngIf="indexes['connectingFlightInfo'] >= 0">
+                                            <ng-container formArrayName="connectingFlightInfo">
+                                              <ng-container [formGroupName]="indexes['connectingFlightInfo']">
+                                                <ngc-display [formControlName]="name"></ngc-display>
+                                              </ng-container>
+                                            </ng-container>
+                                          </ng-container>
+                                        </ng-container>
+                                      </ng-template>
+                                    </ngc-data-column> -->
+          </ngc-data-column>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #popUpWindow [width]="50" [height]="500" title="import.aprontrans_external">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label=""></ngc-label>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

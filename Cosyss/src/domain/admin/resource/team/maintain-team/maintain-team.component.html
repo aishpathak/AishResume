@@ -1,0 +1,228 @@
+<form [formGroup]="maintainTeamForm">
+  <ngc-titlebar title='admin.title.maintain.team' (save)="OnSave()" (clear)="OnClear()" (cancel)="onBack($event)"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <!--KEY_TEAM_NAMES-->
+      <ngc-column [column]="2">
+        <ngc-label value="admin.team.name"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName="teamName" [noCache]="true" sourceId="KEY_TEAM_NAMES" title="admin.team"
+            [width]="150" dataField="desc" UPPERCASE="true">
+            <ngc-data-column text="Team" dataField="desc" displayMember="desc" [width]="50"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label value="admin.team.working.shift.time.from"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="shiftStartsAt" [showCalendarButton]="false"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label value="admin.team.working.shift.time.to"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="shiftEndsAt" [showCalendarButton]="false"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="repeatUntilColumn">
+        <ngc-label value="admin.team.repeat.untill"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="repeatUntils" [showCalendarButton]="true"
+            [showTimeButton]="true"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <ngc-button *ngIf="hideButton" value="g.delete" (click)="onConfirm()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab" *ngIf="createTeamTable">
+    <ngc-row>
+      <ngc-column [column]="8">
+        <ngc-container>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-display value=""></ngc-display>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-display value="&nbsp;"></ngc-display>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead align="left">
+                  <tr>
+                    <th width="30">
+                      <ngc-label value=""></ngc-label>
+                    </th>
+                    <th width="250">
+                      <ngc-label value="Role"></ngc-label>
+                    </th>
+                    <th width="250">
+                      <ngc-label value="Staff"></ngc-label>
+                    </th>
+                    <th width="5">
+                      <ngc-label *ngIf="showRoleCode"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="staffRole">
+                  <tr *ngFor="let item of  maintainTeamForm.controls.staffRole.controls let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="check"></ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-dropdownlist [width]="400" required (select)="changeToCode($event, index)" sourceId="ROLE_CODE_TEAM"
+                        sourceType='query' [dropDownWidth]="400" formControlName="role"></ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-lov formControlName="staff" [sourceParameters]="getLovForStaff" sourceId="AUTHORIZE_TO_CHANGE"
+                        title="admin.staff" [width]="250" dataField="desc" required UPPERCASE="true" [lazyView]="false">
+                        <ngc-data-column text="admin.staff" dataField="desc" displayMember="desc" [width]="50"
+                          formControlName="staff"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td>
+                      <ngc-input *ngIf="showRoleCode" formControlName="roleCode"></ngc-input>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button value="admin.team.add.staff" (click)="addStaffRowForCreateTeam()"></ngc-button>
+              <ngc-button value="admin.team.delete.staff" (click)="removeStaffRowForCreateTeam()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="showTable" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="teamInformation" (linkClick)="openWindow($event)">
+          <ngc-data-column text=" " type="check" [width]="20" align="center" cellsAlign="center" dataField="check"></ngc-data-column>
+          <ngc-data-column text="maintainteam.teamname" [width]="50" align="left" cellsAlign="left" dataField="teamName"
+            UPPERCASE="true"></ngc-data-column>
+          <ngc-data-column text="maintainteam.workingshifttime" [width]="40" align="left" cellsAlign="left" dataField="stratEndDispStr"></ngc-data-column>
+          <ngc-data-column text="admin.team.repeat.untill" [width]="40" align="left" cellsAlign="left" dataField="repeatUntill"
+            type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="g.createdBy" [width]="50" align="left" cellsAlign="left" dataField="createdBy"></ngc-data-column>
+          <ngc-data-column text="g.createdOn" [width]="50" align="left" cellsAlign="left" dataField="createdOn" type="displayDateTime"></ngc-data-column>
+          <ngc-data-column text="g.edit" type="link" iconType="edit" [width]="20" align="left" cellsAlign="left"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #showPopUpWindow width="750" height="400" title="admin.title.maintain.team">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column [column]="2" align="left">
+          <ngc-label value="admin.team.name"></ngc-label>
+          <div>
+            <ngc-display formControlName="teamName1"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3" align="center">
+          <ngc-label label="admin.team.working.shift.time"></ngc-label>
+          <div>
+            <ngc-display formControlName="startendtime"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="3">
+          <ngc-label label="admin.team.repeat.untill"></ngc-label>
+          <div>
+            <ngc-datetimeinput [width]="160" formControlName="repeatUntill1" [showCalendarButton]="true"
+              [showTimeButton]="true" placeHolder="Date"></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column column="1"></ngc-column>
+        <ngc-column>
+          <ngc-row>
+            <ngc-column>
+              <ngc-display value="&nbsp;"></ngc-display>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th width="20">
+                      <ngc-label value=""></ngc-label>
+                    </th>
+                    <th width="150">
+                      <ngc-label value="Role"></ngc-label>
+                    </th>
+                    <th width="205">
+                      <ngc-label value="Staff"></ngc-label>
+                    </th>
+                    <th width="10">
+                      <ngc-label value="&nbsp;"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="staffRoleForCreateTeam">
+                  <tr *ngFor="let item of maintainTeamForm.controls.staffRoleForCreateTeam.controls let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-checkbox formControlName="check"></ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-dropdownlist [width]="200" required (select)="changeToCode($event, index)" sourceId="ROLE_CODE_TEAM"
+                        sourceType='query' [dropDownWidth]="200" formControlName="roleCode" [noCache]="true"></ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-lov formControlName="staff" [sourceParameters]="getLovForStaff" [noCache]="true" sourceId="AUTHORIZE_TO_CHANGE"
+                        title="admin.staff" [width]="250" dataField="desc" required UPPERCASE="true">
+                        <ngc-data-column text="admin.staff" dataField="desc" displayMember="desc" [width]="50"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td>
+                      <ngc-input *ngIf="showRoleCode" formControlName="roleCode"></ngc-input>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="7"></ngc-column>
+            <ngc-column>
+              <ngc-button value="admin.team.add.staff" (click)="addStaffRow()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="sectiontop">
+      <ngc-row>
+        <ngc-column column="12" align="right">
+          <ngc-button value="g.delete" (click)="onDeleteStaffRole()"></ngc-button>
+          <ngc-button value="g.save" (click)="onUpdate()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

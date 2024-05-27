@@ -1,0 +1,475 @@
+<form [formGroup]="listServiceRequestForm">
+  <ngc-titlebar title='bil.list.service.request' (save)="onSave($event)" (clear)="onClear($event)"
+    (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="section" formGroupName="searchOp">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.request.fromDate"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="requestedFrom" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.request.fromTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput formControlName="requestedTo" [showCalendarButton]="true" [showTimeButton]="true">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1.5">
+        <ngc-label label="bil.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='ServicesSats$ServiceStatusSats' formControlName="status" [width]="110"
+            selectedIndex="pending"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column column="1.5">
+        <ngc-label label="bil.handlingArea"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="handlingArea" sourceId='SVC_HANDLINGAREA'  sourceType='query'
+            [sourceParameters]="serviceCategoryCriteria" [width]="100"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="2">
+        <ngc-label label="bil.serviceRequestNo"></ngc-label>
+        <div>
+          <ngc-input formControlName="serviceRequestNo"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="billing.requestedby"></ngc-label>
+        <div>
+          <ngc-input formControlName="requestedBy"></ngc-input>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column [column]="1" entityAttribute='Billing.TruckNumber'>
+        <ngc-label label="TruckNumber"></ngc-label>
+        <div>
+          <ngc-input formControlName="truckNumber" [width]="100"></ngc-input>
+        </div>
+      </ngc-column> -->
+      <ngc-column>
+        <br />
+        <ngc-button label="g.search" iconType="search" (click)='searchServices($event)'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="customerlist.cstname"></ngc-label>
+        <div>
+          <ngc-lov sourceId="CUSTOMER_LIST"   (select)='onClickCustomer($event)' formControlName="customerId"
+            title="billing.list.of.customer"  dataField="param1" displayField="desc" valueMember="desc"
+            [validOnly]='true'>
+            <ngc-data-column text="g.code"  dataField="code"  [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="80" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="bil.serviceName"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" sourceId="SERVICE_LIST"  title="billing.list.of.services"
+            (select)='onClickService($event)' formControlName="serviceCode" [sourceParameters]="customerId"
+             dataField="code" displayField="desc" valueMember="desc" [validOnly]='true'>
+            <ngc-data-column text="g.code"  dataField="code"  [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.description" [width]="80" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1.5">
+        <ngc-label label="billing.reference.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId='Services$ReferenceType' formControlName="referenceType" [width]="110"
+            (select)="setReferenceCode($event)"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1.5">
+        <ngc-label label="billing.reference.code"></ngc-label>
+        <div>
+          <ngc-awbinput *ngIf="showAWBInput" formControlName="shipmentNumber"
+            (ngModelChange)="getFlightDetails($event)"></ngc-awbinput>
+          <ngc-input *ngIf="showTruckInput" formControlName="truckNumber" [width]="100"></ngc-input>
+          <ngc-uldinput *ngIf="showULDInput" formControlName="containerNumber"></ngc-uldinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="1.5" *ngIf="handledbyHouse" entityAttribute='Gen.HAWBOrSBNumber'>
+        <ngc-label label="billing.hawbsbNumber"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="100"
+            sourceId='KEY_BILL_HWBNUMBER' dataField='code' valueMember='code' [noCache]="true"
+            title="billing.hawbsbNumber"
+            [sourceParameters]="{'parameter1': this.listServiceRequestForm.controls.searchOp.get('shipmentNumber').value}"
+            (select)="setAWBNumber($event)">
+            <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code' required>
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="4.5" [grid36]="true" entityAttribute="Flight.DomesticInternationalHandling">
+        <ngc-label label='dropdown.International.domestic'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="domIntl" sourceId="DomIntl$DomIntlDrop" [width]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <!-- <ngc-column [column]="1.5">
+        <ngc-label label="billing.uld"></ngc-label>
+        <div>
+          <ngc-uldinput formControlName="containerNumber"></ngc-uldinput>
+        </div>
+      </ngc-column> -->
+      <ngc-column [column]="2">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput width='90' formControlName="flightKey"></ngc-flightkeyinput>
+          <ngc-dateinput formControlName='flightDate'></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="g.remarks"></ngc-label>
+        <div>
+          <ngc-input formControlName="remarks"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <br />
+        <ngc-button value="bill.listServiceRequest.create" (click)='createServiceRequest($event)'></ngc-button>
+      </ngc-column>
+      <ngc-column align="right">
+        <br />
+        <ngc-button value="bill.listServiceRequest.start" (click)='startService($event)'></ngc-button>
+        <ngc-button value="bill.listServiceRequest.complete" (click)='completeService($event)'></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable (linkClick)="onLinkClick($event)" formArrayName="resultList" [pageable]="true"
+          [pagerMode]="'advanced'" [enablePageSizeHeight]="false" [columnsHeight]="50">
+          <ngc-data-column text=" " dataField="check" [width]="8" type="check" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="billing.service.reqNo" dataField="serviceRequestNo" [width]="120" type="link"
+            cellsAlign="left" align='center'></ngc-data-column>
+          <ngc-data-column text="bil.service.request" dataField="serviceCode" [width]="150" cellsAlign="left"
+            align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="billingverification.customer" dataField="customerCode" [width]="130" cellsAlign="left"
+            align='center'>
+          </ngc-data-column>
+          <!-- <ngc-data-column text="billing.service.shpNo" dataField="shipmentNumber" [width]="100" cellsAlign="left"
+            align='center'> -->
+          <!-- </ngc-data-column> -->
+          <ngc-data-column text="billing.reference.type" dataField="referenceType" [width]="100" cellsAlign="left"
+            align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="billing.reference.code" dataField="referenceCode" [width]="100" cellsAlign="left"
+            align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="billing.hawbsbNumber" dataField="hawbNumber" [width]="200" cellsAlign="center"
+            align='center' entityAttribute='Gen.HAWBOrSBNumber'>
+          </ngc-data-column>
+          <ngc-data-column text="import.domesticInternational" dataField="domIntl" [width]="100" align="center"
+            cellsAlign="center" type="text" entityAttribute="Awb.DomesticInternationalHandling">
+          </ngc-data-column>
+          <!-- <ngc-data-column text="listsr.UldNumber" dataField="containerNumber" [width]="90" [height]="20"
+            cellsAlign="center" align='center'>
+          </ngc-data-column> -->
+          <!-- <ngc-data-column text="awb.flight" dataField="flightKey" [width]="60" cellsAlign="left" align='center'> -->
+          <!-- <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName='flightKey'></ngc-display> 
+                <ngc-display formControlName="flightDate">
+                </ngc-display>
+              </ng-container>
+            </ng-template> -->
+          <!-- </ngc-data-column> -->
+          <!-- <ngc-data-column text="listsr.flightDate" dataField="flightDate" type='displayDate' [width]="120"
+            cellsAlign="center" align='center'>
+          </ngc-data-column> -->
+          <!-- <ngc-data-column text="g.truck.number" dataField="truckNumber" [width]="120" cellsAlign="left" align='center'
+            entityAttribute="Billing.TruckNumber"> -->
+          <!-- </ngc-data-column> -->
+          <ngc-data-column text="listsr.svcReq" dataField="requestedOn" type="displayDateTime" [width]="100"
+            cellsAlign="center" align='center'></ngc-data-column>
+          <ngc-data-column text="awb.remarks" dataField="remarks" [width]="120" cellsAlign="left" align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="bil.requestedBy" dataField="requestedBy" [width]="120" cellsAlign="left"
+            align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="bil.status" dataField="status" [width]="100" cellsAlign="left" align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="listsr.paymentStatus" dataField="paymentStatus" [width]="90" cellsAlign="left"
+            align='center'>
+            <ngc-icon type="yesno" value='g.yes'></ngc-icon>
+          </ngc-data-column>
+          <ngc-data-column text="billing.br.grossAmount" dataField="grossAmount" [width]="90" feature='Billing.SalesTax'
+            cellsAlign="right" align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="billing.br.taxAmount" dataField="taxAmount" [width]="90" feature='Billing.SalesTax'
+            cellsAlign="right" align='center'>
+          </ngc-data-column>
+          <!-- <ngc-data-column text="Tax Comp1" dataField="taxComp1" [width]="90" entityAttribute='Billing.TaxComp1'
+            cellsAlign="right" align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="Tax Comp2" dataField="taxComp2" [width]="90" entityAttribute='Billing.TaxComp2'
+            cellsAlign="right" align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="Tax Comp3" dataField="taxComp3" [width]="90" entityAttribute='Billing.TaxComp3'
+            cellsAlign="right" align='center'>
+          </ngc-data-column> -->
+          <ngc-data-column text="Amount" type="displayCurrency" dataField="amount" [width]="100" cellsAlign="right"
+            align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="listsr.rejectReason" dataField="rejectReason" [width]="100" cellsAlign="left"
+            align='center'>
+          </ngc-data-column>
+          <ngc-data-column text="listsr.slaIndicator" dataField="slaIndicator" iconType="warning" [width]="80"
+            cellsAlign="left" align='center'></ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="EDIT" type="link" iconType="edit" [width]="60" align="center"
+            cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #viewWindow [width]="1200" [height]="360" title="billing.view.title" [showCloseButton]="true">
+    <form [formGroup]="viewServiceRequestForm">
+      <ngc-container type="section">
+        <ngc-row>
+          <ngc-column [column]="1.5">
+            <ngc-label label="bil.serviceName"></ngc-label>
+            <div>
+              <ngc-display formControlName="serviceCode" [width]="200"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1.5">
+            <ngc-label label="customerlist.cstname"></ngc-label>
+            <div>
+              <ngc-display formControlName="customerName" [width]="200"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="1.5">
+            <ngc-label label="bil.serviceRequestNo"></ngc-label>
+            <div>
+              <ngc-display formControlName="serviceRequestNo" [width]="170"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1.5" feature="Billing.AirlineBilling">
+            <ngc-label value="service.category"></ngc-label>
+            <div>
+              <ngc-display formControlName="serviceCategory"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1">
+            <ngc-label label="bil.status"></ngc-label>
+            <div>
+              <ngc-display formControlName="status" sourceCategory="dropdown" sourceId="ServicesSats$ServiceStatusSats"
+                [width]="170"></ngc-display>
+            </div>
+          </ngc-column>
+
+
+          <ngc-column [column]="1.5">
+
+            <ngc-label label="bil.serviceDateTime" required></ngc-label>
+            <div>
+              <ngc-display formControlName="requestedOn"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="1.5">
+            <ngc-label label="bil.requestedBy"></ngc-label>
+            <div>
+              <ngc-display formControlName="requestedBy" [width]="180"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="1.5">
+            <ngc-label label="bil.phoneNumber"></ngc-label>
+            <div>
+              <ngc-display formControlName="requestorContactNumber"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+
+      <ngc-container type="section" *ngIf="isGeneric">
+        <ngc-row>
+          <ngc-column [column]="1.5" *ngIf="isTruck">
+            <ngc-label label="g.truck.number"></ngc-label>
+            <div>
+              <ngc-display formControlName="truckNumber"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1.5" *ngIf="isULD">
+            <ngc-label label="imp.ULDNumber"></ngc-label>
+            <div>
+              <ngc-display formControlName="containerNumber"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column column="3">
+            <ngc-label label="g.duration"></ngc-label>
+            <div>
+              <ngc-label formControlName="durationOf" value=""></ngc-label>&nbsp;
+              <ngc-display decimalDigits="0" digits="5" formControlName="duration"></ngc-display>&nbsp;
+              <ngc-display sourceCategory="dropdown" formControlName="durationUom"
+                sourceId="Billing$Billing.DurationUom"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="expdgd.quantity"></ngc-label>
+            <div>
+              <ngc-label formControlName="quantityOf" value=""></ngc-label>&nbsp;
+              <ngc-display decimalDigits="2" digits="5" formControlName="requestedQuantity"></ngc-display>&nbsp;
+              <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$UOM"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+
+      <ngc-container type="section" *ngIf="isAWB">
+        <ngc-row>
+          <ngc-column [column]="1.5">
+            <ngc-label label="val.no"></ngc-label>
+            <div>
+              <ngc-display formControlName="shipmentNumber" required></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="1.5" entityAttribute='Gen.HAWBOrSBNumber'>
+            <ngc-label label="billing.hawbsbNumber"></ngc-label>
+            <div>
+              <ngc-display formControlName="hawbNumber" required></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1.5">
+            <ngc-label label="imp.ULDNumber"></ngc-label>
+            <div>
+              <ngc-display formControlName="containerNumber"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="2">
+            <ngc-label label="awb.flight"></ngc-label>
+            <div>
+              <ngc-display formControlName="flightKey"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="2">
+            <ngc-label label="billingverification.flightdate"></ngc-label>
+            <div>
+              <ngc-display formControlName="flightDate"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="3">
+            <ngc-label label="g.duration"></ngc-label>
+            <div>
+              <ngc-display formControlName="durationOf" value=""></ngc-display>&nbsp;
+              <ngc-display decimalDigits="0" digits="5" formControlName="duration"></ngc-display>&nbsp;
+              <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$Billing.DurationUom">
+              </ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="1.5">
+            <ngc-label label="expdgd.quantity"></ngc-label>
+            <div>
+              <ngc-display formControlName="quantityOf" value=""></ngc-display>&nbsp;
+              <ngc-display decimalDigits="2" digits="5" formControlName="requestedQuantity"></ngc-display>&nbsp;
+              <ngc-display sourceCategory="dropdown" formControlName="uom" sourceId="Billing$UOM"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+
+      <ngc-container type="section">
+        <ngc-row>
+          <ngc-column [column]="8">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label="bil.requestorRemarks"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="remarks" [width]="555"></ngc-display>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+
+          <ngc-column [column]="4">
+            <ngc-container type="tab">
+              <ngc-row>
+                <ngc-column [column]="2">
+                </ngc-column>
+                <ngc-column>
+                  <ngc-label label="bil.notificationEmail"></ngc-label>
+                  <div>
+                    <ngc-display formControlName="notificationEmailId1" [width]="250"></ngc-display>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]="2">
+                </ngc-column>
+                <ngc-column>
+                  <ngc-display formControlName="notificationEmailId2" [width]="250"></ngc-display>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]="2">
+                </ngc-column>
+                <ngc-column>
+                  <ngc-display formControlName="notificationEmailId3" [width]="250"></ngc-display>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]="2.5">
+            <ngc-label label="bil.service.started"></ngc-label>
+            <div>
+              <ngc-display formControlName="startedOn"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="2.5">
+            <ngc-label label="bil.service.completed"></ngc-label>
+            <div>
+              <ngc-display formControlName="completedOn"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+          <ngc-column [column]="2.5">
+            <ngc-label label="req.reason"></ngc-label>
+            <div>
+              <ngc-display formControlName="rejectReason" sourceCategory="dropdown"
+                sourceId='Bil_RejReason$RejectReason' [width]="190"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column [column]="8">
+            <ngc-label label="bil.executorRemarks"></ngc-label>
+            <div>
+              <ngc-display formControlName="additionalRemarks" [width]="400"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+
+  </ngc-window>
+</form>

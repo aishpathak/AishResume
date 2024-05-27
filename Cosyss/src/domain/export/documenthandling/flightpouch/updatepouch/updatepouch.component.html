@@ -1,0 +1,155 @@
+<form [formGroup]='updateFlightPouch'>
+    <ngc-titlebar title="export.flight.pouch.update.title"></ngc-titlebar>
+    <ngc-container type="header">
+        <ngc-row>
+            <ngc-column [column]="2">
+                <ngc-label label="flight.flight.no"></ngc-label>
+                <div>
+                    <ngc-input (blur)="fltMasking()" [maxLength]="8" upperCase="true" formControlName="flightNo"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label="flight.date"></ngc-label>
+                <div>
+                    <ngc-datetimeinput #flightOriDate [width]="150" formControlName="flightOriDate"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button (click)="getFlightPouchDetails()" iconType="search" value="g.search"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label="g.user"></ngc-label>
+                <div>
+                    <!-- <ngc-dropdownlist formControlName="userId" ngshowBoth="true" sourceId="STAFF"></ngc-dropdownlist> -->
+                    <ngc-input #userInput formControlName="userId" sourceId="STAFF" [minLength]="1" upperCase="true"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label="g.location"></ngc-label>
+                <div>
+
+                    <!-- <ngc-dropdownlist formControlName="phlocId" ngshowBoth="true" sourceId="LOCATIONS"></ngc-dropdownlist> -->
+                    <ngc-input #locInput formControlName="phlocId" [minLength]="1"></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2">
+                <ngc-label label=""></ngc-label>
+                <div>
+                    <ngc-button (click)="updatePouch()" iconType="save" value="g.save"></ngc-button>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <form [formGroup]='popupPouchForm'>
+        <ngc-container *ngIf="showUpdatePouchTable" type="box">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-table>
+                        <thead>
+                            <tr>
+                                <td>
+                                    <ngc-label value="g.sNo"></ngc-label>
+                                </td>
+                                <td>
+                                    <ngc-label value="g.sector"></ngc-label>
+                                </td>
+                                <td>
+                                    <ngc-label value="fltpouch.pouchid"></ngc-label>
+                                </td>
+                                <th>
+                                    <ngc-label value="g.status"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="g.user"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="g.location.name"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.deletereason"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="g.remarks"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="g.delete"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="fltpouch.reprint"></ngc-label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="popupPouchList">
+                            <tr *ngFor="let model of popupPouchForm.controls.popupPouchList.controls; let index=index" [formGroupName]="index">
+                                <td>
+                                    {{index + 1}}
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="sector"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="popPouchId"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="status"></ngc-display>
+                                </td>
+                                <td>
+                                    <!-- <ngc-dropdownlist formControlName="userId" ngshowBoth="true" sourceId="STAFF"></ngc-dropdownlist> -->
+                                    <ngc-display formControlName="userId"></ngc-display>
+                                </td>
+                                <td>
+                                    <!-- <ngc-dropdownlist formControlName="phlocId" ngshowBoth="true" sourceId="LOCATIONS"></ngc-dropdownlist> -->
+                                    <ngc-display formControlName="locationName"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-dropdownlist formControlName="delReason" ngshowBoth="true" sourceId="DELETEREASON"></ngc-dropdownlist>
+                                </td>
+                                <td>
+                                    <ngc-input formControlName="remark"></ngc-input>
+                                </td>
+                                <td>
+                                    <i (click)="deletePouch(model.controls.popPouchId.value, model.controls.delReason.value, model.controls.remark.value, model.controls.sector.value)"
+                                        style="color: red" class="fa fa-times" aria-hidden="true"></i>
+                                </td>
+                                <td>
+                                    <ngc-input formControlName="pouchLbl" hidden></ngc-input>
+                                    <i (click)="onPrintPouchUpdate(model.controls.popPouchId.value, model.controls.sector.value, model.controls.pouchLbl.value)"
+                                        class="fa fa-clipboard" aria-hidden="true"></i>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </ngc-table>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </form>
+
+</form>
+
+<form [formGroup]='popupPrinterInUpdateWindowForm'>
+    <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+        <ngc-container type="box">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-label label="g.printer"></ngc-label>
+                </ngc-column>
+            </ngc-row>
+            <ngc-row>
+                <ngc-column>
+                    <ngc-dropdownlist (ngModelChange)="getSelectedPrinter($event)" #printerdropdown formControlName="printerdropdown" ngshowBoth="true"></ngc-dropdownlist>
+                </ngc-column>
+                <ngc-column>
+                </ngc-column>
+                <ngc-column>
+                </ngc-column>
+                <ngc-column>
+                    <ngc-button (click)="onPouchPrint()" value="g.print"></ngc-button>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>

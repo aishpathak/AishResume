@@ -1,0 +1,272 @@
+<ngc-titlebar title="Add Shipment" (save)="onSaveOfShipmentDetails()" (cancel)="onCancel()" (clear)="onClear($event)">
+</ngc-titlebar>
+<form [formGroup]="MultipleShipmentForm">
+  <ngc-container type="header" *ngIf="titleAddEditShipment === 'export.book.editshipment'">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="{{shipmentNumberLabel}}"></ngc-label>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type='section'>
+    <ngc-row *ngIf="showFlag">
+      <ngc-column [column]="3">
+        <ngc-label label='flight.flightNumber'></ngc-label>
+        <div>
+          <ngc-display formControlName='flightKey'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3">
+        <ngc-label label='flight.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label='flight.std'></ngc-label>
+        <div>
+          <ngc-display formControlName="std"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="4">
+        <ngc-label label='flight.segment'></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis='md'></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column align="right">
+        <!-- <ngc-button value="save" (click)="onSaveOfShipmentDetails()"></ngc-button> -->
+        <ngc-button *ngIf='displayAddRowFlag' value="addRow" (click)="onAddRow()"></ngc-button>
+        <ngc-button *ngIf='displayAddRowFlag' value="delete" (click)="temporaryDeleteRow()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label value=" "></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.book.selectsegment'></ngc-label>
+              </th>
+              <!-- <th>
+                <ngc-label label='export.book.svc'></ngc-label>
+              </th> -->
+              <th>
+                <ngc-label label='g.awbNumber'></ngc-label>
+              </th>
+              <!-- <th>
+                <ngc-label label='export.book.blockspace'></ngc-label>
+              </th> -->
+              <th>
+                <ngc-label label='billing.org'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.dest'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="fbl.ShipmentCode"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.book.pieces'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.book.weight'></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.totalpieces'> </ngc-label>
+              </th>
+              <th>
+                <ngc-label label='awb.nog'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.shc'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='g.priority'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="fbl.buInstruction" align="center" cellsAlign="center"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="Remarks" align="center" cellsAlign="center"></ngc-label>
+              </th>
+              <!-- <th>
+                <ngc-label label='export.book.densitygroup'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.book.volume'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.book.volumecode'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.booking.status'></ngc-label>
+              </th> -->
+              <!-- <th>
+                <ngc-label value='g.shc'></ngc-label>
+              </th> -->
+            </tr>
+          </thead>
+          <tbody formArrayName="MultipleShipmentBooking">
+            <tr *ngFor="let record of MultipleShipmentForm.controls.MultipleShipmentBooking.controls; let index=index"
+              [formGroupName]="index">
+              <th>
+                <ngc-checkbox formControlName='temporaryDeleteCheckBox'></ngc-checkbox>
+              </th>
+              <th>
+                <ngc-dropdownlist required sourceId='FLIGHTSEGMENT_SHIPMENTBOOKING'
+                  [sourceParameters]="sourceIdSegmentDropdown" [displayBoth]="false" [noCache]='true' sourceType='query'
+                  (listOnSelect)='addBoardAndOffPoint($event)' [disabled]='commonDisabledFlag' [autoSelect]="true"
+                  [noBlank]="true" formControlName="dropDownVal" width='100px' #segmentDropDown></ngc-dropdownlist>
+              </th>
+              <th>
+
+                <ngc-awbinput required formControlName="shipmentNumber" [maxlength]="11"
+                  entityAttribute="Shipment.AWBNo" (ngModelChange)="onShipmentChange($event, index)"
+                  [disabled]='commonDisabledFlag' [autoFocus]="true">
+                </ngc-awbinput>
+                <!-- <ngc-input required formControlName="shipmentNumber" [maxlength]="11"
+                  (ngModelChange)="onShipmentChange($event, index)" [disabled]='commonDisabledFlag' [autoFocus]="true">
+                  mask="[a-zA-Z0-9]"
+                </ngc-input> -->
+
+              </th>
+
+
+              <!-- <th>
+                <ngc-checkbox formControlName="blockSpace" [disabled]='commonDisabledFlag'>
+                </ngc-checkbox>
+              </th> -->
+              <th>
+                <ngc-input required upperCase='true' maxlength='3' formControlName="origin" width='80px'></ngc-input>
+              </th>
+              <th>
+                <ngc-input required upperCase='true' maxlength='3' formControlName="destination" width='80px'>
+                </ngc-input>
+              </th>
+              <th>
+                <ngc-dropdownlist [source]='shpCodeList' formControlName="shipmentCode" [width]="60" upperCase="true"
+                  required></ngc-dropdownlist>
+              </th>
+              <!-- <th>
+                <ngc-input required upperCase='true' maxlength='3' formControlName="shpCode" width='80px'>
+                </ngc-input>
+              </th> -->
+              <th>
+                <ngc-piecesinput formControlName="pieces" required></ngc-piecesinput>
+              </th>
+              <th>
+                <ngc-weightinput formControlName="grossWeight" required width='80px'></ngc-weightinput>
+              </th>
+              <th>
+                <ngc-piecesinput formControlName="totalPieces"></ngc-piecesinput>
+              </th>
+              <th>
+                <ngc-input formControlName="natureOfGoodsDescription" [maxlength]="50" required width='100px'
+                  [disabled]='manualBookingFlag'></ngc-input>
+              </th>
+              <th>
+                <ngc-shcinput upperCase="true" [width]="50" [maxItems]="9" formArrayName="shcList"
+                  dataField="specialHandlingCode">
+                </ngc-shcinput>
+              </th>
+              <th>
+                <ngc-input type="number" required upperCase='true' maxlength='1' formControlName="bookingPriority"
+                  width='50px' pattern="[0-9]+">
+                </ngc-input>
+              </th>
+              <th>
+                <ngc-input upperCase='true' formControlName="buInstruction" align="center" cellsAlign="center"
+                  width='150px'>
+                </ngc-input>
+              </th>
+              <th>
+                <ngc-input upperCase='true' formControlName="fblRemarks" align="center" cellsAlign="center"
+                  width='150px'>
+                </ngc-input>
+              </th>
+
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #routingInfoWindow title="awb.routing" [showCloseButton]="true" [width]="800" [height]="500">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.booking.update.label"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="MultipleShipmentBookingWithMatchingRoute" [pageable]="false">
+            <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center" [width]="5">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+            </ngc-data-column>
+            <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center" dataField="partShipment">
+            </ngc-data-column>
+            <ngc-data-column text="awb.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+              cellsAlign="left">
+            </ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.booking.routing.mismatch.label"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.booking.flight"></ngc-label>
+          <ngc-display formControlName='flightKey'></ngc-display>-
+          <ngc-display formControlName="segment"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="MultipleShipmentBookingWithNonMatchingRoute" [pageable]="false">
+            <ngc-data-column text="g.check" dataField="checkBox" [width]="5" type="check" align="center"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="g.sNo" [width]="5" dataField="sno" align="center" cellsAlign="center" [width]="5">
+            </ngc-data-column>
+            <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" [width]="20">
+            </ngc-data-column>
+            <ngc-data-column text="awb.suffix" cellsAlign="center" [width]="20" align="center" dataField="partShipment">
+            </ngc-data-column>
+            <ngc-data-column text="awb.routing" [width]='20' dataField="shipmentRoutingInfo" align="center"
+              cellsAlign="left"></ngc-data-column>
+
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-label label='export.booking.proceed.label'>
+          </ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button value="g.yes" (click)="sendRequestAddShipment()" align="left"></ngc-button>
+          <ngc-button value="g.no" (click)="closePopup()" align="right"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

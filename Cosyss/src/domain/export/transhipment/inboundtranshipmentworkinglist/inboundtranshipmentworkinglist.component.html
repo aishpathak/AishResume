@@ -1,0 +1,503 @@
+<form [formGroup]="inboundTransshipmentWorkingListForm">
+  <ngc-titlebar title="transhipment.inboundtranshipmentworkinglist" (print)="printReport()"
+    (cancel)="navigateToPreviousPage()"></ngc-titlebar>
+  <ngc-page>
+    <ngc-page-header [height]="80">
+      <ngc-container type="section">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value="flight.Flight"></ngc-label>
+            <div>
+              <ngc-display formControlName="flightKey"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value="flight.date"></ngc-label>
+            <div>
+              <ngc-display formControlName="date" [onlyDate]="true"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value="flight.sta"></ngc-label>
+            <div>
+              <ngc-display formControlName="sta"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value="flight.eta"></ngc-label>
+            <div>
+              <ngc-display formControlName="eta"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value="flight.segment"></ngc-label>
+            <div>
+              <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value="abycRegistration"></ngc-label>
+            <div>
+              <ngc-display formControlName="acRegistration"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value="transferType"></ngc-label>
+            <div>
+              <ngc-display emphasis="md" formControlName="transferType"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label value="expbu.loadinginstr"></ngc-label>
+            <div>
+              <ngc-display formControlName="loadingInstruction"></ngc-display>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-printer [width]='200' #printerName [printerTypeList]="['AWB']" [autoSelectOnSingle]="true">
+            </ngc-printer>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-page-header>
+    <ngc-container>
+      <ngc-row>
+        <ngc-column column="11.7" align="center">
+          <ngc-table>
+            <thead>
+              <tr [ngStyle]="{ 'border' : '1px solid black' } ">
+                <th>
+                  <ngc-label value="g.select">
+                  </ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="awb.awbnumber"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="awb.ready"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="awb.origin"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="awb.destination"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.shc"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="natureOfGoods"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.pieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.totalpieces"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="transferType"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="exp.acceptance.fwb"></ngc-label>
+                </th>
+
+                <th>
+                  <ngc-label value="exp.acceptance.fhl"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="export.ITWL.fsu.rcf"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="flightList">
+              <ng-container
+                *ngFor="let item of inboundTransshipmentWorkingListForm.controls.flightList.controls let index=index"
+                [formGroupName]="index">
+                <tr [ngStyle]="{'background-color': '#999DA0'} "
+                  *ngIf="item.get('uldInformationList') && item.get('uldInformationList').length > 0">
+                  <td colspan="17">
+                    <ngc-display formControlName="flightKey"></ngc-display> -
+                    <ngc-display formControlName="standardEstimatedDateTime" [onlyDate]="true" type="displayDate"
+                      upperCase="true">
+                    </ngc-display> -
+                    <ngc-display formControlName="airport" upperCase="true">
+                    </ngc-display> -
+                    <ngc-display formControlName="standardEstimatedDateTime" type="displayTime" [onlyTime]="true"
+                      upperCase="true">
+                    </ngc-display> - DLS -
+                    <ngc-display formControlName="dls" upperCase="true">
+                    </ngc-display> -
+                    <ngc-display formControlName="timeDifference"></ngc-display>
+                  </td>
+                </tr>
+                <ng-container formArrayName="uldInformationList">
+                  <ng-container *ngFor="let sitem of item.controls.uldInformationList.controls let sindex=index"
+                    [formGroupName]="sindex">
+                    <tr [ngStyle]="{'background-color': '#B9BBB6'} ">
+                      <td>
+                        <ngc-checkbox formControlName="select" (modelChange)="onSelectCheckBox($event, index, sindex)">
+                        </ngc-checkbox>
+                      </td>
+                      <td colspan="16">
+                        {{sitem.get('uldKey').value}}
+                        <ng-container *ngIf="sitem.get('contourCode').value">
+                          / {{sitem.get('contourCode').value}}
+                        </ng-container>
+                        <ng-container *ngIf="sitem.get('weightUld').value">
+                          / {{sitem.get('weightUld').value}}
+                        </ng-container>
+                        <ng-container *ngIf="sitem.get('weightUnitCode').value">
+                          / {{sitem.get('weightUnitCode').value}}
+                        </ng-container>
+                        <ng-container *ngIf="sitem.get('assigned').value && sitem.get('uldKey').value != 'BULK'">
+                          - ASSIGNED
+                        </ng-container>
+                        <ng-container *ngIf="!sitem.get('assigned').value && sitem.get('uldKey').value != 'BULK'">
+                          - NOT ASSIGNED
+                        </ng-container>
+                        <ng-container *ngIf="sitem.get('mixLoad').value">
+                          <strong style="color:red;">- ML</strong>
+                        </ng-container>
+                        <ng-container *ngIf="sitem.get('note') && sitem.get('note').value">
+                          <strong style="color:red;">{{sitem.get('note').value}}</strong>
+                        </ng-container>
+                      </td>
+                    </tr>
+                    <ng-container formArrayName="shipmentList">
+                      <tr *ngFor="let titem of sitem.controls.shipmentList.controls let tindex=index"
+                        [formGroupName]="tindex" [ngStyle]="{'background-color': 'white'} ">
+                        <td *ngIf="!titem.get('throughServiceShipment').value">
+                        </td>
+                        <td *ngIf="titem.get('throughServiceShipment').value">
+                          <ngc-checkbox formControlName="select"></ngc-checkbox>
+                        </td>
+                        <td width="400">
+                          <ngc-container>
+                            <ngc-row>
+                              <ngc-column>
+                                <ngc-display formControlName="shipmentNumber">
+                                </ngc-display>
+                                &nbsp; &nbsp;
+                                <ngc-display formControlName="partSuffix" emphasis="md" color="red"></ngc-display>
+                                <ng-container *ngIf="sitem.get('uldKey').value == 'BULK' && (titem.get('loadedShipmentInfoId') && titem.get('loadedShipmentInfoId').value 
+                                  || titem.get('loadedUld') && titem.get('loadedUld').value)">
+                                  <ngc-display value="export.ITWL.assigned" [i18n]="true">
+                                  </ngc-display>
+                                </ng-container>
+                              </ngc-column>
+                            </ngc-row>
+                            <ngc-row *ngIf="titem.get('loadedUld') && titem.get('loadedUld').value">
+                              <ngc-column>
+                                <ngc-display value="["></ngc-display>
+                                <ngc-display formControlName="loadedUld" color="red"></ngc-display>
+                                <ngc-display value="]"></ngc-display>
+                              </ngc-column>
+                            </ngc-row>
+                          </ngc-container>
+                        </td>
+                        <!-- <td class="align-middle" align="center">
+                          <ngc-display *ngIf="false" formControlName="finalizedShipment"></ngc-display>
+                          <ngc-display *ngIf="titem.get('finalizedShipment').value" value="F"></ngc-display>
+                          <ngc-display *ngIf="!titem.get('finalizedShipment').value"></ngc-display>
+                        </td> -->
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="ready"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="origin"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="destination"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="concatSHC"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="natureOfGoods"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="pieces"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="totalPieces"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display emphasis="md" formControlName="transferType"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="fwb"></ngc-display>
+                        </td>
+                        <!-- <td class="align-middle" align="center">
+                          <ngc-display formControlName="ready"></ngc-display>
+                        </td> -->
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="fhl"></ngc-display>
+                        </td>
+                        <td class="align-middle" align="center">
+                          <ngc-display formControlName="rct"></ngc-display>
+                        </td>
+                      </tr>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-footer>
+      <ngc-row>
+        <ngc-column align="center">
+          <ngc-button value="tt.print" (click)="onPrintAwb()"
+            [disabled]="hasReadPermission || this.printerName['value'] === null || this.printerName['value'] === undefined ">
+          </ngc-button>
+          <ngc-button value="tt.load" (click)="loadShipment()" [disabled]="hasReadPermission || finalizeFag || isST">
+          </ngc-button>
+          <ngc-button value="tt.unload" (click)="unloadshipmentToFlight()" ng-dblclick="return false;"
+            ng-disabled="unloadflag" [disabled]="hasReadPermission || finalizeFag || isST">
+          </ngc-button>
+          <!-- <ngc-button accessEnableOn="r" value="tt.finalize" (click)="shipmentByfinalized()"
+            [disabled]="finalizeFag || isST">
+          </ngc-button> -->
+          <ngc-button value="tt.throughtransit" (click)="sendAdvice()">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-footer>
+  </ngc-page>
+</form>
+
+<form [formGroup]="uldForm">
+  <ngc-window #uldUpdateWindow title="unload.loadShipment" [showCloseButton]="true" width="1250" [height]='500'>
+    <ngc-container type="tab" formArrayName="flightList">
+      <ng-container *ngFor="let item of uldForm.get('flightList').controls; let index=index" [formGroupName]="index">
+        <ngc-row>
+          <ngc-column>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th align="center">
+                    <ngc-display formControlName="flightKey"></ngc-display>
+                    -
+                    <ngc-display formControlName="standardEstimatedDateTime"></ngc-display>
+                    -
+                    <ngc-display formControlName="airport"></ngc-display>
+                  </th>
+              </thead>
+            </ngc-table>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="item.get('uldInformationList').length>0 || item.get('bulkShipmentList').length>0">
+          <ngc-column>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th>
+                    <ngc-label label="g.uldTrolleyNumber"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="uld.weight"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="export.countourcode"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="awb.awbnumber"></ngc-label>
+                  </th>
+                  <th *ngIf="item.get('sqCarrier').value">
+                    <ngc-label label="awb.part.suffix"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="g.shc"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="g.pieces"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="g.weight"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="awb.shipment.loc" [width]="20"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label label="awb.warehouse.loc" [width]="20"></ngc-label>
+                  </th>
+              </thead>
+              <tbody formArrayName="uldInformationList">
+                <ng-container *ngFor="let uldItem of item.get('uldInformationList').controls; let uldIndex=index"
+                  [formGroupName]="uldIndex">
+                  <tr>
+                    <td>
+                      <ngc-uldinput
+                        (ngModelChange)="onChangeUldToBulk(index,uldIndex,uldItem.getRawValue(), 'uldInformationList')"
+                        formControlName="uldKey">
+                      </ngc-uldinput>
+                    </td>
+                    <td>
+                      <ngc-weightinput negativeSymbol=" " formControlName="weightUld" [digits]="7" decimalDigits="0"
+                        width='100px'></ngc-weightinput>
+                    </td>
+                    <td>
+                      <ngc-dropdownlist
+                        [required]="uldItem.get('uldKey').value != null && uldItem.get('uldKey').value != ''"
+                        [autoSelect]=" false" [noBlank]="false" sourceId="CONTOURCODE_BASED_ON_ULD" [width]='80'
+                        sourceType="query" formControlName='contourCode' [sourceParameters]="uldForContourCode">
+                      </ngc-dropdownlist>
+                    </td>
+                  </tr>
+                  <ng-container *ngIf="uldItem.get('shipmentList').length>0">
+                    <ng-container formArrayName="shipmentList">
+                      <ng-container
+                        *ngFor="let shipmentItem of uldItem.get('shipmentList').controls; let shipmentIndex=index"
+                        [formGroupName]="shipmentIndex">
+                        <tr>
+                          <td colspan="3">
+                          </td>
+                          <td>
+                            <ngc-awbdisplay [disabled]="shipmentItem.get('mixLoadStatus').value"
+                              formControlName="shipmentNumber"></ngc-awbdisplay>
+                          </td>
+                          <td *ngIf="item.get('sqCarrier').value">
+                            <ngc-dropdownlist formControlName="partSuffix" width='70px'
+                              [source]="shipmentItem.get('allPartSuffix').value" [autoSelect]="true" required>
+                            </ngc-dropdownlist>
+                          </td>
+
+                          <td>
+                            <ngc-display [disabled]="shipmentItem.get('mixLoadStatus').value"
+                              formControlName="concatSHC"></ngc-display>
+                          </td>
+                          <td>
+                            <ngc-piecesinput [disabled]="shipmentItem.get('mixLoadStatus').value"
+                              formControlName="pieces"></ngc-piecesinput>
+                          </td>
+                          <td>
+                            <ngc-weightinput [disabled]="shipmentItem.get('mixLoadStatus').value" negativeSymbol=" "
+                              formControlName="weight" [digits]="7" decimalDigits="0" width='100px'></ngc-weightinput>
+                            <!-- <ngc-weightinput [disabled]="shipmentItem.get('mixLoadStatus').value" formControlName="weight"></ngc-weightinput> -->
+                          </td>
+                          <td></td>
+                          <td>
+                            <ngc-locations-list [disabled]="shipmentItem.get('mixLoadStatus').value"
+                              [displayOnlyLocation]="true" [locationTypeList]="['TTWL']"
+                              formControlName="warehouseLocation" [width]="120"></ngc-locations-list>
+                          </td>
+                        </tr>
+
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </tbody>
+              <tbody formArrayName="bulkShipmentList">
+                <ng-container *ngFor="let bulkItem of item.get('bulkShipmentList').controls; let bulkIndex=index"
+                  [formGroupName]="bulkIndex">
+                  <tr>
+                    <td>
+                      <ngc-uldinput formControlName="uldKey"
+                        (ngModelChange)="onChangeBulkToULD(index,bulkIndex,bulkItem.getRawValue(), 'bulkShipmentList')">
+                      </ngc-uldinput>
+                    </td>
+                    <td>
+                      <ngc-weightinput negativeSymbol=" " formControlName="weightUld" [digits]="7" decimalDigits="0"
+                        width='100px'>
+                      </ngc-weightinput>
+                    </td>
+                    <td>
+                      <ngc-dropdownlist
+                        [required]="bulkItem.get('uldKey').value != null && bulkItem.get('uldKey').value != ''"
+                        [autoSelect]="false" [noBlank]="false" sourceId="CONTOURCODE_BASED_ON_ULD" [width]='80'
+                        sourceType="query" formControlName='contourCode' [sourceParameters]="uldForContourCode">
+                      </ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-awbdisplay formControlName="shipmentNumber"></ngc-awbdisplay>
+                    </td>
+                    <td *ngIf="item.get('sqCarrier').value">
+                      <ngc-dropdownlist formControlName="partSuffix" width='70px' [autoSelect]="true"
+                        [source]="bulkItem.get('allPartSuffix').value" required></ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="concatSHC"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-piecesinput formControlName="pieces"></ngc-piecesinput>
+                    </td>
+                    <td>
+                      <ngc-weightinput negativeSymbol=" " formControlName="weight" [digits]="7" decimalDigits="0"
+                        width='100px'></ngc-weightinput>
+                    </td>
+                    <td></td>
+                    <td>
+                      <ngc-locations-list [displayOnlyLocation]="true" [locationTypeList]="['TTWL']"
+                        formControlName="warehouseLocation" [width]="120"></ngc-locations-list>
+                    </td>
+                  </tr>
+
+                </ng-container>
+              </tbody>
+            </ngc-table>
+          </ngc-column>
+        </ngc-row>
+      </ng-container>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button value="load.screen.loadshipment" (click)="loadshipmentToFlight()"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>
+
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['AWB']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="printAWB()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report format='pdf' #inboundReportWindow title="export.ITWL.report.title"
+     reportId='InboundTranshipmentWorkingListSingleNew'  [reportParameters]='reportParameters'></ngc-report>
+  <ngc-report format='pdf' #inboundReportWindow1 title="export.ITWL.report.title"
+     reportId='InboundTranshipmentWorkingListSingleNewOtherTenant'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+
+<form [formGroup]='showloadedUldForm'>
+  <ngc-window #showloadedUld [width]="500" [height]="300" title="export.loaded.uld">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-display [width]='300' formControlName="showloadedUldP" emphasis="md" color="red"></ngc-display>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

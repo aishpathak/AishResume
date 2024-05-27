@@ -1,0 +1,160 @@
+<form [formGroup]="inactiveoroldcargolist">
+  <ngc-titlebar title='title.inactive.old.cargo.list' (cancel)="onCancel($event)"></ngc-titlebar>
+  <!-- search feilds -->
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label="tracing.careerGrouplabel"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="carrierGp" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA" sourceType="query"
+            [width]="120" (select)="getCarrierCodeByCarrierGroup($event)" [noCache]="true"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label="g.carrierCode"></ngc-label>
+        <div>
+          <!--<ngc-input [width]="100" formControlName="carrierCode"></ngc-input>-->
+          <ngc-lov formControlName="carrierCode" upperCase='true' sourceId='DISPLAY_CARRIER_CODE' sourceType='query'
+            title="g.carrierCode" [sourceParameters]="carrierGroupCodeParam" dataField='code' [width]="120"
+            [noCache]="true" [disabled]="carrier">
+            <ngc-data-column text="g.carrierCode" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4" [grid24]="true">
+        <ngc-label label="g.shc"></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="shcode" sourceId="SHC_MASTER_DATA" sourceType="query" multiSelect="true">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4.5" [grid24]="true">
+        <ngc-label label='awb.without.movement.creation.days'></ngc-label>
+        <div>
+          <ngc-digitinput [width]="200" formControlName="creationdays"></ngc-digitinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4" [grid24]="true">
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-awbinput formControlName="shipmentNumber" [width]="150" required></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column align='left'>
+        <br>
+        <ngc-button value='awb.search' (click)="inactiveOrOldCargoValues()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab" *ngIf="displaySearchContainer">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="resultList" (linkClick)="onLinkClick($event)" [pageSize]="13">
+
+          <ngc-data-column dataField="select" [width]="30" type="check" checkAll="true"></ngc-data-column>
+          <ngc-data-column dataField="shipmentDate" [hidden]="true"></ngc-data-column>
+          <ngc-data-column dataField="shipmentType" [hidden]="true"></ngc-data-column>
+          <ngc-data-column [width]="60" dataField="awbNumber" text="AWB Number" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="40" dataField="origin" text="g.origin" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="50" dataField="destination" text="g.destination" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="60" dataField="shipper" text="awb.shipper" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="60" dataField="consignee" text="awb.consignee" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="40" dataField="nog" text="awb.nog" align="left" cellsAlign="left"></ngc-data-column>
+
+          <ngc-data-column [width]="40" dataField="specialHandlingCode" text="g.shc" align="left" cellsAlign="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="80" dataField="awbPicesWaight" text="awb.awb.pcs.wt" align="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="100" dataField="inventoryPiecesWaight" text="awb.inv.pcs.wt" align="left">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="80" dataField="freightInFlight" text="awb.freight.in.flight" align="left"
+            cellsAlign="left"></ngc-data-column>
+
+          <ngc-data-column [width]="60" dataField="freightInDate" text="shp.feightindate" type="displayDate" align="left"
+            cellsAlign="left"></ngc-data-column>
+
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align='right'>
+        <br>
+        <ngc-button value='Export to (E)xcel' [disabled]="formDisabled||true" (click)="exportToExcel()"></ngc-button>
+        <ngc-button value='Freight (O)ut' (click)="freightOutCargo()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <form formGroupName="remarks">
+    <ngc-window #remarksPopup [width]="600" [height]="400" title="g.remarks">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label='g.type'></ngc-label>
+            <div>
+              <ngc-dropdownlist sourceId="DocVerication$DocverRemark" [width]="100" [dropDownWidth]="100"
+                [noBlank]="true" formControlName="remarkType" required></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label='g.remarks'></ngc-label>
+            <div>
+              <ngc-textarea [width]="300" [height]="50" formControlName="remarks" [maxlength]="65" required>
+              </ngc-textarea>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="deliveryDetials">
+          <ngc-column [column]="3">
+            <ngc-label label="awb.delivery.order.no"></ngc-label>
+            <div>
+              <ngc-input [width]="150" formControlName="doNumber" upperCase="true" [maxlength]="8" required></ngc-input>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=''></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="flightDetails">
+          <ngc-column [column]="3">
+            <ngc-label label="g.flight"></ngc-label>
+            <div>
+              <ngc-input [width]="100" formControlName="flightNumber" upperCase="true" required></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column [column]="5">
+            <ngc-label label="g.date"></ngc-label>
+            <div>
+              <ngc-datetimeinput [width]="100" formControlName="flightDate" required></ngc-datetimeinput>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button (click)="remarkSave()" value="g.save"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </ngc-window>
+  </form>
+</form>

@@ -1,0 +1,359 @@
+<ngc-titlebar title='trm.transferManifestbyAWBList' (cancel)="onCancel($event)" (onClear)="onClear()">
+</ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container *ngIf="showPage" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.trmNumber"></ngc-label>
+        </div>
+        <ngc-input accessEnableOn="r" width='90px' formControlName="trmNumber" upperCase='true'></ngc-input>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.issueDatetimeFrom"></ngc-label>
+        </div>
+        <ngc-datetimeinput accessEnableOn="r" [required]="!selectionDateTimeOptionalFlag"
+          formControlName="issueDateFrom" upperCase='true' [midnight]="true" [showCalendarButton]="true"
+          [showTimeButton]="true">
+        </ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.issueDatetimeTo"></ngc-label>
+        </div>
+        <ngc-datetimeinput accessEnableOn="r" [required]="!selectionDateTimeOptionalFlag" formControlName="issueDateTo"
+          upperCase='true' [endOfDay]="true" [showCalendarButton]="true" [showTimeButton]="true">
+        </ngc-datetimeinput>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="transhipment.from.airline"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" formControlName="carrierCodeFrom" sourceId='CARRIER' title='g.carrier' [width]="40"
+          dataField='code' displayMember='code'>
+          <ngc-data-column text="masters.carrier" dataField="code" [width]="70"></ngc-data-column>
+          <ngc-data-column text="masters.description" dataField="desc" [width]="100"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="transhipment.to.airline"></ngc-label>
+        </div>
+        <ngc-lov accessEnableOn="r" formControlName="carrierCodeTo" sourceId='CARRIER' title='g.carrier' [width]="40"
+          dataField='code' displayMember='code'>
+          <ngc-data-column text="masters.carrier" dataField="code" [width]="70"></ngc-data-column>
+          <ngc-data-column text="masters.description" dataField="desc" [width]="100"></ngc-data-column>
+        </ngc-lov>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="trm.airlineNumber"></ngc-label>
+        </div>
+        <ngc-input accessEnableOn="r" width='90px' formControlName="airlineNumber" upperCase='true'></ngc-input>
+      </ngc-column>
+      <ngc-column>
+        <div>
+          <ngc-label label="awb.awbnumber"></ngc-label>
+        </div>
+        <ngc-awbinput formControlName="shipmentNumber"></ngc-awbinput>
+      </ngc-column>
+      <ngc-column feature="Transhipment.TRM.SearchByULD">
+        <div>
+          <ngc-label label="flight.flight.no"></ngc-label>
+        </div>
+        <ngc-flightkeyinput formControlName="flightKey" (ngModelChange)="onFlightChange()" [width]="80"
+          accessEnableOn="r" [required]="flightOptionalFlag">
+        </ngc-flightkeyinput>
+      </ngc-column>
+      <ngc-column feature="Transhipment.TRM.SearchByULD">
+        <div>
+          <ngc-label label="billingverification.flightdate"></ngc-label>
+        </div>
+        <ngc-dateinput formControlName="flightDate" (ngModelChange)="onFlightChange()" accessEnableOn="r"
+          [required]="flightOptionalFlag">
+        </ngc-dateinput>
+      </ngc-column>
+      <ngc-column align="right">
+        <br>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)="search()"></ngc-button>
+          <ngc-button value='(N)ew' (click)="newTRMByAWB()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="showTable">
+      <ngc-column [column]=4>
+        <ngc-label align="left" value="g.printer"></ngc-label>
+        <div>
+          <ngc-printer [width]='200' formControlName="printerName"  [printerTypeList]="['TRM']"></ngc-printer>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label value=""></ngc-label>
+        <div>
+          <!-- <ngc-column>
+            <ngc-button value='trm.retrieveTRM' (click)="retrieveTrm()" feature="Transhipment.TRM.Retreive">
+            </ngc-button>
+          </ngc-column> -->
+          <ngc-column>
+            <ngc-button value='trm.cancel' (click)="cancelAWB()"></ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button value="trm.rePrint" (click)="onPrint()"></ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button value='trm.finalize' (click)="finalize()"></ngc-button>
+          </ngc-column>
+          <ngc-column>
+            <ngc-button value='trm.unFinalize' (click)="unFinalize()"></ngc-button>
+          </ngc-column>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+
+    <ngc-row *ngIf="showTable">
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.select"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="trm.trmNumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="trm.issueDateTime"></ngc-label>
+              </th>
+
+              <th>
+                <ngc-label label="uld.fromCarrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="uld.toCarrier"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="trm.airlineNumber"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="trm.reasonforCancelation"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="trm.finalized"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="trm.createdBy"></ngc-label>
+              </th>
+              <!-- <th feature="Transhipment.TRM.Retreive" [width]="50">
+                <ngc-label label="trm.cargo.retrieved"></ngc-label>
+              </th> -->
+              <th>
+                <ngc-label label="g.edit"></ngc-label>
+              </th>
+          </thead>
+          <tbody formArrayName="awbList">
+            <tr *ngFor="let awb of form.get('awbList').controls; let awbIndex=index" [formGroupName]="awbIndex">
+              <td>
+                <ngc-checkbox formControlName="select" (ngModelChange)=addCheckBoxData(awb,awbIndex)
+                  *ngIf="awb.get('cancelledBy').value == null"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-display upperCase="true" formControlName="trmNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-display upperCase="true" formControlName="issuedDate"></ngc-display>
+              </td>
+              <td>
+                <ngc-display upperCase="true" formControlName="carrierCodeFrom"></ngc-display>
+              </td>
+              <td>
+                <ngc-display upperCase="true" formControlName="carrierCodeTo"></ngc-display>
+              </td>
+              <td>
+                <ngc-display upperCase="true" formControlName="airlineNumber"></ngc-display>
+              </td>
+              <td>
+                <ngc-dropdownlist required sourceId='TRMCANCELLATION' sourceType='query'
+                  formControlName="cancellationReason" width='300px'></ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-display formControlName="finalizedFlag" width='200px'></ngc-display>
+                &nbsp;
+                <ngc-display formControlName="finalizedBy"></ngc-display>
+              </td>
+              <td>
+                <ngc-display upperCase="true" formControlName="createdBy"></ngc-display>
+              </td>
+              <!-- <td feature="Transhipment.TRM.Retreive">
+                <ngc-display upperCase="true" formControlName="cargoRetreived"></ngc-display>
+              </td> -->
+              <td>
+                <ngc-link *ngIf="awb.get('cancelledBy').value == null" upperCase="true" formControlName="edit"
+                  iconType="edit" (linkClick)="getINfo(awb)"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='AirCargoTranferManifest'  [reportParameters]='reportParameters'>
+  </ngc-report>
+
+  <!-- <ngc-window #retrieveTrmWindow [width]="1500" [height]="600" title="Retrieve TRM" [showCloseButton]="true">
+    <ngc-container type="tab" formGroupName="retreiveTrmInfo">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="trm.trmNumber"></ngc-label>
+          <div>
+            <ngc-display formControlName="trmNumber"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="trm.trm.date"></ngc-label>
+          <div>
+            <ngc-display formControlName="issuedDate"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="trm.transferringCarrier"></ngc-label>
+          <div>
+            <ngc-display formControlName="carrierCodeFrom"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="si.receivingcarrier"></ngc-label>
+          <div>
+            <ngc-display formControlName="carrierCodeTo"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="trm.receiving.carrier.handler"></ngc-label>
+          <div>
+            <ngc-display formControlName="handlingTerminalCode"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button accessEnableOn="r" label='trm.retrieve.button' (click)="onRetriveClick()">
+          </ngc-button>
+          <ngc-button accessEnableOn="r" label='trm.close.Window' (click)="closeRetreiveWindow()">
+          </ngc-button>
+        </ngc-column>
+      </ngc-row>
+
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="g.select"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="trm.trmNumber"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.origin.destination"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="fltpouch.import.flight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="trm.inventory.remarks"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.shipment.location"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="awb.warehouse.location"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="trm.storage.pcs.wt"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="trm.transfer.pcs"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="trm.transfer.weight"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="trm.target.location"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="awbInfoList">
+              <ng-container
+                *ngFor="let item of form.controls.retreiveTrmInfo.controls.awbInfoList.controls; let index=index"
+                [formGroupName]="index">
+
+
+                <tr>
+                  <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                    <ngc-checkbox type="checkbox" formControlName="select"
+                      *ngIf="item.get('inventoryDetails').length > 0"></ngc-checkbox>
+                  </td>
+                  <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                  </td>
+                  <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                    <ngc-display formControlName="origin"></ngc-display>
+                    <ngc-label label="/" *ngIf="item.get('origin').value != null"></ngc-label>
+                    <ngc-display formControlName="destination">
+                    </ngc-display>
+                  </td>
+                  <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                    <ngc-display formControlName="inboundFlightNumber"></ngc-display>
+                    <ngc-label label="/" *ngIf="item.get('inboundFlightNumber').value != null"></ngc-label>
+                    <ngc-display formControlName="inboundFlightDate" [onlyDate]="true"></ngc-display>
+                  </td>
+                  <td [attr.rowspan]="item.controls.inventoryDetails.length + 1">
+                    <ngc-display formControlName="remarks"></ngc-display>
+                  </td>
+                </tr>
+
+                <ng-container formArrayName="inventoryDetails">
+                  <tr *ngFor="let sitem of item.controls.inventoryDetails.controls; let sindex=index"
+                    [formGroupName]="sindex">
+                    <td>
+                      <ngc-display formControlName="shipmentLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="wareHouseLocation"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="pieces"></ngc-display>
+                      <ngc-label label="/" *ngIf="sitem.get('pieces').value != null"></ngc-label>
+                      <ngc-display formControlName="weight">
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-piecesinput formControlName="transferPieces">
+                      </ngc-piecesinput>
+                    </td>
+                    <td>
+                      <ngc-weightinput formControlName="transferWeight">
+                      </ngc-weightinput>
+                    </td>
+                    <td>
+                      <ngc-movable-storage-location upperCase="true" [maxlength]="12" [minlength]="3" [autoFocus]="true"
+                        [width]="130" formControlName="targetLocation">
+                      </ngc-movable-storage-location>
+                    </td>
+                  </tr>
+                </ng-container>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+
+
+    </ngc-container>
+  </ngc-window> -->
+
+</form>

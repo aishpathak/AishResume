@@ -1,0 +1,703 @@
+<ngc-titlebar title='export.eFBL' (save)="onSave()" [disableSave]="savedisable" (clear)="OnClear($event)"
+  (cancel)="onCancel()">
+</ngc-titlebar>
+<form [formGroup]='EFBLform'>
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="8">
+        <ngc-container type="box">
+          <ngc-row>
+            <ngc-column column="1.5">
+
+              <ngc-label value='flight.Flight'></ngc-label>
+              <div>
+                <ngc-flightkeyinput accessEnableOn="r" [width]="90" formControlName="flight_key" upperCase="true"
+                  required (ngModelChange)="onFlightKey()">
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="1.5" align='left'>
+              <ngc-label value='flight.date'></ngc-label>
+              <div>
+                <ngc-datetimeinput accessEnableOn="r" onlyDate='true' required [width]="80"
+                  formControlName="flight_Date" (ngModelChange)="onFlightKey()">
+                </ngc-datetimeinput>
+              </div>
+            </ngc-column>
+            <ngc-column align='right' column='2'>
+              <br />
+              <div>
+                <ngc-button accessEnableOn="r" value='g.search' (click)="onSearch()"></ngc-button>
+              </div>
+            </ngc-column>
+            <ngc-column column='3' align='right' *ngIf="segmentFlag">
+              <div align='center'>
+                <ngc-label label="flight.segment"></ngc-label>
+              </div>
+              <div align='right'>
+                <ngc-dropdownlist accessEnableOn="r" required [width]="90" sourceId="LOADSHIPMENT_SEGMENT"
+                  (select)="selectSegmentId($event)" [sourceParameters]="flightKeyforDropdown" [noCache]="true"
+                  sourceType="query" formControlName="segment_ID" placeholder="placeholder.select" [dropDownWidth]="80"
+                  [autoSelect]="true"></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+
+          </ngc-row>
+
+          <ngc-row *ngIf="flightFlag">
+            <ngc-column column='2'>
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button value="print.tally.sheet" (click)="printTallySheet()"></ngc-button>
+              </div>
+            </ngc-column>
+            <ngc-column column='2'>
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button value="wrkLst.crtMnfst" [disabled]="manifestFlag" (click)="createManifest()"></ngc-button>
+              </div>
+            </ngc-column>
+            <ngc-column column='2'>
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button value="flight.bu.complete" [disabled]="manifestFlag" (click)="flightCompleteUncomplete()">
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+
+      <ngc-column *ngIf="flightFlag && isactiveByDefault">
+        <ngc-datatable formArrayName="airlineLoadingInstructions" [pageable]="false" [enablePageSizeHeight]="false">
+          <ngc-data-column text=" " dataField="loadingInstruction" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.pallet" dataField="totalPallet" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.container" dataField="totlContainer" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.bt" dataField="totalBt" cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+      <!--ULD Type Airline Loading Instructions-->
+      <ngc-column [column]="4" formGroupName="uldtypeali" *ngIf="flightFlag && isactiveByUld">
+        <div style="height: 170px; overflow-y: auto">
+          <ngc-table style="height: 400px">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="uld.uld.type"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="billing.total.sgd"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="ewl.cargo.offer"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="ewl.cargo.used"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="billing.paymentaccountbalance"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container *ngFor="let item of EFBLform.get('uldtypeali').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display [width]="40" formControlName="uldType">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="totalUldType" [width]="40">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="totalUldType">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="uldTypeUsed">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="remainingUldType">
+                  </ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+
+          </ngc-table>
+        </div>
+      </ngc-column>
+
+      <!--Height Type Airline Loading Instructions-->
+      <ngc-column [column]="4" formGroupName="heighttypeali" *ngIf="flightFlag && isactiveByHeight">
+        <div style="height: 170px; overflow-y: auto">
+          <ngc-table style="height: 400px">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="uld.heightcode"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="billing.total.sgd"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="ewl.cargo.offer"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="ewl.cargo.used"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="billing.paymentaccountbalance"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container *ngFor="let item of EFBLform.get('heighttypeali').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display [width]="40" formControlName="heightCode">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="totalHeightType" [width]="40">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="totalHeightType">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="heightTypeUsed">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="remainingHeightType">
+                  </ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+
+          </ngc-table>
+        </div>
+      </ngc-column>
+      <!--Allotment Type Airline Loading Instructions-->
+      <ngc-column [column]="4" formGroupName="allotmenttypeali" *ngIf="flightFlag && isactiveByAllotment">
+        <div style="height: 170px; overflow-y: auto">
+          <ngc-table style="height: 400px">
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="ewl.allotment"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="billing.total.sgd"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="ewl.cargo.offer"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="ewl.cargo.used"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label label="billing.paymentaccountbalance"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container *ngFor="let item of EFBLform.get('allotmenttypeali').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-display [width]="40" formControlName="allotmentType">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display formControlName="totalAllotment" [width]="40">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="totalAllotment">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="usedAllotment">
+                  </ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="40" formControlName="remainingAllotmentType">
+                  </ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+
+          </ngc-table>
+        </div>
+      </ngc-column>
+      <ngc-column column='0.5'>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container *ngIf="flightFlag">
+    <ngc-row>
+      <ngc-column [column]=12>
+        <ngc-container>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label='flight.Flight'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' formControlName="flightNo"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='flight.date'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' formControlName="flightDate" [onlyDate]="true"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='flight.std'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' [onlyTime]="true" formControlName="std"></ngc-display>
+              </div>
+
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='flight.etd'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' [onlyTime]="true" formControlName="etd"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='wrkLst.Aircraft'></ngc-label>
+              <div>
+                <ngc-display emphasis='md' formControlName="aircraftType"></ngc-display>
+              </div>
+            </ngc-column>
+            <ngc-column>
+              <ngc-label label='wrkLst.a/cRegtrn'></ngc-label>
+              <div>
+                <ngc-input emphasis='md' formControlName="aircraftRegistration" [width]="100" [maxlength]="10">
+                </ngc-input>
+              </div>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-label label="g.flight.remark"></ngc-label>&nbsp;
+
+              <ngc-display formControlName="flightRemark" emphasis="md">
+              </ngc-display>
+
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label="g.aircraft.remark"></ngc-label>&nbsp;
+
+              <ngc-display formControlName="aircarftRemarks" emphasis="md">
+              </ngc-display>
+
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-label label="flight.preman.pcswgt"></ngc-label>&nbsp;&nbsp;&nbsp;
+              <div>
+                <ngc-piecesdisplay formControlName="flightPreManPieces" emphasis="lg" color="blue">
+                </ngc-piecesdisplay>/
+                <ngc-weightdisplay formControlName="flightPreManWeight" emphasis="lg" color="blue">
+                </ngc-weightdisplay>
+              </div>
+            </ngc-column>
+
+            <ngc-column column="2">
+              <ngc-label label="flight.booked.pcswgt"></ngc-label>&nbsp;&nbsp;&nbsp;
+              <div>
+                <ngc-piecesdisplay formControlName="flightBookedPieces" emphasis="lg" color="blue">
+                </ngc-piecesdisplay>/
+                <ngc-weightdisplay formControlName="flightBookedWeight" emphasis="lg" color="blue">
+                </ngc-weightdisplay>
+              </div>
+            </ngc-column>
+
+            <ngc-column column="2">
+              <ngc-label label="export.working.list.manifest.created.at">
+              </ngc-label>
+              &nbsp;&nbsp;&nbsp;
+              <div>
+                <ngc-display formControlName="firstTimeManifestCompletedAt" emphasis="lg" color="blue">
+                </ngc-display>
+              </div>
+            </ngc-column>
+
+            <ngc-column column="2">
+              <ngc-label label="flight.buildup.complete">
+              </ngc-label>
+              <div>
+                <ngc-display formControlName="buildupCompletedAt" emphasis="lg" color="blue">
+                </ngc-display>
+              </div>
+            </ngc-column>
+          </ngc-row>
+
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="3">
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+
+  <ngc-container *ngIf="flightFlag" type="box">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs [width]="800" [height]="200">
+          <ngc-tab-card title="stockManagement.booked">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="awb"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.priority"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="exp.doc"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="doc.receive"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="billing.org"></ngc-label>
+
+
+                        <th>
+                          <ngc-label label="export.dest"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.volume"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.nog"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="agent.agent.code"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.awb.pcs.wt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="fbl.pcs.wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.uldlsp"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="inv.pcs.wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="non.preman.pcs.wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="screend.pcs.wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.spl"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="exp.constraint.code"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="bookedShipment">
+                      <ng-container *ngFor="let item of EFBLform.controls.bookedShipment.controls; let index=index"
+                        [formGroupName]="index">
+                        <tr>
+                          <td>
+                            <ngc-display formControlName="shipmentNumber">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="priority">
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td>
+                            <ngc-display formControlName="documentRecieved">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="origin">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="destination">
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td>
+                            <ngc-display formControlName="natureOfGoods">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="agentCode">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="awbPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="awbWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="fblPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="fblWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <!-- <ngc-display [width]="40" [model]="item.get('uldLocation').value">
+                            </ngc-display> -->
+
+                            <ngc-display formControlName="uldLocation">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="invPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="invWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="nonPremanPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="nonPremanWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="screenedPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="screenedWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+
+                            <ngc-display formControlName="shcs">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="cc">
+                            </ngc-display>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+          <ngc-tab-card title="export.preman">
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th>
+                          <ngc-label label="awb"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="efbl.packaging.type"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.priority"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="exp.doc"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="doc.receive"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="billing.org"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="export.dest"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.volume"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.nog"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="awb.awb.pcs.wt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="fbl.pcs.wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="Preman Pcs/Wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="assigned.pcs.wgt"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="equipment.assigned.ulds"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="remaining.inv"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="g.spl"></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label="exp.constraint.code"></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="premanShipment">
+                      <ng-container *ngFor="let item of EFBLform.controls.premanShipment.controls; let index=index"
+                        [formGroupName]="index">
+
+                        <tr>
+                          <td>
+                            <ngc-display formControlName="shipmentNumber">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="packagingType">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="priority">
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td>
+                            <ngc-display formControlName="documentRecieved">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="origin">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="destination">
+                            </ngc-display>
+                          </td>
+                          <td></td>
+                          <td>
+                            <ngc-display formControlName="natureOfGoods">
+                            </ngc-display>
+                          </td>
+
+                          <td>
+                            <ngc-piecesdisplay formControlName="awbPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="awbWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="fblPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="fblWeight">
+                            </ngc-weightdisplay>
+                          </td>
+
+                          <td>
+                            <ngc-piecesdisplay formControlName="premanPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="premanWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <ngc-piecesdisplay formControlName="assignedPieces">
+                            </ngc-piecesdisplay>/
+                            <ngc-weightdisplay formControlName="assignedWeight">
+                            </ngc-weightdisplay>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="assignedULDTrolley">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="remainingULD">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="shcs">
+                            </ngc-display>
+                          </td>
+                          <td>
+                            <ngc-display formControlName="cc">
+                            </ngc-display>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </tbody>
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+
+
+  </ngc-container>
+  <ngc-container *ngIf="flightFlag" type="box">
+    <ngc-row>
+      <ngc-column>
+        <h1></h1>
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+
+
+
+  <ngc-footer [height]="80" *ngIf=flightFlag>
+
+    <ngc-row>
+      <ngc-column column="0.5"></ngc-column>
+      <ngc-column>
+        <ngc-button value="1.premanifest"></ngc-button>
+        <ngc-button value="ecc.2" (click)="routeToUnloadShipment()"></ngc-button>
+        <ngc-button value="export.working.list.assign.uld.trolley.shortcut" (click)="routeToAssignUld()"></ngc-button>
+
+        <ngc-button value="4.FWB"></ngc-button>
+        <ngc-button value="5.loadShipment" (click)="routeToLoadShipment()"></ngc-button>
+        <ngc-button value="6.lyingList"></ngc-button>
+        <ngc-button value="export.working.list.cargo.manifest.shortcut" (click)="routeToCargoManifest()"></ngc-button>
+        <ngc-button value="export.working.list.update.dls.shortcut" (click)="routeToUpdateDLS()"></ngc-button>
+        <ngc-button value="export.working.list.add.mail.manifest.shortcut"></ngc-button>
+
+
+        <ngc-button value="export.working.list.notoc.shortcut" (click)="onNavigateToNotoc()"></ngc-button>
+        <ngc-button value="allotment.ali" (click)="routeToAli()"></ngc-button>
+        <ngc-button value="receive.doc"></ngc-button>
+        <ngc-button value="exp.awb.doc"></ngc-button>
+
+
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-footer>
+  <ngc-report #TallySheet title="g.report"  reportId='eFBLTallySheet'  [reportParameters]='reportParameters'>
+  </ngc-report>
+
+</form>

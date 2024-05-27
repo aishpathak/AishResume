@@ -1,0 +1,457 @@
+<ngc-titlebar title="title.credit.debit.note" (save)="onSave($event)" [disableSave]="readOnly"
+  (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type="section">
+    <ngc-row formGroupName="searchCreditDebitNoteData">
+      <ngc-column>
+        <ngc-label label='sap.invoice'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="receiptNumber" (ngModelChange)="disableDropDown($event)"
+            maxlength='30' [width]="150"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" verticalAlign="bottom">
+        <ngc-label label='OR'></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.awbNumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" (ngModelChange)="onAWBChange($event)" [width]="120"
+            formControlName="awbNumber">
+          </ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='billing.hawbsbNumber'></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='hawbNumber' upperCase='true' [width]="100"
+            sourceId='KEY_BILL_HWBNUMBER' [validOnly]="true" dataField='code' valueMember='code' [noCache]="true"
+            title="billing.hawbsbNumber" [sourceParameters]="AWBNumber" (select)="fetchInvoiceNumber()">
+            <ngc-data-column text='billing.hawbsbNumber' [width]='80' dataField='code' required></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='sap.invoice'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="receiptNumberDropdown" sourceId='INVOICE_BY_AWB_HAWB'
+            sourceType='query'
+            [sourceParameters]="{ 'parameter1': form.get('searchCreditDebitNoteData').get('awbNumber').value , 'parameter2': form.get('searchCreditDebitNoteData').get('hawbNumber').value}"
+            [width]="150">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <ngc-button *ngIf="!readOnly" accessEnableOn="r" (click)="onSearch()" value="bill.create" iconType="create">
+        </ngc-button>
+        <ngc-button *ngIf="readOnly" accessEnableOn="r" (click)="onSearch()" value="g.search" iconType="search">
+        </ngc-button>
+      </ngc-column>
+      <ngc-column *ngIf="searchFlag">
+        <ngc-label label='billing.note.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="noteType" sourceId="Billing$NoteType" [width]="100"
+            (select)="changeLOVReadOnly($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="searchFlag && readOnly">
+        <ngc-label label='billing.credit.debit.number'></ngc-label>
+        <div>
+          <ngc-display formControlName="creditDebitNoteNumber"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="billing.charge.information">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th *ngIf="!readOnly">
+                      <ngc-label label="bill.select"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.invoice.no"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bil.serviceType"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.flight"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.gross.amount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.taxAmount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.total.amount.sgd"></ngc-label>
+                    </th>
+                    <!-- <th>
+                      <ngc-label label="bil.waiveCharges.paidAmount"></ngc-label>
+                    </th> -->
+                    <th *ngIf="CreditDebitAmountSectionFlag">
+                      <ngc-label label="billing.credit.debit.amount"></ngc-label>
+                    </th>
+                    <th *ngIf="CreditDebitAmountSectionFlag">
+                      <ngc-label label="billing.credit.debit.taxComp1"></ngc-label>
+                    </th>
+                    <th *ngIf="CreditDebitAmountSectionFlag">
+                      <ngc-label label="billing.credit.debit.taxComp2"></ngc-label>
+                    </th>
+                    <th *ngIf="CreditDebitAmountSectionFlag">
+                      <ngc-label label="billing.credit.debit.taxComp3"></ngc-label>
+                    </th>
+                    <th *ngIf="CreditDebitAmountSectionFlag">
+                      <ngc-label label="billing.transaction.amount"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody ngc-form-array formArrayName="chargeInformation">
+                  <tr ngc-form-group *ngFor="let item of form.controls.chargeInformation.controls; let index=index"
+                    [formGroupName]="index">
+                    <td *ngIf="!readOnly">
+                      <ngc-checkbox formControlName="select" [width]="30" (click)="showCreditDebitAmountSection(index)">
+                      </ngc-checkbox>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="receiptNumber" [width]="30"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="serviceType" [width]="150"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="flightKey" [width]="150"></ngc-display>
+                      <div>
+                        <ngc-display formControlName="flightDate" [onlyDate]="true">
+                        </ngc-display>
+                      </div>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay formControlName="grossAmount" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay formControlName="taxAmount" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay formControlName="totalAmount" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <!-- <td>
+                      <ngc-currencydisplay formControlName="documentAmount" [width]="50"></ngc-currencydisplay>
+                    </td> -->
+                    <td *ngIf="CreditDebitAmountSectionFlag">
+                      <ngc-currencyinput formControlName="creditOrDebitAmount" [width]="100"
+                        (ngModelChange)="onEnterCreditDebitAmount(index)"
+                        *ngIf="this.form.get(['chargeInformation',index,'select']).value">
+                      </ngc-currencyinput>
+                      <ngc-currencydisplay *ngIf="readOnly" formControlName="creditOrDebitAmount" [width]="50">
+                      </ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="CreditDebitAmountSectionFlag">
+                      <!-- <ngc-currencyinput formControlName="crdbtaxComp1" [width]="100">
+                              </ngc-currencyinput> -->
+                      <ngc-currencydisplay formControlName="crdbtaxComp1" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="CreditDebitAmountSectionFlag">
+                      <!-- <ngc-currencyinput formControlName="crdbtaxComp2" [width]="100">
+                              </ngc-currencyinput> -->
+                      <ngc-currencydisplay formControlName="crdbtaxComp2" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="CreditDebitAmountSectionFlag">
+                      <!-- <ngc-currencyinput formControlName="crdbtaxComp3" [width]="100">
+                              </ngc-currencyinput> -->
+                      <ngc-currencydisplay formControlName="crdbtaxComp3" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td *ngIf="CreditDebitAmountSectionFlag">
+                      <!-- <ngc-currencyinput formControlName="transactionAmount" [width]="100">
+                              </ngc-currencyinput> -->
+                      <ngc-currencydisplay formControlName="transactionAmount" [width]="50"></ngc-currencydisplay>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="10">
+        <ngc-container title="billing.charges.payment">
+          <ngc-row>
+            <ngc-column>
+              <ngc-datatable formArrayName="chargesPayment" [showToolbar]="false" [pageable]="false"
+                [enablePageSizeHeight]="false">
+                <ngc-data-column text="billing.payee.code" dataField="payeeCode" cellsAlign="center" align='center'
+                  [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="billing.payee.name" dataField="payeeName" cellsAlign="center" align='center'
+                  [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="bil.payMode" dataField="mode" cellsAlign="center" align='center' [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="billing.paymentaccountnumber" dataField="pdAccountNumber" cellsAlign="center"
+                  align='center' [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="billing.pdBalance" dataField="pdBalance" cellsAlign="center" align='center'
+                  [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="bil.issuingBank" dataField="issuingBank" cellsAlign="center" align='center'
+                  [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="billing.transcation.no" dataField="transactionNumber" cellsAlign="center"
+                  align='center' [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="billingverification.chargeadvicedt" dataField="transactionDate"
+                  cellsAlign="center" align='center' [width]="40" *ngIf="readOnly" type="displayDate">
+                </ngc-data-column>
+                <ngc-data-column text="bil.groupPayment.paymentAmount" type='displayCurrency' dataField="paymentAmount"
+                  cellsAlign="center" align='center' [width]="40">
+                </ngc-data-column>
+                <ngc-data-column text="bil.paymentRemarks" dataField="paymentRemark" cellsAlign="center" align='center'
+                  [width]="40" *ngIf="readOnly">
+                </ngc-data-column>
+              </ngc-datatable>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="searchFlag">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="8">
+        <ngc-container title="billing.credit.debit.amount.reason">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="bill.credit.debit.total.amt"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bill.CGST"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bill.SGST"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bill.IGST"></ngc-label>
+                    </th>
+                    <!-- <th>
+                              <ngc-label label="Applicable Taxes"></ngc-label>
+                            </th> -->
+                    <th>
+                      <ngc-label label="bill.transaction.amount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.reason"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody ngc-form-array formArrayName="creditDebitAmountReason">
+                  <tr ngc-form-group
+                    *ngFor="let item of form.controls.creditDebitAmountReason.controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-currencydisplay formControlName="documentAmount" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay formControlName="taxComp1" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay formControlName="taxComp2" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-currencydisplay formControlName="taxComp3" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <!-- <td>
+                              <ngc-currencydisplay formControlName="taxAmount" [width]="50"></ngc-currencydisplay>
+                            </td>
+                            <td>
+                              <ngc-display formControlName="applicableTaxes" [width]="50"></ngc-display>
+                            </td> -->
+                    <td>
+                      <ngc-currencydisplay formControlName="totalGrossAmount" [width]="50"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <!-- <ngc-dropdownlist formControlName="reason" sourceId='APP_REASON' sourceType='query'
+                                [sourceParameters]="{'parameter1': 'CREDIT_DEBIT_NOTE'}" [width]="150">
+                              </ngc-dropdownlist> -->
+                      <ngc-dropdownlist formControlName="documentRemark" sourceType='query'
+                        (select)="selectDropdown($event)" sourceId="CREDIT_DEBIT_NOTE_REASON" [width]="150"
+                        *ngIf="!readOnly" required>
+                      </ngc-dropdownlist>
+                      <ngc-display *ngIf="readOnly" formControlName="documentRemark"></ngc-display>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="searchFlag && !readOnly">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-container title="billing.credit.debit.payment">
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="billing.payee.code"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.payee.name"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bil.payMode"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.pdAccount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="billing.pdBalance"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bil.issuingBank"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.date"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.tenderedAmount"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="bil.paymentRemarks"></ngc-label>
+                    </th>
+                    <!-- <th>
+                      <ngc-label label=""></ngc-label>
+                    </th> -->
+                  </tr>
+                </thead>
+                <tbody ngc-form-array formArrayName="paymentDetails">
+
+                  <tr ngc-form-group *ngFor="let item of form.controls.paymentDetails.controls; let index=index"
+                    [formGroupName]="index">
+                    <td>
+                      <ngc-lov accessEnableOn="r" formControlName="customerData" [disabled]="customerLovEditable"
+                        upperCase='true' [width]="300" sourceId='SELECT_CUSTOMERDETAILSFORCREDITDEBITNOTE'
+                        [validOnly]="true" dataField='code' valueMember='code' [noCache]="true"
+                        title="billing.payee.code" (select)="changeCustomer($event)">
+                        <ngc-data-column text='cus.code' dataField='code'>
+                        </ngc-data-column>
+                        <ngc-data-column text='billingverification.customername' [width]="200" dataField='desc'>
+                        </ngc-data-column>
+                        <ngc-data-column text='billing.pdAccount' [width]="100" dataField="param2">
+                        </ngc-data-column>
+                        <ngc-data-column text='billing.pdBalance' [width]="100" dataField="param3">
+                        </ngc-data-column>
+                        <ngc-data-column text='billing.applicablechargecategory' dataField="param4">
+                        </ngc-data-column>
+                        <ngc-data-column text='billing.hawbsbNumber' [hidden]="true" dataField="param1">
+                        </ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="payeeName"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-dropdownlist [noCache]="true" required formControlName="mode" [autoSelect]='true'
+                        sourceId='KEY_BILLING_PAYMENT_MODE' sourceType='query' (select)="onSelectMode($event,index)"
+                        [sourceParameters]='customer' [width]="150">
+                      </ngc-dropdownlist>
+                    </td>
+                    <td *ngIf="item.get('mode').value!='PDACCOUNT'"></td>
+                    <td *ngIf="item.get('mode').value=='PDACCOUNT' && !displayPDAccountDropdown">
+                      <ngc-display formControlName="pdNumber" [width]="150"></ngc-display>
+                    </td>
+                    <td *ngIf="item.get('mode').value=='PDACCOUNT' && displayPDAccountDropdown">
+                      <ngc-dropdownlist [noCache]="true" formControlName="pdNumber" sourceId='BILL_PDACCOUNT'
+                        sourceType='query' (select)="onSelectPDAccount($event,index)" [sourceParameters]='customer'
+                        [width]="150">
+                      </ngc-dropdownlist>
+                    </td>
+                    <td *ngIf="item.get('mode').value!='PDACCOUNT'"></td>
+                    <td *ngIf="item.get('mode').value=='PDACCOUNT'">
+                      <!-- <ngc-input required formControlName="pdBalance" [width]="150"></ngc-input> -->
+                      <ngc-display formControlName="pdBalance" [width]="150"></ngc-display>
+                    </td>
+                    <td *ngIf="item.get('mode').value!='CHEQUE'"></td>
+                    <td *ngIf="item.get('mode').value=='CHEQUE'">
+                      <ngc-dropdownlist required formControlName="issuingBank" sourceId='BILL_BANKS' sourceType='query'
+                        [width]="250">
+                      </ngc-dropdownlist>
+                    </td>
+                    <td>
+                      <ngc-dateinput required formControlName="date"></ngc-dateinput>
+                    </td>
+                    <td>
+                      <!-- <ngc-currencyinput required formControlName="tenderAmount" [width]="150">
+                              </ngc-currencyinput> -->
+                      <ngc-currencydisplay formControlName="tenderedAmount" [width]="150"></ngc-currencydisplay>
+                    </td>
+                    <td>
+                      <ngc-input formControlName="paymentRemarks" [width]="400"></ngc-input>
+                    </td>
+                    <!-- <td class="text-center">
+                      <ngc-link (linkClick)="deleteRow(index)" iconType="delete"
+                        [disabled]="form.controls.paymentDetails.length - 1 !== index">
+                        <ngc-i18n value="g.delete"></ngc-i18n>
+                      </ngc-link>
+                    </td> -->
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <!-- <ngc-row>
+      <ngc-column align="right">
+        <ngc-button (click)="addRow(form.controls.paymentDetails.length)" value="flight.addRow">
+        </ngc-button>
+      </ngc-column>
+    </ngc-row> -->
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report" reportId='Credit_Note' [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

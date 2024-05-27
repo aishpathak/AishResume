@@ -1,0 +1,144 @@
+<ngc-titlebar title="warehouse.inbfltevm" [noButtons]="true"></ngc-titlebar>
+<form [formGroup]="importFlightEVM">
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='outbfltevm.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='fromDate' align="left"
+            accessEnableOn="r"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='outbfltevm.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput [showTimeButton]="true" [showCalendarButton]="true" formControlName='toDate' align="left"
+            [width]="160" [min]="dateTo" align="left" accessEnableOn="r"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label value='import.carrierGroup'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroup" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="80"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label='shp.terminal'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="requestTerminal" sourceId="WAREHOUSE_TERMINAL"
+            [width]="100" sourceType='query'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput upperCase="true" formControlName="flightKey" [width]="100" accessEnableOn="r">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button (click)="fetchImportFlightInfo()" value="g.search" iconType="search" accessEnableOn="r">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label='warehouse.autorefresh'></ngc-label>
+          <ngc-switchbutton formControlName="autoRefresh" (modelChange)="autoRefreshChange($event)" [width]="200"
+            accessEnableOn="r">
+          </ngc-switchbutton>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label='warehouse.lastupdated'></ngc-label>
+          <ngc-display color="blue" value={{lastJobRun}}></ngc-display> &nbsp;&nbsp;
+          <ngc-label label='warehouse.nextupdate'></ngc-label>
+          <ngc-display color="blue" value={{nextJobRun}}></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showTableFlag" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable #dashboardDataTable formArrayName="importFlightList" [pageSize]="20"
+          [enablePageSizeHeight]="false" [showToolbar]="false">
+
+          <ngc-data-column name="outbfltevm.fltDetails" text="warehouse.flightdetails" align="center" [width]="600"
+            [pinned]="true">
+            <ngc-data-column text="flight.flt" [width]="160" align="center" cellsAlign="center" dataField="flightKey">
+            </ngc-data-column>
+            <ngc-data-column text="flight.dat" [width]="100" align="center" cellsAlign="center"
+              [cellsStyleRenderer]="flightDateCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column text="flight.eta" [width]="110" align="center" cellsAlign="center"
+              [cellsStyleRenderer]="dateETACellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column text="flight.reg" [width]="160" align="center" cellsAlign="center"
+              dataField="aircraftRegCode"></ngc-data-column>
+            <ngc-data-column text="flight.typ" [width]="100" align="center" cellsAlign="center"
+              dataField="aircraftType"></ngc-data-column>
+            <ngc-data-column text="flight.bay" [width]="100" align="center" cellsAlign="center" dataField="bay"
+              [cellsStyleRenderer]="bayCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column text="flight.sec" [width]="100" align="center" cellsAlign="center" dataField="sector">
+            </ngc-data-column>
+            <ngc-data-column text="flight.sts" [width]="100" align="center" cellsAlign="center"
+              dataField="flightStatus"></ngc-data-column>
+            <ngc-data-column text="flight.ata" [width]="110" align="center" cellsAlign="center"
+              [cellsStyleRenderer]="dateATACellsStyleRenderer"></ngc-data-column>
+          </ngc-data-column>
+
+          <ngc-data-column text="flight.FFM" [width]="100" align="center" cellsAlign="center" dataField="ffmColor"
+            [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="warehouse.tow.in.br" [width]="100" align="center" cellsAlign="center"
+            dataField="towinRamp" [cellsStyleRenderer]="towinCellsStyleRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="warehouse.pouch.in.br" *ngIf="impFLTPouchReceived" [width]="100" align="center"
+            cellsAlign="center" dataField="inboundFLTPouchReceivedColor" [cellsRenderer]="cellsRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="warehouse.doc.rcvd.br" [width]="100" align="center" cellsAlign="center"
+            dataField="docReceived" [cellsStyleRenderer]="docRecvCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="warehouse.bd.comp.br" [width]="100" align="center" cellsAlign="center"
+            dataField="bdCompletedColor" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="warehouse.bd.comp.on.br" [width]="100" align="center" cellsAlign="center"
+            [cellsStyleRenderer]="bdCompDtTimCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="warehouse.fdl.trigg.br" [width]="100" align="center" cellsAlign="center"
+            dataField="fdlTriggeredColor" [cellsRenderer]="cellsRenderer"></ngc-data-column>
+          <ngc-data-column text="warehouse.svc.rpt.fin.br" [width]="100" align="center" cellsAlign="center"
+            dataField="svcRptFinalized" [cellsStyleRenderer]="svcRptFinCellsStyleRenderer"></ngc-data-column>
+          <ngc-data-column text="warehouse.local" [width]="100" align="center" cellsAlign="center" dataField="local">
+          </ngc-data-column>
+          <ngc-data-column text="warehouse.trans" [width]="100" align="center" cellsAlign="center"
+            dataField="transShipment"></ngc-data-column>
+
+          <ngc-data-column name="manifestedShipments" text="warehouse.manifested.shipments" align="center"
+            [width]="600">
+            <ngc-data-column *ngIf="impShipManifDG" text="warehouse.dg" [width]="100" align="center" cellsAlign="center"
+              dataField="msDg" [cellsStyleRenderer]="msDgCellsStyleRenderer"> </ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifXPS" text="warehouse.xps" [width]="100" align="center"
+              cellsAlign="center" dataField="msXps" [cellsStyleRenderer]="msXpsCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifRAC" text="warehouse.rac" [width]="100" align="center"
+              cellsAlign="center" dataField="msRac" [cellsStyleRenderer]="msRacCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifPIL" text="warehouse.pil" [width]="100" align="center"
+              cellsAlign="center" dataField="msPil" [cellsStyleRenderer]="msPilCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifVAL" text="warehouse.val" [width]="100" align="center"
+              cellsAlign="center" dataField="msVal" [cellsStyleRenderer]="msValCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifAVI" text="warehouse.avi" [width]="100" align="center"
+              cellsAlign="center" dataField="msAvi" [cellsStyleRenderer]="msAviCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifHUM" text="warehouse.hum" [width]="100" align="center"
+              cellsAlign="center" dataField="msHum" [cellsStyleRenderer]="msHumCellsStyleRenderer"></ngc-data-column>
+            <ngc-data-column *ngIf="impShipManifOTH" text="warehouse.oth" [width]="100" align="center"
+              cellsAlign="center" dataField="msOth" [cellsStyleRenderer]="msOthCellsStyleRenderer"></ngc-data-column>
+          </ngc-data-column>
+
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

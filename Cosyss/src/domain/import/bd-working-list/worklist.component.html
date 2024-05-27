@@ -1,0 +1,672 @@
+<form [formGroup]="bdWorkListForm" formName="importWorkListForm">
+  <!-- Card (Begin) -->
+  <ngc-titlebar title="import.breakdown.working.list" (print)="onPrint()" (clear)="onClear($event)"
+    (cancel)="onCancel($event)">
+  </ngc-titlebar>
+  <!-- Card Heading (End) -->
+
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column='1.5'>
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightNumber" upperCase="true" required [width]="120"
+            (modelChange)='onChangeFlight($event)'></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column='2'>
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate" [showCalendarButton]="true"
+            [onlyDate]="true" align="left" [width]="160" (modelChange)='onChangeFlight($event)'></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="2" feature="Imp.Bd.BreakdownComplete" [formGroup]="bdWorkListForm">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-checkbox formControlName="breakdownPending" accessEnableOn="r" [disabled]=showAsPopup>
+            <ngc-label label='imp.bd.not.complete'></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column column='1'>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="getBeakDownList()" value="g.search" iconType=search>
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button *ngIf="(this.carrierCode === 'LH' || this.carrierCode === 'LX') && reopenBDTab"
+            (click)="onLhSendFwb()" value="import.lh.send.fwb.ffm"></ngc-button>
+        </div>
+        <div>
+          <ngc-button *ngIf='reopenBDTab' value="import.reopen.breakdown" (click)="reopenBreakdown()"> </ngc-button>
+        </div>
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button *ngIf='openBDTab' feature="Imp.Bd.AllowGroupLocationCreation" value="import.create.group.location"
+            (click)="groupLocation()"> </ngc-button>
+          <ngc-button *ngIf='openBDTab' value="import.breakdown.complete" (click)="showMisMatchPieces()"> </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="section" *ngIf="isBdWorkListPresent">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNumber"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.arrival.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.sta"></ngc-label>
+        <div>
+          <ngc-display formControlName="sta"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.ata"></ngc-label>
+        <div>
+          <ngc-display formControlName="ata"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="g.segments"></ngc-label>
+        <div>
+          <ngc-display formControlName="segment" color="blue" emphasis="md"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='import.segment'></ngc-label>
+        <div>
+          <ngc-dropdownlist formControlName="segmentDropdown" sourceId="ARRIVAL_FLIGHTSEGMENT" sourceType="query"
+            [sourceParameters]="sourceIdSegmentDropdown" [width]="100" [dropDownWidth]='110' [noCache]="true"
+            (ngModelChange)="onSegmentChange($event)" accessEnableOn="r">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.boarding.point"></ngc-label>
+        <div>
+          <ngc-display formControlName="boardPoint"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.aircraftType"></ngc-label>
+        <div>
+          <ngc-display formControlName="aircraftType"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="import.weather.condition"></ngc-label>
+        <div>
+          <ngc-dropdownlist sourceId="DamageReport$Weather_Condition" formControlName="weatherCondition"
+            [autoSelect]="true" [noBlank]="true" required [width]="130"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label="flight.flight.remarks"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightRemarks"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="left" feature="Imp.Bd.CustomSubmissionRequired">
+        <ngc-label label="import.segregation.report.sent"></ngc-label>
+        <div>
+          <ngc-shape formControlName="customSubmission" type="circle" textColor="white" bgColor="gray" [width]="22"
+            [height]="22">
+          </ngc-shape>
+        </div>
+      </ngc-column>
+      <ngc-column align="left" feature="Imp.Bd.CustomSubmissionRequired">
+        <ngc-label label="import.custom.aknowledge"></ngc-label>
+        <div>
+          <ngc-shape formControlName="customSubmissionAcknowledgement" type="circle" textColor="white" bgColor="gray"
+            [width]="22" [height]="22"></ngc-shape>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <!--Adhoc 116-->
+  <ngc-container *ngIf="isBdWorkListPresent" type='section'>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="g.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="import.first.breakdown.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="firstTimeBreakDownCompletedAt"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="import.flight.completed.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightCompletedDate"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="isBdWorkListPresent" type="box">
+    <ngc-row>
+      <ngc-column>
+        <ngc-tabs (select)="onTabSelect($event)">
+          <!--Consolidated View-->
+          <ngc-tab-card title="import.ConsolidatedView">
+            <ngc-datatable *ngIf="!viewBySegement" formArrayName="breakDownWorkingListShipmentResultConsolidatedView"
+              (itemSelect)="onConsolidatedCheckBoxClick($event)" [groups]="['flightBoardPoint']"
+              [groupsRenderer]="groupsRenderer" [pageable]="true" [pagerMode]="'advanced'" [pageSize]="10"
+              [showToolbar]="true">
+              <ngc-data-column text=" " [width]="20" dataField="flagCRUD" type="check" align="center"
+                cellsAlign="center"></ngc-data-column>
+              <ngc-data-column text="g.awbNumber" [width]="100" align="center" cellsAlign="center"
+                dataField="uldORawbNumber" type="text"></ngc-data-column>
+              <ngc-data-column text="import.domesticInternational" dataField="handledByDOMINT" [width]="65"
+                align="center" cellsAlign="center" type="text" entityAttribute="Awb.DomesticInternationalHandling">
+              </ngc-data-column>
+              <ngc-data-column text="import.handledByMasterHouse" dataField="handledByMasterHouse" [width]="35"
+                align="center" cellsAlign="center" type="text" feature="Imp.Bd.HAWBHandling"></ngc-data-column>
+              <ngc-data-column text="import.AwbPiecsWeight" [width]="90" align="center" cellsAlign="center"
+                dataField="awbPieces" [cellsStyleRenderer]="cellsStyleRenderer" type="text"></ngc-data-column>
+              <ngc-data-column text="import.man.pcs.wt" [width]="90" align="center" cellsAlign="center"
+                dataField="mnPieces" [cellsStyleRenderer]="cellsStyleRenderer" type="text"></ngc-data-column>
+              <ngc-data-column text="import.bd.pcs.wt" [width]="90" align="center" cellsAlign="center"
+                dataField="bdPieces" [cellsStyleRenderer]="breakdownPieceCellsStyleRenderer" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.transfer.type" [width]="100" align="center" cellsAlign="center"
+                dataField="transferType" type="text"></ngc-data-column>
+              <ngc-data-column text="import.Des" [width]="50" dataField="destination" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="flight.outbound.flight" [width]="100" align="center" cellsAlign="center"
+                dataField="outBoundFlightKey" type="text"></ngc-data-column>
+              <ngc-data-column text="import.natureOfGoods" [width]="160" align="center" cellsAlign="center"
+                dataField="natureOfGoodsDescription" type="text"></ngc-data-column>
+              <ngc-data-column text="g.shc" [width]="60" dataField="specialHandlingCode" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column text="import.FFMLocation" [width]="160" align="center" cellsAlign="left"
+                dataField="ffmLocation" type="text"></ngc-data-column>
+              <ngc-data-column text="import.CurrentLocation" [width]="200" align="center" cellsAlign="left"
+                dataField="currentLocation" type="text"></ngc-data-column>
+              <ngc-data-column text="import.d.m.g" [width]="70" dataField="dmgFlag" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.irregurlarity" [width]="140" align="center" cellsAlign="center"
+                dataField="irregularityCode" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="flight.segment" [width]="0" dataField="flightBoardPoint" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.awbNumber" [width]="0" dataField="shipmentNumber" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.shipmentType" [width]="0" dataField="temp" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.origin" [width]="0" dataField="origin" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="" [width]="0" dataField="view" align="center" cellsAlign="center"
+                type="text"></ngc-data-column>
+            </ngc-datatable>
+
+            <ngc-datatable *ngIf="viewBySegement"
+              formArrayName="breakDownWorkingListShipmentResultConsolidatedViewBySegement"
+              (itemSelect)="onConsolidatedCheckBoxClick($event)" [groups]="['flightBoardPoint']"
+              [groupsRenderer]="groupsRenderer" [pageable]="true" [pagerMode]="'advanced'" [pageSize]="10"
+              [showToolbar]="true">
+              <ngc-data-column text=" " [width]="20" dataField="flagCRUD" type="check" align="center"
+                cellsAlign="center"></ngc-data-column>
+              <ngc-data-column text="g.awbNumber" [width]="100" align="center" cellsAlign="center"
+                dataField="uldORawbNumber" type="text"></ngc-data-column>
+              <ngc-data-column text="import.domesticInternational" dataField="handledByDOMINT" [width]="65"
+                align="center" cellsAlign="center" type="text" entityAttribute="Awb.DomesticInternationalHandling">
+              </ngc-data-column>
+              <ngc-data-column text="import.handledByMasterHouse" dataField="handledByMasterHouse" [width]="35"
+                align="center" cellsAlign="center" type="text" feature="Imp.Bd.HAWBHandling"></ngc-data-column>
+              <ngc-data-column text="import.AwbPiecsWeight" [width]="90" align="center" cellsAlign="center"
+                dataField="awbPieces" [cellsStyleRenderer]="cellsStyleRenderer" type="text"></ngc-data-column>
+              <ngc-data-column text="import.man.pcs.wt" [width]="90" align="center" cellsAlign="center"
+                dataField="mnPieces" [cellsStyleRenderer]="cellsStyleRenderer" type="text"></ngc-data-column>
+              <ngc-data-column text="import.bd.pcs.wt" [width]="90" align="center" cellsAlign="center"
+                dataField="bdPieces" [cellsStyleRenderer]="breakdownPieceCellsStyleRenderer" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.transfer.type" [width]="100" align="center" cellsAlign="center"
+                dataField="transferType" type="text"></ngc-data-column>
+              <ngc-data-column text="import.Des" [width]="50" dataField="destination" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="flight.outbound.flight" [width]="100" align="center" cellsAlign="center"
+                dataField="outBoundFlightKey" type="text"></ngc-data-column>
+              <ngc-data-column text="import.natureOfGoods" [width]="160" align="center" cellsAlign="center"
+                dataField="natureOfGoodsDescription" type="text"></ngc-data-column>
+              <ngc-data-column text="g.shc" [width]="60" dataField="specialHandlingCode" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column text="import.FFMLocation" [width]="160" align="center" cellsAlign="left"
+                dataField="ffmLocation" type="text"></ngc-data-column>
+              <ngc-data-column text="import.CurrentLocation" [width]="200" align="center" cellsAlign="left"
+                dataField="currentLocation" type="text"></ngc-data-column>
+              <ngc-data-column text="import.d.m.g" [width]="70" dataField="dmgFlag" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.irregurlarity" [width]="140" align="center" cellsAlign="center"
+                dataField="irregularityCode" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="flight.segment" [width]="0" dataField="flightBoardPoint" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.awbNumber" [width]="0" dataField="shipmentNumber" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.shipmentType" [width]="0" dataField="temp" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.origin" [width]="0" dataField="origin" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="" [width]="0" dataField="view" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+            </ngc-datatable>
+
+          </ngc-tab-card>
+          <!--Manifested View-->
+          <ngc-tab-card title="import.MainifestedView">
+            <ngc-datatable *ngIf="!viewBySegement" formArrayName="breakDownWorkingListShipmentResult" [pageable]="true"
+              (linkClick)="onLinkClick($event)" [widthInPixels]="true" [bindOnValueChange]="false"
+              (itemSelect)="onCheckBoxClick($event)" [groups]="['flightBoardPoint','temp']"
+              [groupsRenderer]="groupsRenderer" [pageable]="true" [pagerMode]="'advanced'"
+              [enablePageSizeHeight]="false" [pageSize]="10" [showToolbar]="true">
+              <ngc-data-column text=" " [width]="20" dataField="flagCRUD" type="check" align="center"
+                cellsAlign="center"></ngc-data-column>
+              <ngc-data-column text="import.awbNumber" [cellsStyleRenderer]="uldConfirmDateCellsStyleRenderer"
+                [width]="180" align="center" cellsAlign="center" dataField="uldORawbNumber" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.man.pcs.wt" [width]="130" align="center" cellsAlign="center"
+                dataField="mnPieces" [cellsStyleRenderer]="cellsStyleRenderer" type="text"></ngc-data-column>
+              <ngc-data-column text="import.bd.pcs.wt" [width]="130" align="center" cellsAlign="center"
+                dataField="bdPieces" [cellsStyleRenderer]="breakdownPieceCellsStyleRenderer" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.transfer.type" [width]="160" align="center" cellsAlign="center"
+                dataField="transferType" type="text"></ngc-data-column>
+              <ngc-data-column text="import.Des" [width]="80" dataField="destination" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="flight.outbound.flight" [width]="160" align="center" cellsAlign="center"
+                dataField="outBoundFlightKey" type="text"></ngc-data-column>
+              <ngc-data-column text="import.natureOfGoods" [width]="170" align="center" cellsAlign="center"
+                dataField="natureOfGoodsDescription" type="text"></ngc-data-column>
+              <ngc-data-column text="g.shc" [width]="90" dataField="specialHandlingCode" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column text="import.handling.instructions" [width]="190" dataField="instruction" align="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.d.m.g" [width]="100" dataField="dmgFlag" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.irregurlarity" [width]="160" align="center" cellsAlign="center"
+                dataField="irregularityCode" type="text"></ngc-data-column>
+              <ngc-data-column text="import.location.pcs" [width]="160" align="center" cellsAlign="center"
+                dataField="readyForDelivery" type="text" cellspacing="0" [cellsStyleRenderer]="cellsStyleRenderer">
+              </ngc-data-column>
+              <ngc-data-column text="accessory" feature="Imp.Bd.Accessory" (linkClick)="openAddAccessory(item,index)"
+                iconType="edit" [width]="140" dataField="" align="center" cellsAlign="center" type="link">
+              </ngc-data-column>
+              <ngc-data-column text="imp.wh.dest" feature="Imp.Bd.WarehouseDestination" [width]="140"
+                dataField="warehouseDestination" align="center" cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column text="imp.eic" feature="Imp.Bd.EIC" [width]="140" dataField="eic" align="center"
+                cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.ramp.check.empty" feature="Imp.Bd.EmptyUld" [width]="140"
+                dataField="emptyFlag" align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="g.condition" feature="Imp.Bd.UldCondition" [width]="140" dataField="uldCondition"
+                align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="imp.uld.locn" feature="Imp.Bd.UldLocation" [width]="140" dataField="uldLocation"
+                align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="imp.uld.cnf.date" feature="Imp.Bd.UldConfirmedDate" [width]="150"
+                dataField="uldConfirmedDate" align="center" cellsAlign="center" type="displayDate">
+              </ngc-data-column>
+              <ngc-data-column text="imp.crnt.sts" feature="Imp.Bd.UldCurrentStatus" [width]="140"
+                dataField="uldCurrentStatus" align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column hidden=true text="flight.segment" dataField="flightBoardPoint" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.awbNumber" dataField="shipmentNumber" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.shipmentType" dataField="temp" align="center" cellsAlign="center"
+                type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.origin" dataField="origin" align="center" cellsAlign="center"
+                type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="" dataField="view" align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column hidden=true text="import.handledByMasterHouse" dataField="handledByMasterHouse"
+                align="center" cellsAlign="center" type="text" feature="Imp.Bd.HAWBHandling">
+              </ngc-data-column>
+            </ngc-datatable>
+
+            <ngc-datatable *ngIf="viewBySegement" formArrayName="breakDownWorkingListShipmentResultBySegment"
+              (itemSelect)="onCheckBoxClick($event)" (linkClick)="onLinkClick($event)" [widthInPixels]="true"
+              [groups]="['flightBoardPoint','temp']" [groupsRenderer]="groupsRenderer" [pageable]="true"
+              [pagerMode]="'advanced'" [pageSize]="10">
+              <ngc-data-column text=" " [width]="20" dataField="flagCRUD" type="check" align="center"
+                cellsAlign="center"></ngc-data-column>
+              <ngc-data-column text="import.awbNumber" [cellsStyleRenderer]="uldConfirmDateCellsStyleRenderer"
+                [width]="180" align="center" cellsAlign="center" dataField="uldORawbNumber" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.man.pcs.wt" [width]="130" align="center" cellsAlign="center"
+                dataField="mnPieces" [cellsStyleRenderer]="cellsStyleRenderer" type="text"></ngc-data-column>
+              <ngc-data-column text="import.bd.pcs.wt" [width]="130" align="center" cellsAlign="center"
+                dataField="bdPieces" [cellsStyleRenderer]="breakdownPieceCellsStyleRenderer" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.transfer.type" [width]="160" align="center" cellsAlign="center"
+                dataField="transferType" type="text"></ngc-data-column>
+              <ngc-data-column text="import.Des" [width]="80" dataField="destination" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="flight.outbound.flight" [width]="160" align="center" cellsAlign="center"
+                dataField="outBoundFlightKey" type="text"></ngc-data-column>
+              <ngc-data-column text="import.natureOfGoods" [width]="170" align="center" cellsAlign="center"
+                dataField="natureOfGoodsDescription" type="text"></ngc-data-column>
+              <ngc-data-column text="g.shc" [width]="90" dataField="specialHandlingCode" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column text="import.handling.instructions" [width]="190" dataField="instruction" align="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.d.m.g" [width]="100" dataField="dmgFlag" align="center" cellsAlign="center"
+                type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.irregurlarity" [width]="160" align="center" cellsAlign="center"
+                dataField="irregularityCode" type="text"></ngc-data-column>
+              <ngc-data-column text="import.location.pcs" [width]="160" align="center" cellsAlign="center"
+                dataField="readyForDelivery" type="text" [cellsStyleRenderer]="cellsStyleRenderer"></ngc-data-column>
+              <ngc-data-column text="accessory" feature="Imp.Bd.Accessory" (linkClick)="openAddAccessory(item,index)"
+                iconType="edit" [width]="140" dataField="" align="center" cellsAlign="center" type="link">
+              </ngc-data-column>
+              <ngc-data-column text="imp.wh.dest" feature="Imp.Bd.WarehouseDestination" [width]="140"
+                dataField="warehouseDestination" align="center" cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column text="imp.eic" feature="Imp.Bd.EIC" [width]="140" dataField="eic" align="center"
+                cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="import.ramp.check.empty" feature="Imp.Bd.EmptyUld" [width]="140"
+                dataField="emptyFlag" align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="g.condition" feature="Imp.Bd.UldCondition" [width]="140" dataField="uldCondition"
+                align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="imp.uld.locn" feature="Imp.Bd.UldLocation" [width]="140" dataField="uldLocation"
+                align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column text="imp.uld.cnf.date" feature="Imp.Bd.UldConfirmedDate" [width]="150"
+                dataField="uldConfirmedDate" align="center" cellsAlign="center" type="displayDate">
+              </ngc-data-column>
+              <ngc-data-column text="imp.crnt.sts" feature="Imp.Bd.UldCurrentStatus" [width]="140"
+                dataField="uldCurrentStatus" align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+              <ngc-data-column hidden=true text="flight.segment" dataField="flightBoardPoint" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.awbNumber" dataField="shipmentNumber" align="center"
+                cellsAlign="center" type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.shipmentType" dataField="temp" align="center" cellsAlign="center"
+                type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="g.origin" dataField="origin" align="center" cellsAlign="center"
+                type="text"></ngc-data-column>
+              <ngc-data-column hidden=true text="" dataField="view" align="center" cellsAlign="center" type="text">
+              </ngc-data-column>
+            </ngc-datatable>
+          </ngc-tab-card>
+        </ngc-tabs>
+      </ngc-column>
+    </ngc-row>
+    <!-- <ngc-row formGroupName="flightLevelCount">
+      <ngc-column [column]="1">
+        <ngc-label label='import.grand.total'></ngc-label>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.uld.dash'></ngc-label>
+        <ngc-display formControlName="flightULDCount"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.loose.cargo.dash'></ngc-label>
+        <ngc-display formControlName="flightLooseCargoCount"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.weight.dash'></ngc-label>
+        <ngc-display formControlName="flightPieces"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1">
+        <ngc-label label='import.weight.dash'></ngc-label>
+        <ngc-weightdisplay formControlName="flightWeight"></ngc-weightdisplay>
+      </ngc-column>
+    </ngc-row> -->
+    <ngc-row formGroupName="flightLevelCount">
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.trm.ulds.manifested'></ngc-label>&nbsp;&nbsp;
+        <ngc-display formControlName="transhipmentULDsManifested"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.trm.uld.bd.complete'></ngc-label>&nbsp;&nbsp;
+        <ngc-display formControlName="transhipmentULDsBDcomplete"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.trm.loose.manifested'></ngc-label>&nbsp;&nbsp;
+        <ngc-display formControlName="transhipmentLooseManifested"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.trm.loose.bd.complete'></ngc-label>&nbsp;&nbsp;
+        <ngc-display formControlName="transhipmentLooseBDcomplete"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row formGroupName="flightLevelCount">
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.local.ulds.manifested'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="localULDsManifested"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.local.uld.bd.complete'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="localULDsBDcomplete"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.local.loose.manifested'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="localLooseManifested"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.local.loose.bd.complete'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="localLooseBDcomplete"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row formGroupName="flightLevelCount">
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.total.ulds.manifested'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="totalULDsManifested"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.total.uld.bd.complete'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="totalULDsBDcomplete"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.total.loose.manifested'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="totalLooseManifested"></ngc-display>
+      </ngc-column>
+      <ngc-column [column]="1.4">
+        <ngc-label label='imp.total.loose.bd.complete'></ngc-label>
+        &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+        <ngc-display formControlName="totalLooseBDcomplete"></ngc-display>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-report #reportWindow title="g.report" reportId='BreakdownWorkingListPrint'
+      [reportParameters]='reportParameters'>
+    </ngc-report>
+
+    <ngc-row>
+      <ngc-window #window [width]="800" [height]="300" title="import.mismatch.location.pieces">
+        <ngc-container type="block">
+          <ngc-row>
+            <ngc-column>
+              <ngc-display *ngIf="this.bdWorkListForm.get('shipmentMismatchPieces').value.length<=0"
+                value="import.no.mismatch.found">
+
+              </ngc-display>
+              <ngc-table *ngIf="this.bdWorkListForm.get('shipmentMismatchPieces').value.length>0">
+                <thead>
+                  <tr>
+                    <th>
+                      <ngc-label label="import.s.no"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="flight.segment"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.awbNumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="g.uldTrolleyNumber"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="import.man.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="import.breakdown.pieces"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="import.irregurlarity"></ngc-label>
+                    </th>
+                    <th>
+                      <ngc-label label="import.off.loaded"></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="shipmentMismatchPieces">
+                  <tr *ngFor="let item of bdWorkListForm.controls.shipmentMismatchPieces.controls; let index=index"
+                    [formGroupName]="index">
+                    <td>{{index+1}}</td>
+                    <td>
+                      <ngc-display formControlName="segment"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="awbNumber"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="uldNumber"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="mnPieces"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="bdPieces"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName="irregularity"></ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display hidden=true formControlName="origin"></ngc-display>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+          <ngc-container type="tab">
+            <ngc-row>
+              <ngc-column align="right">
+                <ngc-button (click)="onClickConfirmButton($event)" label="g.confirm"></ngc-button>
+                <ngc-button (click)="onClickCancelButton($event)" label="g.cancel"></ngc-button>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-window-footer>
+      </ngc-window>
+    </ngc-row>
+    <ngc-row formGroupName="changeLocation">
+      <ngc-window #addLocation [width]="900" [height]="260" title="import.add.location" (close)='closeGroupLocation()'>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column [column]='4'>
+              <ngc-label value="awb.shipment.location"></ngc-label>
+              <div>
+                <ngc-movable-storage-location uppercase="true" [maxlength]="12" [minlength]="3" [width]="130"
+                  formControlName="shipmentLocation"
+                  [destination]="this.bdWorkListForm.get(['changeLocation', 'shipmentDestination']).value"
+                  [origin]="this.bdWorkListForm.get(['changeLocation', 'shipmentOrigin']).value">
+                </ngc-movable-storage-location>
+              </div>
+            </ngc-column>
+            <ngc-column [column]='4'>
+              <ngc-label value="awb.warehouse.location"></ngc-label>
+              <div>
+                <ngc-locations-list [noTerminal]="true" [displayOnlyLocation]="true" [width]="120"
+                  formControlName="warehouseLocation" [locationTypeList]="['STORAGE']">
+                </ngc-locations-list>
+              </div>
+            </ngc-column>
+            <ngc-column [column]='4'>
+              <ngc-label label="import.breakdown.service.providers"></ngc-label>
+              <div>
+                <ngc-dropdownlist formControlName="bdstaffGroups" [width]='240' sourceId='BDSUMMARY_SERVICEPROVIDER'
+                  [sourceParameters]="breakDownServiceProvider" sourceType='query'>
+                </ngc-dropdownlist>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+          <ngc-container type="tab">
+            <ngc-row>
+              <ngc-column align="right">
+                <ngc-button (click)="saveLocationForMultipleShipments($event)" label="g.save"></ngc-button>
+              </ngc-column>
+            </ngc-row>
+          </ngc-container>
+        </ngc-window-footer>
+      </ngc-window>
+    </ngc-row>
+  </ngc-container>
+</form>
+<ngc-window #accessoryPopUp [width]="1500" [height]="600" title="accessory.add.title">
+  <app-add-accessory (autoSearchAccessoryInfo)="autoSearchAccessoryInfo()" (closeWindow)="closeWindow()"
+    [showAsPopup]="true" [inputData]="inputData">
+  </app-add-accessory>
+</ngc-window>
+
+<ngc-footer>
+  <ngc-row *ngIf="isBdWorkListPresent">
+    <ngc-column>
+      <ngc-button class="btn btn-sm" value="brk.FDL" (click)="navigateToFDL()" accessEnableOn="r"></ngc-button>
+      <ngc-button class="btn btn-sm" value="brk.inbound.brk" (click)="shipmentFunction('BREAKDOWN')" accessEnableOn="r">
+      </ngc-button>
+      <ngc-button class="btn btn-sm" value="brk.hold" (click)="shipmentFunction('HOLD')" accessEnableOn="r">
+      </ngc-button>
+      <ngc-button class="btn btn-sm" value="brk.remarks" (click)="shipmentFunction('REMARK')" accessEnableOn="r">
+      </ngc-button>
+      <ngc-button class="btn btn-sm" value="brk.irregularity" (click)="shipmentFunction('IRREGULARITY')"
+        accessEnableOn="r"> </ngc-button>
+      <ngc-button class="btn btn-sm" value="brk.capture.damage" (click)="shipmentFunction('Capture Break Down')"
+        accessEnableOn="r">
+      </ngc-button>
+      <ngc-button class="btn btn-sm" (click)="navigateToBDSummary()" value="brk.summary" accessEnableOn="r"
+        align="left">
+      </ngc-button>
+      <ngc-button class="btn btn-sm" (click)="navigateToBDTracing()" value="brk.tracing" accessEnableOn="r"
+        align="left">
+      </ngc-button>
+      <ngc-button feature="Imp.Bd.CustomSubmissionRequired" *ngIf="reopenBDTab" value="imp.bdw.SegregationReport"
+        (click)="reSendSegregationReport()" accessEnableOn="r" align="left">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

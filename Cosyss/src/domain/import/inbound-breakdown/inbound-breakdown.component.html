@@ -1,0 +1,922 @@
+<form [formGroup]="inboundBreakdownFormGroup" formName="inboundbreakdownForm">
+    <!-- Card (Begin) -->
+    <ngc-titlebar title="import.title.inbound.breakdown" (clear)="clearPage($event)" (save)="onSave()"
+        (cancel)="OnCancel()">
+    </ngc-titlebar>
+
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column column="1.5">
+                <ngc-label label="g.uldTrolleyNumber"></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" formControlName="uldNumber" [width]="150"
+                        (ngModelChange)="onFlightOrUldChange($event , 'uld')" upperCase="true" maxlength="11">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label="short.cut.flight.key" shortcutFor="flightNumber"></ngc-label>
+                <div>
+                    <ngc-flightkeyinput [width]="100" accessEnableOn="r" formControlName="flightNumber" upperCase="true"
+                        required (ngModelChange)="onFlightOrUldChange($event , 'uld')"></ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label="g.date"></ngc-label>
+                <div>
+                    <ngc-datetimeinput [width]=120 accessEnableOn="r" formControlName="flightDate"
+                        [showCalendarButton]="true" [onlyDate]="true"
+                        (ngModelChange)="onFlightOrUldChange($event , 'uld')">
+                    </ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label="g.shipmentType"></ngc-label>
+                <div>
+                    <ngc-dropdownlist width="100" accessEnableOn="r" formControlName="shipmentType"
+                        sourceId="Shpmgmt$Shp_Type_Web" required (ngModelChange)="onShipmentTypeChange($event)">
+                    </ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column column="1.5">
+                <ngc-label label="g.awbNumber" shortcutFor="awbNumber"></ngc-label>
+                <div>
+                    <ngc-input [width]='120' accessEnableOn="r" formControlName="awbNumber"
+                        sourceId="INBOUND_AWBNUMBERKEY" [sourceParameters]="breakDownAwbSourceParameter"
+                        (ngModelChange)='onChangeOfShipmentNumber()'></ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column column="2" feature="Imp.Bd.HAWBHandling" *ngIf="handledByMasterHouse">
+                <ngc-label label="g.hawbNumber"></ngc-label>
+                <div>
+                    <ngc-lov formControlName="hawbNumbers" [noCache]="true" title="g.hawbNumber" dataField='code'
+                        sourceType='query' sourceId="HWBNUMBER" [width]="100" [noValidation]="true"
+                        [sourceParameters]="{'parameter1': inboundBreakdownFormGroup.get('awbNumber').value,r:variable}"
+                        (select)='onChangeHawbNumber()' maxlength="16">
+                        <ngc-data-column text="g.hawbNumber" dataField="code" [width]="100"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column column="2">
+                <ngc-label label="">
+                </ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search"></ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="">
+                </ngc-label>
+                <div>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+</form>
+<form [formGroup]="awbDetailsFormGroup" *ngIf="isAwbDetailsPresent">
+    <ngc-container type="section">
+
+        <ngc-row>
+            <ngc-column>
+                <ngc-label label="g.flight"></ngc-label>
+                <div>
+                    <ngc-display formControlName="flightNumber"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="g.date"></ngc-label>
+                <div>
+                    <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column='1'>
+                <ngc-label label="g.awbNumber"></ngc-label>
+                <div>
+                    <ngc-display formControlName="shipmentNumber"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column [column]='1' [grid24]="true">
+                <ngc-label label="g.origin"></ngc-label>
+                <div>
+                    <ngc-lov formControlName="origin" sourceId="FINAL_DESTINATION" title="g.source" dataField='code'
+                        required="true" [width]="50" [disabled]="isAwbOriginPresent" maxlength="3">
+                        <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column [column]='1.5' [grid24]="true">
+                <ngc-label label="g.destination"></ngc-label>
+                <div>
+                    <ngc-lov formControlName="destination" sourceId="FINAL_DESTINATION" title="g.destination"
+                        dataField='code' required="true" [width]="50" [disabled]="isAwbOriginPresent" maxlength="3">
+                        <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="2.5" [grid24]="true">
+                <ngc-label [value]="pieceDetail"></ngc-label>
+                <div>
+                    <ngc-piecesdisplay formControlName="piece"></ngc-piecesdisplay>/
+                    <ngc-weightdisplay formControlName="weight" *ngIf="!editAwbWeight"></ngc-weightdisplay>
+                    <ngc-weightinput formControlName="weight" required *ngIf="editAwbWeight"></ngc-weightinput>
+                </div>
+            </ngc-column>
+            <ngc-column [column]="1.5" [grid24]="true" entityAttribute="Gen.ChargeableWeight">
+                <ngc-label value="g.chargeableWeight"></ngc-label>
+                <div>
+                    <ngc-chargeableweightdisplay formControlName="awbChargeableWeight"></ngc-chargeableweightdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column [hidden]="isPreBookedPieces" [column]='3' [grid24]="true">
+                <ngc-label label="import.mainfested.pcs.wt"></ngc-label>
+                <div>
+                    <ngc-piecesdisplay formControlName="manifestPieces"></ngc-piecesdisplay>/
+                    <ngc-weightdisplay formControlName="manifestWeight"></ngc-weightdisplay>
+                </div>
+            </ngc-column>
+            <ngc-column column='1.5'>
+                <ngc-label label="import.natureOfGoods">
+                </ngc-label>
+                <div *ngIf="!hawbInfoFeatureEnabled || natureOfGoodsFlag">
+                    <ngc-input formControlName="natureOfGoodsDescription" required="true" maxlength="20" [width]="175">
+                    </ngc-input>
+                </div>
+                <div *ngIf="hawbInfoFeatureEnabled && !natureOfGoodsFlag">
+                    <ngc-display formControlName="natureOfGoodsDescription" required="true" maxlength="20"
+                        [width]="175">
+                    </ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column [column]='1' [grid24]="true">
+                <ngc-label label="flight.ata"></ngc-label>
+                <div>
+                    <ngc-display formControlName="ata"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column='1' entityAttribute="Import.CarCreated">
+                <ngc-label label="import.carcreated"></ngc-label>
+                <div>
+                    <ngc-display formControlName="carCreated"></ngc-display>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]='1.5' [grid24]="true" entityAttribute="Gen.Packing">
+                <ngc-label entityAttribute="Gen.Packing"></ngc-label>
+                <div>
+                    <ngc-display formControlName="packing"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column entityAttribute="Awb.DomesticInternationalHandling" column="1" align="center">
+                <ngc-label label="g.domint"></ngc-label>
+                <div>
+                    <ngc-shape formControlName="handledByDOMINT" type="circle" textColor="white" bgColor="gray"
+                        [width]="30" [height]="20">
+                    </ngc-shape>
+                </div>
+            </ngc-column>
+            <ngc-column class="handledByHouseOrMaster" feature="Imp.Bd.HAWBHandling" column="1">
+                <ngc-label label="g.HandledBy"></ngc-label>
+                <div>
+                    <ngc-shape formControlName="handledByMasterHouse" type="circle" textColor="white" bgColor="gray"
+                        [width]="30" [height]="20">
+                    </ngc-shape>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label label="g.shc"></ngc-label>
+                <div>
+                    <ngc-display formControlName="shcs"></ngc-display>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-container type="section">
+        <ngc-row>
+            <ngc-column column='2'>
+                <ngc-label label="import.breakdown.instruction"></ngc-label>
+                <div>
+                    <ngc-display formControlName="bdinstruction"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column='2'>
+                <ngc-label label="import.bd.start.date.time"></ngc-label>
+                <div>
+                    <ngc-datetimeinput formControlName="bdstartdate" [showCalendarButton]="false" [width]="120"
+                        [onlyDate]="true"></ngc-datetimeinput>
+                    <ngc-datetimeinput [width]="70" formControlName="bdstarttime" [showCalendarButton]="false"
+                        [showTimeButton]="true"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column column='2'>
+                <ngc-label label="imp.transferType"></ngc-label>
+                <div>
+                    <ngc-display formControlName="transferType"></ngc-display>
+                </div>
+            </ngc-column>
+            <ngc-column column='1'>
+                <ngc-label label="import.hand.carry"></ngc-label>
+                <div>
+                    <ngc-checkbox formControlName="handCarry"></ngc-checkbox>
+                </div>
+            </ngc-column>
+            <ngc-column class="pull-right" column='3'>
+                <ngc-label label="import.breakdown.service.providers"></ngc-label>
+                <div>
+                    <ngc-dropdownlist formControlName="bdstaffGroups" [width]='240' sourceId='BDSUMMARY_SERVICEPROVIDER'
+                        [sourceParameters]="breakDownServiceProvider" sourceType='query' [required]="breakFlag"
+                        [noBlank]="serviceProviderLength"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+            <ngc-column column='1' entityAttribute="Import.Damaged.Shipment">
+                <ngc-label label="import.damagedShipments"></ngc-label>
+                <div>
+                    <ngc-checkbox formControlName="damagedShipment"></ngc-checkbox>
+                </div>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-row>
+        <ngc-column>
+            <ngc-container type="rectangle" feature="Imp.Bd.HAWBHandling" *ngIf="handledByMasterHouse">
+                <ngc-row>
+                    <ngc-column column='1'>
+                        <ngc-label label="g.hawbNumber"></ngc-label>
+                        <div>
+                            <ngc-display formControlName="hawbNumber"></ngc-display>
+                        </div>
+                    </ngc-column>
+                    <ngc-column column='1'>
+                        <ngc-label label="g.origin"></ngc-label>
+                        <div *ngIf='ishawbInfoExist'>
+                            <ngc-display formControlName="hawbOrigin"></ngc-display>
+                        </div>
+                        <div *ngIf='!ishawbInfoExist'>
+                            <ngc-lov formControlName="hawbOrigin" sourceId="FINAL_DESTINATION" title="g.source"
+                                dataField='code' [width]="50" maxlength="3">
+                                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                            </ngc-lov>
+                        </div>
+                    </ngc-column>
+                    <ngc-column column='1'>
+                        <ngc-label label="g.destination"></ngc-label>
+                        <div *ngIf='ishawbInfoExist'>
+                            <ngc-display formControlName="hawbDestination"></ngc-display>
+                        </div>
+                        <div *ngIf='!ishawbInfoExist'>
+                            <ngc-lov formControlName="hawbDestination" sourceId="FINAL_DESTINATION"
+                                title="g.destination" dataField='code' [width]="50" maxlength="3">
+                                <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+                            </ngc-lov>
+                        </div>
+                    </ngc-column>
+                    <ngc-column column='1.5'>
+                        <ngc-label value="g.hawbPiecesWeight"></ngc-label>
+                        <div>
+                            <ngc-display formControlName="hawbPieces"></ngc-display>/
+                            <ngc-weightdisplay formControlName="hawbWeight"></ngc-weightdisplay>
+                        </div>
+                    </ngc-column>
+                    <ngc-column column='1.5'>
+                        <ngc-label value="g.chargeableWeight"></ngc-label>
+                        <div>
+                            <ngc-chargeableweightdisplay formControlName="hawbChargebleWeight">
+                            </ngc-chargeableweightdisplay>
+                        </div>
+                    </ngc-column>
+                    <ngc-column column='2'>
+                        <ngc-label label="import.natureOfGoods"></ngc-label>
+                        <div *ngIf='ishawbInfoExist'>
+                            <ngc-display formControlName="hawbNatureOfGoods"></ngc-display>
+                        </div>
+                        <div *ngIf='!ishawbInfoExist'>
+                            <ngc-input formControlName="hawbNatureOfGoods" maxlength="20" [width]="175">
+                            </ngc-input>
+                        </div>
+                    </ngc-column>
+                    <ngc-column>
+                        <ngc-label label="g.shc"></ngc-label>
+                        <div>
+                            <ngc-display formControlName="hawbShcs"></ngc-display>
+                        </div>
+                    </ngc-column>
+                    <ngc-column column='1' *ngIf='false'>
+                        <ngc-label label=""></ngc-label>
+                        <div>
+                            <ngc-display formControlName="hawbId"></ngc-display>
+                        </div>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-column>
+    </ngc-row>
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-label emphasis='md' value="Remaining Pieces/Weight:"></ngc-label>
+                <ngc-display emphasis='md' formControlName="totalUtilisedPieces"></ngc-display>/
+                <ngc-weightdisplay emphasis='md' formControlName="totalUtilisedWeight"></ngc-weightdisplay>
+            </ngc-column>
+            <ngc-column column="5" align="right">
+                <ngc-label emphasis='md' value="Total BreakDown Pieces/Weight:"></ngc-label>
+                <ngc-display emphasis='md' formControlName="breakDownPieces"></ngc-display>/
+                <ngc-weightdisplay emphasis='md' formControlName="breakDownWeight"></ngc-weightdisplay>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column>
+                <ngc-table>
+                    <thead>
+                        <tr>
+                            <th>
+                                <ngc-label value=""></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="g.uldTrolleyNumber"></ngc-label>
+                            </th>
+                            <th *ngIf="isSQGroupCarrier">
+                                <ngc-label value="awb.part.suffix"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="awb.shipment.location.br.bin.bt.uld.pd"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label entityAttribute="Gen.WareHouseDestination"></ngc-label>
+                            </th>
+                            <th *ngIf="actualLocationFeatureEnabled">
+                                <ngc-label value="Gen.ActualLocation"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="g.pieces"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="g.weight"></ngc-label>
+                            </th>
+                            <th entityAttribute="Gen.ChargeableWeight">
+                                <ngc-label value="g.chargeableWeight"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="g.special.handling.code"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="import.warehouseInstructions"></ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="import.handling.mode.br"></ngc-label>
+                            </th>
+                            <th *ngIf="!hawbInfoFeatureEnabled">
+                                <ngc-label value="import.handling.area.br"></ngc-label>
+                            </th>
+                            <th *ngIf="!hawbInfoFeatureEnabled">
+                                <ngc-label value="import.damageuld"></ngc-label>
+                            </th>
+                            <th *ngIf="!hawbInfoFeatureEnabled">
+                                <ngc-label value="import.poissue.tag.info"></ngc-label>
+                            </th>
+                            <th *ngIf="hawbInfoFeatureEnabled">
+                                <ngc-label value="accessory"></ngc-label>
+                            </th>
+                            <th *ngIf="hawbInfoFeatureEnabled">
+                                <ngc-label value="Gen.AddHouse"
+                                    *ngIf="inboundBreakdownFormGroup.get('shipmentType').value !='MAILAWB' && inboundBreakdownFormGroup.get('shipmentType').value !='OBC'">
+                                </ngc-label>
+                                <ngc-label value="import.poissue.tag.info"
+                                    *ngIf="inboundBreakdownFormGroup.get('shipmentType').value =='MAILAWB' || inboundBreakdownFormGroup.get('shipmentType').value =='OBC'">
+                                </ngc-label>
+                            </th>
+                            <th>
+                                <ngc-label value="Delete"></ngc-label>
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody formArrayName="inventory">
+                        <ng-container
+                            *ngFor="let item of awbDetailsFormGroup.get( 'inventory').controls let index=index">
+                            <tr [formGroupName]="index">
+
+                                <td align="center">
+
+                                    <ngc-display *ngIf="item.get('deliveryOrderNo').value"
+                                        formControlName="deliveryOrderNo" [hidden]="true">
+                                    </ngc-display>
+
+                                    <b><I *ngIf="item.get('deliveryOrderNo').value">
+                                            <font size="-2" color="green">
+                                                <ngc-label entityAttribute="Imp.bd.DOCompleted"></ngc-label>
+                                            </font>
+                                        </I></b>
+
+                                    <ngc-display *ngIf="item.get('deliveryRequestOrderNo').value"
+                                        formControlName="deliveryRequestOrderNo" [hidden]="true">
+                                    </ngc-display>
+
+                                    <b><I *ngIf="item.get('deliveryRequestOrderNo').value">
+                                            <font size="-2" color="Red">
+                                                <ngc-label entityAttribute="Imp.bd.POInitiated"></ngc-label>
+                                            </font>
+                                        </I></b>
+
+                                    <ngc-display *ngIf="item.get('throughTransit').value"
+                                        formControlName="throughTransit" [hidden]="true">
+                                    </ngc-display>
+
+                                    <ngc-display *ngIf="item.get('assignedUldTrolley').value"
+                                        formControlName="assignedUldTrolley" [hidden]="true">
+                                    </ngc-display>
+
+                                    <ngc-display *ngIf="item.get('loaded').value" formControlName="loaded"
+                                        [hidden]="true">
+                                    </ngc-display>
+                                    <b><I *ngIf="item.get('loaded').value == 1 || item.get('assignedUldTrolley').value ||
+									             item.get('throughTransit').value">
+                                            <font size="-2" color="blue">
+                                                <ngc-label entityAttribute="Imp.bd.Loaded"></ngc-label>
+                                            </font>
+                                        </I></b>
+                                    <ngc-display *ngIf="item.get('isTrmintiated').value" formControlName="isTrmintiated"
+                                        [hidden]="true">
+                                    </ngc-display>
+                                    <b><I *ngIf="item.get('isTrmintiated').value">
+                                            <font size="-2" color="green">TRM Finalized</font>
+                                        </I></b>
+                                    <ngc-display *ngIf="item.get('hold').value" formControlName="hold" [hidden]="true">
+                                    </ngc-display>
+                                    <b><I class="fa fa-lock fa-2x" style="color:red" *ngIf="item.get('hold').value">
+                                            <font size="-2" color="red">Hold</font>
+                                        </I></b>
+                                </td>
+
+                                <td *ngIf="!isFoundCargo && item.flagCRUD =='C'">
+                                    <ngc-dropdownlist formControlName="uldNumber"
+                                        [sourceParameters]="breakDownUldSourceParameter" sourceId='INBOUND_ULDNO'
+                                        sourceType='query' [width]='120' (select)="onULDChange($event , index)"
+                                        [noCache]="true" [noBlank]="true" valueMember="desc"
+                                        [disabled]="item.get('accessLocation').value"></ngc-dropdownlist>
+                                </td>
+                                <td *ngIf="isFoundCargo">
+                                    <ngc-uldinput formControlName="uldNumber"></ngc-uldinput>
+                                </td>
+                                <td *ngIf="!isFoundCargo && item.flagCRUD !='C'">
+                                    <ngc-display formControlName="uldNumber"></ngc-display>
+                                </td>
+                                <td *ngIf="isSQGroupCarrier">
+                                    <ngc-dropdownlist formControlName="partSuffix" [width]="80" [dropDownWidth]="80"
+                                        sourceId="BOOKING_PART_SUFFIX"
+                                        [sourceParameters]="{ 'parameter1': this.awbDetailsFormGroup.get('shipmentNumber').value}"
+                                        sourceType="query" [noCache]="true" [required]="suffixValuesExist"
+                                        [disabled]="item.get('accessLocation').value">
+                                    </ngc-dropdownlist>
+                                </td>
+                                <td>
+                                    <ngc-movable-storage-location
+                                        [origin]="this.awbDetailsFormGroup.get('origin').value"
+                                        [destination]="this.awbDetailsFormGroup.get('destination').value"
+                                        [shipmentNumber]="this.awbDetailsFormGroup.get('shipmentNumber').value"
+                                        [flightKey]="awbDetailsFormGroup.get('flightNumber').value"
+                                        [flightDate]="awbDetailsFormGroup.get('flightDate').value"
+                                        [disabled]=" item.get('accessLocation').value"
+                                        formControlName="shipmentLocation" [width]="130">
+                                    </ngc-movable-storage-location>
+                                </td>
+                                <!-- if location mandatory based on feature enable-->
+                                <td>
+                                    <ngc-locations-list entityAttribute="Gen.WareHouseDestination"
+                                        [noTerminal]="terminalRequired" [displayOnlyLocation]="true" [width]="120"
+                                        formControlName="warehouseLocation"
+                                        [disabled]="item.get('accessLocation').value" [locationTypeList]="['STORAGE']"
+                                        (select)="onLocationChange($event , index)">
+                                    </ngc-locations-list>
+                                </td>
+                                <td *ngIf="actualLocationFeatureEnabled">
+                                    <ngc-locations-list [displayOnlyLocation]="true" [width]="120"
+                                        [sectorId]="item.get('sector').value" [locationTypeList]="['STORAGE']"
+                                        formControlName="actualLoction" [disabled]="item.get('accessLocation').value">
+                                    </ngc-locations-list>
+                                </td>
+                                <td>
+                                    <ngc-piecesinput formControlName="pieces" required
+                                        (ngModelChange)="onPieceChangeRevised(index)"
+                                        [disabled]="item.get('accessLocation').value"></ngc-piecesinput>
+                                </td>
+                                <td>
+                                    <ngc-weightinput formControlName="weight" required
+                                        (ngModelChange)="onWeightChange(index)"
+                                        [disabled]="item.get('accessLocation').value"></ngc-weightinput>
+                                </td>
+                                <td entityAttribute="Gen.ChargeableWeight">
+                                    <ngc-chargeableweightinput formControlName="chargeableWeight"
+                                        [disabled]="item.get('accessLocation').value" [required]='hawbHandling'>
+                                    </ngc-chargeableweightinput>
+                                </td>
+                                <td *ngIf="hawbInfoFeatureEnabled">
+                                    <ngc-shcinput formArrayName="shc" [width]='70' dataField="specialHandlingCode"
+                                        disabled="true">
+                                    </ngc-shcinput>
+                                </td>
+                                <td *ngIf="!hawbInfoFeatureEnabled">
+                                    <ngc-shcinput formArrayName="shc" dataField="specialHandlingCode"
+                                        [disabled]="item.get('accessLocation').value">
+                                    </ngc-shcinput>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="warehouseHandlingInstruction" [width]='70'>
+                                    </ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="handlingMode" [width]='40'></ngc-display>
+                                </td>
+                                <td *ngIf="!hawbInfoFeatureEnabled">
+                                    <ngc-dropdownlist formControlName="handlingArea" [width]="60" [dropDownWidth]="100"
+                                        sourceId="WAREHOUSE_TERMINAL" sourceType="query" required
+                                        [disabled]="item.get('accessLocation').value"></ngc-dropdownlist>
+                                </td>
+                                <td align="center" *ngIf="!hawbInfoFeatureEnabled">
+                                    <ngc-checkbox formControlName="uldDamage"
+                                        [disabled]="item.get('accessLocation').value"></ngc-checkbox>
+                                </td>
+                                <td *ngIf="!hawbInfoFeatureEnabled">
+                                    <ngc-link formControlName="disbleHouseAdd" (linkClick)="createNewRow($event,index)"
+                                        iconType="add" [disabled]="item.get('accessLocation').value">Add tag</ngc-link>
+                                </td>
+                                <td *ngIf="hawbInfoFeatureEnabled">
+                                    <ngc-link formControlName="accessoryType" (linkClick)="openAddAccessory(item,index)"
+                                        iconType="add"
+                                        [disabled]="item.get('accessLocation').value || item.get('inventoryId').value == null || item.get('uldNumber').value == 'Bulk'">
+                                        Add Accessory</ngc-link>
+                                </td>
+                                <td *ngIf="hawbInfoFeatureEnabled">
+                                    <ngc-link formControlName="maintainHouseAdd"
+                                        (linkClick)="createMaintainBDHouse(item,index)" iconType="add"
+                                        [disabled]="item.get('accessLocation').value||item.get('inventoryId').value == null">
+                                        <ngc-label value="Gen.AddHouse"
+                                            *ngIf="inboundBreakdownFormGroup.get('shipmentType').value !='MAILAWB' && inboundBreakdownFormGroup.get('shipmentType').value !='OBC'">
+                                        </ngc-label>
+                                        <ngc-label value="import.poissue.tag.info"
+                                            *ngIf="inboundBreakdownFormGroup.get('shipmentType').value =='MAILAWB'|| inboundBreakdownFormGroup.get('shipmentType').value =='OBC'">
+                                        </ngc-label>
+                                    </ngc-link>
+                                </td>
+                                <td>
+                                    <ngc-link formControlName="disbleDelete" (linkClick)="deleteInventory($event,index)"
+                                        iconType="delete" [disabled]="item.get('accessLocation').value"></ngc-link>
+                                </td>
+                            </tr>
+                            <tr *ngIf="!hawbInfoFeatureEnabled && item.get( 'house' ).controls &&
+                                item.get('house').controls.length> 0 ">
+                                <td colspan="6"></td>
+                                <td colspan="5">
+                                    <ng-container [formGroupName]="index">
+                                        <ngc-table>
+                                            <thead>
+                                                <tr>
+                                                    <th>
+                                                        <ngc-label value="Number"></ngc-label>
+                                                    </th>
+                                                    <th>
+                                                        <ngc-label value="Pieces"></ngc-label>
+                                                    </th>
+                                                    <th>
+                                                        <ngc-label value="Delete"></ngc-label>
+                                                    </th>
+                                                </tr>
+                                            </thead>
+                    <tbody formArrayName="house">
+                        <tr *ngFor="let subItem of item.get('house').controls let subIndex=index"
+                            [formGroupName]="subIndex">
+                            <td>
+                                <ngc-input formControlName="number" [width]='200' maxlength="20" required
+                                    *ngIf="!item.get('accessLocation').value"></ngc-input>
+                                <ngc-display formControlName="number" [width]='200' maxlength="20" required
+                                    *ngIf="item.get('accessLocation').value">
+                                </ngc-display>
+                            </td>
+                            <td>
+                                <ngc-numberinput formControlName="pieces" [width]='80' decimalDigits="0"
+                                    [disabled]="item.get('accessLocation').value" [min]="0" required></ngc-numberinput>
+                            </td>
+                            <td>
+                                <ngc-link (linkClick)="deletehouse($event,index,subIndex)" iconType="delete"
+                                    [disabled]="item.get('accessLocation').value"></ngc-link>
+                            </td>
+                        </tr>
+                    </tbody>
+                </ngc-table>
+                </ng-container>
+                </td>
+                </tr>
+                </ng-container>
+
+                </tbody>
+                </ngc-table>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align="right">
+                <ngc-button value="add" (click)="addRow()"></ngc-button>
+            </ngc-column>
+        </ngc-row>
+        <ngc-row *ngIf="enableBookingInfo">
+            <ngc-column column="5" feature="Exp.Accpt.UpdateBooking">
+
+                <ngc-label label="import.booking.info"> </ngc-label>
+                <br>
+                <ngc-datatable formArrayName="bookingDetails" [pageable]="false" [pagerMode]="'advanced'"
+                    [pageSize]="2">
+                    <ngc-data-column text="awb.part.suffix" [width]="50" dataField="partSuffix"></ngc-data-column>
+                    <ngc-data-column text="g.flightKey" [width]="100" dataField="flightKey"></ngc-data-column>
+                    <ngc-data-column text="g.FlightDate" [width]="100" dataField="flightOriginDate" type="displayDate">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="partPieces" [width]="50" type="displayPieces"
+                        cellsAlign="right">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="partWeight" [width]="50" type="displayWeight"
+                        cellsAlign="right">
+                    </ngc-data-column>
+                    <ngc-data-column text="flight.boardPoint" dataField="flightBoardPoint" [width]="70"
+                        cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="flight.offPoint" dataField="flightOffPoint" [width]="70" cellsAlign="left">
+                    </ngc-data-column>
+                </ngc-datatable>
+
+                <b>
+                    <font color="black">
+                        <ngc-label value="import.total.pieces.weight"></ngc-label>
+                    </font>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <ngc-piecesinput [readonly]="true" formControlName="bookingPieces"></ngc-piecesinput>
+                    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                    <ngc-weightinput [readonly]="true" formControlName="bookingWeight"></ngc-weightinput>
+                </b>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+
+    <ngc-window #courierwindow [width]="50" [height]="300" title="si.tagid">
+        <ngc-container type="block">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-table>
+                        <tbody formArrayName="courierTags">
+                            <tr *ngFor="let item of awbDetailsFormGroup.controls.courierTags.controls ; let index=index"
+                                [formGroupName]="index">
+                                <td>
+                                    <ngc-display formControlName="tagId"></ngc-display>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </ngc-table>
+                    <ngc-input formControlName="ctag"></ngc-input>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-window-footer>
+            <ngc-container type="tab">
+                <ngc-row>
+                    <ngc-column column="6" align="right">
+                        <ngc-button (click)="addCourierTag()" label="g.add"></ngc-button>
+                    </ngc-column>
+                    <ngc-column column="6" align="left">
+                        <ngc-button (click)="saveCourierTag($event)" label="g.save"></ngc-button>
+                    </ngc-column>
+                </ngc-row>
+            </ngc-container>
+        </ngc-window-footer>
+    </ngc-window>
+
+    <ngc-window #xpsWindow [width]="100" [height]="300" title="import.xps.shipment">
+        <ngc-container type="block">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-row>
+                    </ngc-row>
+
+                    <ngc-table>
+                        <thead>
+                            <tr>
+                                <th>
+                                    <ngc-label value="si.tagid"></ngc-label>
+                                </th>
+                                <th>
+                                    <ngc-label value="si.tagpieces"></ngc-label>
+                                </th>
+                            </tr>
+                        </thead>
+                        <tbody formArrayName="courierTags">
+                            <tr *ngFor="let item of awbDetailsFormGroup.controls.xpsShipment.controls ; let index=index"
+                                [formGroupName]="index">
+                                <td>
+                                    <ngc-display formControlName="tagId"></ngc-display>
+                                </td>
+                                <td>
+                                    <ngc-display formControlName="tagPieces"></ngc-display>
+                                </td>
+                            </tr>
+                        </tbody>
+                    </ngc-table>
+
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+    <ngc-window #updateBookingWindow [showCloseButton]="true" (close)="closeUpdateBooking()" [width]="1500"
+        [height]="600" title="import.update.booking">
+        <app-update-booking [updateBookingObject]="updateBookingObject"></app-update-booking>
+    </ngc-window>
+</form>
+<form [formGroup]="maintainBreakdownHouseInfoFormGroup">
+    <ngc-window #addMaintainHouseWindow [width]="1400" [height]="400" title="Gen.maintainHouse">
+        <ngc-container type="section">
+            <ngc-column>
+                <ngc-label label=""></ngc-label>
+                <div>
+                </div>
+            </ngc-column>
+            <ngc-row>
+                <ngc-column column="4">
+                    <div>
+                        <ngc-label label="Gen.HawbNo"></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+                        <ngc-lov formControlName="houseNum" [noCache]="true" title="g.hawbNumber" dataField='code'
+                            sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO" [width]="200"
+                            [sourceParameters]="{'parameter1': inboundBreakdownFormGroup.get('awbNumber').value,r:variable}"
+                            maxlength="20" [noValidation]="true">
+                            <ngc-data-column text="g.hawbNumber" dataField="code" [width]="200"></ngc-data-column>
+                        </ngc-lov>
+                    </div>
+                </ngc-column>
+                <ngc-column column="5">
+                    <div>
+                        <ngc-button iconType="search" accessEnableOn="r" (click)="maintainHouseSearch()"
+                            value="g.search">
+                        </ngc-button>
+                    </div>
+                </ngc-column>
+                <ngc-column column="1" align="right">
+                    <div>
+                        <ngc-button iconType="add" accessEnableOn="r" (click)="maintainAddNewHouse()"
+                            value="Gen.addHawb">
+                        </ngc-button>
+                    </div>
+                </ngc-column>
+                <ngc-column column="1" align="right">
+                    <div>
+                        <ngc-button iconType="save" (click)="saveMaintainHouseInfo()" label="save"></ngc-button>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-edittable formArrayName="breakdownHouseInfo" [pageable]="false">
+                        <ngc-data-column text="Gen.HawbNo" dataField="houseNumber" cellsAlign="left">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-lov formControlName="houseNumber" [noCache]="true" title="g.hawbNumber"
+                                        dataField='code' sourceType='query' sourceId="MAINTAIN_HAWB_LIST_INFO"
+                                        [sourceParameters]="{'parameter1': inboundBreakdownFormGroup.get('awbNumber').value,r:variable}"
+                                        (select)="setHouseInfo($event,group)" maxlength="20" [width]="200"
+                                        [noValidation]="true" required>
+                                        <ngc-data-column text="g.hawbNumber" dataField="code" [width]="200">
+                                        </ngc-data-column>
+                                    </ngc-lov>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="Gen.housePcsWt" dataField="housePicecWeight" cellsAlign="left">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="left">
+                                    <ngc-piecesinput formControlName="hawbPieces" [width]="100" required>
+                                    </ngc-piecesinput>
+                                    <ngc-weightinput formControlName="hawbWeight" [width]="100" required>
+                                    </ngc-weightinput>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="import.hawbbdpcs" dataField="hawbBDPcs" cellsAlign="left">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="left">
+                                    <ngc-piecesinput formControlName="hawbBDPcs" [width]="100"
+                                        (ngModelChange)="onHouseWayBillPieceChange($event,group)" required>
+                                    </ngc-piecesinput>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="import.hawbbdpwt" dataField="hawbBDWt" cellsAlign="left">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="left">
+                                    <ngc-weightinput formControlName="hawbBDWt" [width]="100" required>
+                                    </ngc-weightinput>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="remarks" dataField="hawbRemarks" cellsAlign="center">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="center">
+                                    <ngc-input formControlName="hawbRemarks" [width]="400" maxlength="65">
+                                    </ngc-input>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="Delete" [width]="10" align="center" cellsAlign="center">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="center">
+                                    <ngc-link (linkClick)="deleteBDHouse($event,group)" iconType="delete">
+                                    </ngc-link>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                    </ngc-edittable>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>
+<form [formGroup]="addTagInfoFormGroup">
+    <ngc-window #addTagWindow [width]="800" [height]="400" title="import.poissue.tag.info">
+        <ngc-container type="section">
+            <ngc-column column="6" align="right">
+                <ngc-label label=""></ngc-label>
+                <div>
+                </div>
+            </ngc-column>
+            <ngc-row>
+                <ngc-column column="10" align="right">
+                    <div>
+                        <ngc-button iconType="add" accessEnableOn="r" (click)="addNewTagInfo()"
+                            value="import.poissue.tag.info">
+                        </ngc-button>
+                    </div>
+                </ngc-column>
+                <ngc-column column="1" align="right">
+                    <div>
+                        <ngc-button iconType="save" (click)="saveMaintainTagInfo()" label="save"></ngc-button>
+                    </div>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+        <ngc-container type="tab">
+            <ngc-row>
+                <ngc-column>
+                    <ngc-edittable formArrayName="breakdownHouseInfo" [pageable]="false">
+                        <ngc-data-column text="Number" dataField="houseNumber" cellsAlign="left">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group">
+                                    <ngc-input formControlName="houseNumber" [width]='200' required maxlength="35">
+                                    </ngc-input>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="g.pieces" dataField="hawbBDPcs" cellsAlign="left">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="left">
+                                    <ngc-piecesinput formControlName="hawbBDPcs" [width]="100" required>
+                                    </ngc-piecesinput>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                        <ngc-data-column text="Delete" [width]="10" align="center" cellsAlign="center">
+                            <ng-template let-name="name" let-group="group">
+                                <ng-container [formGroupName]="group" cellsAlign="center">
+                                    <ngc-link (linkClick)="deleteTagInfo($event,group)" iconType="delete">
+                                    </ngc-link>
+                                </ng-container>
+                            </ng-template>
+                        </ngc-data-column>
+                    </ngc-edittable>
+                </ngc-column>
+            </ngc-row>
+        </ngc-container>
+    </ngc-window>
+</form>
+<ngc-window #accessoryPopUp [width]="1500" [height]="600" title="accessory.add.title" *ngIf="hawbInfoFeatureEnabled">
+    <app-add-accessory (autoSearchAccessoryInfo)="autoSearchAccessoryInfo()" (closeWindow)="closeWindow()"
+        [showAsPopup]="true" [inputData]="inputData">
+    </app-add-accessory>
+</ngc-window>
+<ngc-footer>
+    <ngc-row *ngIf="isAwbDetailsPresent">
+        <ngc-column>
+            <ngc-button class="btn btn-sm" value="inb.workinglist" (click)="navigateToWorkingList()"> </ngc-button>
+            <ngc-button class="btn btn-sm" value="inb.capturedamage" (click)="navigateToDamage()"> </ngc-button>
+            <ngc-button class="btn btn-sm" value="inb.upload" (click)="navigateToUploadPhoto()"> </ngc-button>
+            <ngc-button class="btn btn-sm" value="inb.provide" (click)="navigateToServiceProvider()">
+            </ngc-button>
+            <ngc-button class="btn btn-sm" value="inb.remarks" (click)="shipmentFunction('REMARK')" accessEnableOn="r">
+            </ngc-button>
+            <ngc-button class="btn btn-sm" value="inb.irregularity" (click)="shipmentFunction('IRREGULARITY')"
+                accessEnableOn="r">
+            </ngc-button>
+            <ngc-button feature="Exp.Accpt.UpdateBooking" class="btn btn-sm" value="inb.updatebooking"
+                (click)="updateBookingPcsWt()" [disabled]="isBreakDownCompleted"></ngc-button>
+        </ngc-column>
+    </ngc-row>
+</ngc-footer>

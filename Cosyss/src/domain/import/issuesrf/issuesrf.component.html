@@ -1,0 +1,600 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='issue.srf' (cancel)="onBack($event)" (save)="onSave()" [disablePrint]="printFlag==false">
+  </ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]="2.5">
+        <ngc-label value="g.shipmentType"></ngc-label>
+        <div>
+          <ngc-shipmentinput shipmentType="{{shipmentType1}}" [width]="200" [noDN]="true" [noCBN]="true" required
+            formControlName="shipmentNumber" (select)="onShipmentSelect($event)" accessEnableOn="r">
+          </ngc-shipmentinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="7">
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button label='g.search' accessEnableOn="r" (click)="onSearch()" iconType="search" [disabled]="searchFlag"
+            #searchbutton></ngc-button>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="1" *ngIf="showTable">
+        <ngc-label label="g.printer"></ngc-label>
+        <div>
+          <ngc-printer [width]='200' formControlName="printerName"></ngc-printer>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+
+<form [formGroup]="issueSRFForm">
+  <ng-container type="tab">
+    <ngc-container *ngIf="showTable" type="section">
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="1">
+          <ngc-label label="g.awb"></ngc-label>
+          <div>
+            <ngc-display formControlName="shipmentNumber">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="srf.no"></ngc-label>
+          <div>
+            <ngc-display formControlName="deliveryRequestOrderNo">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="srf.expiry"></ngc-label>
+          <div>
+            <ngc-display formControlName="srfexpiry">
+            </ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label="import.AwbPiecsWeight"></ngc-label>
+          <div>
+            <ngc-piecesdisplay formControlName="pieces"></ngc-piecesdisplay>/
+            <ngc-weightdisplay formControlName="weight"></ngc-weightdisplay>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='import.natureOfGoods'></ngc-label>
+          <div>
+            <ngc-display formControlName="natureOfGoodsDescription"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1.5'>
+          <ngc-label label='g.shc'></ngc-label>
+          <div>
+            <ngc-display formControlName="shc"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label="shp.hold"></ngc-label>
+          <div>
+            <ngc-link *ngIf="!this.issueSRFForm.get('onHoldShipment').value" iconSize="2x">
+              <i class="fa fa-unlock-alt fa-2x" style="color:green"></i>
+            </ngc-link>
+            <ngc-link *ngIf="this.issueSRFForm.get('onHoldShipment').value" iconSize="2x">
+              <i class="fa fa-lock fa-2x" style="color:red"></i>
+            </ngc-link>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label='doc.uploaded'></ngc-label>
+          <div>
+            <ngc-link formControlName="docUploaded" (click)="onDocUpload($event)"></ngc-link>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1">
+          <ngc-label label='approval.status'></ngc-label>
+          <div>
+            <ngc-display formControlName="approvalStatus"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <ngc-label label='bil.paymentStatus'></ngc-label>
+          <div>
+            <ngc-display formControlName="paymentStatus" [width]="30"></ngc-display>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]="1.5">
+          <ngc-label label='import.consignee'></ngc-label>
+          <div>
+            <ngc-display formControlName="consigneeName"></ngc-display>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="1.5">
+          <div>
+            <ngc-label label='agent.appointed.agent' shortcutFor="appointedAgentCode"></ngc-label>
+          </div>
+          <ngc-lov accessEnableOn="r" formControlName="appointedAgent" sourceId="APPOINTED_AGENT_DATA_FOR_AWB_RELEASE"
+            title="g.customer.list" dataField="code" displayMember='code' [width]="120" required
+            (select)='onCompanyLOVSelect($event)'>
+            <ngc-data-column text="g.customerCode" dataField="code" [width]="80"></ngc-data-column>
+            <ngc-data-column text="g.customerName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <ngc-label label='g.iatacode'></ngc-label>
+          <div>
+            <ngc-numberinput [width]="100" formControlName="iataCode" disabled="true" [maxlength]="15" required
+              digits="9" decimalDigits="0">
+            </ngc-numberinput>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label="billing.collected.by"></ngc-label>
+          </div>
+          <ngc-input [width]="100" formControlName="receivingPartyName" [maxlength]="15" [minlength]='4' required>
+          </ngc-input>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label='hkid'></ngc-label>
+          </div>
+          <ngc-input [width]="100" formControlName="receivingPartyIdentificationNumber" [minlength]='8' [maxlength]="10"
+            required>
+          </ngc-input>
+        </ngc-column>
+        <ngc-column [column]='2'>
+          <div>
+            <ngc-label label="truck.company"></ngc-label>
+          </div>
+          <ngc-lov dataField='code' valueMember='code' formControlName='truckCompany' upperCase='true'
+            sourceId='KEY_TRUCKER_COMPANY' title='import.truck.Dock.no' accessEnableOn="r" [dropDownWidth]='60'>
+            <ngc-data-column text='g.companyName' dataField='desc' [width]='150'></ngc-data-column>
+            <ngc-data-column text='g.companyCode' dataField='code' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </ngc-column>
+        <ngc-column [column]='1.5'>
+          <ngc-label label="bank.endorsement"></ngc-label>
+          <div>
+            <ngc-checkbox formControlName="bankEndorsement" [width]="30" type="check"></ngc-checkbox>
+          </div>
+        </ngc-column>
+        <ngc-column [column]="2.5">
+          <ngc-label label="billing.bank"></ngc-label>
+          <div>
+            <ngc-dropdownlist width="330" sourceId="BILL_BANKS" sourceType="query" formControlName="bank">
+            </ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column></ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column [column]='6'>
+          <ngc-label label='srf.remarks'></ngc-label>
+          <div>
+            <ngc-textarea [width]="900" [height]="40" formControlName="srfRemarks" [maxlength]="250">
+            </ngc-textarea>
+          </div>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label="truck.no"></ngc-label>
+          </div>
+          <ngc-input [width]="100" formControlName="truckNumber" [maxlength]="40"></ngc-input>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label='truck.dock.no'></ngc-label>
+          </div>
+          <ngc-display [width]="100" formControlName="truckDockNo"></ngc-display>
+        </ngc-column>
+        <ngc-column [column]='1'>
+          <div>
+            <ngc-label label='timeslot'></ngc-label>
+          </div>
+          <ngc-display [width]="100" formControlName="timeslot"></ngc-display>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ng-container>
+
+
+
+  <ngc-container title="pending.for.delivery" type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column [column]='12'>
+        <ngc-column align="right">
+          <ngc-label label="undelivered.pcs.wt"></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-piecesdisplay formControlName="unDeliveredPieces"></ngc-piecesdisplay>/
+          <ngc-weightdisplay formControlName="unDeliveredWeight"></ngc-weightdisplay>
+        </ngc-column>
+        <ngc-column>
+          &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-label label="delivered.pcs.wt"></ngc-label>&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-piecesdisplay formControlName="deliveredPieces"></ngc-piecesdisplay>/
+          <ngc-weightdisplay formControlName="deliveredWeight"></ngc-weightdisplay>
+        </ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2" [width]="200">
+                <ngc-label></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="import.sno"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="flt/Date"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="ata"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="inv.pcs.wt"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.location"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.man.pcs.wts"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="cir.type"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="cir.pcs.wt"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="cus.res"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.cc"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="ce.remarks"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody formArrayName="inventoryGroupInfoByFlight">
+            <ng-container
+              *ngFor="let item of issueSRFForm.controls.inventoryGroupInfoByFlight.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td colspan="1.5" align="center">
+                  <ngc-checkbox formControlName="checkBoxValue" [width]="30"></ngc-checkbox>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="serialNo"></ngc-display>
+                </td>
+                <td colspan="1.5" *ngIf="item.get('cdifNo').value==null">
+                  <ngc-display formControlName="flight"></ngc-display>/
+                  <ngc-display formControlName="flightDate" [onlyDate]="true"></ngc-display>
+                </td>
+                <td colspan="1.5" *ngIf="item.get('cdifNo').value!=null">
+                  <ngc-display formControlName="cdifNo"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="dateATA"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="inventoryPiecesWeight"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="warehouseLocation"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="manifestPieceWeight"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="cirType"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="cirPieceWeight"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <b>
+                    <span *ngIf="item.controls.ready.value">
+                      <font size="2" color="blue">
+                        <b>{{item.controls.reason.value}}</b>
+                      </font>
+                    </span>
+                  </b>
+                  <b>
+                    <span *ngIf="item.controls.onHold.value" class="fa fa-lock fa-2x" style="color:red">
+                      <font size="2" color="blue">
+                        <b> {{item.controls.reason.value}}</b>
+                      </font>
+                    </span>
+                  </b>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="clearenceInfo"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="ceRemarks"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+
+  <ngc-container title="awb.charge.details" type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column [column]='1.5'>
+        <ngc-label label='agent.pd'></ngc-label>
+        <div>
+          <ngc-display formControlName="agentPD"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1.5'>
+        <ngc-label label='g.balance'></ngc-label>
+        <div>
+          <ngc-display formControlName="agentBalance"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1.5'>
+        <ngc-label label='airline.pd'></ngc-label>
+        <div>
+          <ngc-display formControlName="airlinePF"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='1.5'>
+        <ngc-label label='g.balance'></ngc-label>
+        <div>
+          <ngc-display formControlName="airlineBalance"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column [column]='10' align="right">
+        <ngc-button label="imp.get.charge.details" (click)="onCharges()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="10">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="customs.serviceType"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.quantity"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.duration"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="g.amount"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="si.paid"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="bil.ReceiptNo"></ngc-label>
+              </th>
+              <th rowspan="2" [width]="200">
+                <ngc-label label="bil.report.paymentMode"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="charges">
+            <ng-container *ngFor="let item of issueSRFForm.controls.charges.controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td colspan="1.5">
+                  <ngc-display formControlName="serviceType"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="quantity"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="duration"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="amount"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="paid"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="receiptNo"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="paymentMode"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container title="hwb.license.and.permit" type="section" *ngIf="showTable">
+    <ngc-row>
+      <ngc-column [column]="8">
+        <ngc-row>
+          <ngc-column>
+            <ngc-checkbox formControlName="letterOfDeclaration">
+            </ngc-checkbox>
+            <ngc-label label="declaration.letter"></ngc-label>
+          </ngc-column>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
+          <ngc-column>
+            <ngc-checkbox formControlName="lateSubmission" [disabled]="responseLateSubmission">
+            </ngc-checkbox>
+            <ngc-label label="late.submission"></ngc-label>
+          </ngc-column>
+          <ngc-column [column]="8" align="right">
+            <ngc-button value="add" #addButton accessEnableon="r" (click)="addLicensePermit()" iconType="add">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th rowspan="2">
+                <ngc-label label="g.type"></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label label="license.permit"></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label label="bil.groupPayment.issueDate"></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label label="g.duration"></ngc-label>
+              </th>
+              <th rowspan="2">
+                <ngc-label label="g.expiry.date"></ngc-label>
+              </th>
+              <th>
+                <ngc-label value='g.delete'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+
+          <tbody formArrayName="licensePermitDetails">
+            <ng-container *ngFor="let item of issueSRFForm.get('licensePermitDetails').controls; let index=index"
+              [formGroupName]="index">
+              <tr>
+                <td>
+                  <ngc-dropdownlist formControlName="liscensePermitType" [width]="200" sourceId="MASTER_PERMIT_TYPES"
+                    sourceType="query" (select)="onChangePermitType($event,index)">
+                  </ngc-dropdownlist>
+                </td>
+                <td colspan="1.5">
+                  <ngc-input formControlName="liscensePermitNUmber" [maxlength]="50"></ngc-input>
+                </td>
+                <td colspan="1.5">
+                  <ngc-dateinput formControlName="issueDate" disabled="true"></ngc-dateinput>
+                </td>
+                <td colspan="1.5">
+                  <ngc-display formControlName="duration"></ngc-display>
+                </td>
+                <td colspan="1.5">
+                  <ngc-dateinput formControlName="expiryDate" disabled="true"></ngc-dateinput>
+                </td>
+                <td>
+                  <ngc-link (click)="delete($event,index)">
+                    <ngc-icon type="delete" label="g.delete" value="true" true-color="grey"></ngc-icon>
+                  </ngc-link>
+                </td>
+              </tr>
+
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-footer [height]="50">
+    <ngc-container type="tab" *ngIf="showTable">
+      <ngc-row>
+        <ngc-column align="right">
+          <ngc-button label='srf.monitoring' (click)=" onSRFMonitoring()"></ngc-button>
+          <ngc-button label='shp.hold.info' (click)="onShipmentInfo()"></ngc-button>
+          <ngc-button label='g.cdif' (click)="onCDIF()"></ngc-button>
+          <ngc-button label='e.srf.approval' (click)="onESRFApproval()"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-footer>
+
+  <ngc-window #docUploadWindow title="upload.view" width="1300" height="350" [cancelButton]="true">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="agent.awb"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container>
+              <tr>
+                <td>
+                  <ngc-display formControlName="awbNumber"></ngc-display>
+                </td>
+              </tr>
+            </ng-container>
+            <!-- </tbody> -->
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="g.document.required"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="g.files"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <ng-container>
+              <tr>
+                <td>
+                  <table>
+                    <tr *ngFor="let item of this.issueSRFForm.get('documentNames').controls; let index=index">
+                      <td>
+                        {{index}}
+                      </td>
+                      <td>{{item}}</td>
+                    </tr>
+                  </table>
+                </td>
+                <td>
+                  <ngc-fileupload #uploadedfiles accept="*/*" viewMode="readonly" entityType="AWB"
+                    [entityKey]="this.shipmentNumber" associatedTo="bookingDateTimeSlot" stage="bookingDateTimeSlot"
+                    type="link" icon="camera" (choose)="onChooseDocuments(uploadedfiles,$event)">
+                  </ngc-fileupload>
+                </td>
+              </tr>
+            </ng-container>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>
+
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="import.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['PO']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="onSave()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+  <ngc-report #issueSRFReport title="g.report"  reportId='ISSUESRF'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

@@ -1,0 +1,629 @@
+<ngc-titlebar title="export.handover.confirmation.title" (cancel)="onCancel($event)" (clear)="onClear($event)">
+</ngc-titlebar>
+<form [formGroup]="SpecialCargoHandoverForm">
+  <ngc-container type="box">
+    <ngc-row>
+      <ngc-column column="8">
+        <ngc-container type="box">
+          <ngc-row>
+            <ngc-column column="2">
+              <ngc-label label='flight.Flight'></ngc-label>
+              <div>
+                <ngc-flightkeyinput accessEnableOn="r" [autoFocus]="true" [width]="110" formControlName="flightKey" (ngModelChange)="flightForSegment()"
+                  upperCase="true" required>
+                </ngc-flightkeyinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label='flight.date'></ngc-label>
+              <div>
+                <ngc-datetimeinput accessEnableOn="r" formControlName="flightDate" (ngModelChange)="flightForSegment()" required [width]="100">
+                </ngc-datetimeinput>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label='flight.segment'></ngc-label>
+              <div>
+                <ngc-dropdownlist accessEnableOn="r" required [width]="90" sourceId="FLIGHTSEGMENT" [sourceParameters]="flightKeyforDropdown"
+                  [noCache]="true" sourceType="query" formControlName="segmentId" placeHolder="Select" [dropDownWidth]="80"
+                  [autoSelect]="true">
+                </ngc-dropdownlist>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label label='splcargo.shcgroup'></ngc-label>
+              <div>
+                <ngc-dropdownlist accessEnableOn="r" formControlName="shcGroup" sourceType='query' sourceId='GROUP_COLLECTION_CODE' [width]="100"
+                  [dropDownWidth]='90' required></ngc-dropdownlist>
+              </div>
+            </ngc-column>
+            <ngc-column column="2">
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button value="expbu.search" iconType="search" (click)="onSearch()" accessEnableOn="r" #searchButton>
+                </ngc-button>
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12">
+        <ngc-container type="box">
+          <ngc-row>
+            <ngc-column column="7.5">
+            </ngc-column>
+            <ngc-column column="1.5">
+              <ngc-label label='splcargo.shipmentLocation'></ngc-label>
+              <div>
+                <ngc-movable-storage-location [shipmentNumber]="this.SpecialCargoHandoverForm.get(['readyShipment']).length >0 && this.SpecialCargoHandoverForm.get(['readyShipment', 0,'shipmentNumber']).value"
+                  [maxlength]="12" [minlength]="3" [width]="110" [destination]="this.SpecialCargoHandoverForm.get('currentSeg').value"
+                  [origin]="this.SpecialCargoHandoverForm.get('origin').value" formControlName="uldBtNumber" upperCase="true">
+                </ngc-movable-storage-location>
+                <!-- <ngc-movable-storage-location [maxlength]="12" [minlength]="3" [width]="110"
+                  formControlName="uldBtNumber" upperCase="true">
+                </ngc-movable-storage-location> -->
+                <br>
+              </div>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label label='splcargo.whLocation'></ngc-label>
+              <div>
+                <ngc-locations-list [width]="110" [displayOnlyLocation]="true" formControlName="whLocation" [noTerminal]='true' [locationTypeList]="['STORAGE']">
+                </ngc-locations-list>
+              </div>
+            </ngc-column>
+            <ngc-column column="1">
+              <ngc-label></ngc-label>
+              <div>
+                <ngc-button [disabled]="hasReadPermission" label="splcargo.apply" [width]="100" (click)="onAdd()">
+                </ngc-button>
+
+              </div>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="SpecialCargoHandoverForm.controls.readyShipment.length > 0">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.handover.atd.etd.std"></ngc-label>
+        <ngc-display formControlName='atdetdstd'>
+        </ngc-display>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-table>
+          <thead>
+            <tr>
+              <th width="1%">
+                <ngc-checkbox (modelChange)="selectAll($event)"></ngc-checkbox>
+              </th>
+              <th width="10%">
+                <ngc-label label='awb.awbnumber'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.cargo.handover.bkg.sts'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='flight.segment'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='AWB SHC'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='Bkd Pcs'></ngc-label>
+              </th>
+              <th width="10%">
+                <ngc-label label=' Location'></ngc-label>
+              </th>
+
+              <th>
+                <ngc-label label='export.cargo.handover.location.shc'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='Req/Loc Pcs [wt]'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.cargo.handover.request.summary'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='Shipment Location'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='WH Location'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='Load SHC'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.cargo.handover.ho.pcs'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='export.cargo.handover.ho.wt'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='add'></ngc-label>
+              </th>
+              <th>
+                <ngc-label label='delete'></ngc-label>
+              </th>
+            </tr>
+          </thead>
+
+
+          <tbody formArrayName="readyShipment">
+            <ng-container *ngFor="let item of SpecialCargoHandoverForm.get('readyShipment').controls; let index=index" [formGroupName]="index">
+              <ng-container *ngIf="item !== null">
+                <ng-container>
+                  <tr>
+                    <td>
+                      <ngc-checkbox formControlName="select" (modelChange)="select($event,index)"></ngc-checkbox>
+                    </td>
+                    <td *ngIf="item.get('partSuffixToShow').value ">
+                      <ngc-display formControlName='shipmentNumber'>
+                      </ngc-display>(
+                      <ngc-display formControlName='partSuffix'>
+                      </ngc-display>)
+                    </td>
+                    <td *ngIf="!item.get('partSuffixToShow').value">
+                      <ngc-display formControlName='shipmentNumber'>
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='bookingStatusCode'>
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='segment'>
+                      </ngc-display>
+                    </td>
+                    <td>
+                      <ngc-display formControlName='awbSHC'>
+                      </ngc-display>
+                    </td>
+                    <td colspan="1" align="right">
+                      <ngc-display formControlName='flightBookedPieces'>
+                      </ngc-display>
+                    </td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+                    <td></td>
+
+                    <td colspan="1">
+
+                    </td>
+                    <td colspan="6">
+
+                    </td>
+                  </tr>
+                </ng-container>
+                <!-- <ng-container formArrayName="inventoryList">
+                  <ng-container
+                    *ngFor="let inventorySubItem of item.get(['inventoryList']).controls| page :1 :1; let sindex=index"
+                    [formGroupName]="0">
+                    <tr>
+                      <td colspan="4"></td>
+                      <td *ngIf="inventorySubItem.get('handoverFlag').value===true">
+                        *<ngc-display formControlName='shipmentInventoryShipmentLocation'>
+                        </ngc-display>
+                      </td>
+                      <td *ngIf="inventorySubItem.get('handoverFlag').value!==true">
+                        <ngc-display formControlName='shipmentInventoryShipmentLocation'>
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName='inventoryShcForDisplay'>
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName='requestPieces'>
+                        </ngc-display>/<ngc-display formControlName='shipmentInventoryPieces'>
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ng-container formArrayName="requestList">
+                          <ng-container
+                            *ngFor="let requestSubItem of inventorySubItem.get(['requestList']).controls; let requestIndex=index"
+                            [formGroupName]="requestIndex">
+                            <ngc-display formControlName='requestLocation'></ngc-display>
+                            (<ngc-display formControlName='requestPieces'></ngc-display> ) -
+                            <ngc-display formControlName='requestDateTime'></ngc-display><br>
+                          </ng-container>
+                        </ng-container>
+                      </td>
+                      <ng-container formArrayName="handoverInventoryList">
+                        <ng-container
+                          *ngFor="let handoverSubItem of inventorySubItem.get(['handoverInventoryList']).controls| page :1 :1; let subIndex=index"
+                          [formGroupName]="0">
+                          <td>
+                            <ngc-input *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formControlName='requestedShipmentLocation'>
+                            </ngc-input>
+                          </td>
+                          <td>
+                            <ngc-shcinput *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formArrayName="requstedShcList" dataField="code"></ngc-shcinput>
+                          </td>
+                          <td>
+                            <ngc-piecesinput *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formControlName='handoverPieces' 
+                               (ngModelChange)="calculatePropotionalWeightforHandover(index, sindex, subIndex)" [autoFocus]="true" [width]='60' required>
+                            </ngc-piecesinput>
+                          </td>
+                          <td>
+                            <ngc-weightinput *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formControlName='handoverWight' [width]='70' decimalDigits="1" required>
+                            </ngc-weightinput>
+                          </td>
+                          <td>
+                            <ngc-link *ngIf="inventorySubItem.get('handoverFlag').value!==true" iconType="add"
+                              (linkClick)="onAddLocation(index, sindex)"></ngc-link>
+                          </td>
+                          <td>
+                            <ngc-link *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              (linkClick)="onDeleteRow(index, sindex,subIndex)" iconType="delete"></ngc-link>
+                          </td>
+                        </ng-container>
+                      </ng-container>
+                    </tr>
+                    <ng-container formArrayName="handoverInventoryList">
+                      <ng-container
+                        *ngFor="let handoverSubItem of inventorySubItem.get(['handoverInventoryList']).controls; let subIndex=index"
+                        [formGroupName]="subIndex">
+                        <tr *ngIf="subIndex> 0">
+                          <td colspan="4">
+                          </td>
+                          <td colspan="3">
+                          </td>
+                          <td colspan="1">
+                          </td>
+                          <td>
+                            <ngc-input formControlName='requestedShipmentLocation'>
+                            </ngc-input>
+                          </td>
+                          <td>
+                            <ngc-shcinput formArrayName="requstedShcList" dataField="code"></ngc-shcinput>
+                          </td>
+                          <td>
+                            <ngc-piecesinput *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formControlName='handoverPieces' 
+                               (ngModelChange)="calculatePropotionalWeightforHandover(index, sindex, subIndex)" [autoFocus]="true" [width]='60' required>
+                            </ngc-piecesinput>
+                          </td>
+                          <td>
+                            <ngc-weightinput *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formControlName='handoverWight' [width]='70' decimalDigits="1" required>
+                            </ngc-weightinput>
+                          </td>
+                          <td>
+
+                          </td>
+                          <td>
+                            <ngc-link *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              (linkClick)="onDeleteRow(index, sindex,subIndex)" iconType="delete"></ngc-link>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container> -->
+                <ng-container formArrayName="inventoryList">
+                  <ng-container *ngFor="let inventorySubItem of item.get(['inventoryList']).controls; let sindex=index" [formGroupName]="sindex">
+                    <tr>
+                      <td colspan="6"></td>
+                      <td *ngIf="inventorySubItem.get('handoverFlag').value===true">
+                        *
+                        <ngc-display formControlName='shipmentInventoryShipmentLocation'>
+                        </ngc-display>
+                      </td>
+                      <td *ngIf="inventorySubItem.get('handoverFlag').value!==true">
+                        <ngc-display formControlName='shipmentInventoryShipmentLocation'>
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName='inventoryShcForDisplay'>
+                        </ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName='requestPieces'>
+                        </ngc-display>/
+                        <ngc-display formControlName='shipmentInventoryPieces'>
+                        </ngc-display> (
+                        <ngc-weightdisplay formControlName='shipmentInventoryWeight'>
+                        </ngc-weightdisplay>)
+                      </td>
+                      <td>
+                        <ng-container formArrayName="requestList">
+                          <ng-container *ngFor="let requestSubItem of inventorySubItem.get(['requestList']).controls; let requestIndex=index" [formGroupName]="requestIndex">
+                            <ngc-display formControlName='requestSummary'></ngc-display>
+                            <br>
+                          </ng-container>
+                        </ng-container>
+                      </td>
+                      <ng-container formArrayName="handoverInventoryList">
+                        <ng-container *ngFor="let handoverSubItem of inventorySubItem.get(['handoverInventoryList']).controls| page :1 :1; let subIndex=index"
+                          [formGroupName]="0">
+                          <td>
+                            <ngc-movable-storage-location [maxlength]="12" [minlength]="3" [width]="110" [destination]="this.SpecialCargoHandoverForm.get('currentSeg').value"
+                              [origin]="this.SpecialCargoHandoverForm.get('origin').value" [shipmentNumber]="item.get('shipmentNumber').value"
+                              formControlName="requestedShipmentLocation" upperCase="true" *ngIf="inventorySubItem.get('handoverFlag').value!==true">
+                            </ngc-movable-storage-location>
+
+                            <!-- <ngc-movable-storage-location [maxlength]="12" [minlength]="3"
+                              *ngIf="inventorySubItem.get('handoverFlag').value!==true"
+                              formControlName='requestedShipmentLocation'>
+                            </ngc-movable-storage-location> -->
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-locations-list *ngIf="inventorySubItem.get('handoverFlag').value!==true" formControlName="requestedWHLocation" [noTerminal]='true'
+                                [displayOnlyLocation]="true" [locationTypeList]="['STORAGE']">
+                              </ngc-locations-list>
+                            </div>
+                          </td>
+
+                          <td>
+                            <ngc-shcinput *ngIf="inventorySubItem.get('handoverFlag').value!==true" formArrayName="requstedShcList" dataField="code"></ngc-shcinput>
+                          </td>
+                          <td>
+                            <ngc-piecesinput *ngIf="inventorySubItem.get('handoverFlag').value!==true" formControlName='handoverPieces' (ngModelChange)="calculatePropotionalWeightforHandover(index, sindex, subIndex)"
+                              [autoFocus]="true" [width]='60' required>
+                            </ngc-piecesinput>
+                          </td>
+                          <td>
+                            <ngc-weightinput *ngIf="inventorySubItem.get('handoverFlag').value!==true" formControlName='handoverWight' [width]='70' decimalDigits="1"
+                              required>
+                            </ngc-weightinput>
+                          </td>
+                          <td>
+                            <ngc-link [disabled]="hasReadPermission" *ngIf="inventorySubItem.get('handoverFlag').value!==true" iconType="add" (linkClick)="onAddLocation(index, sindex)"></ngc-link>
+                          </td>
+                          <td>
+                            <ngc-link [disabled]="hasReadPermission" *ngIf="inventorySubItem.get('handoverFlag').value==true" (linkClick)="onDeleteRow(index, sindex,subIndex)" iconType="delete">
+                            </ngc-link>
+                          </td>
+                        </ng-container>
+                      </ng-container>
+                    </tr>
+                    <ng-container formArrayName="handoverInventoryList">
+                      <ng-container *ngFor="let handoverSubItem of inventorySubItem.get(['handoverInventoryList']).controls; let subIndex=index"
+                        [formGroupName]="subIndex">
+                        <tr *ngIf="subIndex> 0">
+                          <td colspan="6">
+                          </td>
+                          <td colspan="3">
+                          </td>
+                          <td colspan="1">
+                          </td>
+                          <td>
+                            <ngc-movable-storage-location [maxlength]="12" [minlength]="3" [width]="110" [destination]="this.SpecialCargoHandoverForm.get('currentSeg').value"
+                              [origin]="this.SpecialCargoHandoverForm.get('origin').value" [shipmentNumber]="item.get('shipmentNumber').value"
+                              formControlName="requestedShipmentLocation" upperCase="true">
+                            </ngc-movable-storage-location>
+                            <!-- <ngc-movable-storage-location [maxlength]="12" [minlength]="3"
+                              formControlName='requestedShipmentLocation'>
+                            </ngc-movable-storage-location> -->
+                          </td>
+                          <td>
+                            <div>
+                              <ngc-locations-list formControlName="requestedWHLocation" [noTerminal]='true' [displayOnlyLocation]="true" [locationTypeList]="['STORAGE']">
+                              </ngc-locations-list>
+                            </div>
+                          </td>
+
+                          <td>
+                            <ngc-shcinput formArrayName="requstedShcList" dataField="code"></ngc-shcinput>
+                          </td>
+                          <td>
+                            <ngc-piecesinput *ngIf="inventorySubItem.get('handoverFlag').value!==true" formControlName='handoverPieces' (ngModelChange)="calculatePropotionalWeightforHandover(index, sindex, subIndex)"
+                              [autoFocus]="true" [width]='60' required>
+                            </ngc-piecesinput>
+                          </td>
+                          <td>
+                            <ngc-weightinput *ngIf="inventorySubItem.get('handoverFlag').value!==true" formControlName='handoverWight' [width]='70' decimalDigits="1"
+                              required>
+                            </ngc-weightinput>
+                          </td>
+                          <td>
+
+                          </td>
+                          <td>
+                            <ngc-link [disabled]="hasReadPermission" *ngIf="hasReadPermission || inventorySubItem.get('handoverFlag').value!==true" (linkClick)="onDeleteRow(index, sindex,subIndex)" iconType="delete"></ngc-link>
+                          </td>
+                        </tr>
+                      </ng-container>
+                    </ng-container>
+                  </ng-container>
+                </ng-container>
+              </ng-container>
+            </ng-container>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="9">&nbsp;
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="3">
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-button [disabled]="hasReadPermission" label='splcargo.request' (click)='onRequest()' width='120'> </ngc-button>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-button [disabled]="hasReadPermission" label='splcargo.ho.confirm' (click)='onHandover()' width='120'> </ngc-button>
+      </ngc-column>
+      <ngc-column column="4.5">
+        <ngc-button [disabled]="hasReadPermission || !isPhotoSetupExists" label='Add Photo' (click)='onAddPhoto()' width='120'>
+        </ngc-button>
+      </ngc-column>
+      <!-- <ngc-column column="2">
+        <ngc-button label='splcargo.clear' (click)='onClear()' width='120'> </ngc-button>
+      </ngc-column> -->
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="SpecialCargoHandoverForm.controls.readyShipment.length > 0">
+    <ngc-row>
+      <ngc-column column="9">
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label="export.handover.confirm.date.time"></ngc-label>
+        <div>
+          <ngc-datetimeinput [showCalendarButton]="true" [showTimeButton]="true" [min]="dateFrom" formControlName="handoverExpDateTime"
+            width="130" [disabled]="true" required>
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="9">&nbsp;
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="6">
+        <ngc-row>
+          <ngc-column column="1.5">
+            <ngc-label label="splcargo.ccStaffId"></ngc-label>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-input formControlName="handOverToCCStaffId" [maxLength]="20" upperCase="true"></ngc-input>
+            <br>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="9">
+        <ngc-row>
+          <ngc-column column="1">
+            <ngc-label label="splcargo.loginId"></ngc-label>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-input formControlName="handoverToLoginId" [maxLength]="20" upperCase="true"></ngc-input>
+
+          </ngc-column>
+          <ngc-column column="1">
+            <ngc-button [disabled]="hasReadPermission" label='splcargo.verify' (click)='onVerify()' width='120'> </ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="6">
+        <ngc-row>
+          <ngc-column column="1.5">
+            <ngc-label label="splcargo.staffName"></ngc-label>
+          </ngc-column>
+          <ngc-column column="2">
+            <ngc-input formControlName="staffName" [maxLength]="20" upperCase="true"></ngc-input>
+            <br>
+          </ngc-column>
+        </ngc-row>
+      </ngc-column>
+      <!--<ngc-column column="4.5">
+        <ngc-button [disabled]="!isPhotoSetupExists" label='capture.damage.addphoto' (click)='onAddPhoto()' width='120'>
+        </ngc-button>
+      </ngc-column> -->
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="9">&nbsp;
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="4">
+        <!-- <ngc-button [disabled]="!isPhotoSetupExists" label='Add Photo' (click)='onAddPhoto()' width='120'>
+        </ngc-button> -->
+      </ngc-column>
+      <ngc-column column="2">
+      </ngc-column>
+      <ngc-column column="2">
+      </ngc-column>
+    </ngc-row>
+
+  </ngc-container>
+  <ngc-window #openUploadPhotoPopup title="capture.damage.addphoto" [width]="1200" [height]="900" style="top:170px !important;"
+    [showCloseButton]="true" (close)="onClickOk()">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label value="ULD"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="Add"></ngc-label>
+                </th>
+                <th>
+                  <ngc-label value="View"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+
+            <tbody formArrayName="inventoryListforaddphoto">
+              <ng-container *ngFor="let item of SpecialCargoHandoverForm.get('inventoryListforaddphoto').controls; let index=index" [formGroupName]="index">
+                <tr>
+                  <td>
+                    <ngc-display formControlName="shipmentInventoryShipmentLocation"></ngc-display>
+
+                  </td>
+                  <td *ngIf="false">
+                    <ngc-display formControlName="identityKeyForImage"></ngc-display>
+
+                  </td>
+                  <td *ngIf="false">
+                    <ngc-display formControlName="partsuffix"></ngc-display>
+
+                  </td>
+                  <td>
+                    <div>
+                      <ngc-fileupload #uploadedfiles accept="*/*" [entityType]="this.SpecialCargoHandoverForm.get('entityType').value" [entityKey]="item.get('identityKeyForImage').value"
+                        associatedTo="SpecialCargoHandover" stage="SpecialCargoHandover" type="link" icon="camera" (choose)="onChooseDocuments(uploadedfiles,$event,item.get('shipmentInventoryShipmentLocation').value,item.get('identityKeyForImage').value)">
+                      </ngc-fileupload>
+
+                    </div>
+
+                  </td>
+                  <td>
+                    <div>
+                      <ngc-fileupload [multiple]="true" accept="*/*" viewMode="readonly" [selectable]="false" [entityType]="this.SpecialCargoHandoverForm.get('entityType').value"
+                        [entityKey]="item.get('identityKeyForImage').value">
+                      </ngc-fileupload>
+                    </div>
+
+                  </td>
+                </tr>
+              </ng-container>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container>
+        <ngc-row>
+          <ngc-column column='10' align="right">
+            <ngc-button [width]="90" (click)="onClickOk()" value="Ok"></ngc-button>
+          </ngc-column>
+          <!-- <ngc-column column='2' align="right">
+            <ngc-button  (click)="onApproval()" value="Approve"></ngc-button>
+          </ngc-column> -->
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+</form>

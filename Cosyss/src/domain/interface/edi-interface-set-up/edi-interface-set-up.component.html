@@ -1,0 +1,164 @@
+<form [formGroup]="editInterfaceSetUp">
+  <ngc-titlebar title='edi.interface.setup.title'></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label='messaging.interface.system.name'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="interfacingSystemId" sourceId="SELECT_INTERFACE_TYPES" sourceType="query"
+            (select)="getInterfaceSystemName($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="messaging.message.header.format"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="messageHeaderFormat" sourceId="Interface$Header.Format">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="flight.carrier"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+             sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="60">
+            <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" (click)="onSearch()" value="g.search"></ngc-button>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button (click)="onAdd()" value="g._add"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=""></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column *ngIf="showData" column="6">
+        <ngc-datatable formArrayName="messageHandlingDefinition" (linkClick)="onLinkClick($event)"
+          [enablePageSizeHeight]="false" [showToolbar]="true">
+          <ngc-data-column text="messaging.interfacing.system" dataField="interfacingSystemName" [width]="270"></ngc-data-column>
+          <ngc-data-column text="messaging.interfacing.system.id" dataField="interfacingSystemId" [width]="270" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="messaging.interfacing.system.table.id" dataField="referenceId" [width]="270" [hidden]="true">
+          </ngc-data-column>
+          <ngc-data-column text="messaging.message.header.format" dataField="messageHeaderFormat" [width]="350"></ngc-data-column>
+          <ngc-data-column text="g.carrierCode" dataField="carrierCode" [width]="270"></ngc-data-column>
+          <ngc-data-column text='g.edit' dataField="edit" [width]="270" iconType='edit' type="link" cellsAlign="center"
+            align="left"></ngc-data-column>
+          <ngc-data-column [disabled]="hasReadPermission" text='g.delete' dataField="delete" [width]="270" iconType='delete' type="link"
+            cellsAlign="center" align="left"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+      <ngc-column column="6">
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-window #saveWindow title="edi.interface.system.setup.title" [showCloseButton]="true" width="500" height="300"
+    (close)="onWindowClose(savesetupForm)">
+    <form [formGroup]="savesetupForm">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label='messaging.interface.system.name'></ngc-label>
+            <div>
+              <ngc-dropdownlist required formControlName="interfacingSystemId" sourceId="SELECT_INTERFACE_TYPES"
+                sourceType="query"
+                [disabled]="this.savesetupForm.get('interfacingSystemId') && this.savesetupForm.get('interfacingSystemId').value != null">
+              </ngc-dropdownlist>
+            </div>
+
+          </ngc-column>
+          <ngc-column column="6">
+            <ngc-label label="messaging.message.header.format"></ngc-label>
+            <div>
+              <ngc-dropdownlist required formControlName="messageHeaderFormat" sourceId="Interface$Header.Format">
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label="flight.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+                 sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="60">
+                <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+                <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="6" align="center">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button (click)="saveSetUp()" value="g.save"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+  </ngc-window>
+  <ngc-window #editWindow title="edi.interface.system.setup.title" [showCloseButton]="true" [width]="500"
+    [height]="300">
+    <form [formGroup]="editsetupForm">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label='messaging.interface.system.name'></ngc-label>
+            <div>
+              <ngc-dropdownlist required formControlName="interfacingSystemId" sourceId="SELECT_INTERFACE_TYPES"
+                sourceType="query"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+          <ngc-column column="6">
+            <ngc-label label="messaging.message.header.format"></ngc-label>
+            <div>
+              <ngc-dropdownlist required formControlName="messageHeaderFormat" sourceId="Interface$Header.Format">
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label=""></ngc-label>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column column="6">
+            <ngc-label label="flight.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r"  formControlName="carrierCode"   upperCase='true'  sourceId='CARRIER'
+                 sourceType='query'  title="g.carrierCode"  dataField='code'  [width]="60">
+                <ngc-data-column text="g.carrierCode"  [width]="80"  dataField="code"></ngc-data-column>
+                <ngc-data-column text="g.carrierName"  [width]="150"  dataField="desc"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column column="6" align="center">
+            <ngc-label label=""></ngc-label>
+            <div>
+              <ngc-button (click)="updateSetUp()" value="g.save"></ngc-button>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </form>
+  </ngc-window>
+</form>

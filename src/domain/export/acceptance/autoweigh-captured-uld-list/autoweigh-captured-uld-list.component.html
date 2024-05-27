@@ -1,0 +1,376 @@
+<ngc-titlebar title='export.acceptence.autoweighcaptureduldlist' (onClear)="clear($event)" (cancel)="onCancel($event)">
+</ngc-titlebar>
+<form [formGroup]="AutoweighCapturedUldListForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="1.5">
+        <ngc-label value="terminal"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="150" [dropDownWidth]="300" sourceId="WAREHOUSE_TERMINAL"
+            required sourceType="query" formControlName="selectedTerminal"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value="timeFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" [showTimeButton]="true" required
+            [showCalendarButton]="true" formControlName="fromDateTime"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label value="timeTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" [showTimeButton]="true" required
+            [showCalendarButton]="true" formControlName="toDateTime"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value="flight.Flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="120" formControlName="flightKey"></ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value="uld.Number"></ngc-label>
+        <div>
+          <ngc-uldinput accessEnableOn="r" [width]="120" formControlName="uldNumber"></ngc-uldinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value="awbnumber"></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" [width]="120" formControlName="shipmentNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="getAutoWeighCapturedUldList()" iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div *ngIf="flagShowData">
+          <ngc-button value="uld.print.tag.button" (click)="printuldtag()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div *ngIf="flagShowData">
+          <ngc-button accessEnableOn="r" value="changeFlight" (click)="changeFlightDetails()"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="flagShowData" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="autoWeighCapturedList" [enablePageSizeHeight]="false"
+          (linkClick)="onLinkClick($event)" (itemSelect)="changeButtonFlag($event)" [pageSize]="15">
+          <ngc-data-column text=" " [width]='10' dataField="checkBox" type="check" align="center" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="uld.uldnumber" [width]='35' dataField="uldNumber"></ngc-data-column>
+          <ngc-data-column text="uld.contour.br.code" [width]='25' dataField="contourCode" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.weighingscale" [width]='30' dataField="weighingScaleName"></ngc-data-column>
+          <ngc-data-column text="uld.pd.br.weight" [width]='25' dataField="uldAndPdWeight" type="displayWeight"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="uld.pd.tare.br.weight" [width]='25' dataField="pdTrolleyWeight" type="displayWeight"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="grossweight" [width]='25' dataField="grossWeight" type="displayWeight"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="flight.flightNumber.br.Date" [width]='50' dataField="flightNumberAndDate"></ngc-data-column>
+          <ngc-data-column text="awb.awbnumber" [width]='35' dataField="shipmentNumber">
+          </ngc-data-column>
+           <ngc-data-column text="export.uldtagprinted" [width]='30' dataField="uldTagPrinted" cellsAlign="center"
+            align="center"></ngc-data-column>
+          <ngc-data-column text="export.uldtagprint" name="tagGroup" align="center" cellsAlign="center">
+            <ngc-data-column text="export.xps" [width]='15' type="icon" iconType="yesno" align="center"
+              dataField="xpsShipment" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="export.cargo" [width]='15' type="icon" iconType="yesno" align="center"
+              dataField="cargo" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="export.mail" [width]='15' type="icon" iconType="yesno" align="center"
+              dataField="mail" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="export.dg" [width]='15' type="icon" iconType="yesno" align="center"
+              dataField="dgShipment" cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="export.courier" [width]='15' type="icon" iconType="yesno" align="center"
+              dataField="courier" cellsAlign="center"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="uld.autoweigh.source" name="sourcetagGroup" align="center" cellsAlign="center">
+            <ngc-data-column text="ACP" [width]='15' type="icon" iconType="yesno" align="center" dataField="bup"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="WHS" [width]='15' type="icon" iconType="yesno" align="center" dataField="whs"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="ICS" [width]='15' type="icon" iconType="yesno" align="center" dataField="ics"
+              cellsAlign="center"></ngc-data-column>
+            <ngc-data-column text="RPRN" [width]='15' type="icon" iconType="yesno" align="center" dataField="rprn"
+              cellsAlign="center"></ngc-data-column>
+          </ngc-data-column>
+          <ngc-data-column text="uld.autoweigh.datetime.userid" [width]='65' dataField="dateTimeAndUserId"></ngc-data-column>
+
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #uldTagRemarkWindow title="export.printuldtag" [showCloseButton]="true" [width]="widthOfTag" [height]='heightOfTag'>
+    <form [formGroup]="PrintUldTagForm">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column [column]=6>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label='export.contenttype'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+
+              <ngc-row>
+                <ngc-column>
+                  <ngc-checkbox formControlName="xpsShipment">
+                    <ngc-label value='export.xps'></ngc-label>
+                  </ngc-checkbox>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-checkbox formControlName="bup" disabled='true'>
+                    <ngc-label value='export.bup'></ngc-label>
+                  </ngc-checkbox>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row></ngc-row>
+              <ngc-row>
+                <ngc-column column="2">
+                  <ngc-radiobutton groupName="contenttype" formControlName="dgShipment"
+                    (click)="onChangeRadioDg($event)">
+                  </ngc-radiobutton>
+                  <ngc-label label="export.dg"></ngc-label>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-radiobutton groupName="contenttype" formControlName="cargo" (click)="onChangeRadioCargo($event)">
+                  </ngc-radiobutton>
+                  <ngc-label label="export.cargo"></ngc-label>
+                </ngc-column>
+                <ngc-column column="3">
+                  <ngc-radiobutton groupName="contenttype" formControlName="mail" (click)="onChangeRadioMail($event)">
+                  </ngc-radiobutton>
+                  <ngc-label label="export.mail"></ngc-label>
+                </ngc-column>
+                <ngc-column column="4">
+                  <ngc-radiobutton groupName="contenttype" formControlName="courier"
+                    (click)="onChangeRadioCourier($event)"></ngc-radiobutton>
+                  <ngc-label label="export.courier"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row></ngc-row>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label='export.uldprinttagremark'></ngc-label>
+                  <div>
+                    <ngc-remarksinput formControlName="tagRemarks" uppercase="true" [maxlength]="27">
+                    </ngc-remarksinput>
+                  </div>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row></ngc-row>
+            </ngc-container>
+          </ngc-column>
+          <ngc-column [column]=5 align="right">
+            <!-- *ngIf="flagShowDgDetail" -->
+            <ngc-container *ngIf='flagShowDgDetail'>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-label label='export.ulddgdetail'></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align=l eft>
+                  <ngc-table align='left'>
+                    <thead>
+                      <th>
+                        <ngc-label label='export.sno'> </ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='export.class'> </ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='shp.SHC'> </ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label> </ngc-label>
+                      </th>
+                    </thead>
+
+                    <tbody formArrayName="dgDetails">
+                      <tr *ngFor="let record of PrintUldTagForm.controls.dgDetails.controls; let index=index"
+                        [formGroupName]="index">
+                        <td style="text-align: center">
+                          <ngc-display [value]="index + 1"></ngc-display>
+                        </td>
+                        <td>
+
+                          <ngc-column column="2">
+                            <ngc-lov displayField="desc" [displayAllInSuggestion]="true" [validOnly]="true" required
+                              formControlName="classCode" filterMatchMode='startsWith' dataField="param1"
+                              (select)="onSelectDGSHC($event,index)" sourceId="SQL_DG_CLASSRISK_SUBRISK"
+                              title="awb.dg.shc.list" [width]="100">
+                              <ngc-data-column text="classcode" dataField="desc" [width]="80"></ngc-data-column>
+                              <ngc-data-column text="g.shc" dataField="code" [width]="50"></ngc-data-column>
+
+                            </ngc-lov>
+                          </ngc-column>
+
+
+                        <td>
+                          <ngc-input formControlName="specialHandlingCode" disabled="true"></ngc-input>
+                        </td>
+
+                        <td style="text-align: center">
+                          <ngc-button iconType='delete' (click)="onDeleteRowDgDetail($event,index)"></ngc-button>
+                        </td>
+                      </tr>
+                    </tbody>
+
+                  </ngc-table>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+
+                <ngc-column align='right'>
+                  <ngc-button value='addRow' (click)="addDgRow()">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-column>
+
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column>
+              <ngc-button value='export.autoweigh.print.uld.tag' (click)="saveAndPrintTag()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </form>
+  </ngc-window>
+
+
+  <ngc-window #flightUpdateWindow title="export.updateFlight" [showCloseButton]="true" [width]="500" [height]='350'>
+    <form [formGroup]="UpdateFlightDetailsForm">
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value='fromFlight'>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value='flight.flightNumber'></ngc-label>
+            <div>
+              <ngc-display formControlName="flightKey"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value='expbu.flightdate'></ngc-label>
+            <div>
+              <ngc-display [onlyDate]="true" [onlyTime]="false" formControlName="date"></ngc-display>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value='flight.segment'></ngc-label>
+            <div>
+              <ngc-display formControlName="segment"></ngc-display>
+            </div>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value=" "></ngc-label>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value='export.toFlight'>
+            </ngc-label>
+          </ngc-column>
+        </ngc-row>
+
+        <ngc-row>
+          <ngc-column>
+            <ngc-label value='flight.flightNumber'></ngc-label>
+            <div>
+              <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="updatedFlightKey">
+              </ngc-flightkeyinput>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label value='expbu.flightdate'></ngc-label>
+            <div>
+              <ngc-dateinput [width]="100" formControlName="newDate"></ngc-dateinput>
+            </div>
+          </ngc-column>
+
+          <ngc-column>
+            <ngc-label label='flight.segment'></ngc-label>
+            <div>
+              <ngc-dropdownlist [autoSelect]='true' sourceId="FLIGHTSEGMENT" [width]='100'
+                formControlName='newFlightSegmentId' [sourceParameters]="flightIdforDropdown" [width]="50"
+                sourceType="query" (select)="getDes($event)"></ngc-dropdownlist>
+            </div>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+      <ngc-window-footer>
+        <ngc-container type="tab">
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button value='save' (click)="updateFlightDetails()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-window-footer>
+    </form>
+  </ngc-window>
+
+</form>
+
+
+<form [formGroup]='popupPrinterForm'>
+  <ngc-window #windowPrinter [width]="400" [height]="70" title="export.select.printer">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="g.printer"></ngc-label>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-printer [width]='200' formControlName="printerdropdown" [printerTypeList]="['ULD']"></ngc-printer>
+        </ngc-column>
+        <ngc-column>
+        </ngc-column>
+        <ngc-column>
+          <ngc-button (click)="printUld()" value="g.print"></ngc-button>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

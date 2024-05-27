@@ -1,0 +1,211 @@
+<!-- bug - 332 fix -->
+<ngc-titlebar title="dls.title" (clear)="onClear()" (print)="onPrint()" [disablePrint]="!loadFlightFlag"
+(cancel)="navigatebackToDls()"></ngc-titlebar>
+<!-- bug - 332 fix END -->
+<form [formGroup]="displayDLSVarianceForm">
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='dls.flight'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="100" formControlName="flightNumber" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='dls.date'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" formControlName='flightDate' [showCalendarButton]="true" [width]="100"
+            required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <label>&nbsp;</label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearch()" label="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="8"></ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf='loadFlightFlag'>
+    <ngc-row>
+      <ngc-column column="1">
+        <ngc-label label="dls.flight"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightNum"></ngc-display>
+          <!-- <ngc-display formControlName="flightKey"></ngc-display> -->
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="dls.date"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightOriDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="dls.std"></ngc-label>
+        <div>
+          <ngc-display formControlName="dateSTD"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="dls.etd"></ngc-label>
+        <div>
+          <ngc-display formControlName="dateETD"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1.5">
+        <ngc-label label="dls.status"></ngc-label>
+        <div>
+          <ngc-display formControlName="status"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label label="flight.segment"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId='FLIGHTSEGMENT_DLS_FULL'
+             [sourceParameters]="sourceIdSegmentDropdown"  [displayBoth]="false"
+            (ngModelChange)='segmentOnChange($event)' [noBlank]="true" [noCache]='true'  sourceType='query'
+             formControlName="segment"  width='100px'></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-container type="section" *ngIf='dlsThreshold'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-accordion [width]="800" [height]="200">
+          <ngc-accordion-card title="g.title" [selected]="false">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="dls.threshold.exceeded"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-datatable formArrayName="dlsThreshold" [groups]="['segment']" [pageable]="false"
+              [enablePageSizeHeight]="false">
+              <ngc-data-column text="dls.uld" [cellsStyleRenderer]="cellsStyleRendererColorProcessed" [width]='15'
+                dataField="uld" align="center" cellsAlign="right"></ngc-data-column>
+              <ngc-data-column text="flight.segment" [width]='20' [hidden]="true" dataField="segment" align="center"
+                cellsAlign="left"></ngc-data-column>
+              <ngc-data-column text="dls.dls" [width]='15' dataField="netWeight" align="center" cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column text="dls.loadmanifest" [width]='15' dataField="manifestedWeight" align="center"
+                cellsAlign="right"></ngc-data-column>
+              <ngc-data-column text="dls.difference" [width]='15' dataField="difference" align="center"
+                cellsAlign="right"></ngc-data-column>
+              <ngc-data-column text="dls.percent" [width]='15' dataField="percentage" align="center" cellsAlign="right">
+              </ngc-data-column>
+              <ngc-data-column feature= "Exp.DLSVariance.AutoWeight" text="dls.icsgrossweight" [width]='15' dataField="icsGrossWeight" align="center"
+                cellsAlign="right" type="displayWeight"></ngc-data-column>
+              <ngc-data-column feature="MHS.Export.Container.AutoWeight" text="dls.icsuldtag" [width]='15'
+                dataField="uldTag" align="center" cellsAlign="right">
+              </ngc-data-column>
+            </ngc-datatable>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="section" *ngIf='loadDetailsFlag'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="dlsVarianceResult" [groups]="['segment']" [pageable]="false"
+          [enablePageSizeHeight]="false">
+          <ngc-data-column text="dls.uld" [width]='15' dataField="uld" align="center" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="flight.segment" [width]='20' [hidden]="true" dataField="segment" align="center"
+            cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="dls.dls" [width]='15' dataField="netWeight" align="center" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="dls.loadmanifest" [width]='15' dataField="manifestedWeight" align="center"
+            cellsAlign="right"></ngc-data-column>
+          <ngc-data-column text="dls.difference" [width]='15' dataField="difference" align="center" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="dls.percent" [width]='15' dataField="percentage" align="center" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column feature= "Exp.DLSVariance.AutoWeight" text="dls.icsgrossweight" [width]='15' dataField="icsGrossWeight" align="center"
+            cellsAlign="right" type="displayWeight"></ngc-data-column>
+          <ngc-data-column feature="MHS.Export.Container.AutoWeight" text="dls.icsuldtag" [width]='15'
+            dataField="uldTag" align="center" cellsAlign="right">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container feature="MHS.Export.Container.AutoWeight" type="section" *ngIf='loadDetailsFlag'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-accordion [width]="800" [height]="200">
+          <ngc-accordion-card title="g.title" [selected]="false">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label label="dls.discrepancylist"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+
+            <ngc-container>
+              <ngc-row>
+                <ngc-column [column]="6">
+                  <ngc-label label="dls.uldinics"></ngc-label>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-label label="dls.uldindls"></ngc-label>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column [column]="6">
+                  <ngc-datatable formArrayName="dlsDiscrepancyResult" [groups]="['segment']" [pageable]="false"
+                    [enablePageSizeHeight]="false">
+                    <ngc-data-column text="dls.uld" [width]='8' dataField="uld" align="center" cellsAlign="right">
+                    </ngc-data-column>
+                    <ngc-data-column text="flight.segment" [width]='20' [hidden]="true" dataField="segment"
+                      align="center" cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="dls.shc" [width]='15' dataField="shc" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="dls.remarks" [width]='15' dataField="remarks" align="center"
+                      cellsAlign="center"></ngc-data-column>
+                  </ngc-datatable>
+                </ngc-column>
+                <ngc-column [column]="6">
+                  <ngc-datatable formArrayName="" [groups]="['segment']" [pageable]="false"
+                    [enablePageSizeHeight]="false">
+                    <ngc-data-column text="dls.uld" [width]='5' dataField="uld" align="center" cellsAlign="right">
+                    </ngc-data-column>
+                    <ngc-data-column text="flight.segment" [width]='20' [hidden]="true" dataField="segment"
+                      align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="dls.details" [width]='15' dataField="dlsWeight" align="center"
+                      cellsAlign="center"></ngc-data-column>
+                  </ngc-datatable>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #Report title="g.report"  reportId='DisplayDLSVariance'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+<ngc-footer>
+  <ngc-row *ngIf='loadFlightFlag'>
+    <ngc-column verticalAlign="bottom">
+      <ngc-button accessEnableOn="r" (click)="navigatebackToDls()" label="dls.update.dls.shortcut"></ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

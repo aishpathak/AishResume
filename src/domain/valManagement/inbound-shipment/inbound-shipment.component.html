@@ -1,0 +1,140 @@
+<form [formGroup]="searchForm">
+    <!-- Title Bar (Begin) -->
+    <ngc-titlebar title="val.head" (print)="oninboundServiceReport(event)" (cancel)="onBack($event)"></ngc-titlebar>
+    <!-- Title Bar (End) -->
+    <ngc-container type="header">
+        <ngc-row>
+            <ngc-column [column]="2">
+                <ngc-label label="val.dateF"></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" formControlName="dateFrom" [showCalendarButton]="true"
+                        [showTimeButton]="true" required>
+                    </ngc-datetimeinput>
+                </div>
+            </ngc-column>
+
+            <ngc-column [column]="2">
+                <ngc-label label="val.dateT"></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" formControlName="dateTo" [showCalendarButton]="true"
+                        [showTimeButton]="true" required>
+                    </ngc-datetimeinput>
+                </div>
+            </ngc-column>
+
+            <ngc-column column="1">
+                <ngc-label label="tracing.careerGrouplabel"></ngc-label>
+                <div>
+                    <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGroupCode"
+                        sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA" sourceType="query" valueMember="desc" [width]="100"
+                        [noCache]="true" (select)="onSelectCarrierGroup($event)"></ngc-dropdownlist>
+                </div>
+            </ngc-column>
+
+            <ngc-column column="1">
+                <ngc-label label="g.carrierCode"></ngc-label>
+                <div>
+                    <ngc-lov [disabled]="onSearchFlag" formControlName="carrierCode" [width]="50" upperCase="true"
+                        noCache="true" sourceId='CARRIER_OPT' title='flight.carrierType' dataField="code"
+                        displayMember="code" accessEnableOn="r">
+                        <ngc-data-column text="g.carrier" dataField="code" [width]="100"></ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                        </ngc-data-column>
+                        <ngc-data-column text="flight.assisted" dataField="param1" [width]="200">
+                        </ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+
+            <ngc-column column="1">
+                <ngc-label label="flight.flightNumber"></ngc-label>
+                <div>
+                    <ngc-flightkeyinput [disabled]="onSearchFlag" [width]="100" [noCarrier]="true" upperCase="true"
+                        formControlName="flightNo" accessEnableOn="r" (ngModelChange)="OnchangeFlightNumber(event)">
+                    </ngc-flightkeyinput>
+                </div>
+            </ngc-column>
+
+            <ngc-column column="1">
+                <ngc-label label="g.date"></ngc-label>
+                <div>
+                    <ngc-dateinput [disabled]="onSearchFlag" [width]="100" formControlName="flightDate"
+                        accessEnableOn="r">
+                    </ngc-dateinput>
+                </div>
+            </ngc-column>
+
+            <ngc-column column='1'>
+                <div>
+                    <ngc-label label="flight.flightType">
+                    </ngc-label>
+                </div>
+                <div>
+                    <ngc-lov [noCache]="true" [disabled]="disableServiceType" formControlName="flightType"
+                        sourceId='SVC' displayMember="code" dataField="code" [width]="50" title='flight.serviceType'
+                        maxlength='1'>
+                        <ngc-data-column text="flight.serviceType" dataField="code" [width]="100">
+                        </ngc-data-column>
+                        <ngc-data-column text="g.description" dataField="desc" [width]="150">
+                        </ngc-data-column>
+                        <ngc-data-column text="flight.paxCao" dataField="param1" [width]="200">
+                        </ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+
+            <ngc-column>
+                <ngc-label></ngc-label>
+                <div>
+                    <ngc-button accessEnableOn="r" (click)="onSearch($event)" value="val.sea" iconType="search">
+                    </ngc-button>
+                </div>
+            </ngc-column>
+            <ngc-column column='7'></ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align="right">
+                <ngc-label label='val.auto.refresh'></ngc-label>
+                <ngc-switchbutton formControlName="auto" (ngModelChange)="onAutoRefresh($event)" [width]="200"
+                    onLabel="val.auto.refresh"></ngc-switchbutton>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container *ngIf="isTableFlg" type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable formArrayName="valShipmentMonitoring" [pageSize]="11" [showToolbar]="false"
+                    [enablePageSizeHeight]="false">
+                    <ngc-data-column text="val.shipment.cata.bag" dataField="shipmentNumber" [width]="100">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.hawb" dataField="hawbNumber" [width]="90" feature="Val.HAWB">
+                    </ngc-data-column>
+                    <ngc-data-column text="val.advice.location" dataField="uldnumber" [width]="90"></ngc-data-column>
+                    <ngc-data-column text="val.flt" dataField="inbFlightKey" [width]="60"></ngc-data-column>
+                    <ngc-data-column text="val.date" type="displayDate" dataField="inbFlightDate" [width]="60">
+                    </ngc-data-column>
+                    <ngc-data-column text="val.sta" type="displayTime" dataField="sta" [width]="40"></ngc-data-column>
+                    <ngc-data-column text="val.eta" type="displayTime" dataField="eta" [width]="40"
+                        [cellsRenderer]="CellsRenderer"></ngc-data-column>
+                    <ngc-data-column text="val.bay" dataField="bay" [width]="30"></ngc-data-column>
+                    <ngc-data-column text="val.flS" dataField="flightStatus" [width]="80"
+                        [cellsRenderer]="throughTransitCellsRenderer"></ngc-data-column>
+                    <ngc-data-column text="val.org1" dataField="originAirport" [width]="40"></ngc-data-column>
+                    <ngc-data-column text="val.dest" dataField="destinationAirport" [width]="60"></ngc-data-column>
+                    <ngc-data-column text="val.pie" dataField="pieces" [width]="40" type="displayPieces"
+                        cellsAlign="right"></ngc-data-column>
+                    <ngc-data-column text="val.weight" dataField="weight" type="displayNumber" [width]="40"
+                        cellsAlign="right" decimalDigits="2"></ngc-data-column>
+                    <ngc-data-column text="awb.nog" dataField="natureOfGoods" [width]="80" cellsAlign="left">
+                    </ngc-data-column>
+                    <ngc-data-column text="val.transfer" dataField="transferType" [width]="80"></ngc-data-column>
+                    <ngc-data-column text="val.outbnd" dataField="oubFlightKey" [width]="80"></ngc-data-column>
+                    <ngc-data-column text="val.status" dataField="consignee" [width]="70"></ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+    <ngc-report  #reportWindow title="g.report"  reportId='inboundvalshipment_report'
+         [reportParameters]='reportParameters'></ngc-report>
+</form>

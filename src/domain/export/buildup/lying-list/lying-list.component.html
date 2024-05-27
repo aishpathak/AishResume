@@ -1,0 +1,556 @@
+<ngc-titlebar title="export.mail.lying.list.title" (print)='onlyingistServiceReport($event)' (cancel)="onBack($event)">
+</ngc-titlebar>
+<form [formGroup]="lyingListForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="9">
+        <ngc-row>
+          <ngc-column>
+            <ngc-label label="mailbag.dn"></ngc-label>
+            <div>
+              <ngc-input accessEnableOn="r" formControlName="dnNumber" [width]="120" (ngModelChange)="appendZeroToDN(item)"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.carrier"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="carriercode" sourceId='CARRIER' title='export.airline' dataField='code'
+                [width]="80" uppercase='true' [maxlength]="2">
+                <ngc-data-column text="mailbag.carrier" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="g.description" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.destination"></ngc-label>
+            <div>
+              <!--<ngc-input [width]="120" formControlName="destination"></ngc-input>-->
+              <ngc-lov accessEnableOn="r" formControlName="destination" [width]="80" title='g.destination' upperCase="true"
+                dataField="code" displayMember="code" sourceId="APT" [maxlength]="3">
+                <ngc-data-column text="code" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.next.destination"></ngc-label>
+            <div>
+              <ngc-lov accessEnableOn="r" formControlName="nextDestination" [width]="80" title='g.destination' upperCase="true"
+                dataField="code" displayMember="code" sourceId="APT" [maxlength]="3">
+                <ngc-data-column text="code" dataField="code" [width]="100"></ngc-data-column>
+                <ngc-data-column text="desc" dataField="desc" [width]="150"></ngc-data-column>
+              </ngc-lov>
+              <!--<ngc-input [width]="120" formControlName="nextDestination" [maxlength]="3"></ngc-input>-->
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="uld.uld.trolley"></ngc-label>
+            <div>
+              <ngc-input accessEnableOn="r" [width]="120" formControlName="uldOrTrolley"></ngc-input>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="export.mail.lying.pa.flight.number"></ngc-label>
+            <div>
+              <!-- <ngc-input [width]="120" formControlName="flightKey"></ngc-input> -->
+              <ngc-flightkeyinput accessEnableOn="r" [width]="120" [noCarrier]="true" formControlName="flightKey">
+              </ngc-flightkeyinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="flight.flightDate"></ngc-label>
+            <div>
+              <ngc-datetimeinput accessEnableOn="r" [width]="120" [min]="minDate" formControlName="flightDate"></ngc-datetimeinput>
+            </div>
+          </ngc-column>
+          <ngc-column>
+            <ngc-label label="mailbag.dn.complete"></ngc-label>
+            <div>
+              <ngc-dropdownlist accessEnableOn="r" [width]="120" formControlName="dnCompSearch" sourceId="Lying_ListAD$DnCompleteFlag">
+              </ngc-dropdownlist>
+            </div>
+          </ngc-column>
+
+        </ngc-row>
+      </ngc-column>
+
+      <ngc-column column="1">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()"></ngc-button>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label=""></ngc-label>
+        </div>
+        <ngc-button accessEnableOn="r" label="g.print.report" (click)="onlyingistServiceReport($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>
+<form [formGroup]="lyingListFormResponse">
+  <ngc-container *ngIf="isTableFlg" type="tab">
+    <ngc-row>
+      <ngc-column column="3">
+        <ngc-label label="&nbsp"></ngc-label>
+        <div>
+          <ngc-label label="g.totalpieces" color="black"></ngc-label>: {{totalPieces}} &nbsp;&nbsp;
+          <ngc-label label="g.totalweight" color="black"></ngc-label>: {{totalWeight}}
+        </div>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-edittable formArrayName="lyingListContainerFormArray" [pageable]="true">
+          <!-- <ngc-data-column text=" " type="check" [width]="20" align="center" cellsAlign="center" dataField="selectParent"></ngc-data-column> -->
+          <ngc-data-column text='' [width]="20" dataField="selectParent" cellsAlign="center" align="center">
+            <!-- <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="selectParent" (click)="checkLoaded(group)"></ngc-checkbox>
+              </ng-container>
+            </ng-template> -->
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-checkbox formControlName="selectParent" (click)="parentCheck(group)"></ngc-checkbox>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text='mailbag.dispatch.number' dataField="dnNumber" [width]="100" cellsAlign="left"
+            align="left">
+          </ngc-data-column>
+          <ngc-data-column text='mailbag.carrier' dataField="carrierCode" [width]="100" cellsAlign="left" align="left">
+          </ngc-data-column>
+          <ngc-data-column text='mailbag.store.location' dataField="allStoreLocations" [width]="80" cellsAlign="left"
+            align="left"></ngc-data-column>
+          <ngc-data-column text='mailbag.location.type' dataField="locationType" [width]="80" upperCase="true"
+            cellsAlign="left" align="left"></ngc-data-column>
+          <ngc-data-column text='mailbag.destination' dataField="destinationResp" [width]="80" align="left"
+            cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text='mailbag.pieces' dataField="pieces" [width]="60" cellsAlign="right" align="left"
+            type="displayPieces"></ngc-data-column>
+          <ngc-data-column text='mailbag.dn.complete' iconType="yesno" type="icon" cellsAlign="centre" align="left"
+            dataField="dnCompflag"></ngc-data-column>
+          <ngc-data-column text='mailbag.weight' dataField="weights" [width]="60" cellsAlign="right" align="left"
+            type="displayWeight"></ngc-data-column>
+          <ngc-data-column text='mailbag.prebooking.flight' dataField="flightKeyAndDate" [width]="100" cellsAlign="left"
+            align="left"></ngc-data-column>
+          <ngc-data-column text='mailbag.booking.flight' dataField="bookingFlight" [width]="100" cellsAlign="left"
+            align="left">
+          </ngc-data-column>
+
+          <ngc-data-column text='export.mail.manifest.intact' iconType="yesno" type="icon" dataField="intact"
+            [width]="70" cellsAlign="center" align="left"></ngc-data-column>
+          <ngc-data-row>
+            <ng-template let-group>
+              <ng-container [formGroupName]="group">
+                <ngc-table>
+                  <thead>
+                    <tr>
+                      <th>
+                        <ngc-label label=''></ngc-label>
+                      </th>
+                      <th [width]="300">
+                        <ngc-label label='mailbag.dispatch.number'></ngc-label>
+                      </th>
+                      <th [width]="300">
+                        <ngc-label label='mailbag.number'></ngc-label>
+                      </th>
+                      <th [width]="30">
+                        <ngc-label label='mailbag.pieces'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.weight'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.mail.type'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.org'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.des'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.next.des'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.shipment.location'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.warehouse.location'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='mailbag.dn.complete'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='export.mll.prebooking.flight.date'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='export.mll.booking.flight.date'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label='g.remarks'></ngc-label>
+                      </th>
+                      <th>
+                        <ngc-label label="export.mll.offload.count"></ngc-label>
+                      </th>
+
+                    </tr>
+                  </thead>
+                  <tbody formArrayName="lyingListShipment">
+                    <tr
+                      *ngFor="let shipmentitem of lyingListFormResponse.get(['lyingListContainerFormArray', group, 'lyingListShipment']).controls; let subIndex=index"
+                      [formGroupName]="subIndex">
+                      <td align="center">
+                        <ngc-checkbox formControlName="selectChild"
+                          (click)="checkMailBagsLoaded(shipmentitem,group,subIndex)"></ngc-checkbox>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="dispatchNumber"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="mailBagNumber"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="piecesDetail"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-weightdisplay formControlName="weightDetail"></ngc-weightdisplay>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="mailType"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="org"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="dest"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="nextDest"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="storeLocation"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="warehouseLocation"></ngc-display>
+                      </td>
+                      <td align="center">
+                        <ngc-link (linkClick)="onLinkClick($event, group, subIndex)"
+                          *ngIf="!shipmentitem.get('dnCompflag').value" formControlName="dnComp"></ngc-link>
+
+                      </td>
+                      <td>
+                        <ngc-display formControlName="flightKey"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="flightANDDate"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="remarks"></ngc-display>
+                      </td>
+                      <td>
+                        <ngc-display formControlName="offloadCount"></ngc-display>
+                      </td>
+                    </tr>
+                  </tbody>
+                </ngc-table>
+              </ng-container>
+            </ng-template>
+          </ngc-data-row>
+        </ngc-edittable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+
+  <ngc-window #updateStorageLocationWindow width="570" title="export.mll.update.storage.location">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-label label="export.mll.storage.location"></ngc-label>
+          <div>
+            <ngc-input *ngIf="commonStorageLoc" formControlName="commonStorageLocation"
+              (ngModelChange)="patchSameValueForShipmentLocation($event)"></ngc-input>
+          </div>
+        </ngc-column>
+        <ngc-column>
+          <ngc-label label="mailbag.warehouse.location"></ngc-label>
+          <div>
+            <ngc-locations-list [noTerminal]="true" *ngIf="commonBreakDownLoc" formControlName="commonBreakLocation"
+              [displayOnlyLocation]="true" (ngModelChange)="patchSameValueForWareHouseLocation($event)">
+            </ngc-locations-list>
+            <!-- <ngc-input *ngIf="commonBreakDownLoc" formControlName="commonBreakLocation"
+              (ngModelChange)="patchSameValueForWareHouseLocation($event)"></ngc-input> -->
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead>
+              <tr>
+                <th>
+                  <ngc-label label="mailbag.number"></ngc-label>
+                </th>
+                <th [width]="80">
+                  <ngc-label label="mailbag.store.location"></ngc-label>
+                </th>
+                <th [width]="80">
+                  <ngc-label label="mailbag.warehouse.location"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody formArrayName="UpdateLocationArray">
+              <tr *ngFor="let item of lyingListFormResponse.controls.UpdateLocationArray.controls; let index=index"
+                [formGroupName]="index">
+                <td>
+                  <ngc-display formControlName="mailBagNumber"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="100" formControlName="storeLocation"></ngc-display>
+                </td>
+                <td>
+                  <ngc-display [width]="100" formControlName="warehouseLocation"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+
+
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="OnUpdateLocationSave()" value="g.save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #BookShipmentWindow [width]="1000" [height]="500" title="export.mll.book.shipment">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column column="2">
+          <ngc-label label="mailbag.booking.flight"></ngc-label>
+          <div>
+            <!-- <ngc-input [width]="140" formControlName="bookingFlightPopUpData" required></ngc-input> -->
+            <ngc-flightkeyinput [width]="140" formControlName="bookingFlightPopUpData" required>
+            </ngc-flightkeyinput>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label label="flight.flightDate"></ngc-label>
+          <div>
+            <ngc-datetimeinput (ngModelChange)="onSelectofDate(group)" [width]="140" [min]="minDate"
+              formControlName="flightDatePopUpData" required></ngc-datetimeinput>
+          </div>
+        </ngc-column>
+        <ngc-column column="2">
+          <ngc-label label="flight.segment"></ngc-label>
+          <div>
+            <ngc-dropdownlist sourceId="FLIGHTSEGMENTMAILMANIFEST" [autoSelect]="true"
+              [sourceParameters]="flightKeyforDropdown" sourceType='query' formControlName="flightSegment"
+              [noCache]="true" [width]="100" required></ngc-dropdownlist>
+          </div>
+        </ngc-column>
+      </ngc-row>
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="BookShipmentContainerArray" [pageable]="true">
+            <ngc-data-column text='mailbag.dispatch.number' dataField="dnNumber" [width]="80" cellsAlign="left"
+              align="left">
+            </ngc-data-column>
+            <ngc-data-column text='mailbag.store.location' dataField="storeLocation" [width]="80" cellsAlign="left"
+              align="left"></ngc-data-column>
+            <ngc-data-row>
+              <ng-template let-group>
+                <ng-container [formGroupName]="group">
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]="300">
+                          <ngc-label label='mailbag.number'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.org'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.des'></ngc-label>
+                        </th>
+                        <th [width]="30">
+                          <ngc-label label='mailbag.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.weight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.booking.flight'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='flight.flightDate'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="lyingListShipment">
+                      <tr
+                        *ngFor="let shipmentitem of lyingListFormResponse.get(['BookShipmentContainerArray', group, 'lyingListShipment']).controls; let subIndex=index"
+                        [formGroupName]="subIndex">
+                        <td>
+                          <ngc-display formControlName="mailBagNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="org"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="dest"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="piecesDetail"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="weightDetail"></ngc-weightdisplay>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="bookingFlightDetail"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="bookedFlightDateDetail"></ngc-display>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ng-container>
+              </ng-template>
+            </ngc-data-row>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="checkForDifferentCarrierAssignment()" value="g.save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+  <ngc-window #manualFreightOutPopUp width="600" title="export.mll.manual.freight.out">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-edittable formArrayName="ManualFreightOutArray" [pageable]="true">
+            <ngc-data-column text='mailbag.store.location' dataField="storeLocation" [width]="80" cellsAlign="left"
+              align="left"></ngc-data-column>
+            <ngc-data-column text="export.mll.carrier.flight" [width]='80' align="center" dataField="freightOutFlight"
+              cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-input [width]="140" formControlName="freightOutFlight" required></ngc-input>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+            <ngc-data-column text="flight.flightDate" [width]='100' align="center" dataField="freightOutFlightDate"
+              cellsAlign="center">
+              <ng-template let-name="name" let-group="group">
+                <ng-container [formGroupName]="group">
+                  <ngc-datetimeinput [width]="140" [min]="minDate" formControlName="freightOutFlightDate">
+                  </ngc-datetimeinput>
+                </ng-container>
+              </ng-template>
+            </ngc-data-column>
+
+            <ngc-data-row>
+              <ng-template let-group>
+                <ng-container [formGroupName]="group">
+                  <ngc-table>
+                    <thead>
+                      <tr>
+                        <th [width]="300">
+                          <ngc-label label='mailbag.number'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.org'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.des'></ngc-label>
+                        </th>
+                        <th [width]="30">
+                          <ngc-label label='mailbag.pieces'></ngc-label>
+                        </th>
+                        <th>
+                          <ngc-label label='mailbag.weight'></ngc-label>
+                        </th>
+                      </tr>
+                    </thead>
+                    <tbody formArrayName="lyingListShipment">
+                      <tr
+                        *ngFor="let shipmentitem of lyingListFormResponse.get(['ManualFreightOutArray', group, 'lyingListShipment']).controls; let subIndex=index"
+                        [formGroupName]="subIndex">
+                        <td>
+                          <ngc-display formControlName="mailBagNumber"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="org"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="dest"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-display formControlName="piecesDetail"></ngc-display>
+                        </td>
+                        <td>
+                          <ngc-weightdisplay formControlName="weightDetail"></ngc-weightdisplay>
+                        </td>
+                      </tr>
+                    </tbody>
+                  </ngc-table>
+                </ng-container>
+              </ng-template>
+            </ngc-data-row>
+          </ngc-edittable>
+        </ngc-column>
+      </ngc-row>
+
+
+    </ngc-container>
+    <ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button (click)="onFreightOut()" value="g.save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>
+  </ngc-window>
+
+
+  <ngc-report #reportWindow title="g.report"  reportId='LyingReport_report'  [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>
+
+<ngc-footer>
+  <ngc-row>
+    <ngc-column *ngIf="isTableFlg" type="tab">
+      <ngc-button value="airmail.lyinglist.loadshipment" (click)="onLoadShipment($event)"></ngc-button>
+      <ngc-button value="airmail.lyinglist.bookshipment" (click)="onBookShipment($event)"
+        [disabled]="disableBookingButton">
+      </ngc-button>
+      <ngc-button value="airmail.lyinglist.updateStroeLoc" (click)="onClick($event)" [disabled]="disableLocationButton">
+      </ngc-button>
+      <ngc-button value="airmail.lyinglist.manualFreightOut" (click)="onFreightOutPopUp($event)"></ngc-button>
+      <ngc-button label="export.aimail.DNATA.Tansfer" (click)="onDNATATransfer($event)">
+      </ngc-button>
+    </ngc-column>
+  </ngc-row>
+</ngc-footer>

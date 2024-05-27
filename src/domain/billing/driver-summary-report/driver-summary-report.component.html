@@ -1,0 +1,80 @@
+<ngc-titlebar title="billing.driver.summary"  (clear)="onClear($event)" (print)="onPrint()" (cancel)="onBack($event)"
+  (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="form">
+  <ngc-container type='section'>
+    <ngc-row>
+      <ngc-column column="6" [grid48]="true">
+        <ngc-label value='g.fromDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" formControlName="fromDate" [showCalendarButton]="true"
+            required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="6" [grid48]="true">
+        <ngc-label value='g.toDate'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [width]="150" formControlName="toDate" [showCalendarButton]="true"
+            [min]='form.controls.fromDate.value' required></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column column="6" [grid48]="true">
+        <ngc-label label="billing.driver.id"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="130" formControlName="driverCode"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="6" [grid48]="true">
+        <ngc-label label="billing.uld.awb.ocs"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [width]="130" formControlName="awbNumber"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column="1" align="left">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value="g.search" (click)="onSearch()" verticalAlign="bottom"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="searchFlag" column="1" align="left">
+        <ngc-label label=""></ngc-label>
+        <div>
+          <ngc-button label="export.excel" (click)="onExportToExcel()" verticalAlign="bottom">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf="searchFlag" type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="driverDetail" [pageable]="true" [pageSize]="20" [enablePageSizeHeight]="false"
+          [showToolbar]="false">
+          <ngc-data-column text="g.flight" [width]="100" dataField="flightNumber" dataType="string" cellsAlign="center"
+            align="center"></ngc-data-column>
+          <ngc-data-column text="billing.driver.id" [width]="100" dataField="driverId" dataType="string"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text="billing.driver.name" [width]="100" dataField="driverName" dataType="string"
+            cellsAlign="center" align="center"></ngc-data-column>
+          <ngc-data-column text="billing.uld.awb.ocs" [width]="100" dataField="awbNumber" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+          <ngc-data-column text="billing.time.of.event" [width]="100" dataField="eventTime" cellsAlign="center"
+            align="center" type="displayDateTime">
+            <ng-template let-name="name" let-group="group">
+              <ng-container [formGroupName]="group">
+                <ngc-display formControlName="eventTime"></ngc-display>
+              </ng-container>
+            </ng-template>
+          </ngc-data-column>
+          <ngc-data-column text="g.audit.EventType" [width]="100" dataField="eventType" cellsAlign="center"
+            align="center">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='driverSummaryReport'  [reportParameters]='reportParameters'>
+  </ngc-report>
+  <ngc-report #reportWindowExcel title="g.report"  format="xls" reportId='driverSummaryReportExcel'
+     [reportParameters]='reportParameters'></ngc-report>
+</form>

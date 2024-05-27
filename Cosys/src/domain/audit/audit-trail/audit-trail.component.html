@@ -1,0 +1,270 @@
+<ngc-titlebar title="audit.title.auditTrail" (cancel)="onCancel()" (clear)="onClear($event)"></ngc-titlebar>
+<form [formGroup]="auditForm">
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label='audit.entityType'></ngc-label>
+        <div>
+          <ngc-dropdownlist [dropDownWidth]="250" accessEnableOn="r" sourceId="AUDIT_ENTITY_TYPE_FOR_GENERAL"
+            sourceType="query" formControlName="entityType" upperCase='true' [width]="250" required
+            (select)="onEntityTypeClick($event)">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showCPE">
+        <ngc-label label='Process Area'></ngc-label>
+        <div>
+          <ngc-dropdownlist [dropDownWidth]="250" accessEnableOn="r"
+            sourceId="OPERATIONAL_MESSAGES_BY_PROCESS_AREA_FOR_AUDIT_TRAIL_GEN" sourceType="query"
+            formControlName="entityValue" upperCase='true' [width]="250" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showShipmentNumber">
+        <ngc-label label='g.shipmentNumber'></ngc-label>
+        <div>
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber" required></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showMailBagNumber">
+        <ngc-label label='g.mailBagNumber'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="mailbagNumber" required [width]="230"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showuldNumber">
+        <ngc-label label='g.uld'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="uldNumber" required></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showflightInput">
+        <ngc-label label='g.flightKey'></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" upperCase="true" formControlName="flightKey" [width]="100" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showflightInput">
+        <ngc-label label='g.FlightDate'></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="flightDate" required width='100'></ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showLocationInput">
+        <ngc-label label='WareHouse Location'></ngc-label>
+        <div>
+          <ngc-locations-list formControlName="warehouseLocation" [noTerminal]='true' [displayOnlyLocation]="true"
+            [width]="100" required></ngc-locations-list>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.user'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="user" upperCase='true' [width]="100"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="!isAvailableForNewImplementation">
+        <ngc-label label='g.audit.EntityValue'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="entityValue" *ngIf="!customerFlag"></ngc-input>
+
+          <ngc-lov accessEnableOn="r" formControlName='entityValue' [width]='140' upperCase='true'
+            sourceId='COMPANY_DEREGISTER' title='g.customerCode' dataField='code' [validOnly]="true" valueMember='code'
+            [dropDownWidth]='60' *ngIf="customerFlag" (select)="onEntityValueLOVSelect($event)">
+            <ngc-data-column text='Company Code' dataField='code' [width]='150'></ngc-data-column>
+            <ngc-data-column text='Company Name' dataField='desc' [width]='150'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showEventType">
+        <ngc-label label='g.audit.EventType'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [dropDownWidth]=" 250" sourceId="AUDIT_EVENT_TYPE" sourceType="query"
+            [sourceParameters]="{ 'parameter1': auditForm.get('entityType').value }" formControlName="eventType"
+            upperCase='true' [width]="250">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column *ngIf="showEventType">
+        <ngc-label label='g.audit.EventAttributes'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [dropDownWidth]=" 250" sourceId="AUDIT_EVENT_TYPE_ATTRIBUTES"
+            sourceType="query" [sourceParameters]="{ 'parameter1': auditForm.get('entityType').value }"
+            formControlName="entityAttributes" upperCase='true' [width]="250" [multiSelect]="true" [all]='false'>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.from'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            [required]="mandatoryFields" formControlName='fromDate' [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='g.to'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" [showCalendarButton]="true" [showTimeButton]="true"
+            [required]="mandatoryFields" formControlName='toDate' [width]="150"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="bottom">
+        <ngc-button accessEnableOn="r" label='g.search' (click)="onSearch()" #searchButton></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngIf="flagToDisplayData">
+      <ngc-column *ngIf="!newAudits">
+
+        <ngc-datatable formArrayName="auditList" [enablePageSizeHeight]="false"
+          (linkClick)="detailsInformation($event)">
+
+          <ngc-data-column text="export.sno" [width]="10" dataField="sno" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.event" [width]="150" dataField="eventName" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.user" [width]="90" dataField="actor" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="shp.datetime" [width]="100" type="displayDateTime" dataField="eventDateTime"
+            [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.action" [width]="50" dataField="eventAction" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.audit.details" [width]="490" dataField="details"
+            [cellsStyleRenderer]="cellsStyleRenderer">
+          </ngc-data-column>
+          <ngc-data-column text="g.eventValue" [width]="490" dataField="eventValue" [hidden]="true" [html]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.audit.Info" [width]="50" dataField="info" align="center" iconType='edit' type="link"
+            cellsAlign="center">
+          </ngc-data-column>
+
+          <!-- <ngc-data-column text="description" [width]="200" dataField="eventValue">
+                  <ng-template let-name="name" let-group="group">
+                    <ng-container [formGroupName]="group">
+                      <ng-container>
+                        <ngc-jsontree [source]="eventData[group]"></ngc-jsontree>
+                      </ng-container>
+                    </ng-container>
+                  </ng-template>
+                </ngc-data-column> -->
+        </ngc-datatable>
+
+      </ngc-column>
+      <ngc-column *ngIf="newAudits">
+
+        <ngc-datatable formArrayName="auditList" [pageSize]=100 [enablePageSizeHeight]="false"
+          (linkClick)="detailsInformationNew($event)">
+
+          <ngc-data-column text="export.sno" [width]="20" emphasis='md' dataField="sno" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.event" [width]="200" emphasis='md' dataField="eventName" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.user" [width]="50" emphasis='md' dataField="actor" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="shp.datetime" [width]="80" emphasis='md' type="displayDateTime"
+            dataField="eventDateTime" [pinned]="true"></ngc-data-column>
+          <ngc-data-column text="g.action" [width]="50" emphasis='md' dataField="eventAction" [pinned]="true">
+          </ngc-data-column>
+          <ngc-data-column text="g.eventValue" [width]="490" emphasis='md' dataField="eventValue" [html]="true">
+          </ngc-data-column>
+          <ngc-data-column dataField="attibutesLst" [hidden]="true"></ngc-data-column>
+          <ngc-data-column text="g.audit.Info" [width]="30" emphasis='md' dataField="info" align="center"
+            iconType='edit' type="link" cellsAlign="center">
+          </ngc-data-column>
+        </ngc-datatable>
+
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ng-container>
+    <ngc-window *ngIf="!newAudits" #windowComponent title="g.audit.details" [cancelButton]="true" [width]="1200"
+      [height]="600">
+      <ngc-container type="square">
+        <ngc-row>
+          <ngc-column>
+            <ng-container>
+              <ngc-jsontree [expanded]=true [source]="auditForm.get('displayInformation').value" markingBeginChar="{"
+                markingEndChar="}"></ngc-jsontree>
+            </ng-container>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window>
+    <ngc-window *ngIf="newAudits" #windowComponent title="g.audit.details" [cancelButton]="true" [width]="1200"
+      [height]="600">
+      <ngc-container type="square">
+        <ngc-row>
+          <ngc-column column="11" align="right">
+            <ngc-button accessEnableOn="r" (click)="onPrevious()" priority="quaternary" [disabled]="indexnumber == 0" height="30"
+              width="50" iconType="previous-simple">
+            </ngc-button>
+          </ngc-column>
+          <ngc-column align="left">
+            <ngc-button accessEnableOn="r" (click)="onNext()" width="50" height="30" priority="quaternary"
+              [disabled]="indexnumber == auditForm.get('entityDataArray').length-1" iconType="next-simple">
+            </ngc-button>
+          </ngc-column>
+        </ngc-row>
+        <ngc-row>
+          <ngc-column>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.audit.event"></ngc-label>
+                <ngc-display formControlName="popupevents"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.audit.user"></ngc-label>
+                <ngc-display formControlName="popupusers"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+            <ngc-row>
+              <ngc-column>
+                <ngc-label label="g.audit.dateTime"></ngc-label>
+                <ngc-display formControlName="popupdatetime"></ngc-display>
+              </ngc-column>
+            </ngc-row>
+            <ngc-table>
+              <thead>
+                <tr>
+                  <th>
+                    <ngc-label value="g.audit.fieldName"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="g.audit.value"></ngc-label>
+                  </th>
+                  <th>
+                    <ngc-label value="g.audit.oldValue"></ngc-label>
+                  </th>
+                </tr>
+
+              </thead>
+              <tbody formArrayName="entityDataArray">
+
+                <tr *ngFor="let item of auditForm.controls.entityDataArray.controls; let index=index"
+                  [formGroupName]="index">
+                  <td>
+                    <ngc-display formControlName="label"></ngc-display>
+                  </td>
+                  <td>
+                    <ngc-display formControlName="value"></ngc-display>
+                  </td>
+                  <td *ngIf="item.get('changedValue').value">
+                    <ngc-display color="blue" emphasis="md" formControlName="changedValue">
+                    </ngc-display>
+                  </td>
+                  <td *ngIf="!item.get('changedValue').value">
+                    <ngc-display></ngc-display>
+                  </td>
+                </tr>
+
+
+
+              </tbody>
+            </ngc-table>
+            <!-- <div [innerHTML]="auditForm.get('displayInformation').value"></div> -->
+          </ngc-column>
+        </ngc-row>
+
+      </ngc-container>
+    </ngc-window>
+  </ng-container>
+
+</form>

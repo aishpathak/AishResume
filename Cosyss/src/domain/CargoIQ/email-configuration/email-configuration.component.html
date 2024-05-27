@@ -1,0 +1,256 @@
+<form [formGroup]="form">
+  <ngc-titlebar title='ciq.emailConfiguration' (save)="onSave($event)" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column [column]='3'>
+        <ngc-label value='cargo.iq.report.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]='350' required (select)="onSelectReportType($event)" formControlName='ciqReportType'
+            sourceId='CiqReport$ReportTypeForEmailConfiguration' [disabled]="disableReport"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column
+        *ngIf="form.get('ciqReportType').value == 'FSU Messaging Exception Report' || form.get('ciqReportType').value == 'FSU Messaging Report'"
+        [grid48]='true' [column]='5'>
+        <ngc-label value='g.message.type'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r"  upperCase='true' [width]="100" [dropDownWidth]="90" formControlName='fsuMessageType'
+            (select)="onSelectMessageType($event)" [disabled]="disableReport" sourceId='CIQ_MESSAGETYPE'
+            [noCache]="true" sourceType="query"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column
+        *ngIf="(form.get('ciqReportType').value == 'FSU Messaging Exception Report' || form.get('ciqReportType').value == 'FSU Messaging Report') 
+       && form.get('fsuMessageType').value && (form.get('fsuMessageType').value == 'DEP' || form.get('fsuMessageType').value == 'RCF')"
+        [grid48]='true' column='3'>
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-checkbox accessEnableOn="r"  formControlName="transitFlag">
+            <ngc-label value='uld.transit'></ngc-label>
+          </ngc-checkbox>
+        </div>
+      </ngc-column>
+      <ngc-column
+        *ngIf="form.get('ciqReportType').value == 'FSU Messaging Exception Report' || form.get('ciqReportType').value == 'FSU Messaging Report'"
+        column="1">
+        <ngc-label value='g.carrier'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName='carrierCode' sourceId='CQ_AIRLINE_DRPDWN' [noCache]="true"
+            sourceType='query' [noCache]='true' [width]="90" [dropDownWidth]="80" [sourceParameters]="airlineParameter"
+            (select)="onCarrierChange($event)" [disabled]="disableReport">
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="1">
+        <ngc-label value=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" value='g.search' (click)='onSearchCiq()'></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container formArrayName="carrierList" type='tab' *ngIf="showRow">
+    <ngc-row *ngFor="let item of form.get('carrierList').controls; let index=index" [formGroupName]="index">
+      <ngc-column>
+        <ngc-container type='squarethin'>
+          <ngc-row>
+            <ngc-column>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column *ngIf="item.get('carrierCode').value">
+                    <ngc-label label='ciq.reportGeneration' emphasis='md'></ngc-label>
+                    (<ngc-label formControlName='carrierCode'></ngc-label>)
+                  </ngc-column>
+                  <ngc-column *ngIf="!item.get('carrierCode').value">
+                    <ngc-label label='ciq.reportGeneration' emphasis='md'></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column column="3" [grid24]='true'>
+                    <div>
+                      <ngc-label label='ciq.weeklyReport'>
+                      </ngc-label>
+                    </div>
+                    <ngc-dropdownlist formControlName="ciqRptGenWeek" width="130" [dropDownWidth]="90"
+                      sourceId="General$Week_Days">
+                    </ngc-dropdownlist>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <div>
+                      <ngc-label label='ciq.dailyReport'>
+                      </ngc-label>
+                    </div>
+                    <ngc-datetimeinput width="80" [showTimeButton]="true" [showCalendarButton]="false"
+                      formControlName="ciqRptGenTime">
+                    </ngc-datetimeinput>
+                  </ngc-column>
+                  <ngc-column column="1">
+                    <ngc-label value='ciq.monthlyReport'></ngc-label>
+                    <div>
+                      <ngc-numberinput digits="2" [defaultZero]='false' [min]='1' [max]='31' decimalDigits="0"
+                        [width]="50" formControlName="ciqRptGenDay" [allowString]='true'>
+                      </ngc-numberinput>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column formArrayName="schedule">
+                    <ngc-container *ngFor="let subitem of item.controls.schedule.controls; let subindex=index"
+                      [formGroupName]="subindex">
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label value='ciq.satsEmail' emphasis='lg'></ngc-label>
+                        </ngc-column>
+                        <ngc-column align="right">
+                          <ngc-button value='g.add' (click)="onAddSATS(index, subindex)" iconType="add"></ngc-button>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-table>
+                            <thead>
+                              <tr>
+                                <th>
+                                  <ngc-label value="ciq.emailId"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value='ciq.weeklyReport'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value='ciq.dailyReport'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value='ciq.monthlyReport'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="g.delete"></ngc-label>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody formArrayName="membersInfo" align="center">
+                              <tr *ngFor="let subsubitem of subitem.get('membersInfo').controls; let sindex=index"
+                                [formGroupName]="sindex">
+                                <td>
+                                  <ngc-input formControlName="emailTo"></ngc-input>
+                                </td>
+                                <td *ngIf="!item.get('ciqRptGenWeek').value">
+                                  <ngc-checkbox [disabled]='true' [checked]='false'
+                                    (click)=" checkDisabled('W', item.get('carrierCode').value)">
+                                  </ngc-checkbox>
+                                </td>
+                                <td *ngIf="item.get('ciqRptGenWeek').value">
+                                  <ngc-checkbox formControlName='weekly'></ngc-checkbox>
+                                </td>
+                                <td *ngIf="!item.get('ciqRptGenTime').value">
+                                  <ngc-checkbox [disabled]='true' [checked]='false'
+                                    (click)=" checkDisabled('D', item.get('carrierCode').value)">
+                                  </ngc-checkbox>
+                                </td>
+                                <td *ngIf="item.get('ciqRptGenTime').value">
+                                  <ngc-checkbox formControlName='daily'></ngc-checkbox>
+                                </td>
+                                <td *ngIf="!item.get('ciqRptGenDay').value">
+                                  <ngc-checkbox [disabled]='true' [checked]='false'
+                                    (click)=" checkDisabled('M', item.get('carrierCode').value)">
+                                  </ngc-checkbox>
+                                </td>
+                                <td *ngIf="item.get('ciqRptGenDay').value">
+                                  <ngc-checkbox formControlName='monthly'></ngc-checkbox>
+                                </td>
+                                <td>
+                                  <ngc-link iconType="delete" (linkClick)="onSATSDelete(index, subindex, sindex)">
+                                  </ngc-link>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </ngc-table>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+                  <ngc-column formArrayName="scheduleIata" align="right">
+                    <ngc-container *ngFor="let subiataitem of item.controls.scheduleIata.controls; let subindex=index"
+                      [formGroupName]="subindex">
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-label value='ciq.iataEmail' emphasis='lg'></ngc-label>
+                        </ngc-column>
+                        <ngc-column align="right">
+                          <ngc-button value='g.add' (click)="onAddIATA(index, subindex)" iconType="add"></ngc-button>
+                        </ngc-column>
+                      </ngc-row>
+                      <ngc-row>
+                        <ngc-column>
+                          <ngc-table>
+                            <thead>
+                              <tr>
+                                <th>
+                                  <ngc-label value="ciq.emailId"></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value='ciq.weeklyReport'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value='ciq.dailyReport'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value='ciq.monthlyReport'></ngc-label>
+                                </th>
+                                <th>
+                                  <ngc-label value="g.delete"></ngc-label>
+                                </th>
+                              </tr>
+                            </thead>
+                            <tbody formArrayName="membersInfo" align="center">
+                              <tr
+                                *ngFor="let subsubiataitem of subiataitem.controls.membersInfo.controls; let sindex=index"
+                                [formGroupName]="sindex">
+                                <td>
+                                  <ngc-input width='100' formControlName="emailTo"></ngc-input>
+                                </td>
+                                <td *ngIf="!item.get('ciqRptGenWeek').value">
+                                  <ngc-checkbox [disabled]='true' [checked]='false'
+                                    (click)="checkDisabled('W', item.get('carrierCode').value)">
+                                  </ngc-checkbox>
+                                </td>
+                                <td *ngIf="item.get('ciqRptGenWeek').value">
+                                  <ngc-checkbox formControlName='weekly'></ngc-checkbox>
+                                </td>
+                                <td *ngIf="!item.get('ciqRptGenTime').value">
+                                  <ngc-checkbox [disabled]='true' [checked]='false'
+                                    (click)="checkDisabled('D', item.get('carrierCode').value)">
+                                  </ngc-checkbox>
+                                </td>
+                                <td *ngIf="item.get('ciqRptGenTime').value">
+                                  <ngc-checkbox formControlName='daily'></ngc-checkbox>
+                                </td>
+                                <td *ngIf="!item.get('ciqRptGenDay').value">
+                                  <ngc-checkbox [disabled]='true' [checked]='false'
+                                    (click)="checkDisabled('M', item.get('carrierCode').value)">
+                                  </ngc-checkbox>
+                                </td>
+                                <td *ngIf="item.get('ciqRptGenDay').value">
+                                  <ngc-checkbox formControlName='monthly'></ngc-checkbox>
+                                </td>
+                                <td>
+                                  <ngc-link iconType="delete" (linkClick)="onIATADelete(index, subindex, sindex)">
+                                  </ngc-link>
+                                </td>
+                              </tr>
+                            </tbody>
+                          </ngc-table>
+                        </ngc-column>
+                      </ngc-row>
+                    </ngc-container>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

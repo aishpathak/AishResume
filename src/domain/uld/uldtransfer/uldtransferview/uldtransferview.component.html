@@ -1,0 +1,132 @@
+<!-- Title Bar -->
+<ngc-titlebar title="uldtransfermng" (clear)="clearFormData()"></ngc-titlebar>
+<form [formGroup]="uldTansferViewForm">
+    <ngc-container type='section'>
+        <ngc-row>
+            <ngc-column column="1">
+                <ngc-label value='uld.fromCarrier'></ngc-label>
+                <div>
+                    <ngc-lov accessEnableOn="r" formControlName='transferCarrier' width='40px' upperCase='true'
+                        sourceId='CARRIER' title='uld.carrier.type' dataField='code' (select)='onSelect($event)'
+                        displayMember="code" [dropDownWidth]='60'>
+                        <ngc-data-column text='uld.carrier' dataField='code' [width]='100'></ngc-data-column>
+                        <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+
+            <ngc-column column="1">
+                <ngc-label label='uld.toCarrier'></ngc-label>
+                <div>
+                    <ngc-lov accessEnableOn="r" formControlName='receivingCarrier' width='40px' upperCase='true'
+                        sourceId='CARRIER' title='uld.carrier.type' dataField='code'
+                        (select)='onSelectRecievecarrier($event)' displayMember="code" [dropDownWidth]='60'>
+                        <ngc-data-column text='uld.carrier' dataField='code' [width]='100'></ngc-data-column>
+                        <ngc-data-column text='uld.description' dataField='desc' [width]='150'></ngc-data-column>
+                    </ngc-lov>
+                </div>
+            </ngc-column>
+
+            <ngc-column column="2" align="left">
+                <ngc-label value='uld.luctransactionnumber'></ngc-label>
+                <div>
+                    <ngc-input accessEnableOn="r" upperCase="true" ngcInputUpper [width]="190"
+                        formControlName="lucTransactionNo">
+                    </ngc-input>
+                </div>
+            </ngc-column>
+            <ngc-column feature="ULD.Transfer.FromDateTime">
+                <ngc-label label="g.fromDate"></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" showTimeButton="true"
+                        formControlName="fromDateTime" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column feature="ULD.Transfer.ToDateTime">
+                <ngc-label label="g.toDate"></ngc-label>
+                <div>
+                    <ngc-datetimeinput accessEnableOn="r" [width]="160" showCalendarButton="true" showTimeButton="true"
+                        formControlName="toDateTime" [min]="dateTo" [max]="dateToMax"></ngc-datetimeinput>
+                </div>
+            </ngc-column>
+            <ngc-column>
+                <div style="padding-top: 30px">
+                    <ngc-checkbox accessEnableOn="r" formControlName="transferFinalizedFlag">
+                        Unfinalized
+                    </ngc-checkbox>
+                </div>
+            </ngc-column>
+            <ngc-column align="left">
+                <br>
+                <ngc-button accessEnableOn="r" (click)="getUldTransferList()" iconType="search" value="g.search"
+                    #searchbutton>
+                </ngc-button>
+            </ngc-column>
+            <ngc-column column='6'></ngc-column>
+        </ngc-row>
+
+        <ngc-row *ngIf="dataDisplay" style="padding-top:10px;">
+            <ngc-column>
+                <ngc-label value='uld.transferfrom'></ngc-label>
+            </ngc-column>
+            <ngc-column column='3'>
+                <ngc-label value='g.name'></ngc-label>
+            </ngc-column>
+            <ngc-column>
+                <ngc-label value='uld.transferto'></ngc-label>
+            </ngc-column>
+            <ngc-column column='3'>
+                <ngc-label value='g.name'></ngc-label>
+            </ngc-column>
+            <ngc-column></ngc-column>
+        </ngc-row>
+
+        <ngc-row *ngIf="dataDisplay">
+            <ngc-column>
+                <ngc-display ngc-form-control formControlName='transferCarrier'></ngc-display>
+            </ngc-column>
+            <ngc-column column='3'>
+                <ngc-display ngc-form-control formControlName='transCarrierName'></ngc-display>
+            </ngc-column>
+            <ngc-column>
+                <ngc-display ngc-form-control formControlName='receivingCarrier'></ngc-display>
+            </ngc-column>
+            <ngc-column column='3'>
+                <ngc-display ngc-form-control formControlName='receivCarrierName'></ngc-display>
+            </ngc-column>
+            <ngc-column></ngc-column>
+        </ngc-row>
+        <ngc-row>
+            <ngc-column align='right'>
+                <ngc-button [width]="250" (click)="navigateTocreateNewUldTransfer()" value="uld.createnewuldtransfer">
+                </ngc-button>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+
+    <ngc-container type="tab">
+        <ngc-row>
+            <ngc-column>
+                <ngc-datatable *ngIf="dataDisplay" formArrayName="uldTransList" (linkClick)="onLinkClick($event)">
+                    <ngc-data-column text="uld.fromCarrier" dataField="transferCarrier" [width]="130" align="left"
+                        cellsAlign="left" *ngIf="!fromCarrierFeatureEnabled"></ngc-data-column>
+                    <ngc-data-column text="uld.toCarrier" dataField="receivingCarrier" [width]="130" align="left"
+                        cellsAlign="left" *ngIf="!toCarrierFeatureEnabled"></ngc-data-column>
+                    <ngc-data-column text="uld.luctransactionnumber" dataField="transferId" [width]="230" type='link'
+                        align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="uld.transferairport" dataField="transferAirport" [width]="130" align="left"
+                        cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text='uld.finalizeddatetime' dataField='finalizedDateTime' [width]='200'
+                        type="displayDateTime" align="left" cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="uld.status" dataField="uldStatus" [width]="130" align="left"
+                        cellsAlign="left"></ngc-data-column>
+                    <ngc-data-column text="g.user" dataField="createdBy" [width]="130" align="left" cellsAlign="left"
+                        feature="ULD.Transfer.CreatedBy">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.edit" dataField="edit" [width]="100" type="link" iconType="edit"
+                        align="left" cellsAlign="left"></ngc-data-column>
+                </ngc-datatable>
+            </ngc-column>
+        </ngc-row>
+    </ngc-container>
+</form>

@@ -1,0 +1,773 @@
+<form [formGroup]="outwardServiceReportForm">
+
+  <ngc-titlebar title="exp.outwardservicereport" (print)="outwardReport()" [disableSave]="finalizeFlag"
+    (save)="onSave($event)"></ngc-titlebar>
+
+  <ngc-container type="square">
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value='flight.Flight'>
+        </ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [autoFocus]="true" [width]="100" formControlName="flightKey" upperCase="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label value='flight.date'>
+        </ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" formControlName="date" required></ngc-dateinput>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="g.search" icon="search" (click)="search()"></ngc-button>
+        </div>
+      </ngc-column>
+      <ngc-column column='3' align="center" verticalAlign="bottom">
+        <ngc-label label="outbfltevm.fltCmplted" *ngIf="showDataFlag && flightCompleteFlag"></ngc-label>
+        <ngc-label label="exp.outwardservicereport.flightnotcomplete" *ngIf="showDataFlag && !flightCompleteFlag">
+        </ngc-label>
+      </ngc-column>
+      <ngc-column column='5' align="left" verticalAlign="bottom">
+        <ngc-label label="exp.outwardservicereport.finalizedby" *ngIf="showDataFlag && finalizeFlag"></ngc-label>
+        <ngc-display formControlName="outwardServiceReportFinalizedBy" *ngIf="showDataFlag && finalizeFlag">
+        </ngc-display>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="square" *ngIf="showDataFlag">
+
+    <ngc-row>
+      <ngc-column>
+        <ngc-label value="flight.flightNumber"></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKey"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value="flight.flightDate"></ngc-label>
+        <div>
+          <ngc-display formControlName="date" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label value="flight.segment"></ngc-label>
+        <div>
+          <ngc-display formControlName="segment"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+        <ngc-label label='flight.std'></ngc-label>
+        <div *ngIf="showStdTimeOnly===false">
+          <ngc-display [onlyTime]="true" formControlName="std"></ngc-display>
+        </div>
+        <div *ngIf="showStdTimeOnly === true">
+          <ngc-display formControlName="std"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.etd'></ngc-label>
+        <div *ngIf="showEtdTimeOnly===false">
+          <ngc-display [onlyTime]="true" formControlName="etd"></ngc-display>
+        </div>
+        <div *ngIf="showEtdTimeOnly===true">
+          <ngc-display formControlName="etd"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column>
+        <ngc-label label='flight.atd'></ngc-label>
+        <div *ngIf="showAtdTimeOnly===false">
+          <ngc-display [onlyTime]="true" formControlName="atd"></ngc-display>
+        </div>
+        <div *ngIf="showAtdTimeOnly===true">
+          <ngc-display formControlName="atd"></ngc-display>
+        </div>
+      </ngc-column>
+
+      <ngc-column>
+
+
+        <div>
+          <ngc-radiobutton accessEnableOn="r" groupName="discrepancyType" formControlName="manifest" (ngModelChange)="changeFlagsManifest()">
+
+            <ngc-label value="exp.manifest"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+
+        <div>
+          <ngc-radiobutton accessEnableOn="r" groupName="discrepancyType" formControlName="warehouse" (ngModelChange)="changeFlagsWarehouse()">
+
+            <ngc-label value="exp.warehouse"></ngc-label>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column verticalAlign="middle">
+        <div>
+          <ngc-button label="uld.finalize" (click)="finalize()" *ngIf="!finalizeFlag" [disabled]="finalFlag">
+          </ngc-button>
+          <ngc-button label="unfinalize" (click)="finalize()" *ngIf="finalizeFlag"></ngc-button>
+        </div>
+      </ngc-column>
+
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="square" *ngIf="showDataFlag">
+
+
+
+    <ngc-row>
+
+      <ngc-column>
+        <ngc-container>
+          <ngc-row>
+
+            <ngc-column>
+
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.manifestLastUpdatedBy"></ngc-label>
+                    <div>
+                      <ngc-input formControlName="manifestLastUpdatedBy" disabled='true'></ngc-input>
+                    </div>
+                    <!-- <ngc-label value="exp.manifestLastUpdatedBy"></ngc-label>
+              <div>
+                <ngc-display formControlName="manifestLastUpdatedBy"></ngc-display>
+              </div> -->
+                  </ngc-column>
+                </ngc-row>
+
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.oamanifesting"></ngc-label>
+                    <div>
+                      <ngc-taginput required formControlName="manifestingOA" [disabled]="freightFlag" [required]="!freightFlag"></ngc-taginput>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.loadcontrolco"></ngc-label>
+                    <div>
+                      <ngc-input required formControlName="loadControlCO" [disabled]="freightFlag" [required]="!freightFlag" [maxlength]='30'></ngc-input>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+
+            <ngc-column>
+
+
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.warehouseLastUpdatedBy"></ngc-label>
+                    <div>
+                      <ngc-input formControlName="warehouseLastUpdatedBy" disabled="true">
+                      </ngc-input>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.cargoPreCheckedBy"></ngc-label>
+                    <div>
+                      <ngc-taginput formControlName="cargoPreCheckedBy" [disabled]="documentFlag">
+                      </ngc-taginput>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.exportWarehouseOa"></ngc-label>
+                    <div>
+                      <ngc-taginput required formControlName="exportWarehouseOA" [maxChars]="30" [disabled]="documentFlag" [required]="!documentFlag">
+                      </ngc-taginput>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.auldCheckedBy"></ngc-label>
+                    <div>
+                      <ngc-input required formControlName="exportWarehouseCO" [disabled]="documentFlag" [required]="!documentFlag"></ngc-input>
+                    </div>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf="showDataFlag" type="tab">
+    <ngc-row *ngIf="documentFlag">
+      <ngc-column>
+        <ngc-accordion accessEnableOn="r">
+          <ngc-accordion-card  accessEnableOn="r">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.documentDescrepancies"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="documentDiscrepancies" [pageable]="false">
+                    <ngc-data-column text="serialno" dataField="sno" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-awbinput required [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-awbinput>
+                          <ngc-display [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.origin" dataField="origin" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+
+                          <ngc-lov required [formControlName]="name" [width]="40" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"
+                            sourceId="FINAL_DESTINATION" title="g.origin" dataField="code" [maxlength]="3">
+                            <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+                          </ngc-lov>
+
+                          <!-- <ngc-input [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"></ngc-input> -->
+                          <ngc-display [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.destination" dataField="destination" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-lov required [formControlName]="name" [width]="40" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"
+                            sourceId="FINAL_DESTINATION" title="g.destination" dataField="code" [maxlength]="3">
+                            <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+                          </ngc-lov>
+                          <!-- <ngc-input [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"></ngc-input> -->
+                          <ngc-display [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="pieces" align="right" cellsAlign="right">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-piecesinput required [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-piecesinput>
+                          <ngc-piecesdisplay [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-piecesdisplay>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="weight" align="weight" cellsAlign="right">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-weightinput required [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-weightinput>
+                          <ngc-weightdisplay [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-weightdisplay>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.book.korl" dataField="weightUnitCode" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-dropdownlist required sourceId='EXPORT$Weight_Code' [width]="40" [autoSelect]="true" [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-dropdownlist>
+                          <!-- <ngc-input [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"></ngc-input> -->
+                          <ngc-display [formControlName]="name" [width]="40" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.natureofgoods" dataField="natureOfGoods" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input required [formControlName]="name" [width]="200" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"
+                            [maxLength]='20'>
+                          </ngc-input>
+                          <ngc-display [formControlName]="name" [width]="200" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.irregularity" name="irregularity">
+
+                      <ngc-data-column text="g.type" dataField="cargoIrregularityCode" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist sourceId="DOCUMENT_IRREGULARITY_TYPE" [width]="200" [formControlName]="name" sourceType="query" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                            </ngc-dropdownlist>
+
+                            <ngc-display [formControlName]="name" [width]="200" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                            </ngc-display>
+                          </ng-container>
+                        </ng-template>
+                      </ngc-data-column>
+                      <ngc-data-column text="g.pieces" dataField="irregularityPieces" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                          <ng-container [formGroupName]="group">
+                            <ngc-piecesinput [formControlName]="name" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                            </ngc-piecesinput>
+                            <ngc-piecesdisplay [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                            </ngc-piecesdisplay>
+                          </ng-container>
+                        </ng-template>
+                      </ngc-data-column>
+                      <ngc-data-column text="Remarks" [width]="180" dataField="irregularityRemarks" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                          <ng-container [formGroupName]="group">
+                            <ngc-input [formControlName]="name" [width]="200" *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value"
+                              [maxLength]='20'>
+                            </ngc-input>
+                            <ngc-display [formControlName]="name" [width]="200" *ngIf="!outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value">
+                            </ngc-display>
+                          </ng-container>
+                        </ng-template>
+                      </ngc-data-column>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="g.action.taken" dataField="remarks" align="left" cellsAlign="left">
+
+
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea *ngIf="!finalizeFlag" [width]="180" [height]="60" [maxlength]="65" [formControlName]="name">
+                          </ngc-textarea>
+                          <ngc-display *ngIf="finalizeFlag" [width]="180" [formControlName]="name"></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+
+                    <ngc-data-column text="g.delete" dataField="manualFlag" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button iconType='delete' *ngIf="outwardServiceReportForm.get(['documentDiscrepancies',group,'manualFlag']).value" (click)="deleteDocumentDescripencies(group)"></ngc-button>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button label="addRow" (click)="addDocumentDiscrepancies()" [disabled]="finalizeFlag">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf="freightFlag">
+
+      <ngc-column>
+        <ngc-accordion>
+          <ngc-accordion-card  accessEnableOn="r">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.freightDesccrepancies"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="freightDiscrepancies" [pageable]="false">
+                    <ngc-data-column text="serialno" dataField="sno" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-awbinput required [formControlName]="name" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-awbinput>
+                          <ngc-display [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="hawb" dataField="hawb" cellsAlign="left" align="left">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input [formControlName]="name" [width]="140" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-input>
+                          <ngc-display [formControlName]="name" width="140" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="origin" dataField="origin" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+
+                          <ngc-lov required [formControlName]="name" [width]="40" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value"
+                            sourceId="FINAL_DESTINATION" title="g.origin" dataField="code" [maxlength]="3">
+                            <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+                          </ngc-lov>
+
+                          <ngc-display [formControlName]="name" [width]="40" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="destination" dataField="destination" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-lov required [formControlName]="name" [width]="40" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value"
+                            sourceId="FINAL_DESTINATION" title="g.origin" dataField="code" [maxlength]="3">
+                            <ngc-data-column text="flight.airportCode" dataField="code" [width]="30"></ngc-data-column>
+                          </ngc-lov>
+                          <ngc-display [formControlName]="name" [width]="40" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="pieces" align="right" cellsAlign="right">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-piecesinput required [formControlName]="name" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-piecesinput>
+                          <ngc-piecesdisplay [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-piecesdisplay>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="weight" align="right" cellsAlign="right">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-weightinput required [formControlName]="name" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-weightinput>
+                          <ngc-weightdisplay [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-weightdisplay>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="export.book.korl" dataField="weightUnitCode" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-dropdownlist required [autoSelect]="true" [width]="40" sourceId='EXPORT$Weight_Code' [formControlName]="name" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-dropdownlist>
+                          <ngc-display [formControlName]="name" [width]="40" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="natureOfGoods" dataField="natureOfGoods" align="left" cellsAlign="left">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-input required [formControlName]="name" [width]="200" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value"
+                            [maxLength]='20'>
+                          </ngc-input>
+                          <ngc-display [formControlName]="name" [width]="200" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="g.irregularity" name="irregularity">
+
+                      <ngc-data-column text="g.type" dataField="cargoIrregularityCode" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                          <ng-container [formGroupName]="group">
+                            <ngc-dropdownlist sourceId="FREIGHT_IRREGULARITY_TYPE" [width]="200" [formControlName]="name" sourceType="query" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                            </ngc-dropdownlist>
+
+                            <ngc-display [formControlName]="name" [width]="200" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                            </ngc-display>
+                          </ng-container>
+                        </ng-template>
+                      </ngc-data-column>
+                      <ngc-data-column text="g.pieces" dataField="irregularityPieces" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                          <ng-container [formGroupName]="group">
+                            <ngc-piecesinput [formControlName]="name" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                            </ngc-piecesinput>
+                            <ngc-piecesdisplay [formControlName]="name" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                            </ngc-piecesdisplay>
+                          </ng-container>
+                        </ng-template>
+                      </ngc-data-column>
+                      <ngc-data-column text="g.remarks" [width]="180" dataField="irregularityRemarks" align="center" cellsAlign="center">
+                        <ng-template let-name="name" let-group="group">
+                          <ng-container [formGroupName]="group">
+                            <ngc-input [formControlName]="name" [width]="200" *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value"
+                              [maxLength]='20'>
+                            </ngc-input>
+                            <ngc-display [formControlName]="name" [width]="200" *ngIf="!outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value">
+                            </ngc-display>
+                          </ng-container>
+                        </ng-template>
+                      </ngc-data-column>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="g.action.taken" dataField="remarks" align="left" cellsAlign="left">
+
+
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-textarea *ngIf="!finalizeFlag" [width]="180" [height]="60" [maxlength]="65" [formControlName]="name">
+                          </ngc-textarea>
+                          <ngc-display *ngIf="finalizeFlag" [width]="180" [formControlName]="name"></ngc-display>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+
+
+
+
+                    <ngc-data-column text="g.delete" dataField="manualFlag" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button iconType='delete' *ngIf="outwardServiceReportForm.get(['freightDiscrepancies',group,'manualFlag']).value" (click)="deleteFreightDiscrepencies(group)"></ngc-button>
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button label="addRow" (click)="addFreightDiscrepancies()" [disabled]="finalizeFlag"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf="offloadFlag">
+
+      <ngc-column>
+        <ngc-accordion>
+          <ngc-accordion-card  accessEnableOn="r">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.offloadingDescrepancies"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="offloadingDiscrepancies" [pageable]="false">
+                    <ngc-data-column text="serialno" dataField="sno" align="center" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display [formControlName]="name"></ngc-display>
+
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.awbnumber" dataField="shipmentNumber" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="uldnumber" dataField="uldNumber" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="origin" dataField="origin" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="destination" dataField="destination" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="g.pieces" dataField="pieces" align="center" cellsAlign="right" type="displayPieces"></ngc-data-column>
+                    <ngc-data-column text="g.weight" dataField="weight" align="center" cellsAlign="right" type="displayWeight"></ngc-data-column>
+                    <ngc-data-column text="export.book.korl" dataField="weightUnitCode" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="natureOfGoods" [width]="300" dataField="natureOfGoods" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                    <ngc-data-column text="exp.discrepencies" [width]="300" dataField="cargoIrregularityCode" align="center" cellsAlign="center">
+                    </ngc-data-column>
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+
+      <ngc-column>
+        <ngc-accordion>
+          <ngc-accordion-card  accessEnableOn="r">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.otherDescrepancies"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-edittable formArrayName="otherDiscrepancies" [pageable]="false">
+
+                    <ngc-data-column text="serialno" dataField="sno" align="center" cellsAlign="center">
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display [formControlName]="name"></ngc-display>
+
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="exp.outwardservicereport.userid" dataField="userId" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display [formControlName]="name" [width]="100" *ngIf="!outwardServiceReportForm.get(['otherDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                          <ngc-input [formControlName]="name" [width]="100" *ngIf="outwardServiceReportForm.get(['otherDiscrepancies',group,'manualFlag']).value">
+                          </ngc-input>
+
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                    <ngc-data-column text="remarks" dataField="remarks" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-display [formControlName]="name" [width]="900" *ngIf="!outwardServiceReportForm.get(['otherDiscrepancies',group,'manualFlag']).value">
+                          </ngc-display>
+                          <ngc-input required [maxlength]="65" [formControlName]="name" [width]="900" *ngIf="outwardServiceReportForm.get(['otherDiscrepancies',group,'manualFlag']).value">
+                          </ngc-input>
+
+
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+
+                    <ngc-data-column text="g.delete" dataField="manualFlag" align="center" cellsAlign="center">
+
+                      <ng-template let-name="name" let-group="group">
+                        <ng-container [formGroupName]="group">
+                          <ngc-button iconType='delete' *ngIf="outwardServiceReportForm.get(['otherDiscrepancies',group,'manualFlag']).value" (click)="deleteOtherDiscrepencies(group)"></ngc-button>
+
+                        </ng-container>
+                      </ng-template>
+                    </ngc-data-column>
+
+                  </ngc-edittable>
+                </ngc-column>
+              </ngc-row>
+              <ngc-row>
+                <ngc-column align="right">
+                  <ngc-button label="addRow" (click)="addOtherDiscrepancies()" [disabled]="finalizeFlag"></ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row *ngIf="freightFlag">
+      <ngc-column>
+        <ngc-accordion>
+          <ngc-accordion-card  accessEnableOn="r">
+            <ngc-accordion-titlebar>
+              <ngc-container>
+                <ngc-row>
+                  <ngc-column>
+                    <ngc-label value="exp.damageReport"></ngc-label>
+                  </ngc-column>
+                </ngc-row>
+              </ngc-container>
+            </ngc-accordion-titlebar>
+            <ngc-container>
+              <ngc-row>
+                <ngc-column>
+                  <ngc-datatable formArrayName="damageReport" [pageable]="false">
+                    <ngc-data-column text="awb.awbnumber" dataField="awbNumber" [width]="100" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="cargoSurvey.hawbNumber" dataField="hwbNumber" [width]="100" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="exp.outwardservicereport.dampiece" [width]="120" dataField="pieces" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="exp.outwardservicereport.content" [width]="100" dataField="content" align="center" cellsAlign="center"></ngc-data-column>
+                    <ngc-data-column text="exp.outwardservicereport.natureofDamage" name="natureofDamageGroup">
+                      <ngc-data-column text="exp.outwardservicereport.crushed" [width]="80" dataField="crushed" type="icon" iconType="yesno" align="center"
+                        cellsAlign="center"></ngc-data-column>
+                      <ngc-data-column text="exp.outwardservicereport.opened" dataField="opened" [width]="100" align="center" type="icon" iconType="yesno"
+                        cellsAlign="center"></ngc-data-column>
+                      <ngc-data-column text="exp.outwardservicereport.punctured" [width]="100" dataField="punctured" align="center" type="icon"
+                        iconType="yesno" cellsAlign="center"></ngc-data-column>
+                      <ngc-data-column text="exp.outwardservicereport.torn" [width]="50" dataField="torn" align="center" type="icon" iconType="yesno"
+                        cellsAlign="center"></ngc-data-column>
+                      <ngc-data-column text="exp.outwardservicereport.wet" [width]="90" dataField="wet" align="center" type="icon" iconType="yesno"
+                        cellsAlign="center"></ngc-data-column>
+                      <ngc-data-column text="exp.outwardservicereport.foreignTaping" [width]="100" dataField="foreignTaping" type="icon" iconType="yesno"
+                        align="center" cellsAlign="center">
+                      </ngc-data-column>
+                      <ngc-data-column text="exp.outwardservicereport.other" [width]="80" dataField="others" type="icon" iconType="yesno" align="center"
+                        cellsAlign="center"></ngc-data-column>
+                    </ngc-data-column>
+                    <ngc-data-column text="awb.remarks" [width]="90" dataField="remarks" align="center" cellsAlign="center"></ngc-data-column>
+                  </ngc-datatable>
+                  <ngc-button label="export.capture.damage" (click)="routeToCaptureDamage()" [disabled]="finalizeFlag">
+                  </ngc-button>
+                </ngc-column>
+              </ngc-row>
+            </ngc-container>
+          </ngc-accordion-card>
+        </ngc-accordion>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title='g.report' reportId="outwardService_report" [reportParameters]='reportParameters'>
+  </ngc-report>
+
+</form>

@@ -1,0 +1,223 @@
+<form [formGroup]="displayabandoncargodetails" item-width="100%">
+  <ngc-titlebar title='tracing.list.abandoned.cargo.title' (cancel)="onCancel($event)" (print)="onPrint()"
+    [disablePrint]="!searchFlg" (clear)="onClear($event)">
+  </ngc-titlebar>
+  <!-- search feilds -->
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label="g.type"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="100" formControlName="importExportIndicator"
+            sourceId="Type$TracingType"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label="tracing.careerGrouplabel"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="carrierGp" sourceId="DISPLAY_CARRIER_GROUP_CODE_DATA"
+            sourceType="query" [width]="100" (select)="getCarrierCodeByCarrierGroup($event)" [noCache]="true"
+            dataField='desc' valueMember='desc'>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label='export.shc.group'></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" formControlName="shcGroupCode" sourceType='query'
+            sourceId='GROUP_COLLECTION_CODE' [width]="100" [dropDownWidth]='90'>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label="g.carrier"></ngc-label>
+        <div>
+          <!--<ngc-input [width]="100" formControlName="carrierCode"></ngc-input>-->
+          <ngc-lov accessEnableOn="r" formControlName="carrierCode" upperCase='true' sourceId='DISPLAY_CARRIER_CODE'
+            sourceType='query' title="g.carrierCode" [sourceParameters]="carrierGroupCodeParam" dataField='code'
+            [width]="60" [noCache]="true">
+            <ngc-data-column text="g.carrierCode" [width]="80" dataField="code"></ngc-data-column>
+            <ngc-data-column text="g.carrierName" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="4" [grid24]="true">
+        <ngc-label label='cargoSurvey.reference'></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" formControlName="referenceNo" [width]="150"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label='g.dateFrom'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" width='110px' required formControlName="fromDate"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="3" [grid24]="true">
+        <ngc-label label='g.dateTo'></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" width='110px' required formControlName="toDate"></ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column align='left'>
+        <br>
+        <ngc-button value='tracing.search' accessEnableOn="r" (click)="abandonedGetsearchValues()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container *ngIf='displaySearchContainer' type="tab">
+    <ngc-row>
+      <ngc-column align='right'>
+        <ngc-button value='tracing.dispose.auction' (click)="disposeAbandonCargo()"></ngc-button>
+        <ngc-button value='tracing.move.to.import' (click)="movetoImport()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="resultList" (linkClick)="onLinkClick($event)" [pageable]="true"
+          [enablePageSizeHeight]="false">
+
+          <ngc-data-column dataField="select" [width]="30" type="check" align="center" cellsAlign="center"
+            checkAll="true"></ngc-data-column>
+
+          <ngc-data-column [width]="50" dataField="caseNumber" text="tracing.caseNumber" align="center"
+            cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column [width]="40" dataField="tracingDate" text="g.date" type="displayDate" align="center"
+            cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column [width]="80" dataField="referenceNumber" text="cargoSurvey.reference" align="center"
+            cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column [width]="80" dataField="hawbNumber" text="g.hawb.number" align="center" cellsAlign="center"
+            feature="Imp.Bd.HAWBHandling">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="80" dataField="awbShcs" text="g.shc" align="center" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="40" dataField="agent" text="tracing.agent" align="center" cellsAlign="center">
+          </ngc-data-column>
+
+          <ngc-data-column [width]="60" dataField="flightNumber" text="tracing.flight" align="center"
+            cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column [width]="60" dataField="flightDate" text="tracing.flightdate" type="displayDate"
+            align="center" cellsAlign="center"></ngc-data-column>
+
+          <ngc-data-column [width]="80" dataField="irregulartyPeices" text="tracing.IrregularityPieces" align="center"
+            cellsAlign="right" type="displayPieces"></ngc-data-column>
+
+          <ngc-data-column [width]="70" dataField="irregularityWaight" text="tracing.IrregularityWeight" align="center"
+            cellsAlign="right" type="displayWeight"></ngc-data-column>
+
+          <ngc-data-column [width]="60" dataField="natureOfGoods" text="cargoSurvey.natureOfGoods" align="center"
+            cellsAlign="center"></ngc-data-column>
+
+          <!-- <ngc-data-column text="tracing.location" dataField="locationInfo" [width]="40" type="link" iconType="location"
+            align="center" cellsAlign="center"></ngc-data-column> -->
+
+          <ngc-data-column text="export.details" [width]="30" dataField="details" type="link" iconType="open-link"
+            align="center" cellsAlign="center"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #lcoationInformation title="tracing.location.info" [width]="1000" [height]="400">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead align="Center">
+              <tr>
+                <th [width]="80" align="Center">
+                  <ngc-label value="tracing.shipment.location"></ngc-label>
+                </th>
+                <th [width]="80" align="Center">
+                  <ngc-label value="g.pieces" cellsAlign="center" align="center"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="g.warehouseLocation"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="g.handlingArea"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align="center" formArrayName="locationresultList">
+              <tr *ngFor="let item of displayabandoncargodetails.controls.locationresultList.controls; let index=index"
+                [formGroupName]="index">
+                <td align="center">
+                  <ngc-display formControlName="shimentLocation"></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="pieces"></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="warehouselocation"></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="handlingArea"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+    <!--<ngc-window-footer>
+      <ngc-container type="tab">
+        <ngc-row>
+          <ngc-column align="right">
+            <ngc-button priority="secondary" (click)="onconfirm($event)" value="Save"></ngc-button>
+          </ngc-column>
+        </ngc-row>
+      </ngc-container>
+    </ngc-window-footer>-->
+  </ngc-window>
+
+  <ngc-window #tracingActivity title="tracing.activity" [width]="1000" [height]="300">
+    <ngc-container type="tab">
+      <ngc-row>
+        <ngc-column>
+          <ngc-table>
+            <thead align="Center">
+              <tr>
+                <th [width]="80" align="Center">
+                  <ngc-label value="tracing.act"></ngc-label>
+                </th>
+                <th [width]="80" align="Center">
+                  <ngc-label value="g.date"></ngc-label>
+                </th>
+                <th [width]="100" align="Center">
+                  <ngc-label value="tracing.handle.by"></ngc-label>
+                </th>
+              </tr>
+            </thead>
+            <tbody align="center" formArrayName="tracingAtivityList">
+              <tr *ngFor="let item of displayabandoncargodetails.controls.tracingAtivityList.controls; let index=index"
+                [formGroupName]="index">
+                <td align="center">
+                  <ngc-display formControlName="activity"></ngc-display>
+                </td>
+                <td align="center" type="displayDate">
+                  <ngc-display formControlName="activityPerformedOn" [onlyDate]="true"></ngc-display>
+                </td>
+                <td align="center">
+                  <ngc-display formControlName="handleBy"></ngc-display>
+                </td>
+              </tr>
+            </tbody>
+          </ngc-table>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+
+  <ngc-report format='xls' #XLSReport title="g.report"  reportId='abandonedCargoReport'
+     [reportParameters]='reportParameters'>
+  </ngc-report>
+</form>

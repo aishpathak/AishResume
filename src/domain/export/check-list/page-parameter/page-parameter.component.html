@@ -1,0 +1,223 @@
+<form [formGroup]="form">
+  <ngc-titlebar title="export.page.parameter" (save)="onSave($event)" (cancel)="onCancel($event)"
+    [disableSave]="hasReadPermission"></ngc-titlebar>
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="export.check.list.type"></ngc-label>
+        <div>
+          <ngc-display sourceId="CHECKLIST_TYPES" sourceCategory="dropdown" formControlName="checkListTypeData">
+          </ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="g.carrier"></ngc-label>
+        <div>
+          <ngc-display sourceId="CARRIER" sourceCategory="lov" formControlName='carrierCodeData'></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column align="right">
+        <div>
+          <ngc-label label="">
+          </ngc-label>
+        </div>
+        <ngc-button [disabled]="hasReadPermission" label="g.addRow" (click)="onAddPageParameter()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.font.family">
+          </ngc-label>
+        </div>
+        <ngc-dropdownfont formControlName="fontFamily">
+        </ngc-dropdownfont>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="export.font.style">
+          </ngc-label>
+        </div>
+        <ngc-buttoninput [width]="500" formControlName="fontStyle" [multiSelect]="false">
+          <ngc-data-item value="bold" iconType="bold"></ngc-data-item>
+          <ngc-data-item value="italic" iconType="italic"></ngc-data-item>
+          <ngc-data-item value="underline" iconType="underline"></ngc-data-item>
+        </ngc-buttoninput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="export.font.size">
+          </ngc-label>
+        </div>
+        <ngc-numberinput digits="3" max="100" decimalDigits="0" [width]="80" formControlName="fontSize">
+        </ngc-numberinput>
+      </ngc-column>
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="export.check.list.alignment">
+          </ngc-label>
+        </div>
+        <ngc-buttoninput [width]="500" formControlName="alignment" [multiSelect]="false">
+          <ngc-data-item value="left" iconType="align-left"></ngc-data-item>
+          <ngc-data-item value="center" iconType="align-center"></ngc-data-item>
+          <ngc-data-item value="right" iconType="align-right"></ngc-data-item>
+        </ngc-buttoninput>
+      </ngc-column>
+      <ngc-column column="2">
+        <div>
+          <ngc-label label="export.background.color">
+          </ngc-label>
+        </div>
+        <ngc-colorpicker formControlName="backGroundColor">
+        </ngc-colorpicker>
+      </ngc-column>
+     
+      <ngc-column column="1">
+        <div>
+          <ngc-label label="export.apply.to.all">
+          </ngc-label>
+        </div>
+        <ngc-checkbox formControlName="applyToAll" (ngModelChange)='onChangeCheckAll($event)'>
+        </ngc-checkbox>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column column="12">
+        <ngc-table>
+          <thead>
+            <tr>
+              <th>
+                <ngc-label label="g.sNo"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.label"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.name"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.position.at"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.required"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.data.type"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.max.length"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.sign.required"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.font.style"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.font.family"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.font.size"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="export.check.list.alignment"></ngc-label>
+              </th>
+             
+              <th>
+                <ngc-label label="export.background.color"></ngc-label>
+              </th>
+              <th>
+                <ngc-label label="g.delete"></ngc-label>
+              </th>
+            </tr>
+          </thead>
+          <tbody formArrayName="parameters">
+            <tr *ngFor="let item of form.controls.parameters.controls; let index=index" [formGroupName]="index">
+              <td>
+                <ngc-display [width]="50" required formControlName="sequence"></ngc-display>
+              </td>
+              <td>
+                <ngc-textarea width="200" [maxlength]='65' required height="50" formControlName="label"></ngc-textarea>
+              </td>
+              <td>
+                <ng-container *ngIf="item.get('dataType').value === 'DateTime'">
+                  <ngc-datetimeinput formControlName="name" width="150" [showCalendarButton]="true"
+                    [showTimeButton]="true">
+                  </ngc-datetimeinput>
+                </ng-container>
+                <ng-container *ngIf="item.get('dataType').value === 'Date'">
+                  <ngc-datetimeinput required formControlName="name" width="150" required>
+                  </ngc-datetimeinput>
+                </ng-container>
+                <ng-container *ngIf="item.get('dataType').value === 'Text'">
+                  <ngc-textarea width="200" [maxlength]="item.get('maxLength').value" required height="50"
+                    formControlName="name">
+                  </ngc-textarea>
+                </ng-container>
+                <ng-container *ngIf="item.get('dataType').value === 'AWB'">
+                  <ngc-awbinput width="120" required formControlName="name">
+                  </ngc-awbinput>
+                </ng-container>
+                <ng-container *ngIf="item.get('dataType').value === 'Number'">
+                  <ngc-numberinput decimalDigits="0" required formControlName="name"
+                    [digits]="item.get('maxLength').value">
+                  </ngc-numberinput>
+                </ng-container>
+              </td>
+              <td>
+                <ngc-dropdownlist required sourceId="General$PositionAt" [width]="100" formControlName="positionAt">
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ngc-checkbox required formControlName="required"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-dropdownlist (select)="onDataType($event, index)" required sourceId="General$DataType"
+                  [width]="160" formControlName="dataType">
+                </ngc-dropdownlist>
+              </td>
+              <td>
+                <ng-container *ngIf="item.get('dataType').value === 'Number' || item.get('dataType').value === 'Text'">
+                  <ngc-numberinput digits="3" max="100" min="1" required decimalDigits="0" [width]="80"
+                    formControlName="maxLength">
+                  </ngc-numberinput>
+                </ng-container>
+              </td>
+              <td>
+                <ngc-checkbox required formControlName="renderSignatureField"></ngc-checkbox>
+              </td>
+              <td>
+                <ngc-buttoninput required width="500" formControlName="fontStyle" [multiSelect]="false">
+                  <ngc-data-item value="bold" iconType="bold"></ngc-data-item>
+                  <ngc-data-item value="italic" iconType="italic"></ngc-data-item>
+                  <ngc-data-item value="underline" iconType="underline"></ngc-data-item>
+                </ngc-buttoninput>
+              </td>
+              <td>
+                <ngc-dropdownfont required [width]="80" [dropDownWidth]="80" formControlName="fontFamily">
+                </ngc-dropdownfont>
+              </td>
+              <td>
+                <ngc-numberinput digits="3" max="100" min="1" required decimalDigits="0" [width]="80"
+                  formControlName="fontSize"></ngc-numberinput>
+              </td>
+              <td>
+                <ngc-buttoninput required [width]="500" formControlName="alignment" [multiSelect]="false">
+                  <ngc-data-item value="left" iconType="align-left"></ngc-data-item>
+                  <ngc-data-item value="center" iconType="align-center"></ngc-data-item>
+                  <ngc-data-item value="right" iconType="align-right"></ngc-data-item>
+                </ngc-buttoninput>
+              </td>
+              <td>
+                <ngc-colorpicker required formControlName="backGroundColor"></ngc-colorpicker>
+              </td>
+              <td>
+                <ngc-link [disabled]="hasReadPermission" (linkClick)="onDeletePageParameter(index)" iconType="delete"></ngc-link>
+              </td>
+            </tr>
+          </tbody>
+        </ngc-table>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+</form>

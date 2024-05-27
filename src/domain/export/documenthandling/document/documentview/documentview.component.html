@@ -1,0 +1,123 @@
+<form [formGroup]="documentViewForm">
+  <ngc-titlebar title="documentView"></ngc-titlebar>
+  <ngc-container type="header">
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.shipmentNumber"></ngc-label>
+        <div>
+          <!--<ngc-input [maxLength]="11" type="number" upperCase="true" [width]="150" formControlName="shipmentNumber"></ngc-input>-->
+          <ngc-awbinput accessEnableOn="r" formControlName="shipmentNumber"></ngc-awbinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.location"></ngc-label>
+        <div>
+          <ngc-lov [noCache]="true" [validOnly]="true" sourceId="LOCATIONS" formControlName="pigeonHoleLoc"
+            dataField="desc" title="g.locations" [sourceParameters]="pigeonHoleLocLOV"
+            (input)="onLocationLOVSelect($event)" (select)="onLocationLOVSelect($event)">
+            <ngc-data-column text="g.location.id"  dataField="code"  [width]="50"></ngc-data-column>
+            <ngc-data-column text="g.location.name" [width]="150" dataField="desc"></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.status"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" sourceId="Status$AWB_Status" formControlName="documentStatus"
+            [width]="150"></ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.flightNumber"></ngc-label>
+        <div>
+          <!-- (blur)="fltMasking()" -->
+          <!--<ngc-input accessEnableOn="r" [maxLength]="8" upperCase="true" [width]="150" formControlName="flightKey"></ngc-input>-->
+          <ngc-flightkeyinput accessEnableOn="r" formControlName="flightKey" maxlength="7" [width]="150">
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.flightDate"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" #flightdate [width]="150" formControlName="flightOriginDate">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+    </ngc-row>
+
+    <ngc-row>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.flightCarrier"></ngc-label>
+        <div>
+          <ngc-input accessEnableOn="r" [maxLength]="3" upperCase="true" [width]="150" formControlName="carrierCode"
+            [width]="150"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.documentReceiveDateFrom"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" #dateFrom [width]="150" formControlName="docReceivedDate">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label label="documentview.documentReceiveDateTo"></ngc-label>
+        <div>
+          <ngc-datetimeinput accessEnableOn="r" #dateTo [width]="150" formControlName="docToDate" [min]="dateToMin">
+          </ngc-datetimeinput>
+        </div>
+      </ngc-column>
+      <ngc-column [column]="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" (click)="onSearchDocumentView()" label="g.search" iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type="box" *ngIf='showDocumentViewTable'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable formArrayName="documentViewTableData" [pageable]="true" [filterable]="false"
+          (linkClick)="onEditClick($event)" [enablePageSizeHeight]="false">
+          <ngc-data-column text="g.sNo" dataField="sno" [width]="40" type="text" align="center" cellsAlign="center">
+          </ngc-data-column>
+          
+          <ngc-data-column text="documentview.awb.no" dataField="awbNum" [width]="120" type="displayAWB" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="g.copy" dataField="copyNum" [width]="40" cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="documentview.flt.no.date" dataField="flightNumDate" [width]="180" cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="export.dest" dataField="destination" [width]="50" cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="g.location" dataField="pigeonHoleLoc" [width]="150" cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="g.status" dataField="docstatus" [width]="100" cellsAlign="center" type="text">
+          </ngc-data-column>
+          <ngc-data-column text="documentview.imp.flt.date" dataField="impFlightDate" [width]="180" cellsAlign="center">
+          </ngc-data-column>
+          <ngc-data-column text="export.flight.ecc" dataField="isECC" [width]="40" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="g.eawb" dataField="isEAWB" [width]="50" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="TT" dataField="isTTH" [width]="35" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="documentview.notify.dt.time" dataField="notifyDate" [width]="110" cellsAlign="right">
+          </ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="edit" [width]="80" type="link" iconType="edit" cellsAlign="center"
+            value="true" true-color="grey">
+          </ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-window #editwindow [width]="1300" [height]="450" [position]="{ x: 50, y: 180 }"
+    title="export.view.update.awb.document" (close)="onEditWindowClose()">
+    <ngc-container type="box">
+      <ngc-row>
+        <ngc-column>
+          <app-updatedocument (closeWindow)='closeWindow()' (openWindow)='openWindow()'></app-updatedocument>
+        </ngc-column>
+      </ngc-row>
+    </ngc-container>
+  </ngc-window>
+</form>

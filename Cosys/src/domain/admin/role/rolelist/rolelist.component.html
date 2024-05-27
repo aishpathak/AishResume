@@ -1,0 +1,99 @@
+<div class="card-block card-highlight-bottom border-on-bottom">
+  <ngc-titlebar title="admin.roleList" (save)="onSave($event)" (clear)='onClear($event)'>
+  </ngc-titlebar>
+</div>
+<form [formGroup]='roleListForm'>
+  <ngc-container type="section">
+    <ngc-row>
+      <ngc-column column="2">
+        <ngc-label label="g.applicationAccess"></ngc-label>
+        <div>
+          <ngc-dropdownlist accessEnableOn="r" [width]="165" formControlName="applicationAccess"
+            sourceId='User Profile$Application_Access' [dropDownWidth]="140" (select)="onSelect($event)" required>
+          </ngc-dropdownlist>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="admin.roleCategory"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [validOnly]="true" formControlName='roleCategory' upperCase='true' [width]="140"
+            sourceId='ROLECREATECATEGORY' title='role.rolecategory' dataField='code' (select)="onSelectCategory($event)">
+            <ngc-data-column text='role.rolecategory' [width]='80' dataField='code'></ngc-data-column>
+            <ngc-data-column text='g.description' [width]='150' dataField='desc'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="admin.roleCode"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" formControlName='roleCode' upperCase='true' [width]="110"
+            sourceId='ROLECODEAPPACCESS' title='g.roleCode' dataField='code' [validOnly]="true" [noCache]="true"
+            [sourceParameters]="roleCodesParams" (select)="onSelectRole($event)">
+            <ngc-data-column text='g.roleCode' [width]='80' dataField='code'></ngc-data-column>
+            <ngc-data-column text='g.description' [width]='150' dataField='desc'></ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="admin.function.group"></ngc-label>
+        <div>
+          <ngc-lov accessEnableOn="r" [validOnly]="true" formControlName='description' [sourceParameters]="dropDownAny"
+            upperCase='true' [width]="170" sourceId='MENUITEM' [noTrim]="true" title='admin.module' dataField='code'
+            displayField='desc' [noCache]="true" (select)="onFunctionGroup($event)">
+            <ngc-data-column text='g.description' [width]='100' dataField='desc'>
+            </ngc-data-column>
+            <ngc-data-column text='g.application.type' [width]='40' dataField='param1'>
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label label="admin.screen.name"></ngc-label>
+        <div>
+          <ngc-lov [displayAllInSuggestion]="true" accessEnableOn="r" [validOnly]="true" formControlName='screenName'
+            [sourceParameters]="{ 'parameter1': moduleCodeForGroup, 'parameter2': submoduleCodeForGroup }"
+            upperCase='true' [width]="170" sourceId='KEY_ALL_SCREEN_NAMES' [noTrim]="true" title='admin.screen.names'
+            dataField='desc' displayField='desc'>
+            <ngc-data-column text='g.description' [width]='100' dataField='desc'>
+            </ngc-data-column>
+            <ngc-data-column text='Code' [width]='100' dataField='code'>
+            </ngc-data-column>
+          </ngc-lov>
+        </div>
+      </ngc-column>
+      <ngc-column column="2">
+        <ngc-label></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" [disabled]="showSearchButton" (click)="onSearchRole()" value="g.search"
+            iconType="search"></ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+  <ngc-container type="tab">
+    <ngc-row>
+      <ngc-column>
+        <ngc-datatable (linkClick)="onLinkClick($event)" formArrayName="resultList" [height]='450'
+          *ngIf="dispTableFlag">
+          <ngc-data-column text="g.sNo" dataField="sno" [width]="50" cellsAlign="center"></ngc-data-column>
+          <ngc-data-column text="admin.roleCategory" dataField="roleCategory" [width]="100" cellsAlign="left">
+          </ngc-data-column>
+          <ngc-data-column text="admin.roleCode" dataField="code" [width]="150" cellsAlign="left" iconType="edit">
+          </ngc-data-column>
+          <ngc-data-column text="admin.duties" dataField="duties" [width]="450" cellsAlign="left"></ngc-data-column>
+          <ngc-data-column text="admin.grantPremisson" dataField="GRANT" [width]="100" cellsAlign="center" type="link"
+            iconType="edit"></ngc-data-column>
+          <ngc-data-column text="g.edit" dataField="EDIT" [width]="100" align="center" cellsAlign="center" type="link"
+            iconType="edit"></ngc-data-column>
+          <ngc-data-column [disabled]="hasReadPermission" text="g.delete" dataField="DELETE" [width]="100" align="center" cellsAlign="center" type="link"
+            iconType="delete"></ngc-data-column>
+          <ngc-data-column text="admin.generate.role.code.report" dataField="Report" [width]="100" cellsAlign="center"
+            type="link" iconType="edit"></ngc-data-column>
+        </ngc-datatable>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-report #reportWindow title="g.report"  reportId='Role Management_report'
+     [reportParameters]='reportParametersData'></ngc-report>
+</form>

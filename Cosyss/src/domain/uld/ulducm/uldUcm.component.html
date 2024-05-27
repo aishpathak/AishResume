@@ -1,0 +1,448 @@
+<form [formGroup]='ulducm'>
+  <ngc-titlebar title='uld.uld.ucm.management' (clear)="onClear()" (delete)="onDelete($event)" (save)="onSave($event)"
+    [disableSave]="onSaveFlag==false" (cancel)="onCancel($event)"></ngc-titlebar>
+  <ngc-container type="sectiontop">
+    <ngc-row>
+      <ngc-column column="1">
+        <div>
+          <ngc-radiobutton accessEnableOn="r" groupName="flightType" formControlName="byIncoming" checked="true">
+            <ngc-i18n value="uld.incoming" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" groupName="flightType" formControlName="byOutgoing">
+            <ngc-i18n value="uld.outgoing" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+        <div>
+          <ngc-radiobutton accessEnableOn="r" groupName="flightType" formControlName="byTransit">
+            <ngc-i18n value="uld.transit" inline="true"></ngc-i18n>
+          </ngc-radiobutton>
+        </div>
+      </ngc-column>
+      <ngc-column column=2>
+        <ngc-label label="g.flight"></ngc-label>
+        <div>
+          <ngc-flightkeyinput accessEnableOn="r" [width]="150" (focusout)="someMethodWithFocusOutEvent($event)"
+            formControlName="flightKey" upperCase="true" [autoFocus]="true" required>
+          </ngc-flightkeyinput>
+        </div>
+      </ngc-column>
+      <ngc-column column=2>
+        <ngc-label label="g.date"></ngc-label>
+        <div>
+          <ngc-dateinput accessEnableOn="r" required [width]="150" formControlName="date">
+          </ngc-dateinput>
+        </div>
+      </ngc-column>
+      <ngc-column column=2>
+        <ngc-label label='&nbsp;'></ngc-label>
+        <div>
+          <ngc-button accessEnableOn="r" label="g.search" (click)="onSearch()" value="search" width='150px !important'
+            iconType="search">
+          </ngc-button>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf=dataSuccessFlag type="sectiontop">
+    <ngc-row>
+      <ngc-column column=1>
+        <ngc-label label='g.flight'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightKey"></ngc-display>
+        </div>
+      </ngc-column>
+     
+      <ngc-column column=1>
+        <ngc-label label='uld.arrival.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="arrivalDate" [onlyDate]="true"></ngc-display>
+        </div>
+        </ngc-column>
+      <ngc-column column=1>
+        <ngc-label label='uld.departure.date'></ngc-label>
+        <div>
+          <ngc-display formControlName="departureDate" [onlyDate]="true"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column=1>
+        <ngc-label label='uld.flight.type'></ngc-label>
+        <div>
+          <ngc-display formControlName="flightType"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column=5>
+        <ngc-label label='uld.a/c.registration'></ngc-label>
+        <div>
+          <ngc-input formControlName="aircraftRegistration" [maxLength]="10"
+            [required]="ulducm.get('flightType').value !== 'IMPORT'" [width]="120"></ngc-input>
+        </div>
+      </ngc-column>
+      <ngc-column column=1>
+        <ngc-label label='uld.uim.ucm.date.time'></ngc-label>
+        <!-- {{ulducm.getRawValue() | json}} -->
+        <div>
+          <ngc-display formControlName="ucmSentDatetime"></ngc-display>
+        </div>
+      </ngc-column>
+      <ngc-column column=1>
+        <ngc-label label='uld.ucm.sent.by'></ngc-label>
+        <!-- {{ulducm.getRawValue().usmSentBy | json}} -->
+        <div>
+          <ngc-display formControlName="usmSentBy"></ngc-display>
+        </div>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf=dataSuccessFlag type="sectiontop">
+    <ngc-row>
+      <ngc-column>
+        <ngc-container type="box" header="Incoming ULD">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="uld.carrier.uld" emphasis="md"></ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+              <ngc-numberinput formControlName="countForIncomingCarrierUld" [width]="30" [digits]="4"
+                [decimalDigits]="0"></ngc-numberinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th [width]="40">
+                      <ngc-label label='uld.uld.number'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.loading.airport'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.content.code.br'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.finalize'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label=''></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="incomingCarrierUldModel">
+                  <tr *ngFor="let item of ulducm.controls.incomingCarrierUldModel.controls; let index=index"
+                    [formGroupName]="index">
+                    <td [width]="40">
+                      <ngc-uldinput [readonly]="item.flagCRUD != 'C'" [autoFocus]="true" formControlName="uldNumber"
+                        (ngModelChange)="onUldNumberChange($event, index,'unloadingAirport','incomingCarrierUldModel','UCM_ULD_BOARDING_POINT')">
+                      </ngc-uldinput>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [maxLength]="3" [disabled]="item.flagCRUD != 'C' && onSaveFlag" [width]="100"
+                        sourceId="UCM_ULD_BOARDING_POINT" [sourceParameters]="{'parameter1':flightId}"
+                        title="uld.sector.list" dataField="code" formControlName="unloadingAirport"
+                        displayMember="code">
+                        <ngc-data-column text="uld.airport.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.airport.name" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [maxLength]="1" [disabled]="item.flagCRUD != 'C' && onSaveFlag" [width]="100"
+                        sourceId="CONTENTS_CODE_ID" title="uld.contents.code" dataField="code"
+                        formControlName="contentCode" displayMember="code">
+                        <ngc-data-column text="uld.contents.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.description" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-display formControlName="finalize"></ngc-display>
+                    </td>
+                    <td [width]="40">
+                      <ngc-link (linkClick)="onDeleteIncomingCarrierUld($event,index)" iconType="delete"
+                        true-color="grey"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.add" [disabled]="incomingFlag == false" (click)="onAddIncomingCarrierUld($event)">
+              </ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="uld.foreign.uld" emphasis="md"></ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+              <ngc-numberinput formControlName="countForIncomingForeignUld" [width]="30" [digits]="4"
+                [decimalDigits]="0"></ngc-numberinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th [width]="40">
+                      <ngc-label label='uld.uld.number'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.loading.airport'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.content.code.br'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.finalize'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label=''></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="incomingForeignUldModel">
+                  <tr *ngFor="let item of ulducm.controls.incomingForeignUldModel.controls; let index=index"
+                    [formGroupName]="index">
+                    <td [width]="40">
+                      <!--<ngc-display *ngIf="item.flagCRUD != 'C'" formControlName="uldNumber" [disabled]="onSaveFlag"></ngc-display>-->
+                      <ngc-uldinput [readonly]="item.flagCRUD != 'C'" [autoFocus]="true" formControlName="uldNumber"
+                        (ngModelChange)="onUldNumberChange($event, index,'unloadingAirport','incomingForeignUldModel','UCM_ULD_BOARDING_POINT')">
+                      </ngc-uldinput>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [disabled]="item.flagCRUD != 'C' && onSaveFlag" [maxLength]="3" [width]="100"
+                        sourceId="UCM_ULD_BOARDING_POINT" [sourceParameters]="{'parameter1':flightId}"
+                        title="uld.sector.list" dataField="code" formControlName="unloadingAirport"
+                        displayMember="code">
+                        <ngc-data-column text="uld.airport.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.airport.name" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [disabled]="item.flagCRUD != 'C' && onSaveFlag" [maxLength]="1" [width]="100"
+                        sourceId="CONTENTS_CODE_ID" title="uld.contents.code" dataField="code"
+                        formControlName="contentCode" displayMember="code">
+                        <ngc-data-column text="uld.contents.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.description" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-display formControlName="finalize"></ngc-display>
+                    </td>
+                    <td [width]="40">
+                      <ngc-display formControlName=''></ngc-display>
+                      <ngc-link (linkClick)="onDeleteIncomingForeignUld($event,index)" iconType="delete"
+                        true-color="grey"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="uld.ucm.add" [disabled]="incomingFlag == false" (click)="onAddIncomingForeignUld($event)">
+              </ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+      <ngc-column>
+        <ngc-container type="box" header="Outgoing ULD">
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="uld.carrier.uld" emphasis="md"></ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+              <ngc-numberinput formControlName="countForOutgoingCarrierUld" [width]="30" [digits]="4"
+                [decimalDigits]="0"></ngc-numberinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th [width]="40">
+                      <ngc-label label='uld.uld.number'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.unloading.airport'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.content.code.br'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.finalize'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label=''></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody formArrayName="outgoingCarrierUldModel">
+                  <tr *ngFor="let item of ulducm.controls.outgoingCarrierUldModel.controls; let index=index"
+                    [formGroupName]="index">
+                    <td [width]="40">
+                      <!--<ngc-display formControlName="item.flagCRUD"></ngc-display>-->
+                      <!-- <ngc-display *ngIf="item.flagCRUD != 'C'" formControlName="uldNumber" [disabled]="onSaveFlag"></ngc-display>-->
+                      <ngc-uldinput [readonly]="item.flagCRUD != 'C'" [autoFocus]="true" formControlName="uldNumber"
+                        (ngModelChange)="onUldNumberChange($event, index,'unloadingAirport','outgoingCarrierUldModel','UCM_ULD_OFFPOINT_POINT')">
+                      </ngc-uldinput>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [disabled]="item.flagCRUD != 'C' && onSaveFlag" formControlName="unloadingAirport"
+                        [maxLength]="3" sourceId="UCM_ULD_OFFPOINT_POINT" [sourceParameters]="{'parameter1':flightId}"
+                        title="uld.sector.list" dataField="code" [width]="100" displayMember="code">
+                        <ngc-data-column text="uld.airport.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.airport.name" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [disabled]="item.flagCRUD != 'C' && onSaveFlag" formControlName="contentCode"
+                        [maxLength]="1" sourceId="CONTENTS_CODE_ID" title="uld.contents.code" [width]="100"
+                        dataField="code" displayMember="code">
+                        <ngc-data-column text="uld.contents.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.description" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-display formControlName="finalize"></ngc-display>
+                    </td>
+                    <td [width]="40">
+                      <ngc-link (linkClick)="onDeleteOutgoingCarrierUld($event,index)" iconType="delete"
+                        true-color="grey"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+
+            <!---->
+
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.add" [disabled]="outgoingFlag == false" (click)="onAddOutgoingCarrierUld($event)"
+                (select)="check()"></ngc-button>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-label label="uld.foreign.uld" emphasis="md"></ngc-label>
+            </ngc-column>
+            <ngc-column align="right">
+              <ngc-numberinput formControlName="countForOutgoingForeignUld" [width]="30" [digits]="4"
+                [decimalDigits]="0"></ngc-numberinput>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column>
+              <ngc-table>
+                <thead>
+                  <tr>
+                    <th [width]="40">
+                      <ngc-label label='uld.uld.number'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.unloading.airport'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.content.code.br'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label='uld.finalize'></ngc-label>
+                    </th>
+                    <th [width]="40">
+                      <ngc-label label=''></ngc-label>
+                    </th>
+                  </tr>
+                </thead>
+
+                <tbody formArrayName="outgoingForeignUldModel" [disabled]="onSaveFlag">
+                  <tr *ngFor="let item of ulducm.controls.outgoingForeignUldModel.controls; let index=index"
+                    [formGroupName]="index">
+                    <td [width]="40">
+                      <!--<ngc-display *ngIf="item.flagCRUD != 'C'" formControlName="uldNumber" [disabled]="onSaveFlag"></ngc-display>-->
+                      <ngc-uldinput [readonly]="item.flagCRUD != 'C'" [autoFocus]="true" formControlName="uldNumber"
+                        (ngModelChange)="onUldNumberChange($event, index,'unloadingAirport','outgoingForeignUldModel','UCM_ULD_OFFPOINT_POINT')">
+                      </ngc-uldinput>
+                    </td>
+                    <td [width]="40">
+                      <ngc-lov [disabled]="item.flagCRUD != 'C' && onSaveFlag" [width]="100"
+                        sourceId="UCM_ULD_OFFPOINT_POINT" [sourceParameters]="{'parameter1':flightId}"
+                        title="uld.sector.list" dataField="code" formControlName="unloadingAirport" [maxLength]="3"
+                        [width]="100" displayMember="code">
+                        <ngc-data-column text="uld.airport.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.airport.name" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+
+                    <td [width]="40">
+                      <ngc-lov [disabled]="item.flagCRUD != 'C' && onSaveFlag" sourceId="CONTENTS_CODE_ID"
+                        title="uld.contents.code" dataField="code" formControlName="contentCode" [maxLength]="1"
+                        [width]="100" displayMember="code">
+                        <ngc-data-column text="uld.contents.code" dataField="code" [width]="50"></ngc-data-column>
+                        <ngc-data-column text="uld.description" dataField="desc" [width]="80"></ngc-data-column>
+                      </ngc-lov>
+                    </td>
+                    <td [width]="40">
+                      <ngc-display formControlName="finalize"></ngc-display>
+                    </td>
+                    <td [width]="40">
+                      <ngc-link (linkClick)="onDeleteOutgoingForeignUld($event,index)" iconType="delete"
+                        true-color="grey"></ngc-link>
+                    </td>
+                  </tr>
+                </tbody>
+              </ngc-table>
+            </ngc-column>
+          </ngc-row>
+          <ngc-row>
+            <ngc-column align="right">
+              <ngc-button label="g.add" [disabled]="outgoingFlag == false" (click)="onAddOutgoingForeignUld($event)">
+              </ngc-button>
+            </ngc-column>
+          </ngc-row>
+        </ngc-container>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container *ngIf=dataSuccessFlag formArrayName="osiFormArray" type='sectiontop'>
+    <ngc-row>
+      <ngc-column column="6">
+        <ngc-label label="uld.osi" emphasis="md"></ngc-label>
+      </ngc-column>
+      <ngc-column>
+        <ngc-button label="uld.add.osi" (click)="onAddOsi($event)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row *ngFor="let item of ulducm.controls.osiFormArray.controls; let index=index" [formGroupName]="index">
+      <ngc-column>
+        <ngc-input [maxLength]="65" formControlName="osi" [width]="600" upperCase="true"></ngc-input>
+        <!-- <ngc-link (linkClick)="onDeleteOsi(index)" iconType="delete"></ngc-link> -->
+        <ngc-button iconType="delete" align="right" (click)="onDeleteOsi(index)"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+  <ngc-container type='sectiontop'>
+    <ngc-row>
+      <ngc-column>
+        <ngc-label label=''></ngc-label>
+      </ngc-column>
+    </ngc-row>
+    <ngc-row>
+      <ngc-column align="right">
+        <ngc-button label="uld.ucmin" [disabled]="!incomingFlag || ucmIn" (click)="onUcmIn()"></ngc-button>
+        <ngc-button label="uld.ucmout" [disabled]="!outgoingFlag || ucmOut" (click)="onUcmOut()"></ngc-button>
+        <ngc-button label="uld.ucmboth" [disabled]="(!incomingFlag || ucmIn) || (!outgoingFlag || ucmOut)"
+          (click)="onUcmBoth()"></ngc-button>
+      </ngc-column>
+    </ngc-row>
+  </ngc-container>
+
+</form>
